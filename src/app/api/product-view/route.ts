@@ -1,0 +1,46 @@
+import { NextResponse } from "next/server";
+import { StorefrontViewTargetKind } from "@/generated/prisma/enums";
+import { recordStorefrontViewEvent } from "@/lib/storefront-view-events";
+
+/** Product slugs are kebab-case; allow alnum, underscore, hyphen. */
+const SLUG_RE = /^[\w-]{1,220}$/i;
+const MAX_VIEW_WEIGHT = 20;
+
+function parseViewWeight(raw: unknown): number {
+  const n = typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return 1;
+  return Math.min(MAX_VIEW_WEIGHT, Math.max(1, Math.round(n)));
+}
+
+/**
+ * POST `{ "productSlug": "..." }` — buffers a view event (rolled up daily; no hot-row UPDATE on PDP traffic).
+ * Best-effort (used for home carousel ranking); callers should not treat failures as user-facing errors.
+ */
+export async function POST(req: Request) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  const slug = String((body as { productSlug?: unknown }).productSlug ?? "").trim();
+  if (!slug || !SLUG_RE.test(slug)) {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  const weight = parseViewWeight((body as { weight?: unknown }).weight);
+
+  try {
+    const ok = await recordStorefrontViewEvent({
+      kind: StorefrontViewTargetKind.product,
+      targetSlug: slug,
+      weight,
+    });
+    return NextResponse.json({ ok });
+  } catch (e) {
+    console.error("[api/product-view]", e);
+    return NextResponse.json({ ok: false }, { status: 500 });
+  }
+}

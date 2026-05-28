@@ -1,0 +1,291 @@
+@import "tailwindcss";
+
+:root {
+  --background: #09090b;
+  --foreground: #fafafa;
+  /* Tells the browser UI (scrollbars, form controls) to use dark styling — fixes light/white scrollbars on Windows Chromium/Edge. */
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-source-sans);
+  --font-mono: var(--font-source-code);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* font-sans on body + html className from next/font — headings included */
+  font-family: var(--font-sans), var(--font-source-sans), ui-sans-serif, system-ui,
+    sans-serif;
+}
+
+/* Tailwind preflight normally sets this; explicit so links never fall back to browser default blue. */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans), var(--font-source-sans), ui-sans-serif, system-ui,
+    sans-serif;
+}
+
+/* Dimension-inspired: depth, panels, clean type (accent: deep blue / zinc / white) */
+.store-dimension-bg {
+  min-height: 100dvh;
+  background-color: #09090b;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgb(30 64 175 / 0.14), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, rgb(24 24 27 / 0.9), transparent),
+    linear-gradient(180deg, rgb(9 9 11) 0%, rgb(3 3 4) 100%);
+}
+
+.store-dimension-panel {
+  border-radius: 1rem;
+  border: 1px solid rgb(63 63 70 / 0.45);
+  background: rgb(9 9 11 / 0.82);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.04),
+    0 25px 80px rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Product detail modal — frosted glass; listing shows through more than full-page panels */
+.store-dimension-panel.store-product-modal-panel {
+  background: rgb(9 9 11 / 0.72);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes store-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .animate-store-panel-in {
+    animation: store-panel-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+.store-kicker {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.store-nav-link {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(161 161 170); /* zinc-400 — matches header nav when utilities load */
+}
+
+/*
+ * html5up.net/dimension uses Source Sans Pro; we load Source Sans 3 in layout.
+ * Explicit stack so nav + major titles always match the template, not a fallback.
+ */
+.store-dimension-brand {
+  font-family: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui,
+    sans-serif;
+  font-weight: 400;
+}
+
+.store-dimension-page-title {
+  font-family: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui,
+    sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Dark scrollbars (Firefox + WebKit / Chromium on Windows) */
+.store-scrollbar-dark {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  /* thumb, then track (Firefox + Chromium 121+) */
+  scrollbar-color: #52525b #18181b;
+}
+
+.store-scrollbar-dark::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.store-scrollbar-dark::-webkit-scrollbar-corner {
+  background: #18181b;
+}
+
+.store-scrollbar-dark::-webkit-scrollbar-track {
+  background: #18181b;
+  border-radius: 999px;
+}
+
+.store-scrollbar-dark::-webkit-scrollbar-thumb {
+  background-color: #52525b;
+  border-radius: 999px;
+  border: 2px solid #18181b;
+}
+
+.store-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background-color: #71717a;
+}
+
+.store-scrollbar-dark::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Product modal overlay: keep scroll when needed but hide bar (only inner body shows a styled bar). */
+.store-modal-overlay-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.store-modal-overlay-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Product modal body — primary scroll area. !important overrides Chromium’s default
+ * light overlay scrollbar on nested overflow containers.
+ */
+.store-product-modal-scroll {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: #52525b transparent;
+  background-color: transparent;
+}
+
+.store-product-modal-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.store-product-modal-scroll::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+.store-product-modal-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+  border-radius: 999px;
+}
+
+.store-product-modal-scroll::-webkit-scrollbar-thumb {
+  background-color: #52525b !important;
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+
+.store-product-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #71717a !important;
+}
+
+.store-product-modal-scroll::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Fans collection splash — image shimmer only */
+@keyframes featured-spotlight-shimmer {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateX(120%) skewX(-12deg);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateX(120%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .featured-spotlight-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgb(255 255 255 / 0.14) 45%,
+      transparent 70%
+    );
+    animation: featured-spotlight-shimmer 4.2s ease-in-out infinite;
+    animation-delay: var(--shimmer-delay, 0s);
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-spotlight-shimmer::after {
+    animation: none !important;
+    content: none !important;
+  }
+  .animate-store-panel-in {
+    animation: none !important;
+  }
+}
+
+/*
+ * Stripe Embedded Checkout (iframe): no API for font-size or field spacing.
+ * Use transform scale (not zoom — zoom clips iframe content). Spacer height is set in JS.
+ */
+.stripe-embedded-checkout-body {
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-top: 0.5rem;
+  scroll-padding-bottom: 1rem;
+}
+
+.stripe-embedded-checkout-spacer {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.stripe-embedded-checkout-mount {
+  --stripe-checkout-zoom: 0.78;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(100% / var(--stripe-checkout-zoom));
+  max-width: calc(28rem / var(--stripe-checkout-zoom));
+  transform: translateX(-50%) scale(var(--stripe-checkout-zoom));
+  transform-origin: top center;
+  overflow: visible;
+}
+
+.stripe-embedded-checkout-mount > div {
+  width: 100% !important;
+}
+
+.stripe-embedded-checkout-mount iframe {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  overflow: visible;
+}

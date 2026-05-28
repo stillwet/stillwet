@@ -1,0 +1,1123 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Audience {
+  sub
+  domme
+  both
+}
+
+enum FulfillmentType {
+  printify
+}
+
+enum ListingRequestStatus {
+  draft
+  submitted
+  /** Admin accepted reference images; next step is Printify product / variant ids. */
+  images_ok
+  /** Admin recorded Printify product/variant IDs for this shop listing. */
+  printify_item_created
+  approved
+  rejected
+}
+
+/** Paid placement products (merchant dashboard); public ranking integration is separate. */
+enum PromotionKind {
+  FRONT_PAGE_ITEM
+  HOT_FEATURED_ITEM
+  MOST_POPULAR_OF_TAG_ITEM
+  FEATURED_SHOP_HOME
+}
+
+enum PromotionPurchaseStatus {
+  pending
+  paid
+  canceled
+  failed
+}
+
+/** Dashboard listing credit pack checkout (10 / 25 / 50 credits). */
+enum ListingCreditPackPurchaseStatus {
+  pending
+  paid
+  canceled
+  failed
+}
+
+enum ShopSetupFeePurchaseStatus {
+  pending
+  paid
+  canceled
+  failed
+}
+
+enum CreatorGiftPurchaseStatus {
+  pending
+  paid
+  canceled
+  failed
+}
+
+enum CreatorGiftCodeType {
+  shop_setup
+  listing_credits
+}
+
+enum ShopReactivationPurchaseStatus {
+  pending
+  paid
+  canceled
+  failed
+}
+
+enum OrderProceedsRouting {
+  standard
+  platform_inactivity_deactivated
+}
+
+enum ShopUserRole {
+  owner
+}
+
+/** How often the admin digest email runs (Pacific send time). */
+enum AdminSummaryEmailFrequency {
+  daily
+  weekly
+  monthly
+}
+
+/**
+ * Admin-managed substrings blocked from creator shop profile and listing text saves
+ * (case-insensitive; phrase spacing is significant).
+ */
+model ModerationKeyword {
+  id               String   @id @default(cuid())
+  phrase           String
+  phraseNormalized String   @unique
+  createdAt        DateTime @default(now())
+}
+
+model Tag {
+  id                                String    @id @default(cuid())
+  slug                              String    @unique
+  name                              String
+  sortOrder                         Int       @default(0)
+  /** Optional admin pick for “By Item” browse; product must have this tag. */
+  byItemSpotlightProductId String?
+  byItemSpotlightProduct   Product?  @relation("TagByItemSpotlight", fields: [byItemSpotlightProductId], references: [id], onDelete: SetNull)
+  productTags                       ProductTag[]
+  primaryProducts                   Product[] @relation("ProductPrimaryTag")
+  adminCatalogItemTags              AdminCatalogItemTag[]
+  promotionPurchases               PromotionPurchase[]
+  createdAt                         DateTime  @default(now())
+  updatedAt                         DateTime  @updatedAt
+}
+
+model ProductTag {
+  productId String
+  tagId     String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Restrict)
+
+  @@id([productId, tagId])
+}
+
+model Product {
+  id                  String          @id @default(cuid())
+  slug                String          @unique
+  name                String
+  description         String?
+  priceCents          Int
+  imageUrl            String?
+  imageGallery        Json?
+  payCard             Boolean         @default(true)
+  payCashApp          Boolean         @default(true)
+  audience            Audience
+  fulfillmentType     FulfillmentType
+  primaryTagId        String?
+  primaryTag          Tag?            @relation("ProductPrimaryTag", fields: [primaryTagId], references: [id], onDelete: SetNull)
+  tags                 ProductTag[]
+  tagByItemSpotlights  Tag[]           @relation("TagByItemSpotlight")
+  checkoutTipEligible Boolean         @default(false)
+  printifyProductId   String?
+  printifyVariantId   String?
+  printifyVariants    Json?
+  /** Ordered display labels (e.g. design series); first is primary. JSON string[]. */
+  designNames         Json?
+  stockQuantity       Int             @default(0)
+  trackInventory      Boolean         @default(true)
+  active              Boolean         @default(true)
+  /** Minimum price (cents) a shop may set on a listing; defaults to priceCents in migration. */
+  minPriceCents       Int             @default(0)
+  /**
+   * Incremented on full storefront product page loads (not embed/modal). Used to rank fallback
+   * items for the platform home “Hot items” carousel.
+   */
+  storefrontViewCount Int             @default(0)
+  shopListings        ShopListing[]
+  orderLines          OrderLine[]
+  adminCatalogItemPlatformLinks AdminCatalogItem[] @relation("AdminCatalogItemPlatformProduct")
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([active, storefrontViewCount(sort: Desc)], map: "Product_active_storefrontViewCount_idx")
+  @@index([active, updatedAt(sort: Desc)], map: "Product_active_updatedAt_idx")
+  @@index([primaryTagId, active], map: "Product_primaryTagId_active_idx")
+}
+
+model Shop {
+  id                       String         @id @default(cuid())
+  slug                     String         @unique
+  displayName              String
+  profileImageUrl          String?
+  bio                      String?        @db.Text
+  /** Short welcome shown on storefront (max 280 chars, tweet length). */
+  welcomeMessage           String?        @db.VarChar(280)
+  /** Optional social URLs: reddit, x, bluesky, twitch, instagram. */
+  socialLinks              Json?
+  active                   Boolean        @default(true)
+  /**
+   * When false, the shop is hidden from the public `/shops` directory and home “top shops” strips;
+   * the storefront at `/s/{slug}` stays available for direct links and search engines you link to.
+   */
+  listedOnShopsBrowse      Boolean        @default(true)
+  stripeConnectAccountId   String?        @unique
+  connectChargesEnabled    Boolean        @default(false)
+  payoutsEnabled           Boolean        @default(false)
+  /** Higher sorts first on home Top shops and /shops (with pin + sales); null = organic only. Paid boosts can reuse later. */
+  editorialPriority        Int?
+  editorialPinnedUntil     DateTime?
+  /** Cached from paid orders for browse sort (webhook updates). */
+  totalSalesCents          Int            @default(0)
+  /**
+   * Incremented on creator storefront home loads (`/s/{slug}`). Used to rank `/shops` featured fill.
+   */
+  storefrontViewCount      Int            @default(0)
+  /**
+   * Creator paused the shop (browse + storefront hidden). Cleared when they unpause, unless a
+   * deletion request still requires the shop to stay inactive.
+   */
+  ownerPausedShopAt        DateTime?
+  /** Self-serve account deletion started — confirmation email is sent; shop is frozen (`active=false`). */
+  accountDeletionRequestedAt DateTime?
+  /** Email link confirmed; final deletion runs only when Stripe Connect balance is zero. */
+  accountDeletionEmailConfirmedAt DateTime?
+  /** Warning email sent after 60 days without a successful creator login. */
+  inactivityWarningSentAt DateTime?
+  /** Shop is deactivated for creator access after 90 days without a successful creator login. */
+  inactivityDeactivatedAt DateTime?
+  /** Platform started deletion cleanup after one year deactivated with no sales. */
+  inactivityDeletionTriggeredAt DateTime?
+  homeFeaturedListingId    String?        @unique
+  homeFeaturedListing      ShopListing?   @relation("ShopHomeFeatured", fields: [homeFeaturedListingId], references: [id], onDelete: SetNull)
+  users                    ShopUser[]
+  listings                 ShopListing[]  @relation("ShopListings")
+  ownerNotices             ShopOwnerNotice[]
+  bugFeedbackReports       BugFeedbackReport[]
+  orders                   Order[]
+  orderLines               OrderLine[]
+  supportThread            SupportThread?
+  /** Creator acknowledged item guidelines (dashboard onboarding). */
+  itemGuidelinesAcknowledgedAt DateTime?
+  /**
+   * Extra publication-fee-free slots beyond the platform default first-N free listings,
+   * granted from the admin Backend → Free listings tab.
+   */
+  listingFeeBonusFreeSlots       Int                            @default(0)
+  listingSlotPromoRedemptions    ShopListingSlotPromoRedemption[]
+  /**
+   * Platform catalog shop (`PLATFORM_SHOP_SLUG`): ordered product IDs (max 10) for the `/shop/all`
+   * featured carousel. Remaining carousel slots are filled from 30-day paid order volume.
+   */
+  browseAllPageFeaturedProductIds Json?
+  /**
+   * Platform shop only: ordered product IDs (max 10) for the marketing home “Hot items” carousel.
+   * Remaining slots use `Product.storefrontViewCount`, then any live marketplace listing.
+   */
+  homeHotCarouselFeaturedProductIds Json?
+  /**
+   * Platform shop only: ordered product IDs for the marketing home “Popular items” carousel.
+   * Backfill uses active **Popular item** paid placements (`MOST_POPULAR_OF_TAG_ITEM`), then views (same cap as hot carousel JSON).
+   */
+  popularItemsFeaturedProductIds Json?
+  /**
+   * Platform shop only: ordered creator `Shop.id` values (max 10) for the `/shops` featured carousel.
+   * Remaining slots use `totalSalesCents`, then `storefrontViewCount`, then any active creator shop.
+   */
+  browseShopsPageFeaturedShopIds Json?
+  promotionPurchases             PromotionPurchase[]
+  listingCreditPackPurchases     ListingCreditPackPurchase[]
+  setupFeePurchases              ShopSetupFeePurchase[]
+  reactivationPurchases          ShopReactivationPurchase[]
+  creatorGiftCodesRedeemed       CreatorGiftCode[]              @relation("CreatorGiftCodeRedeemedByShop")
+  /** Cached JSON for the shop dashboard Promotions tab (fast reads; rebuilt on write + cron). */
+  promotionsDashboardSnapshot    ShopPromotionsDashboardSnapshot?
+  /** Cached paid orders for the Sales tab (at most one live rebuild per Pacific calendar day). */
+  salesDashboardSnapshot         ShopSalesDashboardSnapshot?
+  /** Optional purchased flair type shown on storefront + /shops (one active type per shop). */
+  flairTypeId                   String?
+  flairType                     ShopFlairType?                  @relation(fields: [flairTypeId], references: [id], onDelete: SetNull)
+  /** When the shop first purchased flair access (mock checkout for now). */
+  flairPurchasedAt              DateTime?
+  flairPurchases                ShopFlairPurchase[]
+  /** Unused Google Shopping listing credits (from pack purchases; consumed on enrollment). */
+  googleShoppingCredits           Int                            @default(0)
+  googleShoppingPurchases         ShopGoogleShoppingPurchase[]
+  googleShoppingEnrollments       ShopListingGoogleShoppingEnrollment[]
+  createdAt                      DateTime                       @default(now())
+  updatedAt                      DateTime                       @updatedAt
+
+  @@index([active, listedOnShopsBrowse, totalSalesCents(sort: Desc)], map: "Shop_active_listed_sales_idx")
+  @@index([active, listedOnShopsBrowse, storefrontViewCount(sort: Desc)], map: "Shop_active_listed_views_idx")
+  @@index([active, listedOnShopsBrowse, editorialPriority(sort: Desc)], map: "Shop_active_listed_editorial_idx")
+  @@index([flairTypeId, active, listedOnShopsBrowse], map: "Shop_flairTypeId_active_listed_idx")
+}
+
+enum ShopFlairPurchaseStatus {
+  pending
+  paid
+  failed
+  canceled
+}
+
+model ShopFlairType {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  label     String
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  shops     Shop[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShopFlairPurchase {
+  id                    String                  @id @default(cuid())
+  shopId                String
+  shop                  Shop                    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopUserId            String
+  shopUser              ShopUser                @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  amountCents           Int
+  currency              String                  @default("usd")
+  status                ShopFlairPurchaseStatus @default(pending)
+  stripePaymentIntentId String?                 @unique
+  paidAt                DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([shopUserId, createdAt(sort: Desc)])
+  @@index([status, paidAt])
+}
+
+enum ShopGoogleShoppingPurchaseStatus {
+  pending
+  paid
+  failed
+  canceled
+}
+
+model ShopGoogleShoppingPurchase {
+  id                    String                           @id @default(cuid())
+  shopId                String
+  shop                  Shop                             @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopUserId            String
+  shopUser              ShopUser                         @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  /** `gmc_pack_3` | `gmc_pack_5` | `gmc_pack_10` | `legacy_access` — see `GOOGLE_SHOPPING_CREDIT_PACKS`. */
+  packId                String
+  creditsGranted        Int
+  amountCents           Int
+  currency              String                           @default("usd")
+  status                ShopGoogleShoppingPurchaseStatus @default(pending)
+  stripePaymentIntentId String?                          @unique
+  paidAt                DateTime?
+  createdAt             DateTime                         @default(now())
+  updatedAt             DateTime                         @updatedAt
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([shopUserId, createdAt(sort: Desc)])
+  @@index([status, paidAt])
+}
+
+/** Immutable GMC enrollment for one shop listing (assigned when credits are consumed). */
+model ShopListingGoogleShoppingEnrollment {
+  id                   String      @id @default(cuid())
+  shopId               String
+  shop                 Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopListingId        String      @unique
+  shopListing          ShopListing @relation(fields: [shopListingId], references: [id], onDelete: Cascade)
+  enrolledAt           DateTime    @default(now())
+  enrolledByShopUserId String
+  enrolledByShopUser   ShopUser    @relation(fields: [enrolledByShopUserId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, enrolledAt(sort: Desc)])
+}
+
+/** Precomputed `DashboardPromotionsTabSummaryPayload` per shop — avoids live Postgres stalls on tab open. */
+model ShopPromotionsDashboardSnapshot {
+  shopId  String @id
+  shop    Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  payload Json
+  builtAt DateTime @default(now())
+}
+
+/** Precomputed paid orders for the creator Sales tab (`?dash=orders`). */
+model ShopSalesDashboardSnapshot {
+  shopId    String   @id
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  periodKey String
+  payload   Json
+  builtAt   DateTime @default(now())
+}
+
+/**
+ * Listing-slot promo redemption rows (see `LISTING_SLOT_PROMO_COUPONS_JSON`).
+ * Default coupons are one redemption per shop per code (enforced in app). Repeatable coupons
+ * for a specific shop create multiple rows with the same `(shopId, couponCodeNormalized)`.
+ */
+model ShopListingSlotPromoRedemption {
+  id                   String   @id @default(cuid())
+  shopId               String
+  shop                 Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  /** Uppercase trimmed code (matches env coupon keys case-insensitively). */
+  couponCodeNormalized String
+  slotsGranted         Int
+  createdAt            DateTime @default(now())
+
+  @@index([shopId, couponCodeNormalized])
+  @@index([couponCodeNormalized])
+}
+
+enum SupportMessageAuthor {
+  creator
+  admin
+}
+
+model SupportThread {
+  id        String            @id @default(cuid())
+  shopId    String            @unique
+  shop      Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  messages  SupportMessage[]
+  /**
+   * When an admin last marked the conversation resolved. Cleared when the creator sends a new
+   * message. A thread is “unresolved” if this is null or any creator message is newer than it.
+   */
+  resolvedAt DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model SupportMessage {
+  id         String                @id @default(cuid())
+  threadId   String
+  thread     SupportThread         @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorRole SupportMessageAuthor
+  body       String                @db.Text
+  createdAt  DateTime              @default(now())
+
+  @@index([threadId, createdAt])
+}
+
+model SupportTip {
+  id                     String   @id @default(cuid())
+  stripeCheckoutSessionId String  @unique
+  amountCents            Int
+  currency               String   @default("usd")
+  createdAt              DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model ShopOwnerNotice {
+  id        String    @id @default(cuid())
+  shopId    String
+  shop      Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  body      String    @db.Text
+  kind      String    @default("listing_approved")
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  /** When set, ties a notice (e.g. listing_rejected) to a specific listing row for dashboard display. */
+  relatedListingId String?
+  relatedListing   ShopListing? @relation("ListingRejectionNotice", fields: [relatedListingId], references: [id], onDelete: SetNull)
+  /** When set, ties a notice (e.g. new_sale) to a paid order for deduplication. */
+  relatedOrderId   String?
+
+  @@index([shopId, readAt])
+  @@index([relatedListingId])
+  @@unique([shopId, kind, relatedOrderId])
+}
+
+model BugFeedbackReport {
+  id              String   @id @default(cuid())
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  happened        String   @db.Text
+  expected        String   @db.Text
+  stepsToReproduce String? @db.Text
+  pageUrl         String?  @db.VarChar(2048)
+  userAgent       String?  @db.Text
+
+  imageUrl        String?  @db.VarChar(2048)
+  imageR2Key      String?
+  imageUploadedAt DateTime?
+  imageDeletedAt  DateTime?
+
+  resolvedAt      DateTime?
+  adminNotes      String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([shopId, createdAt])
+  @@index([resolvedAt])
+  @@index([imageUploadedAt])
+}
+
+model ShopUser {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  shopId       String
+  shop         Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  role         ShopUserRole @default(owner)
+  emailVerifiedAt DateTime?
+  /** Successful creator dashboard login; only this resets inactivity lifecycle. */
+  lastLoginAt DateTime?
+  /** Email-based 2FA for new devices: require confirm link before signing in. */
+  twoFactorEmailEnabled Boolean @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  passwordResetTokens ShopPasswordResetToken[]
+  emailVerificationTokens ShopEmailVerificationToken[]
+  accountDeletionTokens ShopAccountDeletionToken[]
+  twoFactorLoginChallenges ShopTwoFactorLoginChallenge[]
+  trustedDevices ShopTrustedDevice[]
+  promotionPurchases PromotionPurchase[]
+  listingCreditPackPurchases ListingCreditPackPurchase[]
+  setupFeePurchases ShopSetupFeePurchase[]
+  reactivationPurchases ShopReactivationPurchase[]
+  flairPurchases ShopFlairPurchase[]
+  googleShoppingPurchases ShopGoogleShoppingPurchase[]
+  googleShoppingEnrollments ShopListingGoogleShoppingEnrollment[]
+}
+
+/** Pending email confirmation required for a new-device login (shop dashboard 2FA). */
+model ShopTwoFactorLoginChallenge {
+  id           String   @id @default(cuid())
+  shopUserId   String
+  shopUser     ShopUser @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  tokenHash    String   @unique
+  deviceIdHash String
+  expiresAt    DateTime
+  consumedAt   DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([shopUserId])
+  @@index([deviceIdHash])
+}
+
+/** Trusted browser/device marker for email-based 2FA (shop dashboard). */
+model ShopTrustedDevice {
+  id           String   @id @default(cuid())
+  shopUserId   String
+  shopUser     ShopUser @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  deviceIdHash String
+  createdAt    DateTime @default(now())
+  lastUsedAt   DateTime @default(now())
+
+  @@unique([shopUserId, deviceIdHash])
+  @@index([shopUserId])
+}
+
+model ShopAccountDeletionToken {
+  id         String    @id @default(cuid())
+  shopUserId String
+  shopUser   ShopUser  @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([shopUserId])
+}
+
+model ShopPasswordResetToken {
+  id         String    @id @default(cuid())
+  shopUserId String
+  shopUser   ShopUser  @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([shopUserId])
+}
+
+model ShopEmailVerificationToken {
+  id         String    @id @default(cuid())
+  shopUserId String
+  shopUser   ShopUser  @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([shopUserId])
+}
+
+model ShopListing {
+  id                 String                 @id @default(cuid())
+  shopId             String
+  shop               Shop                   @relation("ShopListings", fields: [shopId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceCents         Int
+  active             Boolean                @default(false)
+  featuredOnShop     Boolean                @default(false)
+  featuredForHome    Boolean                @default(false)
+  listingFeePaidAt   DateTime?
+  /**
+   * USD cents recorded when the listing publication fee was satisfied (paid checkout, mock, or $0 free slot).
+   * Null on legacy rows before this column; admin may infer an amount from listing ordinal policy.
+   */
+  listingPublicationFeePaidCents Int?
+  /** Shop-specific Printify product id (admin); used for fulfillment instead of Product.printifyProductId when set. */
+  listingPrintifyProductId  String?
+  /** Shop-specific Printify variant id for default checkout line when set. */
+  listingPrintifyVariantId    String?
+  /**
+   * Per Printify variant id → shop price in cents when the listing exposes multiple variants
+   * (no single forced `listingPrintifyVariantId`). Null = use `priceCents` for every variant until set.
+   */
+  listingPrintifyVariantPrices Json?
+  /** Set when an admin saves Printify product/variant IDs (initial or resave); drives “last synced” in admin UI. */
+  listingPrintifyCatalogSyncedAt DateTime?
+  requestImages      Json?
+  /**
+   * Optional extra storefront image (one per listing), uploaded by the shop owner after approval.
+   * Stored in R2 as WebP capped at ~100 KiB; shown after catalog/Printify images on cards and PDP.
+   */
+  ownerSupplementImageUrl String? @db.VarChar(2048)
+  /**
+   * Pending custom storefront image awaiting admin approval (`listing-supplement-pending/{id}.webp`).
+   * Not shown publicly until promoted to `ownerSupplementImageUrl`.
+   */
+  ownerSupplementPendingImageUrl String? @db.VarChar(2048)
+  /** When the shop last submitted (or replaced) the pending supplement image for review. */
+  ownerSupplementPendingSubmittedAt DateTime?
+  /**
+   * Optional second storefront image set by platform admin (WebP on R2, max ~100 KiB).
+   * Shown after Printify/catalog images; shop owners cannot remove it from the dashboard.
+   */
+  adminListingSecondaryImageUrl String? @db.VarChar(2048)
+  /**
+   * When set (JSON string[]), only these catalog/Printify image URLs are shown for this listing
+   * on the public storefront (subset of product hero ∪ gallery). Null = show all catalog images.
+   */
+  listingStorefrontCatalogImageUrls Json?
+  /** Shop-provided display name for this listing request (review / fulfillment context). */
+  requestItemName    String?
+  /**
+   * Optional one-line pitch from the shop (max tweet length); shown on the public product detail
+   * above “Item details”. Editable on the dashboard for draft / approved listings.
+   */
+  storefrontItemBlurb String? @db.VarChar(280)
+  /**
+   * Optional shop-owned search hints (comma- or space-separated), distinct from admin `Tag` labels;
+   * used for browse/PDP discoverability, not as category tags.
+   */
+  listingSearchKeywords String? @db.VarChar(2000)
+  /**
+   * Baseline catalog picker value (`ab|…`) saved at submit. Used when stub `Product.slug` is no longer
+   * deterministic (multiple listings of the same catalog line) so draft prefill + variant price remap still work.
+   */
+  baselineCatalogPickEncoded String?
+  requestStatus      ListingRequestStatus   @default(draft)
+  /** Set when an admin hides an approved listing from the shop (distinct from awaiting publication fee). */
+  adminRemovedFromShopAt DateTime?
+  /** Set when the shop owner hides this listing from their storefront. */
+  creatorRemovedFromShopAt DateTime?
+  /**
+   * When the owner requested account deletion while this listing was storefront-active (`active`),
+   * we set this timestamp and `active: false`. Cleared if they cancel the deletion request before
+   * confirming email (listings are reactivated).
+   */
+  hiddenStorefrontForAccountDeletionAt DateTime?
+  /** Admin cleared this row from the Listing requests queue; see Removed items tab. */
+  removedFromListingRequestsAt DateTime?
+  /** Internal notes on a removed queue row (editable in admin). */
+  adminListingRemovalNotes       String?    @db.Text
+  shopHomeFeatured   Shop?                  @relation("ShopHomeFeatured")
+  orderLines         OrderLine[]
+  rejectionNotices   ShopOwnerNotice[]      @relation("ListingRejectionNotice")
+  promotionPurchases PromotionPurchase[]
+  googleShoppingEnrollment ShopListingGoogleShoppingEnrollment?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@unique([shopId, productId])
+  @@index([shopId, active])
+  @@index([shopId, active, updatedAt(sort: Desc)], map: "ShopListing_shopId_active_updatedAt_idx")
+  @@index([productId, active, updatedAt(sort: Desc)], map: "ShopListing_productId_active_updatedAt_idx")
+  @@index([active, creatorRemovedFromShopAt, adminRemovedFromShopAt, hiddenStorefrontForAccountDeletionAt], map: "ShopListing_public_visibility_idx")
+  @@index([active, priceCents], map: "ShopListing_active_priceCents_idx")
+  /** Publication-fee ordinal subqueries (admin listing requests + badge). */
+  @@index([shopId, createdAt, id])
+  @@index([requestStatus])
+  @@index([removedFromListingRequestsAt])
+}
+
+/**
+ * Stripe-paid promotion slot purchase. Multiple rows per listing/shop/kind are allowed.
+ * `paidAt` ordering is the merchant-facing “stack”; public surfaces may merge with organic later.
+ */
+model PromotionPurchase {
+  id                    String                  @id @default(cuid())
+  shopId                String
+  shop                  Shop                    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopUserId            String
+  shopUser              ShopUser                @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  kind                  PromotionKind
+  /** Listing-scoped placements; null for FEATURED_SHOP_HOME. */
+  shopListingId         String?
+  shopListing           ShopListing?            @relation(fields: [shopListingId], references: [id], onDelete: SetNull)
+  /** Reserved for tag-page “most popular” placement when live ranking ships. */
+  tagId                 String?
+  tag                   Tag?                    @relation(fields: [tagId], references: [id], onDelete: SetNull)
+  amountCents           Int
+  currency              String                  @default("usd")
+  status                PromotionPurchaseStatus @default(pending)
+  stripePaymentIntentId String?                 @unique
+  stripeChargeId        String?
+  paidAt                DateTime?
+  /**
+   * Pacific two-week placement window start when booking a future period or recording slot accounting;
+   * otherwise null and the purchase’s period is inferred from `paidAt`. Benefits still follow the shared
+   * Mon–Sun cycle — when null, active timing follows `paidAt` vs `eligibleFrom` rules in app code.
+   */
+  eligibleFrom          DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([kind, status, eligibleFrom])
+  @@index([kind, status, paidAt])
+}
+
+model ListingCreditPackPurchase {
+  id                    String                        @id @default(cuid())
+  shopId                String
+  shop                  Shop                          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopUserId            String
+  shopUser              ShopUser                      @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  /** `pack_10` | `pack_25` | `pack_50` — see `LISTING_CREDIT_PACKS` in app code. */
+  packId                String
+  creditsGranted        Int
+  amountCents           Int
+  currency              String                        @default("usd")
+  status                ListingCreditPackPurchaseStatus @default(pending)
+  stripePaymentIntentId String?                       @unique
+  paidAt                DateTime?
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([status, paidAt])
+}
+
+model PendingShopSignup {
+  id           String   @id @default(cuid())
+  email        String
+  displayName  String
+  slug         String
+  passwordHash String
+  expiresAt    DateTime
+  consumedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  setupFeePurchases ShopSetupFeePurchase[]
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model ShopSetupFeePurchase {
+  id                      String                     @id @default(cuid())
+  pendingSignupId         String
+  pendingSignup           PendingShopSignup          @relation(fields: [pendingSignupId], references: [id], onDelete: Cascade)
+  shopId                  String?
+  shop                    Shop?                      @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  shopUserId              String?
+  shopUser                ShopUser?                  @relation(fields: [shopUserId], references: [id], onDelete: SetNull)
+  amountCents             Int
+  currency                String                     @default("usd")
+  status                  ShopSetupFeePurchaseStatus @default(pending)
+  stripeCheckoutSessionId String?                    @unique
+  stripePaymentIntentId   String?                    @unique
+  paidAt                  DateTime?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+
+  @@index([pendingSignupId])
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([status, paidAt])
+}
+
+model ShopReactivationPurchase {
+  id                      String                         @id @default(cuid())
+  shopId                  String
+  shop                    Shop                           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopUserId              String
+  shopUser                ShopUser                       @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
+  amountCents             Int
+  currency                String                         @default("usd")
+  status                  ShopReactivationPurchaseStatus @default(pending)
+  stripeCheckoutSessionId String?                        @unique
+  stripePaymentIntentId   String?                        @unique
+  paidAt                  DateTime?
+  createdAt               DateTime                       @default(now())
+  updatedAt               DateTime                       @updatedAt
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([shopUserId, createdAt(sort: Desc)])
+  @@index([status, paidAt])
+}
+
+model CreatorGiftPurchase {
+  id                      String                    @id @default(cuid())
+  purchaserEmail          String
+  setupFeeIncluded        Boolean                   @default(false)
+  listingCreditPackId     String?
+  listingCreditsGranted   Int                       @default(0)
+  amountCents             Int
+  currency                String                    @default("usd")
+  status                  CreatorGiftPurchaseStatus @default(pending)
+  stripeCheckoutSessionId String?                   @unique
+  stripePaymentIntentId   String?                   @unique
+  paidAt                  DateTime?
+  emailedAt               DateTime?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+
+  codes CreatorGiftCode[]
+
+  @@index([purchaserEmail])
+  @@index([status, paidAt])
+}
+
+model CreatorGiftCode {
+  id                    String              @id @default(cuid())
+  purchaseId            String
+  purchase              CreatorGiftPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  type                  CreatorGiftCodeType
+  code                  String              @unique
+  codeNormalized        String              @unique
+  listingCreditsGranted Int                 @default(0)
+  redeemedAt            DateTime?
+  redeemedByShopId      String?
+  redeemedByShop        Shop?               @relation("CreatorGiftCodeRedeemedByShop", fields: [redeemedByShopId], references: [id], onDelete: SetNull)
+  createdAt             DateTime            @default(now())
+
+  @@index([purchaseId, type])
+  @@index([type, redeemedAt])
+  @@index([redeemedByShopId])
+}
+
+enum OrderStatus {
+  pending_payment
+  paid
+  cancelled
+}
+
+model Order {
+  id                    String            @id @default(cuid())
+  shopId                String?
+  shop                  Shop?             @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  stripeSessionId       String?           @unique
+  stripePaymentIntentId String?           @unique
+  email                 String?
+  status                OrderStatus       @default(pending_payment)
+  subtotalCents         Int
+  tipCents              Int               @default(0)
+  shippingCents         Int               @default(0)
+  totalCents            Int
+  currency              String            @default("usd")
+  proceedsRouting       OrderProceedsRouting @default(standard)
+  shippingName          String?
+  shippingLine1         String?
+  shippingLine2         String?
+  shippingCity          String?
+  shippingState         String?
+  shippingPostal        String?
+  shippingCountry       String?
+  shippingPhone         String?
+  lines                 OrderLine[]
+  fulfillmentJobs       FulfillmentJob[]
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([shopId])
+  @@index([status, createdAt(sort: Desc)], map: "Order_status_createdAt_idx")
+}
+
+model OrderLine {
+  id                 String         @id @default(cuid())
+  orderId            String
+  order              Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shopId             String?
+  shop               Shop?          @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  shopListingId      String?
+  shopListing        ShopListing?   @relation(fields: [shopListingId], references: [id], onDelete: SetNull)
+  productId          String
+  product            Product        @relation(fields: [productId], references: [id])
+  quantity           Int
+  unitPriceCents     Int
+  productName        String
+  fulfillmentType    FulfillmentType
+  printifyProductId  String?
+  printifyVariantId  String?
+  /** Fulfillment / COGS for this line (total cents), deducted before marketplace fee; retained by platform. */
+  goodsServicesCostCents Int        @default(0)
+  /** Marketplace fee (cents) on merchandise after goods/services cost. */
+  platformCutCents   Int            @default(0)
+  shopCutCents       Int            @default(0)
+  createdAt          DateTime       @default(now())
+
+  @@index([shopId])
+  @@index([shopListingId])
+  @@index([productId], map: "OrderLine_productId_idx")
+}
+
+enum FulfillmentJobStatus {
+  pending
+  processing
+  succeeded
+  failed
+}
+
+model FulfillmentJob {
+  id         String                 @id @default(cuid())
+  orderId    String
+  order      Order                  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider   String
+  externalId String?
+  status     FulfillmentJobStatus   @default(pending)
+  payload    Json?
+  lastError  String?
+  attempts   Int                    @default(0)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+}
+
+model ProcessedStripeEvent {
+  id            String   @id @default(cuid())
+  stripeEventId String   @unique
+  processedAt   DateTime @default(now())
+}
+
+/**
+ * Manual admin reference catalog (Admin list tab): item name, example listing URL, min list price,
+ * optional goods/services COGS. `variants` JSON is legacy and cleared on save; item-level fields are authoritative.
+ */
+model AdminCatalogItem {
+  id        String   @id @default(cuid())
+  sortOrder Int      @default(0)
+  name      String
+  /** Optional public storefront description for this baseline catalog item. */
+  storefrontDescription String? @db.Text
+  /** Legacy JSON array (unused for new rows; kept for DB compatibility). */
+  variants  Json
+  /**
+   * Optional storefront Product id (active Printify) for shop catalog resolution when there is no
+   * example URL / name match.
+   */
+  itemPlatformProductId String?
+  itemPlatformProduct   Product? @relation("AdminCatalogItemPlatformProduct", fields: [itemPlatformProductId], references: [id], onDelete: SetNull)
+  /** Optional example listing for the item. */
+  itemExampleListingUrl String? @db.VarChar(2048)
+  /** Minimum list price in cents for the item (required on save). */
+  itemMinPriceCents     Int     @default(0)
+  /**
+   * Fulfillment / goods-and-services COGS (cents per unit) retained by the platform from the sale;
+   * distinct from the marketplace fee on the remainder.
+   */
+  itemGoodsServicesCostCents Int @default(0)
+  /**
+   * Optional free-text shown on the listing request form (e.g. "12\" @ 300 DPI").
+   */
+  itemImageRequirementLabel  String?  @db.VarChar(400)
+  /**
+   * Legacy longest-edge pixel minimum (no longer editable in admin; kept for DB compatibility).
+   */
+  itemMinArtworkLongEdgePx     Int?
+  /**
+   * Optional Printify print-area size in pixels (both set or both null). When set, listing artwork must
+   * match this aspect; optional {@link itemMinArtworkDpi} tightens minimum source resolution vs. reference DPI.
+   */
+  itemPrintAreaWidthPx  Int?
+  itemPrintAreaHeightPx Int?
+  /**
+   * When set with print area, crop must cover at least print dimensions scaled by (minDpi / 300)
+   * (reference: print W×H are assumed specified at 300 DPI).
+   */
+  itemMinArtworkDpi Int?
+  catalogTags           AdminCatalogItemTag[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+/** Tags assigned to an admin baseline catalog item (Admin → List). */
+model AdminCatalogItemTag {
+  adminCatalogItemId String
+  tagId              String
+  adminCatalogItem   AdminCatalogItem @relation(fields: [adminCatalogItemId], references: [id], onDelete: Cascade)
+  tag                Tag              @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([adminCatalogItemId, tagId])
+}
+
+/**
+ * Inbound mail captured from Resend (`email.received` webhook → Receiving API).
+ * Configure MX for your domain in Resend and point webhooks at `/api/webhooks/resend-inbound`.
+ */
+model AdminInboundEmail {
+  id            String   @id @default(cuid())
+  /** Resend received-email id (from webhook / Receiving API). */
+  resendEmailId String   @unique
+  fromAddress   String
+  toAddress     String
+  subject       String   @db.Text
+  textBody      String?  @db.Text
+  htmlBody      String?  @db.Text
+  receivedAt    DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([receivedAt(sort: Desc)])
+}
+
+/**
+ * Optional overrides for automated site emails (admin → Email format tab).
+ * When a row is missing, built-in defaults from code are used.
+ */
+model SiteEmailTemplate {
+  id        String   @id @default(cuid())
+  /** Stable key, e.g. `shop_dashboard_email_verification`. */
+  key       String   @unique
+  subject   String?  @db.Text
+  htmlBody  String?  @db.Text
+  textBody  String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * Singleton (id = `default`): automated admin metrics digest (listing queue, support, sales, etc.).
+ * Recipients and schedule are edited in Admin → Backend → Email format.
+ */
+model AdminSummaryEmailSettings {
+  id String @id @default("default")
+
+  enabled           Boolean                   @default(false)
+  /** JSON string[] — addresses that receive the digest */
+  recipientEmails   Json                      @default("[]")
+  frequency         AdminSummaryEmailFrequency @default(daily)
+
+  /** Send at this local time in `America/Los_Angeles` (handles PST/PDT). */
+  hourLa   Int @default(16)
+  minuteLa Int @default(0)
+
+  /** ISO weekday when sending weekly summaries: 1 = Monday … 7 = Sunday */
+  weeklyIsoWeekday Int @default(1)
+
+  /** Calendar day (1–28) for monthly sends */
+  monthlyDay Int @default(1)
+
+  lastSentAt        DateTime?
+  /** Dedupe key for the reporting period already emailed, e.g. `2026-05-11-daily` */
+  lastSentPeriodKey String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * Singleton (`id` = `default`): ordered `ShopListing` ids for `/shop/all` “Hot items”, rebuilt daily
+ * by `/api/cron/platform-hot-items-snapshot` so the storefront avoids live ranking queries.
+ */
+model PlatformBrowseHotItemsSnapshot {
+  id String @id @default("default")
+
+  /** JSON `string[]` — carousel order */
+  listingIdsOrdered Json
+
+  computedAt DateTime
+}
+
+/**
+ * Singleton (`id` = `default`): ordered creator `Shop` ids for featured strips (home footer, `/shops`),
+ * rebuilt daily with `/shop/all` hot-items cron batch.
+ */
+model PlatformFeaturedShopsSnapshot {
+  id String @id @default("default")
+
+  /** JSON `string[]` — featured shop strip order */
+  shopIdsOrdered Json
+
+  computedAt DateTime
+}
+
+/**
+ * Singleton: full marketplace Popular-sort listing id order (promotion → revenue → views). `/shop/all`
+ * `sort=popular` intersects this with the user’s tag/search filter when possible.
+ */
+model PlatformPopularListingOrderSnapshot {
+  id String @id @default("default")
+
+  listingIdsOrdered Json
+
+  computedAt DateTime
+}
+
+/** Marketplace browse filter tags; rebuilt daily to avoid heavy join queries on cache miss. */
+model PlatformStoreTagsSnapshot {
+  id String @id @default("default")
+
+  /** JSON array of `{ id, slug, name, sortOrder }` */
+  tagsJson Json
+
+  computedAt DateTime
+}
+
+enum StorefrontViewTargetKind {
+  product
+  shop
+}
+
+/** Append-only PDP/shop views; rolled up into `Product`/`Shop` counters by daily maintenance. */
+model StorefrontViewEvent {
+  id         String                   @id @default(cuid())
+  kind       StorefrontViewTargetKind
+  targetSlug String
+  weight     Int                      @default(1)
+  createdAt  DateTime                 @default(now())
+
+  @@index([createdAt])
+  @@index([kind, targetSlug])
+}
+
+/** Free-form text rows (e.g. notes). Requires an id for Prisma; add rows via SQL or future UI. */
+model Comment {
+  id      String  @id @default(cuid())
+  comment String? @db.Text
+
+  @@map("comments")
+}

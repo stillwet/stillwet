@@ -1,0 +1,129 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { createShopFromSignup } from "@/actions/shop-auth";
+import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
+
+export function CreateShopForm() {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const [setupMethod, setSetupMethod] = useState<"pay" | "code" | "">("");
+  const [setupCode, setSetupCode] = useState("");
+  const canSubmit = setupMethod === "pay" || (setupMethod === "code" && setupCode.trim().length > 0);
+
+  return (
+    <form
+      className="mt-8 space-y-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setError(null);
+        setPending(true);
+        try {
+          const fd = new FormData(e.currentTarget);
+          const r = await createShopFromSignup(undefined, fd);
+          if (r?.error) setError(r.error);
+          if (r?.redirectTo) window.location.href = r.redirectTo;
+        } finally {
+          setPending(false);
+        }
+      }}
+    >
+      <label className="block text-sm text-zinc-400">
+        Email
+        <input
+          type="email"
+          name="email"
+          required
+          autoComplete="email"
+          className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
+        />
+      </label>
+      <label className="block text-sm text-zinc-400">
+        Password
+        <input
+          type="password"
+          name="password"
+          required
+          minLength={10}
+          autoComplete="new-password"
+          className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
+        />
+      </label>
+      <fieldset className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-4">
+        <legend className="px-1 text-sm font-medium text-zinc-300">
+          Opening a shop requires a one time creation fee
+        </legend>
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-zinc-400">
+          <input
+            type="radio"
+            name="setupMethod"
+            value="pay"
+            checked={setupMethod === "pay"}
+            onChange={() => setSetupMethod("pay")}
+            className="mt-1"
+          />
+          <span>
+            <span className="block text-zinc-200">
+              Pay ${(SHOP_SETUP_FEE_CENTS / 100).toFixed(2)} shop creation fee
+            </span>
+            <span className="mt-0.5 block text-xs text-zinc-500">
+              Card processing fee is added at Stripe checkout.
+            </span>
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-zinc-400">
+          <input
+            type="radio"
+            name="setupMethod"
+            value="code"
+            checked={setupMethod === "code"}
+            onChange={() => setSetupMethod("code")}
+            className="mt-1"
+          />
+          <span className="flex-1">
+            <span className="block text-zinc-200">Enter coupon code</span>
+            <input
+              type="text"
+              name="setupCode"
+              autoComplete="off"
+              placeholder="Code"
+              value={setupCode}
+              onChange={(e) => {
+                setSetupCode(e.target.value);
+                if (setupMethod !== "code") setSetupMethod("code");
+              }}
+              disabled={setupMethod === "pay"}
+              className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 uppercase tracking-[0.16em] text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <span className="mt-1.5 block text-xs leading-relaxed text-zinc-500">
+              People can{" "}
+              <Link href="/gift-creator" className="text-blue-400/80 hover:text-blue-300 hover:underline">
+                gift a shop setup fee
+              </Link>
+              .
+            </span>
+          </span>
+        </label>
+      </fieldset>
+      {error ? (
+        <p className="text-sm text-amber-400" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        disabled={pending || !canSubmit}
+        className="w-full rounded-lg bg-zinc-100 py-2.5 text-sm font-medium text-zinc-900 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+      >
+        {pending
+          ? "Starting…"
+          : setupMethod === "pay"
+            ? "Continue to payment"
+            : setupMethod === "code"
+              ? "Create shop with code"
+              : "Select option"}
+      </button>
+    </form>
+  );
+}

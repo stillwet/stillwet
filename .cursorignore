@@ -1,0 +1,17 @@
+﻿node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+.turbo/
+.vercel/
+.cache/
+*.tsbuildinfo
+next-env.d.ts
+prisma/dev.db
+prisma/dev.db-journal
+*.min.js
+*.min.css
+*.map
+package-lock.json

@@ -1,0 +1,14 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "crons": [
+    {
+      "path": "/api/cron/daily-maintenance",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-maintenance",
+      "schedule": "0 16 1 * *"
+    }
+  ]
+}
