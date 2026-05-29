@@ -27,6 +27,45 @@ function normalizePostgresUrlForDevelopment(url: string): string {
   return url;
 }
 
+/**
+ * Neon/Vercel pooled URLs sometimes include `channel_binding=require`, which can break `pg` on
+ * serverless hosts. Strip it and ensure a connect timeout for cold Neon compute.
+ */
+function normalizePostgresUrlForServerless(url: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.delete("channel_binding");
+    if (!u.searchParams.has("connect_timeout")) {
+      u.searchParams.set("connect_timeout", "15");
+    }
+    return u.toString();
+  } catch {
+    return url.replace(/[?&]channel_binding=[^&]*/gi, "").replace(/\?&/, "?");
+  }
+}
+
+function finalizeRuntimeDatabaseUrl(url: string): string {
+  const normalized = normalizePostgresUrlForServerless(url);
+  return normalizePostgresUrlForDevelopment(normalized);
+}
+
+/** Which env var supplied the runtime URL (name only — for `/api/health` and logs). */
+export function runtimeDatabaseUrlSourceKey(): string | undefined {
+  if (process.env.POSTGRES_PRISMA_URL?.trim() && isPostgresUrl(process.env.POSTGRES_PRISMA_URL)) {
+    return "POSTGRES_PRISMA_URL";
+  }
+  if (process.env.DATABASE_URL?.trim() && isPostgresUrl(process.env.DATABASE_URL)) {
+    return "DATABASE_URL";
+  }
+  if (process.env.POSTGRES_URL?.trim() && isPostgresUrl(process.env.POSTGRES_URL)) {
+    return "POSTGRES_URL";
+  }
+  if (process.env.DIRECT_URL?.trim() && isPostgresUrl(process.env.DIRECT_URL)) {
+    return "DIRECT_URL";
+  }
+  return integrationPooledUrlEntry()?.key;
+}
+
 export function runtimeDatabaseUrlFromEnv(): string | undefined {
   const standard =
     process.env.POSTGRES_PRISMA_URL?.trim() ||
@@ -34,12 +73,12 @@ export function runtimeDatabaseUrlFromEnv(): string | undefined {
     process.env.POSTGRES_URL?.trim() ||
     process.env.DIRECT_URL?.trim();
   if (standard && isPostgresUrl(standard)) {
-    return normalizePostgresUrlForDevelopment(standard);
+    return finalizeRuntimeDatabaseUrl(standard);
   }
 
   const integrated = integrationPooledUrl();
   if (integrated) {
-    return normalizePostgresUrlForDevelopment(integrated);
+    return finalizeRuntimeDatabaseUrl(integrated);
   }
 
   if (process.env.NODE_ENV === "development") {
@@ -58,7 +97,7 @@ export function runtimeDatabaseUrlFromEnv(): string | undefined {
 const SUFFIX_PRISMA = "_POSTGRES_PRISMA_URL";
 const SUFFIX_DB = "_DATABASE_URL";
 
-function integrationPooledUrl(): string | undefined {
+function integrationPooledUrlEntry(): { key: string; url: string } | undefined {
   const found: { key: string; url: string }[] = [];
   for (const [k, v] of Object.entries(process.env)) {
     if (!v?.trim() || !isPostgresUrl(v)) continue;
@@ -71,12 +110,16 @@ function integrationPooledUrl(): string | undefined {
   }
   if (found.length === 0) return undefined;
   found.sort((a, b) => a.key.localeCompare(b.key));
-  if (found.length > 1 && process.env.NODE_ENV === "development") {
+  if (found.length > 1) {
     console.warn(
       `[prisma] Multiple integration pooled URLs (${found.map((f) => f.key).join(", ")}). Using ${found[0].key}.`,
     );
   }
-  return found[0].url;
+  return found[0];
+}
+
+function integrationPooledUrl(): string | undefined {
+  return integrationPooledUrlEntry()?.url;
 }
 
 const SUFFIX_NON_POOLING = "_POSTGRES_URL_NON_POOLING";

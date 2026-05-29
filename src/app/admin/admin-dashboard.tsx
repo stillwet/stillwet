@@ -233,13 +233,20 @@ async function AdminDashboardPageBody({
   // Tier 1 — communications row. Each loader is `unstable_cache`-wrapped so cold reads happen at
   // most once per TTL; warm reads return fast.
   const tier1Promise = isMain
-    ? Promise.all([
-        loadAdminBadgeListingRequests(),
-        loadAdminBadgeSupplementPending(),
-        loadAdminBadgeSupportUnresolved(),
-        loadAdminBadgeInboxCount(),
-        loadAdminBadgeBugFeedbackOpen(),
-      ])
+    ? (async () => {
+        try {
+          return await Promise.all([
+            loadAdminBadgeListingRequests(),
+            loadAdminBadgeSupplementPending(),
+            loadAdminBadgeSupportUnresolved(),
+            loadAdminBadgeInboxCount(),
+            loadAdminBadgeBugFeedbackOpen(),
+          ]);
+        } catch (e) {
+          console.error("[admin] tier1 nav badge queries failed", e);
+          return [0, 0, 0, 0, 0] as const;
+        }
+      })()
     : Promise.resolve([0, 0, 0, 0, 0] as const);
 
   const basePath =
@@ -247,7 +254,9 @@ async function AdminDashboardPageBody({
 
   // Tier 2 — heavy badges: `<AdminLazyBadge>` fills counts after paint unless this shell already
   // loaded the matching cached count for the active tab (`initialCount`).
-  const tier2Promise = Promise.all([
+  const tier2Promise = (async () => {
+    try {
+      return await Promise.all([
     adminSection === "main"
       ? prisma.product.findFirst({ select: { id: true } }).then((r) => (r ? 1 : 0))
       : Promise.resolve(0),
@@ -286,7 +295,31 @@ async function AdminDashboardPageBody({
     adminSection === "main" && inventoryTab === "sales"
       ? loadAdminBadgePlatformSales()
       : Promise.resolve(null),
-  ]);
+      ]);
+    } catch (e) {
+      console.error("[admin] tier2 shell queries failed", e);
+      return [
+        0,
+        {
+          nextBuildBytes: null,
+          nextBuildArtifactBytes: null,
+          nextBuildDirPresent: false,
+          processCwd: process.cwd(),
+          nodeEnv: process.env.NODE_ENV,
+          vercelEnv: process.env.VERCEL_ENV,
+          isVercel: Boolean(process.env.VERCEL),
+        } satisfies AdminDeployFootprint,
+        0,
+        0,
+        0,
+        0,
+        null,
+        null,
+        null,
+        null,
+      ] as const;
+    }
+  })();
 
   const [, tier1Row, tier2Row] = await Promise.all([
     baselinePromise,

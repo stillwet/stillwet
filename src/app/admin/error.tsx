@@ -14,7 +14,8 @@ export default function AdminError({
     console.error("[admin route]", error);
   }, [error]);
 
-  const msg = error.message ?? String(error);
+  const msg = error.message?.trim() || String(error);
+  const digest = error.digest?.trim();
   /** Query uses a field the loaded Prisma Client was not generated with (stale `.next` / dev server / singleton). */
   const looksLikeStaleClient =
     /Unknown argument `/i.test(msg) ||
@@ -74,9 +75,22 @@ export default function AdminError({
           </li>
         </ol>
       ) : null}
+      {digest ? (
+        <p className="mt-3 font-mono text-[11px] text-zinc-400">
+          Error digest (search Vercel logs): <span className="text-zinc-200">{digest}</span>
+        </p>
+      ) : null}
       <pre className="mt-4 max-h-48 overflow-auto rounded border border-red-900/40 bg-zinc-950/80 p-3 font-mono text-[11px] text-zinc-300">
-        {msg}
+        {msg || "(no message in production — check Vercel → Logs for this digest or [admin] lines)"}
       </pre>
+      <p className="mt-3 text-xs text-red-200/70">
+        After deploy, open{" "}
+        <code className="rounded bg-zinc-950/80 px-1 py-0.5 font-mono text-[11px] text-zinc-300">
+          /api/health
+        </code>{" "}
+        — <code className="font-mono text-[11px]">database.ok</code> should be{" "}
+        <code className="font-mono text-[11px]">true</code>.
+      </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="button"
