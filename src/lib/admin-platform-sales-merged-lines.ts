@@ -1,5 +1,7 @@
+import { unstable_cache } from "next/cache";
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import {
   ListingCreditPackPurchaseStatus,
   OrderStatus,
@@ -723,5 +725,112 @@ export async function loadPlatformSalesPriorCalendarYearTotals(
   const year = through.getUTCFullYear() - 1;
   const { gte, lte } = utcFullCalendarYearRange(year);
   const totals = await aggregatePlatformRevenueForUtcWindow(prisma, gte, lte);
+  return { year, ...totals };
+}
+
+const SALES_HISTORICAL_ROLLUP_CACHE_S = 60 * 60 * 12;
+
+function sumPlatformSalesPeriodTotals(
+  a: PlatformSalesPeriodTotals,
+  b: PlatformSalesPeriodTotals,
+): PlatformSalesPeriodTotals {
+  return {
+    itemPlatformCents: a.itemPlatformCents + b.itemPlatformCents,
+    listingPlatformCents: a.listingPlatformCents + b.listingPlatformCents,
+    promotionPlatformCents: a.promotionPlatformCents + b.promotionPlatformCents,
+    supportPlatformCents: a.supportPlatformCents + b.supportPlatformCents,
+  };
+}
+
+function utcYearStartThroughEndOfPreviousCalendarMonth(through: Date): { gte: Date; lte: Date } | null {
+  const year = through.getUTCFullYear();
+  const month = through.getUTCMonth();
+  if (month === 0) return null;
+  const gte = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+  const lte = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+  return { gte, lte };
+}
+
+export function platformSalesUtcMonthTitles(reference: Date): {
+  currentMonthTitle: string;
+  previousMonthTitle: string;
+} {
+  const fmt = (y: number, m: number) =>
+    new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(
+      new Date(Date.UTC(y, m, 1)),
+    );
+  const cy = reference.getUTCFullYear();
+  const cm = reference.getUTCMonth();
+  const pm = cm === 0 ? 11 : cm - 1;
+  const py = cm === 0 ? cy - 1 : cy;
+  return {
+    currentMonthTitle: fmt(cy, cm),
+    previousMonthTitle: fmt(py, pm),
+  };
+}
+
+async function loadPlatformSalesPreviousMonthTotalsUncached(throughIso: string): Promise<PlatformSalesPeriodTotals> {
+  const through = new Date(throughIso);
+  return loadPlatformSalesPreviousMonthTotals(prisma, through);
+}
+
+/** Cached full prior UTC calendar month — historical rollup only. */
+export async function loadPlatformSalesPreviousMonthTotalsCached(
+  through: Date,
+): Promise<PlatformSalesPeriodTotals> {
+  const key = `${through.getUTCFullYear()}-${through.getUTCMonth()}`;
+  return unstable_cache(
+    () => loadPlatformSalesPreviousMonthTotalsUncached(through.toISOString()),
+    [`admin-platform-sales-prev-month:v1:${key}`],
+    { revalidate: SALES_HISTORICAL_ROLLUP_CACHE_S },
+  )();
+}
+
+async function loadPlatformSalesPriorCalendarYearTotalsUncached(throughIso: string): Promise<PlatformSalesYtdTotals> {
+  const through = new Date(throughIso);
+  return loadPlatformSalesPriorCalendarYearTotals(prisma, through);
+}
+
+/** Cached full prior UTC calendar year. */
+export async function loadPlatformSalesPriorCalendarYearTotalsCached(
+  through: Date,
+): Promise<PlatformSalesYtdTotals> {
+  const year = through.getUTCFullYear() - 1;
+  return unstable_cache(
+    () => loadPlatformSalesPriorCalendarYearTotalsUncached(through.toISOString()),
+    [`admin-platform-sales-prior-year:v1:${year}`],
+    { revalidate: SALES_HISTORICAL_ROLLUP_CACHE_S },
+  )();
+}
+
+async function loadPlatformSalesYtdPriorMonthsUncached(
+  year: number,
+  throughIso: string,
+): Promise<PlatformSalesPeriodTotals> {
+  const through = new Date(throughIso);
+  const range = utcYearStartThroughEndOfPreviousCalendarMonth(through);
+  if (!range || range.gte.getUTCFullYear() !== year) {
+    return {
+      itemPlatformCents: 0,
+      listingPlatformCents: 0,
+      promotionPlatformCents: 0,
+      supportPlatformCents: 0,
+    };
+  }
+  return aggregatePlatformRevenueForUtcWindow(prisma, range.gte, range.lte);
+}
+
+/**
+ * YTD through `through`: cached Jan–prior-month plus live current-month totals.
+ */
+export async function loadPlatformSalesYtdTotalsHybrid(through: Date): Promise<PlatformSalesYtdTotals> {
+  const year = through.getUTCFullYear();
+  const priorMonths = await unstable_cache(
+    () => loadPlatformSalesYtdPriorMonthsUncached(year, through.toISOString()),
+    [`admin-platform-sales-ytd-prior-months:v1:${year}:${through.getUTCMonth()}`],
+    { revalidate: SALES_HISTORICAL_ROLLUP_CACHE_S },
+  )();
+  const currentMonth = await loadPlatformSalesCurrentMonthTotals(prisma, through);
+  const totals = sumPlatformSalesPeriodTotals(priorMonths, currentMonth);
   return { year, ...totals };
 }

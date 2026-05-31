@@ -266,7 +266,7 @@ export function AdminPlatformSalesTab(props: {
               <th className="py-2 pr-2 font-medium">Qty</th>
               <th className="py-2 pr-2 font-medium">Merch</th>
               <th className="py-2 pr-2 font-medium">G/S cost</th>
-              <th className="py-2 pr-2 font-medium">Plat. fee</th>
+              <th className="py-2 pr-2 font-medium">Platform</th>
               <th className="py-2 pr-2 font-medium">Shop</th>
               <th className="py-2 font-medium">Shop name</th>
             </tr>

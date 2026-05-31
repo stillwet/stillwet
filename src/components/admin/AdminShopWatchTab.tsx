@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { fetchAdminShopWatchShopDetails } from "@/actions/admin-shop-watch";
 import { adminDeleteShopListingRecord, adminFreezeShopListing } from "@/actions/admin-marketplace";
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
 
@@ -47,8 +48,11 @@ export type ShopWatchRow = {
   detailsOtherPipeline: ShopWatchDetail[];
   /** Approved but not on storefront (e.g. fee pending, inactive product). */
   detailsOtherApproved: ShopWatchDetail[];
-  /** Formal admin rejects (without queue timestamp) — merged under Removed with creator and × removals. */
+  /** Formal admin rejects — merged under Removed with creator and × removals. */
   detailsOtherRejected: ShopWatchDetail[];
+  /** Summary-only counts (details load on expand). */
+  otherRequestedCount?: number;
+  otherPipelineCount?: number;
 };
 
 /** Creator marketplace roll-up (non–platform-catalog shops). */
@@ -273,7 +277,46 @@ export function AdminShopWatchTab(props: {
     }
     return new Set();
   });
+  const [detailsByShopId, setDetailsByShopId] = useState<
+    Record<
+      string,
+      Pick<
+        ShopWatchRow,
+        | "detailsActive"
+        | "detailsFrozen"
+        | "detailsRemoved"
+        | "detailsOtherRequested"
+        | "detailsOtherPipeline"
+        | "detailsOtherApproved"
+        | "detailsOtherRejected"
+      >
+    >
+  >({});
+  const [loadingShopIds, setLoadingShopIds] = useState<Set<string>>(new Set());
   const [tableFilter, setTableFilter] = useState<TableFilter>("all");
+
+  async function ensureShopDetails(shopId: string) {
+    if (detailsByShopId[shopId] || loadingShopIds.has(shopId)) return;
+    setLoadingShopIds((prev) => new Set(prev).add(shopId));
+    try {
+      const result = await fetchAdminShopWatchShopDetails(shopId);
+      if (result.ok) {
+        setDetailsByShopId((prev) => ({ ...prev, [shopId]: result.details }));
+      }
+    } finally {
+      setLoadingShopIds((prev) => {
+        const next = new Set(prev);
+        next.delete(shopId);
+        return next;
+      });
+    }
+  }
+
+  function rowWithDetails(r: ShopWatchRow): ShopWatchRow {
+    const loaded = detailsByShopId[r.shopId];
+    if (!loaded) return r;
+    return { ...r, ...loaded };
+  }
 
   useEffect(() => {
     if (!initialExpandedShopId) return;
@@ -284,16 +327,22 @@ export function AdminShopWatchTab(props: {
       next.add(initialExpandedShopId);
       return next;
     });
+    void ensureShopDetails(initialExpandedShopId);
   }, [initialExpandedShopId, rows]);
 
   const toggle = useCallback((shopId: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(shopId)) next.delete(shopId);
-      else next.add(shopId);
+      const willOpen = !next.has(shopId);
+      if (willOpen) {
+        next.add(shopId);
+        void ensureShopDetails(shopId);
+      } else {
+        next.delete(shopId);
+      }
       return next;
     });
-  }, []);
+  }, [detailsByShopId, loadingShopIds]);
 
   /** Which listing groups to show inside expanded rows (does not hide shops in the table). */
   const detailVisibility = useMemo(() => {
@@ -347,7 +396,13 @@ export function AdminShopWatchTab(props: {
   const grandFrozen = rows.reduce((acc, r) => acc + r.frozenCount, 0);
   const grandRemoved = rows.reduce((acc, r) => acc + r.removedCount, 0);
   const grandOther = rows.reduce(
-    (acc, r) => acc + r.detailsOtherRequested.length + r.detailsOtherPipeline.length,
+    (acc, r) => {
+      const loaded = detailsByShopId[r.shopId];
+      if (loaded) {
+        return acc + loaded.detailsOtherRequested.length + loaded.detailsOtherPipeline.length;
+      }
+      return acc + (r.otherRequestedCount ?? 0) + (r.otherPipelineCount ?? 0);
+    },
     0,
   );
 
@@ -514,17 +569,19 @@ export function AdminShopWatchTab(props: {
                 </td>
               </tr>
               {rows.map((r) => {
+                const row = rowWithDetails(r);
                 const isOpen = expanded.has(r.shopId);
-                const mergedLiveSection = [...r.detailsActive, ...r.detailsOtherApproved].sort(sortWatchDetails);
-                const mergedRemovedSection = [...r.detailsRemoved, ...r.detailsOtherRejected].sort(sortWatchDetails);
-                const mergedRequestedSection = [...r.detailsOtherRequested].sort(sortWatchDetails);
-                const mergedPipelineOnly = [...r.detailsOtherPipeline].sort(sortWatchDetails);
+                const detailsLoading = isOpen && loadingShopIds.has(r.shopId) && !detailsByShopId[r.shopId];
+                const mergedLiveSection = [...row.detailsActive, ...row.detailsOtherApproved].sort(sortWatchDetails);
+                const mergedRemovedSection = [...row.detailsRemoved, ...row.detailsOtherRejected].sort(sortWatchDetails);
+                const mergedRequestedSection = [...row.detailsOtherRequested].sort(sortWatchDetails);
+                const mergedPipelineOnly = [...row.detailsOtherPipeline].sort(sortWatchDetails);
                 const visibleListingCount =
                   (detailVisibility.active ? mergedLiveSection.length : 0) +
-                  (detailVisibility.frozen ? r.detailsFrozen.length : 0) +
+                  (detailVisibility.frozen ? row.detailsFrozen.length : 0) +
                   (detailVisibility.removed ? mergedRemovedSection.length : 0) +
                   (detailVisibility.otherPipeline
-                    ? r.detailsOtherRequested.length + r.detailsOtherPipeline.length
+                    ? row.detailsOtherRequested.length + row.detailsOtherPipeline.length
                     : 0);
                 return (
                   <Fragment key={r.shopId}>
@@ -569,6 +626,11 @@ export function AdminShopWatchTab(props: {
                           <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-zinc-600">
                             Listing details
                           </p>
+                          {detailsLoading ? (
+                            <p className="text-xs text-zinc-500">Loading listings…</p>
+                          ) : visibleListingCount === 0 ? (
+                            <p className="text-xs text-zinc-600">No listings in this filter.</p>
+                          ) : null}
                           {detailVisibility.active && mergedLiveSection.length > 0 ? (
                             <DetailSection
                               title="Live"
@@ -579,7 +641,7 @@ export function AdminShopWatchTab(props: {
                             />
                           ) : null}
                           {detailVisibility.frozen ? (
-                            <DetailSection title="Frozen" tone="sky" items={r.detailsFrozen} showDelete />
+                            <DetailSection title="Frozen" tone="sky" items={row.detailsFrozen} showDelete />
                           ) : null}
                           {detailVisibility.removed && mergedRemovedSection.length > 0 ? (
                             <DetailSection title="Removed" tone="fuchsia" items={mergedRemovedSection} showDelete />
@@ -599,18 +661,6 @@ export function AdminShopWatchTab(props: {
                               items={mergedPipelineOnly}
                               showDelete
                             />
-                          ) : null}
-                          {visibleListingCount === 0 ? (
-                            <p className="mt-2 text-xs text-zinc-600">
-                              {tableFilter === "all" &&
-                              mergedLiveSection.length === 0 &&
-                              r.detailsFrozen.length === 0 &&
-                              mergedRemovedSection.length === 0 &&
-                              mergedRequestedSection.length === 0 &&
-                              mergedPipelineOnly.length === 0
-                                ? "No listings in these categories for this shop."
-                                : "No listings match the current filter for this shop."}
-                            </p>
                           ) : null}
                         </td>
                       </tr>
