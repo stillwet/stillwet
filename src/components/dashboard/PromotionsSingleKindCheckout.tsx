@@ -10,13 +10,15 @@ export function PromotionsSingleKindCheckout(props: {
   kind: PromotionKind;
   periodSlotUiByKind?: PromotionCheckoutSlotsByKind;
   mockPromotionCheckout: boolean;
+  stripePublishableKey?: string;
   onClose: () => void;
 }) {
-  const { kind, mockPromotionCheckout, onClose } = props;
+  const { kind, mockPromotionCheckout, stripePublishableKey = "", onClose } = props;
   return (
     <PromotionsInlineCheckout
       kind={kind as PlacementCheckoutPromotionKind}
       mockPromotionCheckout={mockPromotionCheckout}
+      stripePublishableKey={stripePublishableKey}
       onClose={onClose}
     />
   );

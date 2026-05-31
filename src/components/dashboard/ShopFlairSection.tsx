@@ -2,70 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { dashboardSetShopFlairType, type DashboardFlairActionResult } from "@/actions/dashboard-flair";
 import { ShopFlairAccessPay } from "@/components/dashboard/ShopFlairAccessPay";
 import type { ShopFlairDashboardPayload } from "@/lib/shop-flair-dashboard-payload";
-import { shopFlairAccessPurchaseLabel } from "@/lib/shop-flair";
+import { shopFlairAccessBuyButtonLabel, shopFlairAccessPurchaseLabel } from "@/lib/shop-flair";
 
 const btnPack =
   "inline-block rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100";
 const btnPackSelected =
   "inline-block rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-[11px] font-medium text-zinc-100";
-
-function FlairAccessVerifyDialog(props: {
-  titleId: string;
-  onDismiss: () => void;
-  onConfirm: () => void;
-}) {
-  const { titleId, onDismiss, onConfirm } = props;
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDismiss();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onDismiss]);
-
-  return (
-    <div
-      className="fixed inset-0 z-[2600] flex items-center justify-center bg-black/70 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-    >
-      <button
-        type="button"
-        className="absolute inset-0 cursor-default"
-        aria-label="Dismiss"
-        onClick={onDismiss}
-      />
-      <div className="relative z-[1] w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-950 p-5 shadow-xl">
-        <h2 id={titleId} className="text-base font-semibold text-zinc-100">
-          Verify purchase
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-zinc-400">{shopFlairAccessPurchaseLabel()}</p>
-        <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
-          <button
-            type="button"
-            className="rounded border border-zinc-600 bg-zinc-900/50 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:border-zinc-500"
-            onClick={onDismiss}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="rounded border border-zinc-600 bg-zinc-400 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-300"
-            onClick={onConfirm}
-          >
-            Continue to payment
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function ShopFlairSection(props: {
   flair: ShopFlairDashboardPayload;
@@ -84,8 +30,6 @@ export function ShopFlairSection(props: {
   const [flairResult, setFlairResult] = useState<DashboardFlairActionResult | null>(null);
   const [isFlairPending, startFlairTransition] = useTransition();
   const [selectedFlairTypeId, setSelectedFlairTypeId] = useState(flair.selectedType?.id ?? "");
-  const flairConfirmTitleId = useId();
-  const [flairConfirmOpen, setFlairConfirmOpen] = useState(false);
   const [flairPayOpen, setFlairPayOpen] = useState(false);
   const [flairSuccessKind, setFlairSuccessKind] = useState<"purchase" | "update" | null>(null);
 
@@ -98,7 +42,6 @@ export function ShopFlairSection(props: {
     setFlairResult(null);
     setFlairSuccessKind(null);
     setSelectedFlairTypeId(flair.selectedType?.id ?? "");
-    setFlairConfirmOpen(false);
     setFlairPayOpen(false);
   }, [flair.purchasedAt, flair.selectedType?.id]);
 
@@ -124,12 +67,7 @@ export function ShopFlairSection(props: {
             {flair.selectedType?.label ?? "None selected"}
           </span>
         </p>
-      ) : (
-        <p className="mt-2 text-[11px] text-zinc-400">
-          Flair access{" "}
-          <span className="font-medium text-amber-200/90">not purchased</span>
-        </p>
-      )}
+      ) : null}
 
       {flairResult && !flairResult.ok ? (
         <p className="mt-2 rounded border border-amber-900/50 bg-amber-950/25 px-2.5 py-1.5 text-xs text-amber-200/90">
@@ -165,18 +103,17 @@ export function ShopFlairSection(props: {
           ) : null}
 
           <div className="mt-3">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Flair access</p>
-            <ul className="mt-1.5 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
+            <ul className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
               <li>
                 <button
                   type="button"
                   className={flairPayOpen ? btnPackSelected : btnPack}
                   onClick={() => {
                     setFlairResult(null);
-                    setFlairConfirmOpen(true);
+                    setFlairPayOpen(true);
                   }}
                 >
-                  {shopFlairAccessPurchaseLabel()}
+                  {shopFlairAccessBuyButtonLabel()}
                 </button>
               </li>
             </ul>
@@ -209,17 +146,6 @@ export function ShopFlairSection(props: {
                 Cancel
               </button>
             </div>
-          ) : null}
-
-          {flairConfirmOpen ? (
-            <FlairAccessVerifyDialog
-              titleId={flairConfirmTitleId}
-              onDismiss={() => setFlairConfirmOpen(false)}
-              onConfirm={() => {
-                setFlairConfirmOpen(false);
-                setFlairPayOpen(true);
-              }}
-            />
           ) : null}
         </>
       ) : (

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import type { ProductCardProduct } from "@/components/ProductCard";
+import { MarketplaceEmptyState } from "@/components/MarketplaceEmptyState";
 
 /** Flat grid — no per-tag or per-design sections (marketplace or single-shop “flat” browse). */
 export function ShopPlatformBrowseGrid({
@@ -19,7 +20,7 @@ export function ShopPlatformBrowseGrid({
 }) {
   if (products.length === 0) {
     return (
-      emptyState ?? <p className="mt-8 text-sm text-zinc-600">No products yet.</p>
+      emptyState ?? <MarketplaceEmptyState variant="shop-listings" />
     );
   }
   return (

@@ -5,7 +5,6 @@ import { PromotionCheckoutCostLine } from "@/components/dashboard/PromotionCheck
 import { PromotionsCheckoutPayLazy } from "@/components/dashboard/PromotionsCheckoutPayLazy";
 import { PromotionsCheckoutPeriodFieldset } from "@/components/dashboard/promotions/PromotionsCheckoutPeriodFieldset";
 import { computedPeriodChoice } from "@/lib/promotion-checkout-period-display";
-import { placementPeriodTierLabel } from "@/lib/promotion-period-pacific";
 import type { PlacementPeriodChoiceUi } from "@/lib/promotion-placement-ui-pure";
 import type { PlacementCheckoutPromotionKind } from "@/lib/promotion-placement-ui-pure";
 
@@ -15,6 +14,7 @@ export function PromotionsCheckoutPeriodPaySection(props: {
   selectedOffset: 0 | 1 | 2 | null;
   computedPeriodChoices: PlacementPeriodChoiceUi[] | null;
   mockPromotionCheckout: boolean;
+  stripePublishableKey: string;
   onSelectPeriod: (offset: 0 | 1 | 2) => void;
   loadingOffset?: 0 | 1 | 2 | null;
   periodPricingLoading?: boolean;
@@ -50,9 +50,6 @@ export function PromotionsCheckoutPeriodPaySection(props: {
       {showCostLoading ? (
         <PromotionCheckoutCostLine
           kind={kind as PromotionKind}
-          periodLabel={
-            selectedOffset != null ? placementPeriodTierLabel(selectedOffset) : "Placement period"
-          }
           amountCents={null}
           loading
         />
@@ -61,8 +58,8 @@ export function PromotionsCheckoutPeriodPaySection(props: {
           kind={kind as PromotionKind}
           placementOffset={selectedOffset!}
           amountCents={selected.amountCents}
-          periodLabel={selected.placementMonthLabel}
           mockPay={mockPromotionCheckout}
+          stripePublishableKey={props.stripePublishableKey}
         />
       ) : computed && selected && !selected.selectable ? (
         <p className="mt-3 text-xs text-amber-200/90">

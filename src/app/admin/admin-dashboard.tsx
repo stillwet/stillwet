@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
 import { logoutAdmin } from "@/actions/admin";
 import {
@@ -9,19 +8,8 @@ import {
   ADMIN_MAIN_BASE_PATH,
 } from "@/lib/admin-dashboard-urls";
 import { AdminLocalTodoList } from "@/components/admin/AdminLocalTodoList";
-import { navTabCountBadgeClass } from "@/lib/nav-tab-count-badge";
 import { ensureBaselineAdminCatalogIfEmpty } from "@/lib/seed-baseline-admin-catalog";
-import {
-  loadAdminBadgeBugFeedbackOpen,
-  loadAdminBadgeInboxCount,
-  loadAdminBadgeListingRequests,
-  loadAdminBadgePlatformSales,
-  loadAdminBadgePromotionLists,
-  loadAdminBadgeShopLeaderboardCount,
-  loadAdminBadgeShopWatch,
-  loadAdminBadgeSupplementPending,
-  loadAdminBadgeSupportUnresolved,
-} from "@/lib/admin-nav-badges";
+import { prisma } from "@/lib/prisma";
 import {
   AdminDashboardTabPanel,
   AdminDashboardTabPanelFallback,
@@ -32,12 +20,13 @@ import { AdminGoogleShoppingTabLoader } from "@/components/admin/AdminGoogleShop
 import { printifyHookBannerFromSearchParams } from "@/lib/admin-printify-hook-banner";
 import { PrintifyApiTab } from "./printify-api-tab";
 import {
-  fetchAdminBadgePlatformSalesCount,
-  fetchAdminBadgePromotionListsCount,
-  fetchAdminBadgeShopLeaderboardCount,
-  fetchAdminBadgeShopWatchCount,
-} from "@/actions/admin-nav-badges-actions";
-import { AdminLazyBadge } from "@/components/admin/AdminLazyBadge";
+  AdminBackendNavCount,
+} from "@/components/admin/AdminBackendNavCountsClient";
+import {
+  AdminMainEmptyDbBanner,
+  AdminMainNavCount,
+  AdminShellCountsProvider,
+} from "@/components/admin/AdminMainShellClient";
 import {
   formatBytesForAdmin,
   getAdminDeployFootprint,
@@ -215,11 +204,10 @@ async function AdminDashboardPageBody({
     redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}`);
   }
 
-  // Baseline catalog seed + badge/count queries run together so the shell is not blocked on
-  // baseline finishing before the first round of DB reads (and vice versa).
-  const isMain = adminSection === "main";
+  // Baseline catalog seed only where the admin list / requests tab needs it — not every main visit.
   const needsBaselineCatalogSeed =
-    isMain || (adminSection === "backend" && inventoryTab === "admin-list");
+    inventoryTab === "requests" ||
+    (adminSection === "backend" && inventoryTab === "admin-list");
   const baselinePromise = needsBaselineCatalogSeed
     ? (async () => {
         try {
@@ -230,127 +218,32 @@ async function AdminDashboardPageBody({
       })()
     : Promise.resolve();
 
-  // Tier 1 — communications row. Each loader is `unstable_cache`-wrapped so cold reads happen at
-  // most once per TTL; warm reads return fast.
-  const tier1Promise = isMain
-    ? (async () => {
-        try {
-          return await Promise.all([
-            loadAdminBadgeListingRequests(),
-            loadAdminBadgeSupplementPending(),
-            loadAdminBadgeSupportUnresolved(),
-            loadAdminBadgeInboxCount(),
-            loadAdminBadgeBugFeedbackOpen(),
-          ]);
-        } catch (e) {
-          console.error("[admin] tier1 nav badge queries failed", e);
-          return [0, 0, 0, 0, 0] as const;
-        }
-      })()
-    : Promise.resolve([0, 0, 0, 0, 0] as const);
-
   const basePath =
     adminSection === "main" ? ADMIN_MAIN_BASE_PATH : ADMIN_BACKEND_BASE_PATH;
 
-  // Tier 2 — heavy badges: `<AdminLazyBadge>` fills counts after paint unless this shell already
-  // loaded the matching cached count for the active tab (`initialCount`).
-  const tier2Promise = (async () => {
-    try {
-      return await Promise.all([
-    adminSection === "main"
-      ? prisma.product.findFirst({ select: { id: true } }).then((r) => (r ? 1 : 0))
-      : Promise.resolve(0),
-    adminSection === "main"
-      ? getAdminDeployFootprint()
-      : Promise.resolve({
-          nextBuildBytes: null,
-          nextBuildArtifactBytes: null,
-          nextBuildDirPresent: false,
-          processCwd: process.cwd(),
-          nodeEnv: process.env.NODE_ENV,
-          vercelEnv: process.env.VERCEL_ENV,
-          isVercel: Boolean(process.env.VERCEL),
-        } satisfies AdminDeployFootprint),
-    adminSection === "backend"
-      ? prisma.shopListing.count({ where: { removedFromListingRequestsAt: { not: null } } })
-      : Promise.resolve(0),
-    adminSection === "backend"
-      ? prisma.adminCatalogItem.count()
-      : Promise.resolve(0),
-    adminSection === "backend"
-      ? prisma.product.count()
-      : Promise.resolve(0),
-    adminSection === "backend"
-      ? prisma.tag.count()
-      : Promise.resolve(0),
-    adminSection === "main" && inventoryTab === "shop-watch"
-      ? loadAdminBadgeShopWatch()
-      : Promise.resolve(null),
-    adminSection === "main" && inventoryTab === "promotion-lists"
-      ? loadAdminBadgePromotionLists()
-      : Promise.resolve(null),
-    adminSection === "main" && inventoryTab === "shop-leaderboard"
-      ? loadAdminBadgeShopLeaderboardCount()
-      : Promise.resolve(null),
-    adminSection === "main" && inventoryTab === "sales"
-      ? loadAdminBadgePlatformSales()
-      : Promise.resolve(null),
-      ]);
-    } catch (e) {
-      console.error("[admin] tier2 shell queries failed", e);
-      return [
-        0,
-        {
-          nextBuildBytes: null,
-          nextBuildArtifactBytes: null,
-          nextBuildDirPresent: false,
-          processCwd: process.cwd(),
-          nodeEnv: process.env.NODE_ENV,
-          vercelEnv: process.env.VERCEL_ENV,
-          isVercel: Boolean(process.env.VERCEL),
-        } satisfies AdminDeployFootprint,
-        0,
-        0,
-        0,
-        0,
-        null,
-        null,
-        null,
-        null,
-      ] as const;
-    }
-  })();
+  const vercelStubFootprint = (): AdminDeployFootprint => ({
+    nextBuildBytes: null,
+    nextBuildArtifactBytes: null,
+    nextBuildDirPresent: true,
+    processCwd: process.cwd(),
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
+    isVercel: true,
+  });
 
-  const [, tier1Row, tier2Row] = await Promise.all([
+  const shellPromise = Promise.all([
     baselinePromise,
-    tier1Promise,
-    tier2Promise,
+    adminSection === "main" && !process.env.VERCEL
+      ? getAdminDeployFootprint()
+      : adminSection === "main"
+        ? Promise.resolve(vercelStubFootprint())
+        : Promise.resolve(null),
   ]);
 
-  const [
-    listingRequestTabBadgeCount,
-    supplementPendingTabBadgeCount,
-    supportUnresolvedCount,
-    adminInboxCount,
-    bugFeedbackOpenCount,
-  ] = tier1Row;
-
-  const [
-    mainProductCount,
-    deployFootprint,
-    removedListingCount,
-    adminListCount,
-    printifyNavBadgeCount,
-    tagsNavCount,
-    shopWatchTabBadgeCountInitial,
-    promotionListsActivePaidCountInitial,
-    shopLeaderboardShopCountInitial,
-    platformSalesLineCountInitial,
-  ] = tier2Row;
-
-  const productCount = mainProductCount;
+  const [, deployFootprint] = await shellPromise;
 
   return (
+    <AdminShellCountsProvider adminSection={adminSection}>
     <div className="space-y-12">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-2">
@@ -387,49 +280,9 @@ async function AdminDashboardPageBody({
         </div>
       </div>
 
-      {adminSection === "main" && productCount === 0 ? (
-        <div
-          role="status"
-          className="rounded-lg border border-amber-900/45 bg-amber-950/25 px-4 py-3 text-sm text-amber-100/90"
-        >
-          <p className="font-medium text-amber-50/95">No products in this database</p>
-          <p className="mt-2 text-xs leading-relaxed text-amber-200/85">
-            Admin and the shop use the same PostgreSQL connection. If both look empty, this environment is
-            almost certainly using a database with no product rows yet, or a different database than where you
-            created data (for example only on your laptop, not on Vercel).
-          </p>
-          <ul className="mt-3 list-disc space-y-1.5 pl-5 text-xs text-amber-200/80">
-            <li>
-              Confirm{" "}
-              <code className="rounded bg-zinc-950/60 px-1 py-0.5 font-mono text-amber-100/90">
-                POSTGRES_PRISMA_URL
-              </code>{" "}
-              or{" "}
-              <code className="rounded bg-zinc-950/60 px-1 py-0.5 font-mono text-amber-100/90">
-                DATABASE_URL
-              </code>{" "}
-              in this deployment (e.g. Vercel → Production) points at the database you intend.
-            </li>
-            <li>
-              Run{" "}
-              <code className="rounded bg-zinc-950/60 px-1 py-0.5 font-mono text-amber-100/90">
-                npx prisma migrate deploy
-              </code>{" "}
-              and{" "}
-              <code className="rounded bg-zinc-950/60 px-1 py-0.5 font-mono text-amber-100/90">
-                npm run db:seed
-              </code>{" "}
-              from your machine using that same URL (see VERCEL.md).
-            </li>
-            <li>
-              Or add listings in Admin Dash / Backend admin (and sync Printify if you use it)—they are stored only in the
-              database your env points to.
-            </li>
-          </ul>
-        </div>
-      ) : null}
+      {adminSection === "main" ? <AdminMainEmptyDbBanner /> : null}
 
-      {adminSection === "main" ? (
+      {adminSection === "main" && deployFootprint ? (
       <section
         aria-label="Production deployment footprint"
         className="rounded-lg border border-zinc-800 bg-zinc-900/35 px-3 py-2 text-[11px] text-zinc-400"
@@ -527,9 +380,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Listing requests
-                    <span className={navTabCountBadgeClass(listingRequestTabBadgeCount)}>
-                      ({listingRequestTabBadgeCount})
-                    </span>
+                    <AdminMainNavCount field="listingRequests" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=custom-images`}
@@ -542,14 +393,11 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Image requests
-                    <span className={navTabCountBadgeClass(supplementPendingTabBadgeCount)}>
-                      ({supplementPendingTabBadgeCount})
-                    </span>
+                    <AdminMainNavCount field="supplementPending" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=support`}
                     role="tab"
-                    title={`${supportUnresolvedCount} unresolved support conversation(s) (needs reply or not marked resolved)`}
                     aria-selected={inventoryTab === "support"}
                     className={`inline-flex min-h-10 shrink-0 items-center rounded-t-lg px-4 py-3 text-sm font-medium leading-none transition ${
                       inventoryTab === "support"
@@ -558,7 +406,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Support
-                    <span className={navTabCountBadgeClass(supportUnresolvedCount)}>({supportUnresolvedCount})</span>
+                    <AdminMainNavCount field="supportUnresolved" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=admin-inbox`}
@@ -571,7 +419,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Inbox
-                    <span className={navTabCountBadgeClass(adminInboxCount)}>({adminInboxCount})</span>
+                    <AdminMainNavCount field="adminInbox" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=bug-feedback`}
@@ -584,9 +432,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Bug/Feedback
-                    <span className={navTabCountBadgeClass(bugFeedbackOpenCount)}>
-                      ({bugFeedbackOpenCount})
-                    </span>
+                    <AdminMainNavCount field="bugFeedbackOpen" />
                   </Link>
                 </div>
               </div>
@@ -603,11 +449,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Shop Data
-                    <AdminLazyBadge
-                      fetchAction={fetchAdminBadgeShopWatchCount}
-                      variant="muted"
-                      initialCount={shopWatchTabBadgeCountInitial}
-                    />
+                    <AdminMainNavCount field="shopWatch" variant="muted" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=promotion-lists`}
@@ -621,11 +463,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Promotion lists
-                    <AdminLazyBadge
-                      fetchAction={fetchAdminBadgePromotionListsCount}
-                      variant="muted"
-                      initialCount={promotionListsActivePaidCountInitial}
-                    />
+                    <AdminMainNavCount field="promotionLists" variant="muted" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=shop-leaderboard`}
@@ -638,11 +476,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Shop leaderboard
-                    <AdminLazyBadge
-                      fetchAction={fetchAdminBadgeShopLeaderboardCount}
-                      variant="muted"
-                      initialCount={shopLeaderboardShopCountInitial}
-                    />
+                    <AdminMainNavCount field="shopLeaderboard" variant="muted" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=sales`}
@@ -656,11 +490,7 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Platform sales
-                    <AdminLazyBadge
-                      fetchAction={fetchAdminBadgePlatformSalesCount}
-                      variant="muted"
-                      initialCount={platformSalesLineCountInitial}
-                    />
+                    <AdminMainNavCount field="platformSales" variant="muted" />
                   </Link>
                 </div>
               </div>
@@ -702,7 +532,7 @@ async function AdminDashboardPageBody({
             }`}
           >
             Admin list
-            <span className={navTabCountBadgeClass(adminListCount)}>({adminListCount})</span>
+            <AdminBackendNavCount field="adminListCount" />
           </Link>
           <Link
             href={`${basePath}?tab=printify`}
@@ -715,9 +545,7 @@ async function AdminDashboardPageBody({
             }`}
           >
             Printify items
-            <span className={navTabCountBadgeClass(printifyNavBadgeCount)}>
-              ({printifyNavBadgeCount})
-            </span>
+            <AdminBackendNavCount field="printifyNavBadgeCount" />
           </Link>
           <Link
             href={`${basePath}?tab=flairs`}
@@ -754,9 +582,7 @@ async function AdminDashboardPageBody({
             }`}
           >
             Removed items
-            <span className={navTabCountBadgeClass(removedListingCount)}>
-              ({removedListingCount})
-            </span>
+            <AdminBackendNavCount field="removedListingCount" />
           </Link>
           <Link
             href={`${basePath}?tab=email-format`}
@@ -805,7 +631,7 @@ async function AdminDashboardPageBody({
             }`}
           >
             Tags
-            <span className={navTabCountBadgeClass(tagsNavCount)}>({tagsNavCount})</span>
+            <AdminBackendNavCount field="tagsNavCount" />
           </Link>
           <Link
             href={`${basePath}?tab=printify-api`}
@@ -862,5 +688,6 @@ async function AdminDashboardPageBody({
         ← Home
       </Link>
     </div>
+    </AdminShellCountsProvider>
   );
 }

@@ -3,7 +3,6 @@ import { PromotionKind } from "@/generated/prisma/enums";
 import type { PlacementCheckoutPromotionKind } from "@/lib/promotion-placement-ui-pure";
 import {
   PROMOTION_SURFACE_ALL_ITEMS_HREF,
-  PROMOTION_SURFACE_HOME_HREF,
   PROMOTION_SURFACE_POPULAR_FILTER_HREF,
   PROMOTION_SURFACE_SHOPS_HREF,
 } from "@/lib/promotion-surface-paths";
@@ -46,17 +45,13 @@ export function PromotionKindSurfaceBlurb(props: { kind: PlacementCheckoutPromot
           <Link href={PROMOTION_SURFACE_ALL_ITEMS_HREF} prefetch={false} className={surfaceLinkClass}>
             all items
           </Link>{" "}
-          page Hot items carousel.
+          page carousel.
         </>
       );
     case PromotionKind.FEATURED_SHOP_HOME:
       return (
         <>
           Displays as a &quot;Featured Shop&quot; on the{" "}
-          <Link href={PROMOTION_SURFACE_HOME_HREF} prefetch={false} className={surfaceLinkClass}>
-            home page
-          </Link>{" "}
-          and{" "}
           <Link href={PROMOTION_SURFACE_SHOPS_HREF} prefetch={false} className={surfaceLinkClass}>
             all shops
           </Link>{" "}

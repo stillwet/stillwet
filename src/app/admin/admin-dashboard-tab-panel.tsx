@@ -22,10 +22,8 @@ import {
   type PlatformSalesPeriodTotals,
   type PlatformSalesYtdTotals,
 } from "@/lib/admin-platform-sales-merged-lines";
-import {
-  AdminShopLeaderboardTab,
-  type AdminShopLeaderboardRow,
-} from "@/components/admin/AdminShopLeaderboardTab";
+import { loadAdminShopLeaderboardRows } from "@/lib/admin-shop-leaderboard-load";
+import { AdminShopLeaderboardTab } from "@/components/admin/AdminShopLeaderboardTab";
 import {
   AdminListingRequestsTab,
   type ListingRequestTabRow,
@@ -258,6 +256,8 @@ function buildListingRequestTabRowsFromLoaded(
 export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps) {
   const { adminSection, inventoryTab, sp } = props;
 
+  if (!inventoryTab) return null;
+
   const supportShopParam =
     typeof sp.supportShop === "string" && sp.supportShop.trim() ? sp.supportShop.trim() : undefined;
   const watchShopParam =
@@ -349,14 +349,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
           ...(salesTo ? { lte: salesTo } : {}),
         }
       : undefined;
-  const leaderboardOrderDateSql: Prisma.Sql =
-    salesFrom && salesTo
-      ? Prisma.sql`AND o."createdAt" >= ${salesFrom} AND o."createdAt" <= ${salesTo}`
-      : salesFrom
-        ? Prisma.sql`AND o."createdAt" >= ${salesFrom}`
-        : salesTo
-          ? Prisma.sql`AND o."createdAt" <= ${salesTo}`
-          : Prisma.sql``;
 
   /** Queue rows for listing-requests tab (full rows only load on the Requests tab). */
   const listingRequestTabPrismaWhere: Prisma.ShopListingWhereInput = {
@@ -596,44 +588,13 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
     };
   }
 
-  type ShopLeaderboardQueryRow = {
-    shopId: string;
-    displayName: string;
-    slug: string;
-    merchandiseCents: bigint;
-    shopCutCents: bigint;
-    lineCount: number;
-  };
-
-  /** Loaded only on the Shop leaderboard tab — the aggregate over orders is heavy on large datasets. */
-  let shopLeaderboardRows: AdminShopLeaderboardRow[] = [];
+  /** Loaded only on the Shop leaderboard tab — cached aggregate over orders. */
+  let shopLeaderboardRows: Awaited<ReturnType<typeof loadAdminShopLeaderboardRows>> = [];
   if (adminSection === "main" && inventoryTab === "shop-leaderboard") {
-    const rowBlock = await prisma.$queryRaw<ShopLeaderboardQueryRow[]>`
-        SELECT
-          s.id AS "shopId",
-          s."displayName" AS "displayName",
-          s.slug AS "slug",
-          SUM(ol.quantity * ol."unitPriceCents")::bigint AS "merchandiseCents",
-          SUM(ol."shopCutCents")::bigint AS "shopCutCents",
-          COUNT(*)::int AS "lineCount"
-        FROM "OrderLine" ol
-        INNER JOIN "Order" o ON o.id = ol."orderId"
-        INNER JOIN "Shop" s ON s.id = ol."shopId"
-        WHERE o.status = 'paid'
-          ${leaderboardOrderDateSql}
-        GROUP BY s.id, s."displayName", s.slug
-        HAVING SUM(ol.quantity * ol."unitPriceCents") > 0
-        ORDER BY SUM(ol.quantity * ol."unitPriceCents") DESC
-      `;
-    shopLeaderboardRows = rowBlock.map((r, i) => ({
-      rank: i + 1,
-      displayName: r.displayName,
-      slug: r.slug,
-      merchandiseCents: Number(r.merchandiseCents),
-      shopCutCents: Number(r.shopCutCents),
-      platformProfitCents: Math.max(0, Number(r.merchandiseCents) - Number(r.shopCutCents)),
-      paidLineCount: Number(r.lineCount),
-    }));
+    shopLeaderboardRows = await loadAdminShopLeaderboardRows({
+      salesFrom,
+      salesTo,
+    });
   }
 
   const removedListingTabRows: RemovedListingRow[] =

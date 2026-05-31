@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { MarketplaceEmptyState } from "@/components/MarketplaceEmptyState";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 import {
@@ -469,6 +470,22 @@ export async function ShopAllProductsPage({
 
   const toolbarTags = filterTags.map((t) => ({ slug: t.slug, name: t.name }));
 
+  let marketplaceEmptyStats: { creatorShops: number; liveListings: number } | undefined;
+  if (browseProducts.length === 0 && !searchQuery?.trim() && isPlatformCatalog) {
+    const [creatorShops, liveListings] = await Promise.all([
+      prisma.shop.count({
+        where: { active: true, slug: { not: PLATFORM_SHOP_SLUG } },
+      }),
+      prisma.shopListing.count({
+        where: {
+          ...marketplaceAggregatedListingWhere,
+          product: { active: true },
+        },
+      }),
+    ]);
+    marketplaceEmptyStats = { creatorShops, liveListings };
+  }
+
   return (
     <div>
       {!embedded ? (
@@ -523,24 +540,20 @@ export async function ShopAllProductsPage({
           products={browseProducts}
           emptyState={
             searchQuery?.trim() ? (
-              <p className="mt-8 text-sm text-zinc-600">
-                No products match your search. Try different keywords or clear the search box above.
-              </p>
+              <MarketplaceEmptyState variant="search-results" searchQuery={searchQuery} />
             ) : isPlatformCatalog ? (
-              <div className="mt-8 space-y-2 text-sm text-zinc-600">
-                <p>No marketplace listings to show.</p>
-                <p className="text-zinc-500">
-                  Browse here includes only creator shops (not the platform catalog shop), an active
-                  shop row, active catalog products, and storefront-visible listings. Dashboard “Live”
-                  ignores shop and product activation—if you see live listings there but nothing here,
-                  confirm the shop is active (shop deactivation or account deletion hides the whole
-                  storefront) and products are active.
+              <MarketplaceEmptyState
+                variant="marketplace-listings"
+                stats={marketplaceEmptyStats}
+              >
+                <p>
+                  Browse only includes creator shops with active products and storefront-visible
+                  listings. Dashboard “Live” can show more — check shop activation and product status
+                  if you expected items here.
                 </p>
-              </div>
+              </MarketplaceEmptyState>
             ) : (
-              <p className="mt-8 text-sm text-zinc-600">
-                {browseFlat ? "No products in this shop yet." : "No marketplace listings to show."}
-              </p>
+              <MarketplaceEmptyState variant="shop-listings" />
             )
           }
         />

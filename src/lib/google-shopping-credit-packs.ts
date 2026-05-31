@@ -13,9 +13,9 @@ export type GoogleShoppingCreditPack = {
 };
 
 export const GOOGLE_SHOPPING_CREDIT_PACKS: readonly GoogleShoppingCreditPack[] = [
-  { id: "gmc_pack_3", credits: 3, priceCents: 500, label: "3 listings — $5.00" },
-  { id: "gmc_pack_5", credits: 5, priceCents: 700, label: "5 listings — $7.00" },
-  { id: "gmc_pack_10", credits: 10, priceCents: 1000, label: "10 listings — $10.00" },
+  { id: "gmc_pack_3", credits: 3, priceCents: 500, label: "3 credits — $5" },
+  { id: "gmc_pack_5", credits: 5, priceCents: 700, label: "5 credits — $7" },
+  { id: "gmc_pack_10", credits: 10, priceCents: 1000, label: "10 credits — $10" },
 ] as const;
 
 export function parseGoogleShoppingCreditPackId(raw: string): GoogleShoppingCreditPackId | null {

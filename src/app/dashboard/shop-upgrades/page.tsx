@@ -286,6 +286,7 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
                   selectedOffset={resolvedPeriodOffset}
                   computedPeriodChoices={computedPeriodChoices}
                   mockPromotionCheckout={mockPromotionCheckout}
+                  stripePublishableKey={stripePublishableKey ?? ""}
                   queryPreserve={queryPreserve}
                 />
               ) : null

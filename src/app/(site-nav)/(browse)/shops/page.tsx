@@ -9,6 +9,7 @@ import {
 import { SHOPS_BROWSE_PAGE_FEATURED_DEFAULT_DISPLAY } from "@/lib/platform-all-page-featured-constants";
 import { FeaturedProductsCarousel } from "@/components/FeaturedProductsCarousel";
 import { ShopBrowseGrid } from "@/components/ShopBrowseGrid";
+import { MarketplaceEmptyState } from "@/components/MarketplaceEmptyState";
 import { shopsToFeaturedCarouselItems } from "@/lib/shop-featured-carousel";
 import {
   parseShopBrowseSort,
@@ -120,8 +121,10 @@ export default async function ShopsBrowsePage({ searchParams }: PageProps) {
   const flairTypes = showFlairFilters ? await loadCachedShopFlairTypesForBrowse() : [];
 
   let raw;
+  let allBrowseRows;
   try {
-    raw = (await loadCachedShopsBrowseRows()).filter((s) =>
+    allBrowseRows = await loadCachedShopsBrowseRows();
+    raw = allBrowseRows.filter((s) =>
       flairTypeSlug
         ? s.flairPurchasedAt && s.flairType?.active && s.flairType.slug === flairTypeSlug
         : true,
@@ -131,6 +134,15 @@ export default async function ShopsBrowsePage({ searchParams }: PageProps) {
   }
 
   const shops = sortShopsForBrowse(raw, sort);
+
+  let browseEmptyStats: { creatorShops: number; liveListings?: number } | undefined;
+  if (shops.length === 0) {
+    browseEmptyStats = {
+      creatorShops: await prisma.shop.count({
+        where: { active: true, slug: { not: PLATFORM_SHOP_SLUG } },
+      }),
+    };
+  }
 
   let featuredRows = shops.slice(0, TOP_SHOPS_PREVIEW_COUNT).map((s) => ({
     slug: s.slug,
@@ -172,13 +184,13 @@ export default async function ShopsBrowsePage({ searchParams }: PageProps) {
 
       {gridShops.length === 0 ? (
         <section className="mt-2">
-          <p className="text-sm text-zinc-600">
-            No shops yet —{" "}
-            <Link href="/create-shop" className="text-blue-400 hover:underline">
-              create the first one
-            </Link>
-            .
-          </p>
+          {allBrowseRows.length > 0 && flairTypeSlug ? (
+            <MarketplaceEmptyState variant="shops-filter" stats={browseEmptyStats} />
+          ) : (
+            <MarketplaceEmptyState variant="marketplace-shops" stats={browseEmptyStats}>
+              <p>Shops show up here after creators open a shop and appear on the public browse list.</p>
+            </MarketplaceEmptyState>
+          )}
         </section>
       ) : (
         <>

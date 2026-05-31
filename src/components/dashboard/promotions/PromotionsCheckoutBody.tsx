@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreserveScrollOnSettled } from "@/lib/use-preserve-scroll-on-settled";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { PromotionCheckoutCostLine } from "@/components/dashboard/PromotionCheckoutCostLine";
@@ -9,7 +10,6 @@ import { PromotionKind } from "@/generated/prisma/enums";
 import { dashboardPromotionsCheckoutPeriodUrl } from "@/lib/dashboard-promotions-path";
 import { computedPeriodChoice } from "@/lib/promotion-checkout-period-display";
 import { getPlacementPeriodChoicesForKind } from "@/lib/promotion-period-calendar-cache";
-import { placementPeriodTierLabel } from "@/lib/promotion-period-pacific";
 import type { PlacementPeriodChoiceUi } from "@/lib/promotion-placement-ui-pure";
 import type { PlacementCheckoutPromotionKind } from "@/lib/promotion-placement-ui-pure";
 
@@ -19,6 +19,7 @@ export function PromotionsCheckoutBody(props: {
   selectedOffset: 0 | 1 | 2 | null;
   computedPeriodChoices: PlacementPeriodChoiceUi[] | null;
   mockPromotionCheckout: boolean;
+  stripePublishableKey: string;
   queryPreserve?: Record<string, string | undefined>;
 }) {
   const router = useRouter();
@@ -34,6 +35,8 @@ export function PromotionsCheckoutBody(props: {
   const hasPeriodData = periodChoicesForUi != null;
   const pricingLoading =
     (isPending || (props.selectedOffset != null && !serverComputed)) && !hasPeriodData;
+  const pricingReady = props.selectedOffset != null && hasPeriodData;
+  const captureScroll = usePreserveScrollOnSettled(pricingLoading, pricingReady);
   const pendingOffset = pricingLoading && isPending ? loadingOffset : null;
 
   const selected =
@@ -42,9 +45,10 @@ export function PromotionsCheckoutBody(props: {
       : undefined;
 
   function onNavigatePeriod(offset: 0 | 1 | 2, href: string) {
+    captureScroll();
     setLoadingOffset(offset);
     startTransition(() => {
-      router.push(href);
+      router.push(href, { scroll: false });
     });
   }
 
@@ -64,9 +68,6 @@ export function PromotionsCheckoutBody(props: {
       {pricingLoading ? (
         <PromotionCheckoutCostLine
           kind={props.kind as PromotionKind}
-          periodLabel={
-            pendingOffset != null ? placementPeriodTierLabel(pendingOffset) : "Placement period"
-          }
           amountCents={null}
           loading
         />
@@ -75,8 +76,8 @@ export function PromotionsCheckoutBody(props: {
           kind={props.kind as PromotionKind}
           placementOffset={props.selectedOffset!}
           amountCents={selected.amountCents}
-          periodLabel={selected.placementMonthLabel}
           mockPay={props.mockPromotionCheckout}
+          stripePublishableKey={props.stripePublishableKey}
         />
       ) : hasPeriodData && selected && !selected.selectable ? (
         <p className="mt-3 text-xs text-amber-200/90">

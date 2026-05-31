@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MarketplaceEmptyState } from "@/components/MarketplaceEmptyState";
 import { ShopFlairBadge } from "@/components/ShopFlairBadge";
 
 export type ShopBrowseGridShop = {
@@ -13,7 +14,7 @@ export type ShopBrowseGridShop = {
 /** Same wrap layout as `ShopPlatformBrowseGrid`, but creator shop storefront links. */
 export function ShopBrowseGrid({ shops }: { shops: ShopBrowseGridShop[] }) {
   if (shops.length === 0) {
-    return <p className="mt-8 text-sm text-zinc-600">No shops yet.</p>;
+    return <MarketplaceEmptyState variant="shops-filter" />;
   }
   return (
     <ul className="mx-auto flex max-w-full flex-wrap justify-center gap-2 sm:gap-3">

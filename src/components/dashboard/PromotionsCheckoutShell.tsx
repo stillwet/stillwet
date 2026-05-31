@@ -9,6 +9,7 @@ export function PromotionsCheckoutShell(props: {
   selectedOffset: 0 | 1 | 2 | null;
   computedPeriodChoices: PlacementPeriodChoiceUi[] | null;
   mockPromotionCheckout: boolean;
+  stripePublishableKey: string;
   queryPreserve?: Record<string, string | undefined>;
 }) {
   return (

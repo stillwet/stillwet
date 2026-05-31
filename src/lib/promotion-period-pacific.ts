@@ -157,18 +157,21 @@ export function placementPeriodTierLabel(offset: 0 | 1 | 2): string {
   return PLACEMENT_PERIOD_TIER_LABELS[offset];
 }
 
-/** `MM/DD–MM/DD` for a fixed two-week Pacific placement period index. */
+/** `M/D` without leading zeros for Pacific placement date ranges. */
+function formatPacificMonthDay(p: { m: number; d: number }): string {
+  return `${p.m}/${p.d}`;
+}
+
+/** `M/D–M/D` for a fixed two-week Pacific placement period index. */
 export function formatPromotionPlacementPeriodMmDdRangeForIndex(periodIndex: number): string {
   const startUtc = promotionPeriodStartUtc(periodIndex);
   const endInclusiveUtc = promotionPeriodEndInclusiveUtc(periodIndex);
   const a = pacificParts(startUtc);
   const b = pacificParts(endInclusiveUtc);
-  const mmdd = (p: { m: number; d: number }) =>
-    `${String(p.m).padStart(2, "0")}/${String(p.d).padStart(2, "0")}`;
-  return `${mmdd(a)}–${mmdd(b)}`;
+  return `${formatPacificMonthDay(a)}–${formatPacificMonthDay(b)}`;
 }
 
-/** Checkout radio label: `Current — 04/27–05/10` (tier + Pacific date range). */
+/** Checkout radio label: `Current — 4/27–5/10` (tier + Pacific date range). */
 export function formatPromotionPlacementPeriodChoiceLabel(
   periodIndex: number,
   offset: 0 | 1 | 2,
@@ -177,7 +180,7 @@ export function formatPromotionPlacementPeriodChoiceLabel(
 }
 
 /**
- * `MM/DD–MM/DD` for the fixed Pacific two-week cycle (Mon 12:00am start → Sun 11:59pm end) for this purchase’s
+ * `M/D–M/D` for the fixed Pacific two-week cycle (Mon 12:00am start → Sun 11:59pm end) for this purchase’s
  * placement period — not the instant the buyer paid.
  */
 export function formatPacificPromotionWindowMmDdRange(input: {
@@ -192,9 +195,7 @@ export function formatPacificPromotionWindowMmDdRange(input: {
   const endInclusiveUtc = new Date(promotionPeriodEndExclusiveUtc(idx).getTime() - 1);
   const a = pacificParts(startUtc);
   const b = pacificParts(endInclusiveUtc);
-  const mmdd = (p: { m: number; d: number }) =>
-    `${String(p.m).padStart(2, "0")}/${String(p.d).padStart(2, "0")}`;
-  return `${mmdd(a)}–${mmdd(b)}`;
+  return `${formatPacificMonthDay(a)}–${formatPacificMonthDay(b)}`;
 }
 
 /**

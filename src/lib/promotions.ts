@@ -54,11 +54,11 @@ export function promotionKindSurfaceDescription(kind: PromotionKind): string {
     case PromotionKind.FRONT_PAGE_ITEM:
       return 'Displays as a "hot item" on the home page.';
     case PromotionKind.HOT_FEATURED_ITEM:
-      return 'Displays as a "Hot Item" on the all items page Hot items carousel.';
+      return 'Displays as a "Hot Item" on the all items page carousel.';
     case PromotionKind.MOST_POPULAR_OF_TAG_ITEM:
       return 'Displays first under the "Popular" filter on the all items page.';
     case PromotionKind.FEATURED_SHOP_HOME:
-      return 'Displays as a "Featured Shop" on the home page and all shops page.';
+      return 'Displays as a "Featured Shop" on the all shops page.';
     default:
       return "";
   }

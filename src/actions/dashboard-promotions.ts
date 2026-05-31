@@ -470,37 +470,47 @@ export async function finalizePromotionPurchaseIntent(
   return { ok: true };
 }
 
-export async function dashboardMockPayPromotion(formData: FormData) {
+export type MockPurchasePromotionPlacementResult = { ok: true } | { ok: false; error: string };
+
+export async function mockPurchasePromotionPlacement(input: {
+  promotionKind: string;
+  placementPeriodOffset?: 0 | 1 | 2;
+  shopListingId?: string | null;
+}): Promise<MockPurchasePromotionPlacementResult> {
   const user = await requireShopOwner();
   const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) return;
+  if (shop.slug === PLATFORM_SHOP_SLUG) {
+    return { ok: false, error: "Not available for the platform catalog shop." };
+  }
 
-  const kind = parsePromotionKind(String(formData.get("promotionKind") ?? ""));
-  if (!kind) return;
+  const kind = parsePromotionKind(input.promotionKind);
+  if (!kind) return { ok: false, error: "Invalid promotion type." };
 
-  const listingIdRaw = String(formData.get("shopListingId") ?? "").trim();
+  const listingIdRaw = String(input.shopListingId ?? "").trim();
   const listingKind = promotionKindRequiresListing(kind);
-  if (!listingKind && listingIdRaw) return;
+  if (!listingKind && listingIdRaw) {
+    return { ok: false, error: "This promotion applies to your shop, not a single listing." };
+  }
 
   let shopListingId: string | null = null;
   if (listingIdRaw) {
-    if (!listingKind) return;
+    if (!listingKind) return { ok: false, error: "Invalid listing for this promotion type." };
     const gate = await assertShopListingLiveForPromotion(shop.id, listingIdRaw);
-    if (!gate.ok) return;
+    if (!gate.ok) return gate;
     shopListingId = listingIdRaw;
   }
 
   if (!promotionUiUsesMockCheckout(shop.slug)) {
-    redirect(dashboardPromotionsUrl({ promo: "err", promoErr: "mock_only" }));
+    return { ok: false, error: "Mock checkout is not enabled." };
   }
 
-  const placementPeriodOffset = parsePlacementPeriodOffset(formData.get("placementPeriodOffset"));
+  const placementPeriodOffset = normalizePlacementPeriodOffsetFromClient(input.placementPeriodOffset);
   const priced = await resolvePromotionPricing(kind, placementPeriodOffset);
   if (!priced.ok) {
-    redirect(dashboardPromotionsUrl({ promo: "err", promoErr: "hot_item_policy" }));
+    return { ok: false, error: priced.error };
   }
   const { amountCents, eligibleFrom } = priced;
-  if (amountCents <= 0) return;
+  if (amountCents <= 0) return { ok: false, error: "Invalid promotion price." };
 
   await prisma.promotionPurchase.create({
     data: {
@@ -519,6 +529,27 @@ export async function dashboardMockPayPromotion(formData: FormData) {
   void rebuildShopPromotionsDashboardSnapshot(shop.id, shop.slug).catch(() => {});
   revalidatePath("/dashboard");
   revalidateShopUpgradesDashboardPaths();
+  return { ok: true };
+}
+
+export async function dashboardMockPayPromotion(formData: FormData) {
+  const kind = String(formData.get("promotionKind") ?? "");
+  const listingIdRaw = String(formData.get("shopListingId") ?? "").trim();
+  const placementPeriodOffset = parsePlacementPeriodOffset(formData.get("placementPeriodOffset"));
+
+  const result = await mockPurchasePromotionPlacement({
+    promotionKind: kind,
+    placementPeriodOffset,
+    shopListingId: listingIdRaw || undefined,
+  });
+
+  if (!result.ok) {
+    if (result.error === "Mock checkout is not enabled.") {
+      redirect(dashboardPromotionsUrl({ promo: "err", promoErr: "mock_only" }));
+    }
+    redirect(dashboardPromotionsUrl({ promo: "err", promoErr: "hot_item_policy" }));
+  }
+
   redirect(dashboardPromotionsUrl({ promo: "ok" }));
 }
 

@@ -13,6 +13,12 @@ export function shopFlairAccessPurchaseLabel(): string {
   return `Shop flair — ${shopFlairAccessPriceUsdLabel()}`;
 }
 
+/** Compact pack button on shop upgrades. */
+export function shopFlairAccessBuyButtonLabel(): string {
+  const dollars = Math.round(SHOP_FLAIR_ACCESS_PRICE_CENTS / 100);
+  return `Buy Flair - $${dollars}`;
+}
+
 /** Synthetic `kind` on dashboard purchase-history rows for flair access payments. */
 export const SHOP_FLAIR_PURCHASE_HISTORY_KIND = "SHOP_FLAIR_ACCESS";
 

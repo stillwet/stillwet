@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   assignGoogleShoppingListings,
+  fetchGoogleShoppingListingPicklist,
   type DashboardGoogleShoppingActionResult,
 } from "@/actions/dashboard-google-shopping";
 import { ShopGoogleShoppingPackPay } from "@/components/dashboard/ShopGoogleShoppingPackPay";
@@ -19,6 +20,118 @@ const btnPack =
   "inline-block rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100";
 const btnPackSelected =
   "inline-block rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-[11px] font-medium text-zinc-100";
+const btnChooseListings =
+  "inline-block rounded-md border border-emerald-800/70 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-emerald-400/95 transition-colors hover:border-emerald-600/70 hover:bg-zinc-800/60 hover:text-emerald-300/95";
+
+function GoogleShoppingListingPickerDialog(props: {
+  titleId: string;
+  credits: number;
+  eligible: GoogleShoppingListingPicklistEntry[];
+  picklistLoading: boolean;
+  picklistError: string | null;
+  selectedIds: Set<string>;
+  onToggle: (id: string) => void;
+  onDismiss: () => void;
+  onReview: () => void;
+}) {
+  const {
+    titleId,
+    credits,
+    eligible,
+    picklistLoading,
+    picklistError,
+    selectedIds,
+    onToggle,
+    onDismiss,
+    onReview,
+  } = props;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onDismiss();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[2500] flex items-center justify-center bg-black/70 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+    >
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
+        aria-label="Dismiss"
+        onClick={onDismiss}
+      />
+      <div className="relative z-[1] flex max-h-[min(32rem,90vh)] w-full max-w-md flex-col rounded-xl border border-zinc-700 bg-zinc-950 shadow-xl">
+        <div className="border-b border-zinc-800 px-5 py-4">
+          <h2 id={titleId} className="text-base font-semibold text-zinc-100">
+            Choose listings for Google Shop ({credits})
+          </h2>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
+          {picklistLoading ? (
+            <p className="text-sm text-zinc-500">Loading listings…</p>
+          ) : picklistError ? (
+            <p className="text-sm text-amber-300/90">{picklistError}</p>
+          ) : eligible.length === 0 ? (
+            <p className="text-sm text-zinc-500">
+              No eligible listings. Publish approved listings on your storefront first.
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {eligible.map((row) => {
+                const checked = selectedIds.has(row.id);
+                const disabled = !checked && selectedIds.size >= credits;
+                return (
+                  <li key={row.id}>
+                    <label
+                      className={`flex cursor-pointer items-center gap-2 rounded border px-2 py-1.5 text-xs ${
+                        checked
+                          ? "border-emerald-900/50 bg-emerald-950/20 text-zinc-200"
+                          : "border-zinc-800 bg-zinc-950/40 text-zinc-400"
+                      } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="rounded border-zinc-600"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() => onToggle(row.id)}
+                      />
+                      <span className="min-w-0 truncate">{row.label}</span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-zinc-800 px-5 py-4">
+          <button
+            type="button"
+            className="rounded border border-zinc-600 bg-zinc-900/50 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:border-zinc-500"
+            onClick={onDismiss}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="rounded border border-zinc-600 bg-zinc-400 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={selectedIds.size === 0 || picklistLoading}
+            onClick={onReview}
+          >
+            Review & confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function GoogleShoppingAssignConfirmDialog(props: {
   titleId: string;
@@ -105,6 +218,7 @@ export function ShopGoogleShoppingSection(props: {
 
   const router = useRouter();
   const confirmTitleId = useId();
+  const pickerTitleId = useId();
   const [result, setResult] = useState<DashboardGoogleShoppingActionResult | null>(null);
   const [payPanelPack, setPayPanelPack] = useState<GoogleShoppingCreditPack | null>(null);
   const [payPanelVisible, setPayPanelVisible] = useState(false);
@@ -118,36 +232,31 @@ export function ShopGoogleShoppingSection(props: {
   const [assignBusy, setAssignBusy] = useState(false);
 
   const credits = googleShopping.creditsAvailable;
-  const maxSelect = Math.min(credits, eligible.length);
 
   useEffect(() => {
     setPayPanelVisible(payPanelPack !== null);
   }, [payPanelPack]);
 
+  // Close payment panel when credits refresh after purchase — do not reset listing picker.
   useEffect(() => {
-    setResult(null);
     setPayPanelPack(null);
     setPayPanelVisible(false);
-    setAssignOpen(false);
-    setSelectedIds(new Set());
-    setConfirmOpen(false);
-  }, [googleShopping.creditsAvailable, googleShopping.enrolled.length]);
+  }, [googleShopping.creditsAvailable]);
 
   const loadPicklist = useCallback(async () => {
     setPicklistLoading(true);
     setPicklistError(null);
     try {
-      const res = await fetch("/api/dashboard/google-shopping/picklist");
-      if (!res.ok) {
-        setPicklistError("Could not load listings.");
+      const data = await fetchGoogleShoppingListingPicklist();
+      if (!data.ok) {
+        setPicklistError(data.error);
+        setEligible([]);
         return;
       }
-      const data = (await res.json()) as {
-        eligible: GoogleShoppingListingPicklistEntry[];
-      };
-      setEligible(data.eligible ?? []);
+      setEligible(data.eligible);
     } catch {
       setPicklistError("Could not load listings.");
+      setEligible([]);
     } finally {
       setPicklistLoading(false);
     }
@@ -205,13 +314,7 @@ export function ShopGoogleShoppingSection(props: {
         Off site searchability
       </h2>
       <p className="mt-0.5 text-[11px] leading-snug text-zinc-600">
-        Buy listing credits for Google Merchant Center, then choose which approved storefront listings
-        to submit. Selections are permanent.
-      </p>
-
-      <p className="mt-2 text-[11px] text-zinc-400">
-        <span className="font-medium text-zinc-200">{credits}</span> Google Shopping credit
-        {credits === 1 ? "" : "s"} available
+        Get your listings onto Google Shop to boost your traffic.
       </p>
 
       {result && !result.ok ? (
@@ -285,84 +388,18 @@ export function ShopGoogleShoppingSection(props: {
 
       {credits > 0 ? (
         <div className="mt-3">
-          {!assignOpen ? (
-            <button
-              type="button"
-              className={btnPack}
-              onClick={() => {
-                setResult(null);
-                setAssignOpen(true);
-              }}
-            >
-              Choose listings to submit…
-            </button>
-          ) : (
-            <div className="rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-3">
-              <p className="text-[11px] font-medium text-zinc-200">
-                Select up to {maxSelect} listing{maxSelect === 1 ? "" : "s"} ({selectedIds.size}{" "}
-                selected)
-              </p>
-              <p className="mt-0.5 text-[10px] text-zinc-500">
-                Only approved listings visible on your storefront are eligible.
-              </p>
-              {picklistLoading ? (
-                <p className="mt-2 text-xs text-zinc-500">Loading listings…</p>
-              ) : picklistError ? (
-                <p className="mt-2 text-xs text-amber-300/90">{picklistError}</p>
-              ) : eligible.length === 0 ? (
-                <p className="mt-2 text-xs text-zinc-500">
-                  No eligible listings. Publish approved listings on your storefront first.
-                </p>
-              ) : (
-                <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto">
-                  {eligible.map((row) => {
-                    const checked = selectedIds.has(row.id);
-                    const disabled = !checked && selectedIds.size >= credits;
-                    return (
-                      <li key={row.id}>
-                        <label
-                          className={`flex cursor-pointer items-center gap-2 rounded border px-2 py-1.5 text-xs ${
-                            checked
-                              ? "border-emerald-900/50 bg-emerald-950/20 text-zinc-200"
-                              : "border-zinc-800 bg-zinc-950/40 text-zinc-400"
-                          } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
-                        >
-                          <input
-                            type="checkbox"
-                            className="rounded border-zinc-600"
-                            checked={checked}
-                            disabled={disabled}
-                            onChange={() => toggleListing(row.id)}
-                          />
-                          <span className="min-w-0 truncate">{row.label}</span>
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="rounded border border-zinc-600 bg-zinc-400 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={selectedIds.size === 0 || picklistLoading}
-                  onClick={() => setConfirmOpen(true)}
-                >
-                  Review & confirm
-                </button>
-                <button
-                  type="button"
-                  className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
-                  onClick={() => {
-                    setAssignOpen(false);
-                    setSelectedIds(new Set());
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+          <button
+            type="button"
+            className={btnChooseListings}
+            onClick={() => {
+              setResult(null);
+              setSelectedIds(new Set());
+              setConfirmOpen(false);
+              setAssignOpen(true);
+            }}
+          >
+            Choose Listings ({credits})
+          </button>
         </div>
       ) : null}
 
@@ -400,6 +437,24 @@ export function ShopGoogleShoppingSection(props: {
             </p>
           </div>
         </details>
+      ) : null}
+
+      {assignOpen ? (
+        <GoogleShoppingListingPickerDialog
+          titleId={pickerTitleId}
+          credits={credits}
+          eligible={eligible}
+          picklistLoading={picklistLoading}
+          picklistError={picklistError}
+          selectedIds={selectedIds}
+          onToggle={toggleListing}
+          onDismiss={() => {
+            setAssignOpen(false);
+            setSelectedIds(new Set());
+            setConfirmOpen(false);
+          }}
+          onReview={() => setConfirmOpen(true)}
+        />
       ) : null}
 
       {confirmOpen ? (

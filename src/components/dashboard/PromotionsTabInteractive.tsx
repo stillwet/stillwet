@@ -48,6 +48,7 @@ export function PromotionsTabInteractive({ initialSummary }: PromotionsTabIntera
                   <PromotionsInlineCheckout
                     kind={kind}
                     mockPromotionCheckout={initialSummary.mockPromotionCheckout}
+                    stripePublishableKey={initialSummary.stripePublishableKey ?? ""}
                     onClose={() => setCheckoutKind(null)}
                   />
                 ) : null}

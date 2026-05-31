@@ -19,10 +19,9 @@ export default function DemoInstructionsPage() {
 
       <div className="mt-10 space-y-8 text-sm leading-relaxed text-zinc-400">
         <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5">
-          <h2 className="text-base font-semibold text-zinc-100">1. Create your demo shop</h2>
+          <h2 className="text-base font-semibold text-zinc-100">1. Create your shop</h2>
           <p className="mt-3">
-            Go to the shop signup page, enter your shop details, and apply your demo coupon code during signup.
-            After your account is created, continue through the dashboard onboarding steps.
+            Sign up for a shop with your coupon code. Complete the shop onboarding.
           </p>
           <Link
             href="/create-shop"
@@ -35,8 +34,8 @@ export default function DemoInstructionsPage() {
         <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5">
           <h2 className="text-base font-semibold text-zinc-100">2. Remember this is demo-only</h2>
           <p className="mt-3">
-            The website is currently in beta testing. Payments are demos right now, so no actual sales are
-            possible until the site goes live later this year.
+            The website is in beta testing, so all payments are demo-only for now. The site will go live later
+            this year, at which time your listings can be bought for real money.
           </p>
           <p className="mt-3">
             An announcement will be sent when real sales and live payments are available.
@@ -46,8 +45,7 @@ export default function DemoInstructionsPage() {
         <section className="rounded-2xl border border-blue-500/25 bg-blue-500/10 p-5">
           <h2 className="text-base font-semibold text-blue-100">3. Fill out the tester survey</h2>
           <p className="mt-3 text-blue-100/85">
-            When you finish testing signup, onboarding, shop setup, listings, and browsing, please complete the
-            tester survey.
+            When you complete onboarding, please complete the tester survey.
           </p>
           <a
             href={DEMO_SURVEY_URL}

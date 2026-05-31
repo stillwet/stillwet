@@ -9,7 +9,7 @@ import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs
 import { prisma } from "@/lib/prisma";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { fulfillShopGoogleShoppingPurchaseIfPending } from "@/lib/shop-google-shopping-fulfillment";
-import { assignGoogleShoppingCreditsToListings } from "@/lib/shop-google-shopping-enrollment";
+import { assignGoogleShoppingCreditsToListings, loadGoogleShoppingListingPicklistForShop } from "@/lib/shop-google-shopping-enrollment";
 import { getShopOwnerSession } from "@/lib/session";
 import { paymentIntentStartErrorMessage } from "@/lib/payment-intent-start-error";
 import { getStripe } from "@/lib/stripe";
@@ -200,6 +200,21 @@ export async function mockPurchaseShopGoogleShoppingPack(
   revalidatePath("/dashboard");
   revalidateShopUpgradesDashboardPaths();
   return { ok: true };
+}
+
+/** Read-only picklist for the Choose Listings flow (server action — same session as assign). */
+export async function fetchGoogleShoppingListingPicklist(): Promise<
+  | { ok: true; eligible: Awaited<ReturnType<typeof loadGoogleShoppingListingPicklistForShop>>["eligible"] }
+  | { ok: false; error: string }
+> {
+  const user = await requireShopOwner();
+  const shop = user.shop;
+  if (shop.slug === PLATFORM_SHOP_SLUG) {
+    return { ok: false, error: "Not available for the platform catalog shop." };
+  }
+
+  const picklist = await loadGoogleShoppingListingPicklistForShop(shop.id);
+  return { ok: true, eligible: picklist.eligible };
 }
 
 export async function assignGoogleShoppingListings(

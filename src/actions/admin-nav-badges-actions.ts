@@ -2,11 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { getAdminSessionReadonly } from "@/lib/session";
+import { loadAdminBackendNavCounts } from "@/lib/admin-backend-nav-badges";
 import {
   loadAdminBadgePlatformSales,
   loadAdminBadgePromotionLists,
   loadAdminBadgeShopLeaderboardCount,
   loadAdminBadgeShopWatch,
+  loadAdminHasProducts,
+  loadAdminMainNavBadgeCounts,
 } from "@/lib/admin-nav-badges";
 
 async function requireAdmin() {
@@ -15,10 +18,27 @@ async function requireAdmin() {
 }
 
 /**
- * Read-only server actions used by `<AdminLazyBadge>` to fetch heavy admin nav badge counts
- * from the client AFTER the admin page has rendered. Keeping these out of the page render path
- * prevents the admin shell — and especially the post-mutation revalidation render — from being
- * blocked on the slowest aggregate query.
+ * Single client fetch for all main admin nav badges + empty-catalog check.
+ * Keeps the admin shell render free of Neon aggregate queries.
+ */
+export async function fetchAdminMainShellData() {
+  await requireAdmin();
+  const [badges, hasProducts] = await Promise.all([
+    loadAdminMainNavBadgeCounts(),
+    loadAdminHasProducts(),
+  ]);
+  return { ...badges, hasProducts };
+}
+
+/** Backend admin nav counts — one batched cached read after paint. */
+export async function fetchAdminBackendNavCounts() {
+  await requireAdmin();
+  return loadAdminBackendNavCounts();
+}
+
+/**
+ * Read-only server actions used by legacy `<AdminLazyBadge>` callers.
+ * Prefer {@link fetchAdminMainShellData} for new code.
  */
 export async function fetchAdminBadgeShopWatchCount(): Promise<number> {
   await requireAdmin();

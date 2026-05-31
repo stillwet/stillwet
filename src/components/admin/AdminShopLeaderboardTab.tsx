@@ -94,7 +94,6 @@ export function AdminShopLeaderboardTab(props: {
                   <Link href={`/s/${encodeURIComponent(r.slug)}`} className="text-blue-400/90 hover:underline">
                     {r.displayName}
                   </Link>
-                  <span className="ml-2 font-mono text-[10px] text-zinc-600">/s/{r.slug}</span>
                 </td>
                 <td className="py-2 px-2 text-center tabular-nums">{formatPrice(r.merchandiseCents)}</td>
                 <td className="py-2 px-2 text-center tabular-nums">{formatPrice(r.shopCutCents)}</td>

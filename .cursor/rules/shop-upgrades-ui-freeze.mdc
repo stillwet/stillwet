@@ -1,0 +1,35 @@
+---
+description: No formatting or visual changes on shop upgrades unless the user explicitly asks
+globs: src/app/dashboard/shop-upgrades/**,src/components/dashboard/promotions/**,src/components/dashboard/Promotions*.tsx,src/components/dashboard/Promotion*.tsx,src/components/dashboard/ShopFlairSection.tsx,src/components/dashboard/ShopGoogleShoppingSection.tsx,src/components/dashboard/PromotionsSectionFrame.tsx
+alwaysApply: false
+---
+
+# Shop upgrades UI — no unsolicited visual changes
+
+The creator **Shop Upgrades** page (`/dashboard/shop-upgrades`) and its UI are layout-approved.
+
+**Do not change formatting, styling, layout, spacing, copy, or visual structure** on this surface unless the user **explicitly requests** that visual change in the current conversation.
+
+## In scope (treat the same as the page)
+
+- `src/app/dashboard/shop-upgrades/**`
+- `src/components/dashboard/promotions/**`
+- `src/components/dashboard/Promotions*.tsx`, `Promotion*.tsx`
+- `src/components/dashboard/ShopFlairSection.tsx`
+- `src/components/dashboard/ShopGoogleShoppingSection.tsx`
+- `src/components/dashboard/PromotionsSectionFrame.tsx`
+- Related display helpers when the task is only about this page’s appearance (e.g. `promotion-checkout-period-display.ts`, period picker fieldset)
+
+## Allowed without an explicit visual request
+
+- Bug fixes that restore **documented/intended** behavior (broken checkout, wrong price math, failed payment)
+- Wiring, data fetching, server actions, types, performance — **only if** the diff does not alter how the page looks
+- Changes the user asked for in non-visual terms (e.g. “inline pay instead of redirect”) — minimize CSS/class churn; do not opportunistically restyle adjacent UI
+
+## Requires explicit user ask
+
+- Tailwind classes, grid/flex layout, column widths, alignment
+- Labels, button text, section order, borders, colors, spacing
+- Refactors whose primary effect is visual (even if “cleaner”)
+
+When unsure whether a change affects appearance, **ask first** or keep the existing markup and classes.

@@ -12,17 +12,14 @@ function formatMoney(cents: number) {
 /** Summary above pay — cost shows a spinner while placement pricing loads. */
 export function PromotionCheckoutCostLine(props: {
   kind: PromotionKind;
-  periodLabel: string;
   amountCents: number | null;
   loading?: boolean;
 }) {
-  const { kind, periodLabel, amountCents, loading = false } = props;
+  const { kind, amountCents, loading = false } = props;
 
   return (
     <p className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-zinc-400">
       <strong className="text-zinc-200">{promotionKindLabel(kind)}</strong>
-      <span aria-hidden>·</span>
-      <span className="text-zinc-500">{periodLabel}</span>
       <span aria-hidden>—</span>
       <span className="inline-flex items-center gap-1.5">
         {loading ? (

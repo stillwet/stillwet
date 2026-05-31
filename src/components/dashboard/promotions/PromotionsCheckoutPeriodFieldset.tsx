@@ -4,16 +4,40 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { PromotionsCheckoutSpinner } from "@/components/dashboard/PromotionsCheckoutSpinner";
 import {
-  formatComputedPeriodChoiceLine,
+  placementPeriodChoiceDisplayParts,
   staticPromotionPeriodPickerRows,
 } from "@/lib/promotion-checkout-period-display";
 import type { PlacementPeriodChoiceUi } from "@/lib/promotion-placement-ui-pure";
 import type { PlacementCheckoutPromotionKind } from "@/lib/promotion-placement-ui-pure";
 
+const periodRowGridClass =
+  "grid w-full min-w-0 grid-cols-[auto_4.75rem_5.5rem_minmax(0,1fr)] items-baseline gap-x-2";
+
 const periodRowClass = (active: boolean, loading: boolean) =>
-  `flex w-full items-start gap-2 rounded px-0.5 text-left text-[11px] ${
+  `${periodRowGridClass} rounded px-0.5 text-left text-[11px] ${
     loading ? "text-violet-100/90" : active ? "text-violet-100" : "text-zinc-300 hover:text-zinc-100"
   }`;
+
+function PeriodChoiceAlignedCells(props: {
+  tier: string;
+  dateRange: string;
+  price: ReactNode;
+  priceSuffix?: ReactNode;
+  datePlaceholder?: boolean;
+}) {
+  return (
+    <>
+      <span className="font-medium text-zinc-200">{props.tier}</span>
+      <span className={`tabular-nums ${props.datePlaceholder ? "text-zinc-600" : "text-zinc-400"}`}>
+        {props.dateRange || "—"}
+      </span>
+      <span className="justify-self-start whitespace-nowrap tabular-nums text-zinc-200">
+        {props.price}
+        {props.priceSuffix ? <span className="text-zinc-500">{props.priceSuffix}</span> : null}
+      </span>
+    </>
+  );
+}
 
 function PeriodRadioDot({ active, loading }: { active: boolean; loading?: boolean }) {
   if (loading) {
@@ -104,24 +128,23 @@ export function PromotionsCheckoutPeriodFieldset(props: {
           ? computedPeriodChoices!.map((c) => {
               const offset = Number(c.offset) as 0 | 1 | 2;
               const active = selectedOffset === offset;
+              const { tier, dateRange, price, priceSuffix } = placementPeriodChoiceDisplayParts(c);
               const labelBody = (
-                <span className="font-medium text-zinc-200">{formatComputedPeriodChoiceLine(c)}</span>
+                <PeriodChoiceAlignedCells tier={tier} dateRange={dateRange} price={price} priceSuffix={priceSuffix} />
               );
 
               if (!c.selectable) {
                 return (
                   <div
                     key={offset}
-                    className="flex items-start gap-2 text-[11px] text-zinc-600"
+                    className={`${periodRowGridClass} text-[11px] text-zinc-600`}
                     aria-disabled="true"
                   >
                     <PeriodRadioDot active={false} />
-                    <span>
-                      {labelBody}
-                      {c.disabledReason ? (
-                        <span className="block text-zinc-600"> — {c.disabledReason}</span>
-                      ) : null}
-                    </span>
+                    {labelBody}
+                    {c.disabledReason ? (
+                      <span className="col-span-3 col-start-2 text-zinc-600"> — {c.disabledReason}</span>
+                    ) : null}
                   </div>
                 );
               }
@@ -132,11 +155,12 @@ export function PromotionsCheckoutPeriodFieldset(props: {
               renderSelectableRow(
                 row.offset,
                 false,
-                <span>
-                  <span className="font-medium text-zinc-200">{row.periodName}</span>
-                  {" — "}
-                  <span className="text-zinc-400">{row.priceLine}</span>
-                </span>,
+                <PeriodChoiceAlignedCells
+                  tier={row.periodName}
+                  dateRange=""
+                  price={row.priceLine}
+                  datePlaceholder
+                />,
               ),
             )}
       </div>

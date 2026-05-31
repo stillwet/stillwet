@@ -195,39 +195,59 @@ export const loadAdminBadgeShopLeaderboardCount = unstable_cache(
   { revalidate: TWO_HOURS_S + 49 * 60 },
 );
 
-export async function loadAdminMainNavBadges() {
-  // Prioritize listing requests: kick it off first.
-  const listingRequestTabBadgeCount = await loadAdminBadgeListingRequests();
+export type AdminMainNavBadgeCounts = {
+  listingRequests: number;
+  supplementPending: number;
+  supportUnresolved: number;
+  adminInbox: number;
+  bugFeedbackOpen: number;
+  shopWatch: number;
+  promotionLists: number;
+  shopLeaderboard: number;
+  platformSales: number;
+};
+
+/** Cached boolean — avoids `findFirst` on every admin main shell render. */
+export const loadAdminHasProducts = unstable_cache(
+  async () => (await prisma.product.findFirst({ select: { id: true } })) != null,
+  ["admin-has-products:v1"],
+  { revalidate: TWO_HOURS_S },
+);
+
+/** All main admin nav badge counts in one parallel round-trip (each loader is separately cached). */
+export async function loadAdminMainNavBadgeCounts(): Promise<AdminMainNavBadgeCounts> {
   const [
-    supplementPendingTabBadgeCount,
-    supportUnresolvedCount,
-    adminInboxCount,
-    bugFeedbackOpenCount,
-    shopWatchTabBadgeCount,
-    platformSalesLineCount,
-    promotionListsActivePaidCount,
-    shopLeaderboardShopCount,
+    listingRequests,
+    supplementPending,
+    supportUnresolved,
+    adminInbox,
+    bugFeedbackOpen,
+    shopWatch,
+    promotionLists,
+    shopLeaderboard,
+    platformSales,
   ] = await Promise.all([
+    loadAdminBadgeListingRequests(),
     loadAdminBadgeSupplementPending(),
     loadAdminBadgeSupportUnresolved(),
     loadAdminBadgeInboxCount(),
     loadAdminBadgeBugFeedbackOpen(),
     loadAdminBadgeShopWatch(),
-    loadAdminBadgePlatformSales(),
     loadAdminBadgePromotionLists(),
     loadAdminBadgeShopLeaderboardCount(),
+    loadAdminBadgePlatformSales(),
   ]);
 
   return {
-    supportUnresolvedCount,
-    bugFeedbackOpenCount,
-    adminInboxCount,
-    listingRequestTabBadgeCount,
-    supplementPendingTabBadgeCount,
-    shopWatchTabBadgeCount,
-    promotionListsActivePaidCount,
-    platformSalesLineCount,
-    shopLeaderboardShopCount,
+    listingRequests,
+    supplementPending,
+    supportUnresolved,
+    adminInbox,
+    bugFeedbackOpen,
+    shopWatch,
+    promotionLists,
+    shopLeaderboard,
+    platformSales,
   };
 }
 
