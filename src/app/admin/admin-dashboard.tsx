@@ -15,6 +15,7 @@ import {
 } from "./admin-dashboard-tab-panel";
 import { AdminListTab } from "@/components/admin/AdminListTab";
 import { AdminBetaTestersTabLoader } from "@/components/admin/AdminBetaTestersTabLoader";
+import { AdminWaivedShopFeesTabLoader } from "@/components/admin/AdminWaivedShopFeesTabLoader";
 import { AdminShopFlairsTabLoader } from "@/components/admin/AdminShopFlairsTabLoader";
 import { AdminGoogleShoppingTabLoader } from "@/components/admin/AdminGoogleShoppingTabLoader";
 import { AdminShopWatchTabLoader } from "@/components/admin/AdminShopWatchTabLoader";
@@ -97,6 +98,7 @@ async function AdminDashboardPageBody({
     "bug-feedback",
     "shop-watch",
     "beta-testers",
+    "waived-shop-fees",
     "promotion-lists",
     "shop-leaderboard",
     "sales",
@@ -385,6 +387,18 @@ async function AdminDashboardPageBody({
                     Beta testers
                   </Link>
                   <Link
+                    href={`${basePath}?tab=waived-shop-fees`}
+                    role="tab"
+                    aria-selected={inventoryTab === "waived-shop-fees"}
+                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                      inventoryTab === "waived-shop-fees"
+                        ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                        : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+                    }`}
+                  >
+                    Waived shop fees
+                  </Link>
+                  <Link
                     href={`${basePath}?tab=promotion-lists`}
                     role="tab"
                     title="Count is paid merchant placements currently in their active window (Hot item, Featured shop home, Popular item, Front page)."
@@ -618,6 +632,10 @@ async function AdminDashboardPageBody({
           ) : adminSection === "main" && inventoryTab === "beta-testers" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <AdminBetaTestersTabLoader />
+            </Suspense>
+          ) : adminSection === "main" && inventoryTab === "waived-shop-fees" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminWaivedShopFeesTabLoader />
             </Suspense>
           ) : adminSection === "main" && inventoryTab === "promotion-lists" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

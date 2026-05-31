@@ -18,12 +18,15 @@ export function ShopFlairSection(props: {
   stripePublishableKey?: string | null;
   mockListingFeeCheckout?: boolean;
   className?: string;
+  /** Profile form: flair type picker only when access is already unlocked. */
+  variant?: "full" | "selection";
 }) {
   const {
     flair,
     stripePublishableKey = null,
     mockListingFeeCheckout = false,
     className = "mt-6 max-w-xl rounded-xl border border-zinc-800 bg-zinc-950/30 p-2 sm:p-3",
+    variant = "full",
   } = props;
 
   const router = useRouter();
@@ -44,6 +47,63 @@ export function ShopFlairSection(props: {
     setSelectedFlairTypeId(flair.selectedType?.id ?? "");
     setFlairPayOpen(false);
   }, [flair.purchasedAt, flair.selectedType?.id]);
+
+  if (variant === "selection") {
+    if (!flair.purchasedAt) return null;
+
+    return (
+      <div className={className}>
+        <form
+          className="space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (isFlairPending || !flairSelectionDirty) return;
+            setFlairResult(null);
+            const fd = new FormData();
+            fd.set("flairTypeId", selectedFlairTypeId);
+            startFlairTransition(async () => {
+              const r = await dashboardSetShopFlairType(fd);
+              if (r.ok) setFlairSuccessKind("update");
+              setFlairResult(r);
+              if (r.ok) router.refresh();
+            });
+          }}
+        >
+          <label className="block text-xs text-zinc-500">
+            Shop flair
+            <select
+              value={selectedFlairTypeId}
+              onChange={(e) => setSelectedFlairTypeId(e.target.value)}
+              disabled={isFlairPending}
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 disabled:opacity-50"
+            >
+              <option value="">None</option>
+              {flair.catalog.types.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {flairResult && !flairResult.ok ? (
+            <p className="text-xs leading-snug text-red-300/90" role="alert">
+              {flairResult.error}
+            </p>
+          ) : null}
+          {flairResult && flairResult.ok ? (
+            <p className="text-xs text-emerald-300/90">Flair updated.</p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={isFlairPending || !flairSelectionDirty}
+            className="rounded-lg border border-zinc-600 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isFlairPending ? "Saving…" : "Save flair"}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <section className={className}>

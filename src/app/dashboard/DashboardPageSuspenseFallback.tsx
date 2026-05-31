@@ -1,7 +1,9 @@
+import { DASHBOARD_MAIN_SHELL_FALLBACK_CLASS } from "@/lib/dashboard-layout";
+
 /** Shown while dashboard body or tab data Suspense boundaries resolve (streaming RSC). */
 export function DashboardPageSuspenseFallback() {
   return (
-    <main className="mx-auto flex min-h-[min(420px,50vh)] max-w-[868px] flex-col justify-center px-4 py-12">
+    <main className={DASHBOARD_MAIN_SHELL_FALLBACK_CLASS}>
       <div className="flex flex-col items-center gap-4 text-center">
         <span
           className="inline-block h-10 w-10 shrink-0 animate-spin rounded-full border-2 border-zinc-600 border-t-violet-500/90"

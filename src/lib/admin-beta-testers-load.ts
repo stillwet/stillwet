@@ -4,7 +4,6 @@ import {
   ListingRequestStatus,
   ShopUserRole,
 } from "@/generated/prisma/enums";
-import { BETA_TESTER_COHORT_LABEL } from "@/lib/beta-tester-codes";
 import {
   computeShopOnboardingSteps,
   countIncompleteOnboardingSteps,
@@ -12,33 +11,29 @@ import {
 import { incompleteOnboardingStepLabels } from "@/lib/beta-tester-onboarding-sync";
 import { prisma } from "@/lib/prisma";
 
-export type AdminBetaTesterShopRow = {
-  shopId: string;
-  displayName: string;
-  slug: string;
-  cohortLabel: typeof BETA_TESTER_COHORT_LABEL;
-  signedUpAt: string;
-  onboardingStatus: BetaTesterOnboardingStatus;
-  onboardingCheckedAt: string | null;
-  onboardingCompletedAt: string | null;
-  incompleteSteps: string[];
-  inviteCode: string | null;
-};
-
-export type AdminBetaTesterUnusedCodeRow = {
+export type AdminBetaTesterCodeRow = {
+  codeId: string;
   code: string;
   createdAt: string;
+  status: "unused" | "used";
+  shopAccount: {
+    shopId: string;
+    slug: string;
+    displayName: string;
+    createdAt: string;
+    adminFrozenAt: string | null;
+  } | null;
+  shopFreeze: {
+    shopId: string;
+    adminFrozenAt: string | null;
+  } | null;
+  onboardingStatus: BetaTesterOnboardingStatus | null;
+  onboardingCompletedAt: string | null;
+  incompleteSteps: string[];
 };
 
 export type AdminBetaTesterDashboardPayload = {
-  summary: {
-    unusedCodes: number;
-    shopsSignedUp: number;
-    onboardingComplete: number;
-    onboardingInProgress: number;
-  };
-  shops: AdminBetaTesterShopRow[];
-  unusedCodes: AdminBetaTesterUnusedCodeRow[];
+  codes: AdminBetaTesterCodeRow[];
 };
 
 const LISTING_PROGRESS_OR: Array<{
@@ -56,102 +51,144 @@ function iso(d: Date | null | undefined): string | null {
   return d ? d.toISOString() : null;
 }
 
+const redeemedShopSelect = {
+  id: true,
+  slug: true,
+  displayName: true,
+  betaTesterAt: true,
+  betaTesterOnboardingStatus: true,
+  betaTesterOnboardingCompletedAt: true,
+  adminFrozenAt: true,
+  itemGuidelinesAcknowledgedAt: true,
+  connectChargesEnabled: true,
+  payoutsEnabled: true,
+  users: {
+    where: { role: ShopUserRole.owner },
+    select: { emailVerifiedAt: true },
+    orderBy: { createdAt: "asc" as const },
+    take: 1,
+  },
+} as const;
+
+function unusedCodeRow(codeId: string, code: string, createdAt: Date): AdminBetaTesterCodeRow {
+  return {
+    codeId,
+    code,
+    createdAt: createdAt.toISOString(),
+    status: "unused",
+    shopAccount: null,
+    shopFreeze: null,
+    onboardingStatus: null,
+    onboardingCompletedAt: null,
+    incompleteSteps: [],
+  };
+}
+
 export async function loadAdminBetaTesterDashboardPayload(): Promise<AdminBetaTesterDashboardPayload> {
-  const [shops, unusedCodeRows] = await Promise.all([
-    prisma.shop.findMany({
-      where: { betaTesterAt: { not: null } },
-      orderBy: [{ betaTesterAt: "desc" }],
-      select: {
-        id: true,
-        slug: true,
-        displayName: true,
-        betaTesterAt: true,
-        betaTesterOnboardingStatus: true,
-        betaTesterOnboardingCheckedAt: true,
-        betaTesterOnboardingCompletedAt: true,
-        itemGuidelinesAcknowledgedAt: true,
-        connectChargesEnabled: true,
-        payoutsEnabled: true,
-        users: {
-          where: { role: ShopUserRole.owner },
-          select: { emailVerifiedAt: true },
-          orderBy: { createdAt: "asc" },
-          take: 1,
-        },
-        creatorGiftCodesRedeemed: {
-          where: { type: CreatorGiftCodeType.shop_setup },
-          select: { code: true },
-          take: 1,
-        },
+  const codeRows = await prisma.creatorGiftCode.findMany({
+    where: {
+      type: CreatorGiftCodeType.shop_setup,
+      purchase: { isBetaTesterBatch: true },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      code: true,
+      createdAt: true,
+      redeemedAt: true,
+      redeemedByShopId: true,
+      redeemedByShop: {
+        select: redeemedShopSelect,
       },
-    }),
-    prisma.creatorGiftCode.findMany({
-      where: {
-        type: CreatorGiftCodeType.shop_setup,
-        redeemedAt: null,
-        purchase: { isBetaTesterBatch: true },
-      },
-      orderBy: { createdAt: "asc" },
-      select: { code: true, createdAt: true },
-    }),
+    },
+  });
+
+  const redeemedShopIds = codeRows
+    .map((row) => row.redeemedByShopId ?? row.redeemedByShop?.id)
+    .filter((id): id is string => id != null);
+
+  const [shopsWithListingProgress, shopsByIdRows] = await Promise.all([
+    redeemedShopIds.length === 0
+      ? Promise.resolve([])
+      : prisma.shopListing.findMany({
+          where: { shopId: { in: redeemedShopIds }, OR: LISTING_PROGRESS_OR },
+          select: { shopId: true },
+          distinct: ["shopId"],
+        }),
+    redeemedShopIds.length === 0
+      ? Promise.resolve([])
+      : prisma.shop.findMany({
+          where: { id: { in: redeemedShopIds } },
+          select: redeemedShopSelect,
+        }),
   ]);
 
-  const shopRows: AdminBetaTesterShopRow[] = [];
-  let onboardingComplete = 0;
-  let onboardingInProgress = 0;
+  const shopsById = new Map(shopsByIdRows.map((shop) => [shop.id, shop]));
 
-  for (const shop of shops) {
-    const hasListingProgress = Boolean(
-      await prisma.shopListing.findFirst({
-        where: { shopId: shop.id, OR: LISTING_PROGRESS_OR },
-        select: { id: true },
-      }),
-    );
+  const listingProgressShopIds = new Set(shopsWithListingProgress.map((row) => row.shopId));
+
+  const codes: AdminBetaTesterCodeRow[] = codeRows.map((row) => {
+    const shop =
+      row.redeemedByShop ??
+      (row.redeemedByShopId ? (shopsById.get(row.redeemedByShopId) ?? null) : null);
+
+    if (!row.redeemedAt && !shop) {
+      return unusedCodeRow(row.id, row.code, row.createdAt);
+    }
+
+    if (!shop) {
+      return {
+        codeId: row.id,
+        code: row.code,
+        createdAt: row.createdAt.toISOString(),
+        status: "used",
+        shopAccount: null,
+        shopFreeze: null,
+        onboardingStatus: null,
+        onboardingCompletedAt: null,
+        incompleteSteps: [],
+      };
+    }
+
+    const shopFreeze = {
+      shopId: shop.id,
+      adminFrozenAt: iso(shop.adminFrozenAt),
+    };
 
     const owner = shop.users[0];
     const steps = computeShopOnboardingSteps({
       displayName: shop.displayName,
       itemGuidelinesAcknowledgedAt: shop.itemGuidelinesAcknowledgedAt,
       emailVerifiedAt: owner?.emailVerifiedAt ?? null,
-      hasListingProgress,
+      hasListingProgress: listingProgressShopIds.has(shop.id),
       connectChargesEnabled: shop.connectChargesEnabled,
       payoutsEnabled: shop.payoutsEnabled,
     });
 
-    const status =
+    const onboardingStatus =
       shop.betaTesterOnboardingStatus ??
       (countIncompleteOnboardingSteps(steps) === 0
         ? BetaTesterOnboardingStatus.complete
         : BetaTesterOnboardingStatus.in_progress);
 
-    if (status === BetaTesterOnboardingStatus.complete) onboardingComplete++;
-    else onboardingInProgress++;
-
-    shopRows.push({
-      shopId: shop.id,
-      displayName: shop.displayName,
-      slug: shop.slug,
-      cohortLabel: BETA_TESTER_COHORT_LABEL,
-      signedUpAt: shop.betaTesterAt!.toISOString(),
-      onboardingStatus: status,
-      onboardingCheckedAt: iso(shop.betaTesterOnboardingCheckedAt),
-      onboardingCompletedAt: iso(shop.betaTesterOnboardingCompletedAt),
-      incompleteSteps: incompleteOnboardingStepLabels(steps),
-      inviteCode: shop.creatorGiftCodesRedeemed[0]?.code ?? null,
-    });
-  }
-
-  return {
-    summary: {
-      unusedCodes: unusedCodeRows.length,
-      shopsSignedUp: shops.length,
-      onboardingComplete,
-      onboardingInProgress,
-    },
-    shops: shopRows,
-    unusedCodes: unusedCodeRows.map((row) => ({
+    return {
+      codeId: row.id,
       code: row.code,
       createdAt: row.createdAt.toISOString(),
-    })),
-  };
+      status: "used",
+      shopAccount: {
+        shopId: shop.id,
+        slug: shop.slug,
+        displayName: shop.displayName,
+        createdAt: (shop.betaTesterAt ?? row.redeemedAt ?? row.createdAt).toISOString(),
+        adminFrozenAt: iso(shop.adminFrozenAt),
+      },
+      shopFreeze,
+      onboardingStatus,
+      onboardingCompletedAt: iso(shop.betaTesterOnboardingCompletedAt),
+      incompleteSteps: incompleteOnboardingStepLabels(steps),
+    };
+  });
+
+  return { codes };
 }

@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { AdminBetaTesterDeleteCodeButton } from "@/components/admin/AdminBetaTesterDeleteCodeButton";
+import { AdminBetaTesterShopFreezeToggle } from "@/components/admin/AdminBetaTesterShopFreezeToggle";
+import { AdminGenerateBetaTesterCodesControls } from "@/components/admin/AdminGenerateBetaTesterCodesControls";
 import type { AdminBetaTesterDashboardPayload } from "@/lib/admin-beta-testers-load";
 import { BetaTesterOnboardingStatus } from "@/generated/prisma/enums";
 
@@ -10,19 +13,30 @@ function formatWhen(iso: string | null): string {
   }).format(new Date(iso));
 }
 
-function statusBadge(status: BetaTesterOnboardingStatus) {
-  if (status === BetaTesterOnboardingStatus.complete) {
+function codeStatusBadge(status: "unused" | "used") {
+  if (status === "used") {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
   }
   return "border-amber-500/30 bg-amber-500/10 text-amber-200";
 }
 
-function statusLabel(status: BetaTesterOnboardingStatus) {
-  return status === BetaTesterOnboardingStatus.complete ? "Complete" : "In progress";
+function codeStatusLabel(status: "unused" | "used") {
+  return status === "used" ? "Used" : "Unused";
+}
+
+function onboardingCompleteLabel(status: BetaTesterOnboardingStatus) {
+  return status === BetaTesterOnboardingStatus.complete ? "Yes" : "No";
+}
+
+function onboardingCompleteTone(status: BetaTesterOnboardingStatus) {
+  if (status === BetaTesterOnboardingStatus.complete) {
+    return "text-emerald-200";
+  }
+  return "text-amber-200";
 }
 
 export function AdminBetaTestersTab(props: { payload: AdminBetaTesterDashboardPayload }) {
-  const { summary, shops, unusedCodes } = props.payload;
+  const { codes } = props.payload;
 
   return (
     <section className="space-y-6" aria-label="Beta testers">
@@ -34,109 +48,95 @@ export function AdminBetaTestersTab(props: { payload: AdminBetaTesterDashboardPa
           credits plus shop flair access. Onboarding status is refreshed once per day by the daily
           maintenance cron.
         </p>
-        <p className="mt-2 text-xs text-zinc-600">
-          Generate codes locally:{" "}
-          <code className="text-zinc-400">npm run generate:beta-tester-codes</code>
-        </p>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          ["Unused codes", summary.unusedCodes],
-          ["Shops signed up", summary.shopsSignedUp],
-          ["Onboarding complete", summary.onboardingComplete],
-          ["Onboarding in progress", summary.onboardingInProgress],
-        ].map(([label, value]) => (
-          <div
-            key={String(label)}
-            className="rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-3"
-          >
-            <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-              {label}
-            </p>
-            <p className="mt-1 text-2xl font-semibold text-zinc-100">{value}</p>
-          </div>
-        ))}
+        <AdminGenerateBetaTesterCodesControls />
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-zinc-200">Beta tester shops</h3>
+        <h3 className="text-sm font-medium text-zinc-200">Code tracker</h3>
         <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
-          <div className="grid grid-cols-[1.1fr_0.8fr_0.8fr_1fr_0.9fr] gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-            <span>Shop</span>
-            <span>Cohort</span>
-            <span>Onboarding</span>
-            <span>Remaining steps</span>
-            <span>Last checked</span>
-          </div>
-          {shops.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-zinc-500">No beta tester shops yet.</p>
-          ) : (
-            shops.map((shop) => (
-              <div
-                key={shop.shopId}
-                className="grid grid-cols-[1.1fr_0.8fr_0.8fr_1fr_0.9fr] gap-3 border-b border-zinc-900 px-4 py-4 text-sm last:border-b-0"
-              >
-                <div>
-                  <Link
-                    href={`/s/${shop.slug}`}
-                    className="font-medium text-zinc-100 hover:underline"
-                  >
-                    {shop.displayName}
-                  </Link>
-                  <p className="mt-1 text-xs text-zinc-500">
-                    /{shop.slug}
-                    {shop.inviteCode ? (
-                      <>
-                        {" "}
-                        · code <code className="text-zinc-400">{shop.inviteCode}</code>
-                      </>
-                    ) : null}
-                  </p>
-                  <p className="mt-1 text-xs text-zinc-600">Signed up {formatWhen(shop.signedUpAt)}</p>
-                </div>
-                <p className="text-zinc-300">{shop.cohortLabel}</p>
-                <div>
-                  <span
-                    className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ${statusBadge(
-                      shop.onboardingStatus,
-                    )}`}
-                  >
-                    {statusLabel(shop.onboardingStatus)}
-                  </span>
-                  {shop.onboardingCompletedAt ? (
-                    <p className="mt-2 text-xs text-zinc-600">
-                      Completed {formatWhen(shop.onboardingCompletedAt)}
-                    </p>
-                  ) : null}
-                </div>
-                <p className="text-sm text-zinc-400">
-                  {shop.incompleteSteps.length > 0 ? shop.incompleteSteps.join(", ") : "—"}
-                </p>
-                <p className="text-sm text-zinc-400">{formatWhen(shop.onboardingCheckedAt)}</p>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-medium text-zinc-200">Unused invite codes</h3>
-        <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
-          <div className="grid grid-cols-[1.2fr_0.8fr] gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+          <div className="grid grid-cols-[1fr_0.6fr_1fr_0.85fr_0.75fr_0.9fr_0.5fr] gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
             <span>Code</span>
-            <span>Created</span>
+            <span>Status</span>
+            <span>Shop name</span>
+            <span>Account created</span>
+            <span>Onboarding complete</span>
+            <span>Frozen</span>
+            <span>Delete</span>
           </div>
-          {unusedCodes.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-zinc-500">No unused beta tester codes.</p>
+          {codes.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-zinc-500">No beta tester codes yet.</p>
           ) : (
-            unusedCodes.map((row) => (
+            codes.map((row) => (
               <div
                 key={row.code}
-                className="grid grid-cols-[1.2fr_0.8fr] gap-3 border-b border-zinc-900 px-4 py-3 text-sm last:border-b-0"
+                className="grid grid-cols-[1fr_0.6fr_1fr_0.85fr_0.75fr_0.9fr_0.5fr] gap-3 border-b border-zinc-900 px-4 py-3 text-sm last:border-b-0"
               >
-                <code className="text-zinc-200">{row.code}</code>
-                <span className="text-zinc-500">{formatWhen(row.createdAt)}</span>
+                <div>
+                  <code className="text-zinc-200">{row.code}</code>
+                </div>
+                <div>
+                  <span
+                    className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ${codeStatusBadge(
+                      row.status,
+                    )}`}
+                  >
+                    {codeStatusLabel(row.status)}
+                  </span>
+                </div>
+                <div className="text-zinc-400">
+                  {row.shopAccount ? (
+                    <>
+                      <Link
+                        href={`/s/${row.shopAccount.slug}`}
+                        className="font-medium text-zinc-100 hover:underline"
+                      >
+                        {row.shopAccount.displayName}
+                      </Link>
+                      <p className="mt-1 text-xs text-zinc-500">/{row.shopAccount.slug}</p>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+                <div className="text-zinc-400">
+                  {row.shopAccount ? formatWhen(row.shopAccount.createdAt) : "—"}
+                </div>
+                <div className="text-zinc-400">
+                  {row.onboardingStatus ? (
+                    <>
+                      <span
+                        className={`font-medium ${onboardingCompleteTone(row.onboardingStatus)}`}
+                      >
+                        {onboardingCompleteLabel(row.onboardingStatus)}
+                      </span>
+                      {row.onboardingStatus === BetaTesterOnboardingStatus.complete &&
+                      row.onboardingCompletedAt ? (
+                        <p className="mt-1 text-xs text-zinc-600">
+                          {formatWhen(row.onboardingCompletedAt)}
+                        </p>
+                      ) : row.incompleteSteps.length > 0 ? (
+                        <p className="mt-1 text-xs text-zinc-500">
+                          {row.incompleteSteps.join(", ")}
+                        </p>
+                      ) : null}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+                <div>
+                  <AdminBetaTesterShopFreezeToggle
+                    shopId={row.shopFreeze?.shopId ?? null}
+                    adminFrozenAt={row.shopFreeze?.adminFrozenAt ?? null}
+                  />
+                </div>
+                <div>
+                  {row.status === "unused" ? (
+                    <AdminBetaTesterDeleteCodeButton codeId={row.codeId} />
+                  ) : (
+                    <span className="text-zinc-400">—</span>
+                  )}
+                </div>
               </div>
             ))
           )}

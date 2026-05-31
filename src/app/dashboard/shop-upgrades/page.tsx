@@ -39,6 +39,7 @@ import { ShopDataLoadError } from "@/components/ShopDataLoadError";
 
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 import { DASHBOARD_SHOP_UPGRADES_LABEL } from "@/lib/dashboard-promotions-path";
+import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 
 export const dynamic = "force-dynamic";
 
@@ -212,7 +213,7 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
 
     return (
 
-      <main className="mx-auto flex min-h-screen max-w-[868px] flex-col px-4 py-12">
+      <main className={DASHBOARD_MAIN_SHELL_CLASS}>
         <PromotionsPagePeriodPrefetch enabled={buyKind != null} />
 
         <Link href="/dashboard" prefetch={false} className="text-sm text-zinc-500 hover:text-zinc-300">

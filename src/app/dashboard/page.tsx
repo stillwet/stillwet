@@ -18,6 +18,7 @@ import {
   type CreatorDashboardSetupPayload,
 } from "@/components/dashboard/DashboardDeferredTabsIsland";
 import { DashboardTabsSuspenseFallback } from "./DashboardPageSuspenseFallback";
+import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 import { scopesForInitialTab } from "@/lib/dashboard-scoped-data";
 import {
   canStartStripeConnect,
@@ -423,7 +424,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   })();
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-[868px] flex-col px-4 py-12">
+    <main className={DASHBOARD_MAIN_SHELL_CLASS}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-50">Shop dashboard</h1>

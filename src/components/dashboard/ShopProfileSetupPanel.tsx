@@ -324,14 +324,6 @@ export function ShopProfileSetupPanel(props: {
       className={`rounded-xl border border-zinc-800 bg-zinc-950/50 p-4 sm:p-6 ${embedded ? "mt-0" : "mt-8"}`}
     >
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Shop profile</h2>
-      {shop.flair ? (
-        <ShopFlairSection
-          flair={shop.flair}
-          stripePublishableKey={stripePublishableKey}
-          mockListingFeeCheckout={mockListingFeeCheckout}
-          className="mt-4 max-w-xl rounded-xl border border-zinc-800 bg-zinc-950/30 p-4"
-        />
-      ) : null}
 
       <div className="mt-6 flex flex-wrap items-center gap-4 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
         {shop.profileImageUrl ? (
@@ -455,6 +447,13 @@ export function ShopProfileSetupPanel(props: {
               </p>
             ) : null}
           </label>
+          {shop.flair?.purchasedAt ? (
+            <ShopFlairSection
+              flair={shop.flair}
+              variant="selection"
+              className=""
+            />
+          ) : null}
           {SHOP_SOCIAL_KEYS.map((key) => (
             <input key={key} type="hidden" name={`social_${key}`} value={social[key] ?? ""} />
           ))}

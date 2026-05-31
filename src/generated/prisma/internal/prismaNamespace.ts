@@ -4546,6 +4546,7 @@ export const CreatorGiftPurchaseScalarFieldEnum = {
   promotionCreditsGranted: 'promotionCreditsGranted',
   shopFlairIncluded: 'shopFlairIncluded',
   isBetaTesterBatch: 'isBetaTesterBatch',
+  isWaivedShopFeeBatch: 'isWaivedShopFeeBatch',
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',

@@ -863,6 +863,8 @@ model CreatorGiftPurchase {
   shopFlairIncluded            Boolean                    @default(false)
   /** Batch-generated invite codes for beta testers (shop_setup codes). */
   isBetaTesterBatch            Boolean                    @default(false)
+  /** Admin-generated shop_setup codes that waive the signup fee only (no extra perks). */
+  isWaivedShopFeeBatch         Boolean                    @default(false)
   amountCents                  Int
   currency                     String                     @default("usd")
   status                       CreatorGiftPurchaseStatus  @default(pending)

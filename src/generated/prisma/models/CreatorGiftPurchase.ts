@@ -55,6 +55,7 @@ export type CreatorGiftPurchaseMinAggregateOutputType = {
   promotionCreditsGranted: number | null
   shopFlairIncluded: boolean | null
   isBetaTesterBatch: boolean | null
+  isWaivedShopFeeBatch: boolean | null
   amountCents: number | null
   currency: string | null
   status: $Enums.CreatorGiftPurchaseStatus | null
@@ -81,6 +82,7 @@ export type CreatorGiftPurchaseMaxAggregateOutputType = {
   promotionCreditsGranted: number | null
   shopFlairIncluded: boolean | null
   isBetaTesterBatch: boolean | null
+  isWaivedShopFeeBatch: boolean | null
   amountCents: number | null
   currency: string | null
   status: $Enums.CreatorGiftPurchaseStatus | null
@@ -107,6 +109,7 @@ export type CreatorGiftPurchaseCountAggregateOutputType = {
   promotionCreditsGranted: number
   shopFlairIncluded: number
   isBetaTesterBatch: number
+  isWaivedShopFeeBatch: number
   amountCents: number
   currency: number
   status: number
@@ -149,6 +152,7 @@ export type CreatorGiftPurchaseMinAggregateInputType = {
   promotionCreditsGranted?: true
   shopFlairIncluded?: true
   isBetaTesterBatch?: true
+  isWaivedShopFeeBatch?: true
   amountCents?: true
   currency?: true
   status?: true
@@ -175,6 +179,7 @@ export type CreatorGiftPurchaseMaxAggregateInputType = {
   promotionCreditsGranted?: true
   shopFlairIncluded?: true
   isBetaTesterBatch?: true
+  isWaivedShopFeeBatch?: true
   amountCents?: true
   currency?: true
   status?: true
@@ -201,6 +206,7 @@ export type CreatorGiftPurchaseCountAggregateInputType = {
   promotionCreditsGranted?: true
   shopFlairIncluded?: true
   isBetaTesterBatch?: true
+  isWaivedShopFeeBatch?: true
   amountCents?: true
   currency?: true
   status?: true
@@ -314,6 +320,7 @@ export type CreatorGiftPurchaseGroupByOutputType = {
   promotionCreditsGranted: number
   shopFlairIncluded: boolean
   isBetaTesterBatch: boolean
+  isWaivedShopFeeBatch: boolean
   amountCents: number
   currency: string
   status: $Enums.CreatorGiftPurchaseStatus
@@ -363,6 +370,7 @@ export type CreatorGiftPurchaseWhereInput = {
   promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   shopFlairIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   isBetaTesterBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -391,6 +399,7 @@ export type CreatorGiftPurchaseOrderByWithRelationInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   shopFlairIncluded?: Prisma.SortOrder
   isBetaTesterBatch?: Prisma.SortOrder
+  isWaivedShopFeeBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -424,6 +433,7 @@ export type CreatorGiftPurchaseWhereUniqueInput = Prisma.AtLeast<{
   promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   shopFlairIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   isBetaTesterBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -450,6 +460,7 @@ export type CreatorGiftPurchaseOrderByWithAggregationInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   shopFlairIncluded?: Prisma.SortOrder
   isBetaTesterBatch?: Prisma.SortOrder
+  isWaivedShopFeeBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -484,6 +495,7 @@ export type CreatorGiftPurchaseScalarWhereWithAggregatesInput = {
   promotionCreditsGranted?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
   shopFlairIncluded?: Prisma.BoolWithAggregatesFilter<"CreatorGiftPurchase"> | boolean
   isBetaTesterBatch?: Prisma.BoolWithAggregatesFilter<"CreatorGiftPurchase"> | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolWithAggregatesFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusWithAggregatesFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -509,6 +521,7 @@ export type CreatorGiftPurchaseCreateInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -537,6 +550,7 @@ export type CreatorGiftPurchaseUncheckedCreateInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -563,6 +577,7 @@ export type CreatorGiftPurchaseUpdateInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -591,6 +606,7 @@ export type CreatorGiftPurchaseUncheckedUpdateInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -618,6 +634,7 @@ export type CreatorGiftPurchaseCreateManyInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -643,6 +660,7 @@ export type CreatorGiftPurchaseUpdateManyMutationInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -669,6 +687,7 @@ export type CreatorGiftPurchaseUncheckedUpdateManyInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -705,6 +724,7 @@ export type CreatorGiftPurchaseCountOrderByAggregateInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   shopFlairIncluded?: Prisma.SortOrder
   isBetaTesterBatch?: Prisma.SortOrder
+  isWaivedShopFeeBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -738,6 +758,7 @@ export type CreatorGiftPurchaseMaxOrderByAggregateInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   shopFlairIncluded?: Prisma.SortOrder
   isBetaTesterBatch?: Prisma.SortOrder
+  isWaivedShopFeeBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -764,6 +785,7 @@ export type CreatorGiftPurchaseMinOrderByAggregateInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   shopFlairIncluded?: Prisma.SortOrder
   isBetaTesterBatch?: Prisma.SortOrder
+  isWaivedShopFeeBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -869,6 +891,7 @@ export type CreatorGiftPurchaseCreateWithoutRecipientShopInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -895,6 +918,7 @@ export type CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -951,6 +975,7 @@ export type CreatorGiftPurchaseScalarWhereInput = {
   promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   shopFlairIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   isBetaTesterBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -976,6 +1001,7 @@ export type CreatorGiftPurchaseCreateWithoutCodesInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -1003,6 +1029,7 @@ export type CreatorGiftPurchaseUncheckedCreateWithoutCodesInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -1044,6 +1071,7 @@ export type CreatorGiftPurchaseUpdateWithoutCodesInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -1071,6 +1099,7 @@ export type CreatorGiftPurchaseUncheckedUpdateWithoutCodesInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -1096,6 +1125,7 @@ export type CreatorGiftPurchaseCreateManyRecipientShopInput = {
   promotionCreditsGranted?: number
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -1121,6 +1151,7 @@ export type CreatorGiftPurchaseUpdateWithoutRecipientShopInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -1147,6 +1178,7 @@ export type CreatorGiftPurchaseUncheckedUpdateWithoutRecipientShopInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -1173,6 +1205,7 @@ export type CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isWaivedShopFeeBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -1230,6 +1263,7 @@ export type CreatorGiftPurchaseSelect<ExtArgs extends runtime.Types.Extensions.I
   promotionCreditsGranted?: boolean
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -1259,6 +1293,7 @@ export type CreatorGiftPurchaseSelectCreateManyAndReturn<ExtArgs extends runtime
   promotionCreditsGranted?: boolean
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -1286,6 +1321,7 @@ export type CreatorGiftPurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime
   promotionCreditsGranted?: boolean
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -1313,6 +1349,7 @@ export type CreatorGiftPurchaseSelectScalar = {
   promotionCreditsGranted?: boolean
   shopFlairIncluded?: boolean
   isBetaTesterBatch?: boolean
+  isWaivedShopFeeBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -1324,7 +1361,7 @@ export type CreatorGiftPurchaseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CreatorGiftPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaserEmail" | "fulfillmentMode" | "recipientShopId" | "giftFromName" | "setupFeeIncluded" | "listingCreditPackId" | "listingCreditsGranted" | "googleShoppingCreditPackId" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "shopFlairIncluded" | "isBetaTesterBatch" | "amountCents" | "currency" | "status" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "emailedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["creatorGiftPurchase"]>
+export type CreatorGiftPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaserEmail" | "fulfillmentMode" | "recipientShopId" | "giftFromName" | "setupFeeIncluded" | "listingCreditPackId" | "listingCreditsGranted" | "googleShoppingCreditPackId" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "shopFlairIncluded" | "isBetaTesterBatch" | "isWaivedShopFeeBatch" | "amountCents" | "currency" | "status" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "emailedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["creatorGiftPurchase"]>
 export type CreatorGiftPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
   codes?: boolean | Prisma.CreatorGiftPurchase$codesArgs<ExtArgs>
@@ -1361,6 +1398,10 @@ export type $CreatorGiftPurchasePayload<ExtArgs extends runtime.Types.Extensions
      * * Batch-generated invite codes for beta testers (shop_setup codes).
      */
     isBetaTesterBatch: boolean
+    /**
+     * * Admin-generated shop_setup codes that waive the signup fee only (no extra perks).
+     */
+    isWaivedShopFeeBatch: boolean
     amountCents: number
     currency: string
     status: $Enums.CreatorGiftPurchaseStatus
@@ -1809,6 +1850,7 @@ export interface CreatorGiftPurchaseFieldRefs {
   readonly promotionCreditsGranted: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
   readonly shopFlairIncluded: Prisma.FieldRef<"CreatorGiftPurchase", 'Boolean'>
   readonly isBetaTesterBatch: Prisma.FieldRef<"CreatorGiftPurchase", 'Boolean'>
+  readonly isWaivedShopFeeBatch: Prisma.FieldRef<"CreatorGiftPurchase", 'Boolean'>
   readonly amountCents: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly status: Prisma.FieldRef<"CreatorGiftPurchase", 'CreatorGiftPurchaseStatus'>

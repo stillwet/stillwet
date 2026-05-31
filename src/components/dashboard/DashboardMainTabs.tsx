@@ -1319,7 +1319,7 @@ export function DashboardMainTabs(props: {
     effectiveGroupedListingSections;
 
   const tabBtnClass = (active: boolean) =>
-    `inline-block rounded-md px-4 py-2 text-sm font-medium transition ${
+    `inline-block shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition ${
       active
         ? "bg-zinc-800 text-zinc-100 ring-1 ring-zinc-600"
         : "text-zinc-500 hover:bg-zinc-900/80 hover:text-zinc-300"
@@ -1365,7 +1365,7 @@ export function DashboardMainTabs(props: {
       href={DASHBOARD_PROMOTIONS_PATH}
       prefetch={false}
       scroll={false}
-      className="inline-block rounded-md border border-violet-800/55 bg-violet-950/35 px-4 py-2 text-sm font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50"
+      className="inline-block shrink-0 whitespace-nowrap rounded-md border border-violet-800/55 bg-violet-950/35 px-4 py-2 text-sm font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50"
     >
       {DASHBOARD_SHOP_UPGRADES_LABEL}
     </Link>
@@ -1414,7 +1414,7 @@ export function DashboardMainTabs(props: {
           </div>
         ) : null}
         <div
-          className="flex w-full min-w-0 flex-wrap items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-zinc-950/40 p-1"
+          className="flex w-full min-w-0 flex-wrap items-center justify-start gap-1 rounded-xl border border-zinc-800 bg-zinc-950/40 p-1"
           role="tablist"
           aria-label="Shop dashboard"
         >
