@@ -1,6 +1,6 @@
-import { prisma, prismaAdminInboundEmailOrNull } from "@/lib/prisma";
+﻿import { prisma, prismaAdminInboundEmailOrNull } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
-import { ListingRequestStatus, OrderStatus } from "@/generated/prisma/enums";
+import { ListingRequestStatus } from "@/generated/prisma/enums";
 import { isR2UploadConfigured } from "@/lib/r2-upload";
 import { ConfirmDeleteForm } from "@/components/ConfirmDeleteForm";
 import { productHasTag } from "@/lib/product-tags";
@@ -11,17 +11,6 @@ import {
 } from "@/lib/site-email-template-service";
 import { PrintifyApiTab } from "./printify-api-tab";
 import { PrintifyInventoryTab } from "./printify-inventory-tab";
-import { AdminPlatformSalesTab } from "@/components/admin/AdminPlatformSalesTab";
-import {
-  loadMergedPlatformSalesLines,
-  loadPlatformSalesCurrentMonthTotals,
-  loadPlatformSalesPreviousMonthTotals,
-  loadPlatformSalesPriorCalendarYearTotals,
-  loadPlatformSalesYtdTotals,
-  type AdminPlatformSalesMergedLine,
-  type PlatformSalesPeriodTotals,
-  type PlatformSalesYtdTotals,
-} from "@/lib/admin-platform-sales-merged-lines";
 import { loadAdminShopLeaderboardRows } from "@/lib/admin-shop-leaderboard-load";
 import { AdminShopLeaderboardTab } from "@/components/admin/AdminShopLeaderboardTab";
 import {
@@ -34,18 +23,6 @@ import {
   AdminRemovedListingItemsTab,
   type RemovedListingRow,
 } from "@/components/admin/AdminRemovedListingItemsTab";
-import {
-  AdminShopWatchTab,
-  type ShopWatchDetail,
-  type ShopWatchRow,
-} from "@/components/admin/AdminShopWatchTab";
-import { AdminHomeHotCarouselFeaturedPanel } from "@/components/admin/AdminHomeHotCarouselFeaturedPanel";
-import { AdminPopularItemsFeaturedPanel } from "@/components/admin/AdminPopularItemsFeaturedPanel";
-import { AdminBrowseShopsPageFeaturedPanel } from "@/components/admin/AdminBrowseShopsPageFeaturedPanel";
-import {
-  listingRejectionReasonTextForCard,
-  resolveListingRejectionNoticeBody,
-} from "@/lib/shop-listing-rejection-notice";
 import { AdminListTab } from "@/components/admin/AdminListTab";
 import {
   AdminSupportMessagesTab,
@@ -67,24 +44,11 @@ import {
 } from "@/lib/admin-summary-email-settings-dto";
 import { AdminInboxTab, type AdminInboxRow } from "@/components/admin/AdminInboxTab";
 import {
-  isFounderUnlimitedFreeListingsShop,
   listingFeeCentsForOrdinal,
   PLATFORM_SHOP_SLUG,
-  SPECIAL_PROMOTION_FREE_LISTING_IDS,
 } from "@/lib/marketplace-constants";
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
-import {
-  HOME_HOT_CAROUSEL_MAX_ITEMS,
-  SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS,
-} from "@/lib/platform-all-page-featured-constants";
-import {
-  getOrderedHotFeaturedItemProductIds,
-  getOrderedPopularFeaturedItemProductIds,
-} from "@/lib/platform-all-page-featured";
-import { getFeaturedShopsRankedRows } from "@/lib/shops-browse-page-featured";
-import { parseShopOrderedFeaturedProductIds } from "@/lib/shop-ordered-featured-product-ids";
 import { shopListingPrintifyMappingReservedWhere } from "@/lib/shop-listing-printify-mapping-reserved";
-import { marketplaceAggregatedListingWhere } from "@/lib/shop-listing-storefront-visibility";
 import { loadSupportUnresolvedShopIdsForAdmin } from "@/lib/admin-nav-badges";
 import { listingOrdinalByListingId } from "@/lib/shop-listing-ordinal";
 import {
@@ -93,7 +57,6 @@ import {
   PRINTIFY_ADMIN_FETCH_TIMEOUT_MS,
 } from "@/lib/printify";
 import { defaultPrintifyVariantIdForCatalogProduct } from "@/lib/printify-catalog";
-import { listingRejectionNoticeDetail } from "@/lib/listing-request-reject-reasons";
 import {
   adminCreateTagForm,
   adminDeleteTagForm,
@@ -133,24 +96,6 @@ export function AdminDashboardTabPanelFallback() {
       <div className="h-24 rounded-lg bg-zinc-900/40" />
     </div>
   );
-}
-
-function platformSalesUtcMonthTitles(reference: Date): {
-  currentMonthTitle: string;
-  previousMonthTitle: string;
-} {
-  const fmt = (y: number, m: number) =>
-    new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(
-      new Date(Date.UTC(y, m, 1)),
-    );
-  const cy = reference.getUTCFullYear();
-  const cm = reference.getUTCMonth();
-  const pm = cm === 0 ? 11 : cm - 1;
-  const py = cm === 0 ? cy - 1 : cy;
-  return {
-    currentMonthTitle: fmt(cy, cm),
-    previousMonthTitle: fmt(py, pm),
-  };
 }
 
 type AdminProductWithTags = Prisma.ProductGetPayload<{
@@ -260,8 +205,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
 
   const supportShopParam =
     typeof sp.supportShop === "string" && sp.supportShop.trim() ? sp.supportShop.trim() : undefined;
-  const watchShopParam =
-    typeof sp.watchShop === "string" && sp.watchShop.trim() ? sp.watchShop.trim() : undefined;
 
   const publicBaseTrim = publicAppBaseUrl()?.replace(/\/$/, "") ?? "";
   const adminInboxWebhookEndpoint = publicBaseTrim
@@ -326,14 +269,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
 
   const salesFromRaw = typeof sp.salesFrom === "string" ? sp.salesFrom : "";
   const salesToRaw = typeof sp.salesTo === "string" ? sp.salesTo : "";
-  const salesKindRaw = typeof sp.salesKind === "string" ? sp.salesKind.trim() : "";
-  const salesKindFilter: "all" | "listing" | "item" | "support" | "promotion" =
-    salesKindRaw === "listing" ||
-    salesKindRaw === "item" ||
-    salesKindRaw === "support" ||
-    salesKindRaw === "promotion"
-      ? salesKindRaw
-      : "all";
   function parseIsoDateBoundary(s: string): Date | undefined {
     const t = s.trim();
     if (!t) return undefined;
@@ -342,13 +277,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
   }
   const salesFrom = parseIsoDateBoundary(salesFromRaw);
   const salesTo = parseIsoDateBoundary(salesToRaw);
-  const salesOrderCreatedAt =
-    salesFrom || salesTo
-      ? {
-          ...(salesFrom ? { gte: salesFrom } : {}),
-          ...(salesTo ? { lte: salesTo } : {}),
-        }
-      : undefined;
 
   /** Queue rows for listing-requests tab (full rows only load on the Requests tab). */
   const listingRequestTabPrismaWhere: Prisma.ShopListingWhereInput = {
@@ -537,20 +465,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
       ? prisma.shopFlairType.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] })
       : Promise.resolve([] as { id: string; slug: string; label: string; sortOrder: number; active: boolean }[]);
 
-  let platformSalesTabLines: AdminPlatformSalesMergedLine[] = [];
-  let platformSalesMonthSummaries: {
-    currentMonthTitle: string;
-    previousMonthTitle: string;
-    currentTotals: PlatformSalesPeriodTotals;
-    previousTotals: PlatformSalesPeriodTotals;
-    ytdTotals: PlatformSalesYtdTotals;
-    priorCalendarYearTotals: PlatformSalesYtdTotals;
-  } | null = null;
-
-  const clearSalesHistoryEnabled =
-    process.env.NODE_ENV !== "production" ||
-    process.env.ALLOW_ADMIN_CLEAR_SALES_HISTORY?.trim() === "true";
-
   const [adminTags, products, removedListingRows, flairTypes] = await Promise.all([
     adminSection === "backend" && inventoryTab === "tags"
       ? prisma.tag.findMany({
@@ -561,32 +475,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
     loadRemovedRows,
     loadFlairTypes,
   ]);
-
-  if (adminSection === "main" && inventoryTab === "sales") {
-    const bundle = await loadMergedPlatformSalesLines(prisma, {
-      salesOrderCreatedAt,
-    });
-    const merged = bundle.lines;
-    platformSalesTabLines =
-      salesKindFilter === "all"
-        ? merged
-        : merged.filter((l) => l.platformSaleCategory === salesKindFilter);
-    const salesClock = new Date();
-    const titles = platformSalesUtcMonthTitles(salesClock);
-    const [currentTotals, previousTotals, ytdTotals, priorCalendarYearTotals] = await Promise.all([
-      loadPlatformSalesCurrentMonthTotals(prisma, salesClock),
-      loadPlatformSalesPreviousMonthTotals(prisma, salesClock),
-      loadPlatformSalesYtdTotals(prisma, salesClock),
-      loadPlatformSalesPriorCalendarYearTotals(prisma, salesClock),
-    ]);
-    platformSalesMonthSummaries = {
-      ...titles,
-      currentTotals,
-      previousTotals,
-      ytdTotals,
-      priorCalendarYearTotals,
-    };
-  }
 
   /** Loaded only on the Shop leaderboard tab — cached aggregate over orders. */
   let shopLeaderboardRows: Awaited<ReturnType<typeof loadAdminShopLeaderboardRows>> = [];
@@ -773,395 +661,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
     return [...withoutLive, ...withLive];
   })();
 
-  let shopWatchRows: ShopWatchRow[] = [];
-  let platformBrowseFeaturedPickerShops: { id: string; displayName: string }[] = [];
-  let platformBrowseFeaturedPickerProductsByShopId: Record<
-    string,
-    { productId: string; label: string }[]
-  > = {};
-  let platformBrowseFeaturedPickerLabelsByProductId: Record<string, string> = {};
-  let platformHomeHotCarouselInitialIds: string[] = [];
-  let platformPopularItemsInitialIds: string[] = [];
-  let platformBrowseShopsPageFeaturedInitialIds: string[] = [];
-  let creatorShops: { id: string; displayName: string; slug: string; listingFeeBonusFreeSlots: number | null }[] = [];
-  let creatorShopIds: string[] = [];
-
-  if (inventoryTab === "shop-watch" || inventoryTab === "promotion-lists") {
-    creatorShops = await prisma.shop.findMany({
-      where: { slug: { not: PLATFORM_SHOP_SLUG }, active: true },
-      select: { id: true, displayName: true, slug: true, listingFeeBonusFreeSlots: true },
-      orderBy: { displayName: "asc" },
-    });
-    creatorShopIds = creatorShops.map((s) => s.id);
-  }
-
-  if (inventoryTab === "shop-watch" && creatorShopIds.length > 0) {
-    const [paidOrderRows, allCreatorListings, listingRejectionNotices] = await Promise.all([
-      prisma.order.findMany({
-        where: {
-          shopId: { in: creatorShopIds },
-          status: OrderStatus.paid,
-        },
-        select: { shopId: true },
-      }),
-      prisma.shopListing.findMany({
-        where: { shopId: { in: creatorShopIds } },
-        select: {
-          id: true,
-          shopId: true,
-          createdAt: true,
-          listingFeePaidAt: true,
-          active: true,
-          requestStatus: true,
-          requestItemName: true,
-          requestImages: true,
-          adminRemovedFromShopAt: true,
-          creatorRemovedFromShopAt: true,
-          removedFromListingRequestsAt: true,
-          adminListingRemovalNotes: true,
-          product: { select: { name: true, slug: true, active: true } },
-        },
-      }),
-      prisma.shopOwnerNotice.findMany({
-        where: { shopId: { in: creatorShopIds }, kind: "listing_rejected" },
-        orderBy: { createdAt: "desc" },
-        select: { shopId: true, kind: true, relatedListingId: true, body: true },
-      }),
-    ]);
-
-    const listingRejectionNoticesByShop = new Map<
-      string,
-      Array<{ kind: string; relatedListingId: string | null; body: string }>
-    >();
-    for (const n of listingRejectionNotices) {
-      const arr = listingRejectionNoticesByShop.get(n.shopId) ?? [];
-      arr.push(n);
-      listingRejectionNoticesByShop.set(n.shopId, arr);
-    }
-
-    /** Same filters as the former `groupBy` on listings (avoids Prisma 7 aggregate edge cases). */
-    const activeByShop = new Map<string, number>();
-    const frozenByShop = new Map<string, number>();
-    const removedByShop = new Map<string, number>();
-    const salesByShop = new Map<string, number>();
-    for (const id of creatorShopIds) {
-      activeByShop.set(id, 0);
-      frozenByShop.set(id, 0);
-      removedByShop.set(id, 0);
-      salesByShop.set(id, 0);
-    }
-    for (const l of allCreatorListings) {
-      if (l.adminRemovedFromShopAt != null) {
-        frozenByShop.set(l.shopId, (frozenByShop.get(l.shopId) ?? 0) + 1);
-      }
-      if (l.creatorRemovedFromShopAt != null) {
-        removedByShop.set(l.shopId, (removedByShop.get(l.shopId) ?? 0) + 1);
-      }
-      if (
-        l.active &&
-        l.creatorRemovedFromShopAt == null &&
-        l.product.active
-      ) {
-        activeByShop.set(l.shopId, (activeByShop.get(l.shopId) ?? 0) + 1);
-      }
-    }
-    for (const o of paidOrderRows) {
-      const sid = o.shopId;
-      if (sid != null) {
-        salesByShop.set(sid, (salesByShop.get(sid) ?? 0) + 1);
-      }
-    }
-
-    const listingsByShop = new Map<string, typeof allCreatorListings>();
-    for (const l of allCreatorListings) {
-      const arr = listingsByShop.get(l.shopId) ?? [];
-      arr.push(l);
-      listingsByShop.set(l.shopId, arr);
-    }
-
-    const sortDetails = (a: ShopWatchDetail, b: ShopWatchDetail) =>
-      a.productName.localeCompare(b.productName, undefined, { sensitivity: "base" });
-
-    const listingFeeKindForShopWatch = (
-      shopSlug: string,
-      ordinal1Based: number,
-      listingId: string,
-      listingFeePaidAt: Date | null,
-      listingFeeBonusFreeSlots: number,
-    ): ShopWatchDetail["listingFeeKind"] => {
-      if (SPECIAL_PROMOTION_FREE_LISTING_IDS.has(listingId)) {
-        return "free_promo";
-      }
-      const cents = listingFeeCentsForOrdinal(ordinal1Based, shopSlug, listingFeeBonusFreeSlots);
-      if (cents === 0) {
-        return isFounderUnlimitedFreeListingsShop(shopSlug) ? "free_promo" : "free_slot";
-      }
-      return listingFeePaidAt != null ? "paid" : "unpaid";
-    };
-
-    shopWatchRows = creatorShops.map((shop) => {
-      const shopRejectionNotices = listingRejectionNoticesByShop.get(shop.id) ?? [];
-      const listings = listingsByShop.get(shop.id) ?? [];
-      const ordinalByListingId = new Map<string, number>();
-      [...listings]
-        .sort((a, b) => {
-          const t = a.createdAt.getTime() - b.createdAt.getTime();
-          if (t !== 0) return t;
-          return a.id.localeCompare(b.id);
-        })
-        .forEach((row, i) => ordinalByListingId.set(row.id, i + 1));
-
-      const detailsActiveRaw: ShopWatchDetail[] = [];
-      const detailsFrozenRaw: ShopWatchDetail[] = [];
-      const detailsRemovedRaw: ShopWatchDetail[] = [];
-      const detailsOtherPipelineRaw: ShopWatchDetail[] = [];
-      const detailsOtherRequestedRaw: ShopWatchDetail[] = [];
-      const detailsOtherApprovedRaw: ShopWatchDetail[] = [];
-      const detailsOtherRejectedRaw: ShopWatchDetail[] = [];
-
-      for (const l of listings) {
-        const ordinal = ordinalByListingId.get(l.id) ?? 1;
-        const listingFeeKind = listingFeeKindForShopWatch(
-          shop.slug,
-          ordinal,
-          l.id,
-          l.listingFeePaidAt,
-          shop.listingFeeBonusFreeSlots ?? 0,
-        );
-        const base: Omit<ShopWatchDetail, "rowKind"> = {
-          listingId: l.id,
-          productName: l.product.name,
-          productSlug: l.product.slug,
-          listingFeeKind,
-          queueRemoved: l.removedFromListingRequestsAt != null,
-          notes: l.adminListingRemovalNotes,
-        };
-        if (l.creatorRemovedFromShopAt != null) {
-          detailsRemovedRaw.push({
-            ...base,
-            rowKind: "removed",
-            removalSource: "creator",
-          });
-        } else if (l.adminRemovedFromShopAt != null) {
-          detailsFrozenRaw.push({ ...base, rowKind: "frozen" });
-        } else if (l.active && l.creatorRemovedFromShopAt == null && l.product.active) {
-          detailsActiveRaw.push({ ...base, rowKind: "active" });
-        } else if (
-          l.removedFromListingRequestsAt != null &&
-          l.creatorRemovedFromShopAt == null &&
-          l.adminRemovedFromShopAt == null
-        ) {
-          detailsRemovedRaw.push({
-            ...base,
-            rowKind: "removed",
-            removalSource: "admin_queue",
-            rejectionReasonText: listingRejectionNoticeDetail("other", null),
-          });
-        } else {
-          const row: ShopWatchDetail = {
-            ...base,
-            rowKind: "other",
-            pipelineStatus: l.requestStatus,
-            listingActive: l.active,
-            productActive: l.product.active,
-          };
-          if (l.requestStatus === ListingRequestStatus.rejected) {
-            const noticeBody = resolveListingRejectionNoticeBody(
-              shopRejectionNotices,
-              l.id,
-              l.product.name,
-            );
-            detailsOtherRejectedRaw.push({
-              ...row,
-              rejectionReasonText: listingRejectionReasonTextForCard(noticeBody),
-            });
-          } else if (l.requestStatus === ListingRequestStatus.approved) {
-            detailsOtherApprovedRaw.push(row);
-          } else if (
-            l.requestStatus === ListingRequestStatus.submitted ||
-            l.requestStatus === ListingRequestStatus.images_ok
-          ) {
-            detailsOtherRequestedRaw.push(row);
-          } else {
-            detailsOtherPipelineRaw.push(row);
-          }
-        }
-      }
-
-      detailsActiveRaw.sort(sortDetails);
-      detailsFrozenRaw.sort(sortDetails);
-      detailsRemovedRaw.sort(sortDetails);
-      detailsOtherRequestedRaw.sort(sortDetails);
-      detailsOtherPipelineRaw.sort(sortDetails);
-      detailsOtherApprovedRaw.sort(sortDetails);
-      detailsOtherRejectedRaw.sort(sortDetails);
-
-      const detailsActive = detailsActiveRaw;
-      const detailsFrozen = detailsFrozenRaw;
-      const detailsRemoved = detailsRemovedRaw;
-      const detailsOtherPipeline = detailsOtherPipelineRaw;
-      const detailsOtherRequested = detailsOtherRequestedRaw;
-      const detailsOtherApproved = detailsOtherApprovedRaw;
-      const detailsOtherRejected = detailsOtherRejectedRaw;
-
-      const paidListingsCount = listings.reduce((acc, l) => {
-        const ordinal = ordinalByListingId.get(l.id) ?? 1;
-        return (
-          listingFeeKindForShopWatch(
-            shop.slug,
-            ordinal,
-            l.id,
-            l.listingFeePaidAt,
-            shop.listingFeeBonusFreeSlots ?? 0,
-          ) === "paid"
-        )
-          ? acc + 1
-          : acc;
-      }, 0);
-
-      return {
-        shopId: shop.id,
-        displayName: shop.displayName,
-        slug: shop.slug,
-        activeListingsCount:
-          (activeByShop.get(shop.id) ?? 0) + detailsOtherApproved.length,
-        salesCount: salesByShop.get(shop.id) ?? 0,
-        paidListingsCount,
-        frozenCount: frozenByShop.get(shop.id) ?? 0,
-        removedCount: detailsRemoved.length + detailsOtherRejected.length,
-        detailsActive,
-        detailsFrozen,
-        detailsRemoved,
-        detailsOtherRequested,
-        detailsOtherPipeline,
-        detailsOtherApproved,
-        detailsOtherRejected,
-      };
-    });
-    shopWatchRows.sort(
-      (a, b) =>
-        b.frozenCount + b.removedCount - (a.frozenCount + a.removedCount) ||
-        a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" }),
-    );
-  }
-
-  /** Hot carousel + browse featured pickers — Promotion lists tab only (Shop Data does not need this). */
-  if (inventoryTab === "promotion-lists") {
-    try {
-      const platformShop = await prisma.shop.findUnique({
-        where: { slug: PLATFORM_SHOP_SLUG },
-        select: { id: true },
-      });
-      if (platformShop) {
-        try {
-          const featuredRow = await prisma.shop.findUnique({
-            where: { id: platformShop.id },
-            select: {
-              homeHotCarouselFeaturedProductIds: true,
-              popularItemsFeaturedProductIds: true,
-              browseShopsPageFeaturedShopIds: true,
-            },
-          });
-          platformHomeHotCarouselInitialIds = parseShopOrderedFeaturedProductIds(
-            featuredRow?.homeHotCarouselFeaturedProductIds ?? null,
-            { max: HOME_HOT_CAROUSEL_MAX_ITEMS },
-          );
-          if (platformHomeHotCarouselInitialIds.length === 0) {
-            platformHomeHotCarouselInitialIds = await getOrderedHotFeaturedItemProductIds();
-          }
-          platformPopularItemsInitialIds = parseShopOrderedFeaturedProductIds(
-            featuredRow?.popularItemsFeaturedProductIds ?? null,
-            { max: HOME_HOT_CAROUSEL_MAX_ITEMS },
-          );
-          if (platformPopularItemsInitialIds.length === 0) {
-            platformPopularItemsInitialIds = await getOrderedPopularFeaturedItemProductIds();
-          }
-          platformBrowseShopsPageFeaturedInitialIds = parseShopOrderedFeaturedProductIds(
-            featuredRow?.browseShopsPageFeaturedShopIds ?? null,
-            { max: SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS },
-          );
-          if (platformBrowseShopsPageFeaturedInitialIds.length === 0) {
-            const ranked = await getFeaturedShopsRankedRows(SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS);
-            platformBrowseShopsPageFeaturedInitialIds = ranked.map((r) => r.id);
-          }
-        } catch (e) {
-          console.warn(
-            "[admin-dashboard] platform featured JSON columns unavailable (apply migrations for browse-all / home hot carousel?)",
-            e,
-          );
-        }
-        const liveRows = await prisma.shopListing.findMany({
-          where: {
-            ...marketplaceAggregatedListingWhere,
-            product: { active: true },
-          },
-          select: {
-            shopId: true,
-            productId: true,
-            requestItemName: true,
-            product: { select: { name: true } },
-            shop: { select: { displayName: true } },
-          },
-          orderBy: { product: { name: "asc" } },
-          take: 500,
-        });
-        const byShop = new Map<string, { productId: string; label: string }[]>();
-        const shopDisplayNameById = new Map<string, string>();
-        for (const r of liveRows) {
-          shopDisplayNameById.set(r.shopId, r.shop.displayName);
-          const itemLabel = r.requestItemName?.trim() || r.product.name;
-          const list = byShop.get(r.shopId) ?? [];
-          if (list.some((x) => x.productId === r.productId)) continue;
-          list.push({ productId: r.productId, label: itemLabel });
-          byShop.set(r.shopId, list);
-        }
-        platformBrowseFeaturedPickerShops = [...shopDisplayNameById.entries()]
-          .map(([id, displayName]) => ({ id, displayName }))
-          .sort((a, b) =>
-            a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" }),
-          );
-        platformBrowseFeaturedPickerProductsByShopId = {};
-        platformBrowseFeaturedPickerLabelsByProductId = {};
-        for (const [sid, products] of byShop) {
-          platformBrowseFeaturedPickerProductsByShopId[sid] = [...products].sort((a, b) =>
-            a.label.localeCompare(b.label, undefined, { sensitivity: "base" }),
-          );
-          for (const p of products) {
-            platformBrowseFeaturedPickerLabelsByProductId[p.productId] = p.label;
-          }
-        }
-      }
-    } catch (e) {
-      console.error("[admin-dashboard] promotion-lists featured panel load", e);
-    }
-  }
-
-  let creatorAccountCount = 0;
-  let shopsWithListingCount = 0;
-  let shopsWithPaidListingCount = 0;
-  if (inventoryTab === "shop-watch") {
-    const counts = await Promise.all([
-      prisma.shopUser.count({
-        where: { shop: { slug: { not: PLATFORM_SHOP_SLUG } } },
-      }),
-      prisma.shop.count({
-        where: {
-          slug: { not: PLATFORM_SHOP_SLUG },
-          listings: { some: {} },
-        },
-      }),
-      prisma.shop.count({
-        where: {
-          slug: { not: PLATFORM_SHOP_SLUG },
-          listings: { some: { listingFeePaidAt: { not: null } } },
-        },
-      }),
-    ]);
-    creatorAccountCount = counts[0];
-    shopsWithListingCount = counts[1];
-    shopsWithPaidListingCount = counts[2];
-  }
-
   const printifyProducts = products;
 
   /** Live Printify shop catalog (Printify + Requests tabs only — avoids slow remote fetch on every admin load). */
@@ -1243,7 +742,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
       shopId: t.shopId,
       shopDisplayName: t.shop.displayName,
       shopSlug: t.shop.slug,
-      ownerEmail: "—",
+      ownerEmail: "â€”",
       updatedAt: t.updatedAt.toISOString(),
       needsReply: supportUnresolvedShopIds.has(t.shopId),
     }));
@@ -1267,7 +766,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
           shopId: shopRow.id,
           shopDisplayName: shopRow.displayName,
           shopSlug: shopRow.slug,
-          ownerEmail: shopRow.users[0]?.email ?? "—",
+          ownerEmail: shopRow.users[0]?.email ?? "â€”",
           needsReply: supportUnresolvedShopIds.has(shopRow.id),
           resolvedAtIso: existingThread?.resolvedAt?.toISOString() ?? null,
           messages:
@@ -1303,52 +802,11 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
               printifyProductIdsSharedAcrossListings={printifyProductIdsSharedAcrossListings}
               r2Configured={isR2UploadConfigured()}
             />
-          ) : inventoryTab === "promotion-lists" ? (
-            <>
-              <AdminHomeHotCarouselFeaturedPanel
-                key={`home-hot:${JSON.stringify(platformHomeHotCarouselInitialIds)}`}
-                shops={platformBrowseFeaturedPickerShops}
-                productsByShopId={platformBrowseFeaturedPickerProductsByShopId}
-                labelsByProductId={platformBrowseFeaturedPickerLabelsByProductId}
-                initialProductIds={platformHomeHotCarouselInitialIds}
-              />
-              <AdminPopularItemsFeaturedPanel
-                key={`popular-items:${JSON.stringify(platformPopularItemsInitialIds)}`}
-                shops={platformBrowseFeaturedPickerShops}
-                productsByShopId={platformBrowseFeaturedPickerProductsByShopId}
-                labelsByProductId={platformBrowseFeaturedPickerLabelsByProductId}
-                initialProductIds={platformPopularItemsInitialIds}
-              />
-              <AdminBrowseShopsPageFeaturedPanel
-                key={`browse-shops:${JSON.stringify(platformBrowseShopsPageFeaturedInitialIds)}`}
-                shops={creatorShops}
-                initialShopIds={platformBrowseShopsPageFeaturedInitialIds}
-              />
-            </>
-          ) : inventoryTab === "shop-watch" ? (
-            <AdminShopWatchTab
-              rows={shopWatchRows}
-              marketplaceStats={{
-                creatorAccountCount,
-                shopsWithListingCount,
-                shopsWithPaidListingCount,
-              }}
-              initialExpandedShopId={watchShopParam}
-            />
           ) : inventoryTab === "shop-leaderboard" ? (
             <AdminShopLeaderboardTab
               rows={shopLeaderboardRows}
               salesFromValue={salesFromRaw}
               salesToValue={salesToRaw}
-            />
-          ) : inventoryTab === "sales" ? (
-            <AdminPlatformSalesTab
-              lines={platformSalesTabLines}
-              salesFromValue={salesFromRaw}
-              salesToValue={salesToRaw}
-              salesKind={salesKindFilter}
-              monthSummaries={platformSalesMonthSummaries}
-              clearSalesHistoryEnabled={clearSalesHistoryEnabled}
             />
           ) : inventoryTab === "admin-inbox" ? (
             <AdminInboxTab
@@ -1463,7 +921,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                 </p>
               ) : null}
               <p className="mt-1 text-xs text-zinc-600">
-                Tags are shared across the shop. Optional: set a “By Item” top pick per tag below.
+                Tags are shared across the shop. Optional: set a â€œBy Itemâ€ top pick per tag below.
               </p>
               <ul className="mt-4 divide-y divide-zinc-800 border-y border-zinc-800 text-sm">
                 {adminTags.map((t) => {
@@ -1542,7 +1000,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                             className="mt-0.5 block max-w-[min(100%,20rem)] rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-100"
                             title="Which product represents this tag in the By Item browse (must have this tag)."
                           >
-                            <option value="__auto__">Auto (first A–Z)</option>
+                            <option value="__auto__">Auto (first Aâ€“Z)</option>
                             {products
                               .filter((p) => productHasTag(p, t.id))
                               .map((p) => (
@@ -1557,7 +1015,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                     <div className="flex shrink-0 items-center gap-3 sm:pb-0.5">
                       <ConfirmDeleteForm
                         action={adminDeleteTagForm}
-                        message={`Delete tag “${t.name}”? Only if no products use it.`}
+                        message={`Delete tag â€œ${t.name}â€? Only if no products use it.`}
                       >
                         <input type="hidden" name="tagId" value={t.id} />
                         <button
@@ -1573,7 +1031,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                 })}
               </ul>
               {adminTags.length === 0 ? (
-                <p className="mt-2 text-sm text-zinc-600">No tags — run db seed.</p>
+                <p className="mt-2 text-sm text-zinc-600">No tags â€” run db seed.</p>
               ) : null}
               <form
                 action={adminCreateTagForm}

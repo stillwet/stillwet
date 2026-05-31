@@ -6,38 +6,59 @@ import {
   adminSaveBrowseShopsPageFeaturedInitialState,
 } from "@/actions/admin-browse-shops-page-featured-state";
 import { adminSaveBrowseShopsPageFeaturedShopIdsForm } from "@/actions/admin-browse-shops-page-featured";
-import {
-  SHOPS_BROWSE_PAGE_FEATURED_DEFAULT_DISPLAY,
-  SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS,
-} from "@/lib/platform-all-page-featured-constants";
+import { SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS } from "@/lib/platform-all-page-featured-constants";
+import { AdminActivePromotionsReadOnlyList } from "@/components/admin/AdminActivePromotionsReadOnlyList";
+import { AdminFeaturedListSaveButton } from "@/components/admin/AdminFeaturedListSaveButton";
 
 export function AdminBrowseShopsPageFeaturedPanel(props: {
-  shops: { id: string; displayName: string; slug: string }[];
-  initialShopIds: string[];
+  activeShopIds: string[];
+  permanentShopIds: string[];
+  permanentShopOptions: { id: string; displayName: string; slug: string }[];
+  activeShopLabelsById: Record<string, string>;
 }) {
-  const { shops, initialShopIds } = props;
+  const { activeShopIds, permanentShopIds, permanentShopOptions, activeShopLabelsById } = props;
   const router = useRouter();
-  const [ids, setIds] = useState<string[]>(initialShopIds);
+  const [ids, setIds] = useState<string[]>(permanentShopIds);
+  const [savedFlash, setSavedFlash] = useState(false);
   const [state, formAction] = useActionState(
     adminSaveBrowseShopsPageFeaturedShopIdsForm,
     adminSaveBrowseShopsPageFeaturedInitialState,
   );
 
+  const dirty = useMemo(() => {
+    if (ids.length !== permanentShopIds.length) return true;
+    return ids.some((id, i) => id !== permanentShopIds[i]);
+  }, [ids, permanentShopIds]);
+
   useEffect(() => {
-    if (state.ok) void router.refresh();
+    setIds(permanentShopIds);
+  }, [permanentShopIds]);
+
+  useEffect(() => {
+    if (state.ok) {
+      setSavedFlash(true);
+      void router.refresh();
+    }
   }, [state.ok, router]);
 
+  useEffect(() => {
+    if (dirty) setSavedFlash(false);
+  }, [dirty]);
+
   const labelById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const s of shops) {
+    const m = new Map<string, string>(Object.entries(activeShopLabelsById));
+    for (const s of permanentShopOptions) {
       m.set(s.id, `${s.displayName} — /${s.slug}`);
     }
     return m;
-  }, [shops]);
+  }, [activeShopLabelsById, permanentShopOptions]);
 
   const available = useMemo(
-    () => shops.filter((s) => !ids.includes(s.id)).sort((a, b) => a.displayName.localeCompare(b.displayName)),
-    [shops, ids],
+    () =>
+      permanentShopOptions
+        .filter((s) => !ids.includes(s.id))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+    [permanentShopOptions, ids],
   );
 
   function remove(id: string) {
@@ -69,34 +90,34 @@ export function AdminBrowseShopsPageFeaturedPanel(props: {
         Featured Shops
       </h3>
       <p className="mt-1 max-w-3xl text-xs leading-relaxed text-zinc-500">
-        Default order follows active <span className="font-medium text-zinc-400">Featured shop home</span> paid
-        placements (newest payment first), then UTC calendar-month seller revenue, storefront views, and platform
-        pin rules — same as the live <span className="font-mono text-zinc-400">/shops</span> strip when nothing is
-        saved. Saving pins that order (up to {SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS} shops). With no saved list, visitors
-        see the first {SHOPS_BROWSE_PAGE_FEATURED_DEFAULT_DISPLAY} in that ranking. Clear all restores automatic
-        ordering.
+        Section A shows paid <span className="font-medium text-zinc-400">Featured shop home</span> placements
+        active in the current Pacific window. Section B is your permanent pin for the{" "}
+        <span className="font-mono text-zinc-400">/shops</span> featured strip — when saved and non-empty, the
+        public site uses that order instead of active promotions (clear to fall back).
       </p>
+
+      <AdminActivePromotionsReadOnlyList
+        title="Active promotions (this window)"
+        ids={activeShopIds}
+        labelsById={activeShopLabelsById}
+        emptyMessage="No active Featured shop home promotions in the current window."
+      />
 
       {state.error ? (
         <p className="mt-3 rounded-md border border-amber-900/50 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
           {state.error}
         </p>
       ) : null}
-      {state.ok ? (
-        <p className="mt-3 rounded-md border border-emerald-900/50 bg-emerald-950/25 px-3 py-2 text-xs text-emerald-200/90">
-          Saved. Refresh <span className="font-mono text-zinc-300">/shops</span> to see changes.
-        </p>
-      ) : null}
 
-      <form action={formAction} className="mt-4 space-y-4">
+      <form action={formAction} className="mt-4 space-y-4 border-t border-zinc-800/80 pt-4">
         <input type="hidden" name="shopIdsJson" value={JSON.stringify(ids)} />
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-            Order ({ids.length}/{SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS})
+            Permanently featured ({ids.length}/{SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS})
           </p>
           {ids.length === 0 ? (
             <p className="mt-2 text-xs text-zinc-600">
-              None — /shops uses paid Featured shop home placements, then sales/views ranking.
+              No permanent picks — /shops uses active promotions, then automatic ranking.
             </p>
           ) : (
             <ol className="mt-2 space-y-2">
@@ -142,8 +163,8 @@ export function AdminBrowseShopsPageFeaturedPanel(props: {
 
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Add shop</p>
-          {shops.length === 0 ? (
-            <p className="mt-2 text-xs text-zinc-600">No creator shops in the database.</p>
+          {permanentShopOptions.length === 0 ? (
+            <p className="mt-2 text-xs text-zinc-600">No browse-listed creator shops available.</p>
           ) : (
             <select
               key={`${ids.join()}`}
@@ -173,18 +194,13 @@ export function AdminBrowseShopsPageFeaturedPanel(props: {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
-          >
-            Save /shops featured picks
-          </button>
+          <AdminFeaturedListSaveButton dirty={dirty} savedFlash={savedFlash} />
           <button
             type="button"
             className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-300 hover:underline"
             onClick={() => setIds([])}
           >
-            Clear all
+            Clear permanent list
           </button>
         </div>
       </form>

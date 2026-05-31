@@ -7,7 +7,6 @@ import {
   ADMIN_BACKEND_BASE_PATH,
   ADMIN_MAIN_BASE_PATH,
 } from "@/lib/admin-dashboard-urls";
-import { AdminLocalTodoList } from "@/components/admin/AdminLocalTodoList";
 import { ensureBaselineAdminCatalogIfEmpty } from "@/lib/seed-baseline-admin-catalog";
 import { prisma } from "@/lib/prisma";
 import {
@@ -17,6 +16,9 @@ import {
 import { AdminListTab } from "@/components/admin/AdminListTab";
 import { AdminShopFlairsTabLoader } from "@/components/admin/AdminShopFlairsTabLoader";
 import { AdminGoogleShoppingTabLoader } from "@/components/admin/AdminGoogleShoppingTabLoader";
+import { AdminShopWatchTabLoader } from "@/components/admin/AdminShopWatchTabLoader";
+import { AdminPromotionListsTabLoader } from "@/components/admin/AdminPromotionListsTabLoader";
+import { AdminPlatformSalesTabLoader } from "@/components/admin/AdminPlatformSalesTabLoader";
 import { printifyHookBannerFromSearchParams } from "@/lib/admin-printify-hook-banner";
 import { PrintifyApiTab } from "./printify-api-tab";
 import {
@@ -27,11 +29,6 @@ import {
   AdminMainNavCount,
   AdminShellCountsProvider,
 } from "@/components/admin/AdminMainShellClient";
-import {
-  formatBytesForAdmin,
-  getAdminDeployFootprint,
-  type AdminDeployFootprint,
-} from "@/lib/deploy-footprint";
 export const dynamic = "force-dynamic";
 
 export type AdminDashboardSection = "main" | "backend";
@@ -221,26 +218,7 @@ async function AdminDashboardPageBody({
   const basePath =
     adminSection === "main" ? ADMIN_MAIN_BASE_PATH : ADMIN_BACKEND_BASE_PATH;
 
-  const vercelStubFootprint = (): AdminDeployFootprint => ({
-    nextBuildBytes: null,
-    nextBuildArtifactBytes: null,
-    nextBuildDirPresent: true,
-    processCwd: process.cwd(),
-    nodeEnv: process.env.NODE_ENV,
-    vercelEnv: process.env.VERCEL_ENV,
-    isVercel: true,
-  });
-
-  const shellPromise = Promise.all([
-    baselinePromise,
-    adminSection === "main" && !process.env.VERCEL
-      ? getAdminDeployFootprint()
-      : adminSection === "main"
-        ? Promise.resolve(vercelStubFootprint())
-        : Promise.resolve(null),
-  ]);
-
-  const [, deployFootprint] = await shellPromise;
+  await baselinePromise;
 
   return (
     <AdminShellCountsProvider adminSection={adminSection}>
@@ -281,83 +259,6 @@ async function AdminDashboardPageBody({
       </div>
 
       {adminSection === "main" ? <AdminMainEmptyDbBanner /> : null}
-
-      {adminSection === "main" && deployFootprint ? (
-      <section
-        aria-label="Production deployment footprint"
-        className="rounded-lg border border-zinc-800 bg-zinc-900/35 px-3 py-2 text-[11px] text-zinc-400"
-      >
-        <h2 className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-          Production footprint (this host)
-        </h2>
-        <dl className="mt-1.5 flex flex-wrap gap-x-8 gap-y-1.5">
-          <div>
-            <dt className="text-zinc-600">Next.js build (artifact size)</dt>
-            <dd className="font-mono text-xs text-zinc-200">
-              {deployFootprint.nextBuildDirPresent
-                ? deployFootprint.nextBuildArtifactBytes != null
-                  ? formatBytesForAdmin(deployFootprint.nextBuildArtifactBytes)
-                  : deployFootprint.nextBuildBytes != null
-                    ? formatBytesForAdmin(deployFootprint.nextBuildBytes)
-                    : "`.next` present (size unavailable)"
-                : "No `.next` folder at process cwd"}
-            </dd>
-            {deployFootprint.nextBuildBytes != null &&
-            deployFootprint.nextBuildArtifactBytes != null &&
-            deployFootprint.nextBuildBytes !== deployFootprint.nextBuildArtifactBytes ? (
-              <dd className="mt-1 font-mono text-[10px] text-zinc-600">
-                Full <code className="text-zinc-500">.next</code> incl. dev caches:{" "}
-                {formatBytesForAdmin(deployFootprint.nextBuildBytes)}
-              </dd>
-            ) : null}
-          </div>
-          <div>
-            <dt className="text-zinc-600">Runtime</dt>
-            <dd className="font-mono text-xs text-zinc-200">
-              NODE_ENV={deployFootprint.nodeEnv ?? "—"}
-              {deployFootprint.isVercel ? (
-                <>
-                  {" · "}
-                  VERCEL_ENV={deployFootprint.vercelEnv ?? "—"}
-                </>
-              ) : null}
-            </dd>
-          </div>
-        </dl>
-        <details className="mt-2 text-[11px] text-zinc-600">
-          <summary className="cursor-pointer select-none text-[11px] text-zinc-500 hover:text-zinc-300">
-            Footprint
-          </summary>
-          <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1.5 text-[11px]">
-            <div>
-              <dt className="text-zinc-700">Process cwd</dt>
-              <dd
-                className="max-w-full truncate font-mono text-[10px] text-zinc-600"
-                title={deployFootprint.processCwd}
-              >
-                {deployFootprint.processCwd}
-              </dd>
-            </div>
-          </dl>
-          <p className="mt-2 leading-relaxed">
-            Primary figure excludes <code className="text-zinc-500">.next/cache</code> and{" "}
-            <code className="text-zinc-500">.next/dev</code> when present — closer to what a{" "}
-            <code className="text-zinc-500">next build</code> / production host keeps than the raw dev-server folder size.
-            It is not the git repo size and does not include <code className="text-zinc-500">node_modules</code>. When
-            caches exist locally, the secondary line shows full <code className="text-zinc-500">.next</code>.
-          </p>
-        </details>
-
-        <AdminLocalTodoList
-          storageKey="stillwet:admin-todo:v1"
-          initialItems={[
-            "Test admin dash speed",
-            "Test promotion lists",
-            "Test leaderboard",
-          ]}
-        />
-      </section>
-      ) : null}
 
       <div className="rounded-xl border border-zinc-800 bg-zinc-950/40">
         <nav
@@ -462,7 +363,7 @@ async function AdminDashboardPageBody({
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
                     }`}
                   >
-                    Promotion lists
+                    Promotion Rank
                     <AdminMainNavCount field="promotionLists" variant="muted" />
                   </Link>
                   <Link
@@ -671,6 +572,18 @@ async function AdminDashboardPageBody({
           ) : adminSection === "backend" && inventoryTab === "google-shopping" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <AdminGoogleShoppingTabLoader />
+            </Suspense>
+          ) : adminSection === "main" && inventoryTab === "shop-watch" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminShopWatchTabLoader sp={sp} />
+            </Suspense>
+          ) : adminSection === "main" && inventoryTab === "promotion-lists" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminPromotionListsTabLoader />
+            </Suspense>
+          ) : adminSection === "main" && inventoryTab === "sales" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminPlatformSalesTabLoader sp={sp} />
             </Suspense>
           ) : (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

@@ -14,7 +14,7 @@ export function AdminFeaturedProductPickerByShop(props: {
   productsByShopId: Record<string, ProductRow[]>;
   selectedProductIds: string[];
   maxSelectable: number;
-  onAddProduct: (productId: string) => void;
+  onAddProduct: (productId: string, label?: string) => void;
 }) {
   const { shops, productsByShopId, selectedProductIds, maxSelectable, onAddProduct } = props;
   const [shopId, setShopId] = useState(() => shops[0]?.id ?? "");
@@ -61,7 +61,8 @@ export function AdminFeaturedProductPickerByShop(props: {
           onChange={(e) => {
             const v = e.target.value;
             if (!v) return;
-            onAddProduct(v);
+            const row = available.find((r) => r.productId === v);
+            onAddProduct(v, row?.label);
           }}
         >
           <option value="">

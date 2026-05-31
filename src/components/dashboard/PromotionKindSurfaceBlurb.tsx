@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PromotionKind } from "@/generated/prisma/enums";
 import type { PlacementCheckoutPromotionKind } from "@/lib/promotion-placement-ui-pure";
+import { HOT_ITEM_PLATFORM_PERIOD_CAP, TOP_SHOP_PLATFORM_PERIOD_CAP } from "@/lib/promotion-policy-shared";
 import {
   PROMOTION_SURFACE_ALL_ITEMS_HREF,
   PROMOTION_SURFACE_POPULAR_FILTER_HREF,
@@ -41,21 +42,31 @@ export function PromotionKindSurfaceBlurb(props: { kind: PlacementCheckoutPromot
     case PromotionKind.HOT_FEATURED_ITEM:
       return (
         <>
-          Displays as a &quot;Hot Item&quot; on the{" "}
-          <Link href={PROMOTION_SURFACE_ALL_ITEMS_HREF} prefetch={false} className={surfaceLinkClass}>
-            all items
-          </Link>{" "}
-          page carousel.
+          <p>
+            Displays as a &quot;Hot Item&quot; on the{" "}
+            <Link href={PROMOTION_SURFACE_ALL_ITEMS_HREF} prefetch={false} className={surfaceLinkClass}>
+              all items
+            </Link>{" "}
+            page carousel.
+          </p>
+          <p className="text-zinc-600">
+            Each placement period allows for {HOT_ITEM_PLATFORM_PERIOD_CAP} promotions. Get yours before we run out!
+          </p>
         </>
       );
     case PromotionKind.FEATURED_SHOP_HOME:
       return (
         <>
-          Displays as a &quot;Featured Shop&quot; on the{" "}
-          <Link href={PROMOTION_SURFACE_SHOPS_HREF} prefetch={false} className={surfaceLinkClass}>
-            all shops
-          </Link>{" "}
-          page.
+          <p>
+            Displays as a &quot;Featured Shop&quot; on the{" "}
+            <Link href={PROMOTION_SURFACE_SHOPS_HREF} prefetch={false} className={surfaceLinkClass}>
+              all shops
+            </Link>{" "}
+            page.
+          </p>
+          <p className="text-zinc-600">
+            Each placement period allows for {TOP_SHOP_PLATFORM_PERIOD_CAP} promotions. Get yours before we run out!
+          </p>
         </>
       );
     default:

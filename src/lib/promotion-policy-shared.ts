@@ -16,7 +16,7 @@ import {
 export const HOT_ITEM_PLATFORM_PERIOD_CAP = 15;
 
 /** Paid Top shop placements per two-week Pacific period (platform-wide; two home slots are reserved). */
-export const TOP_SHOP_PLATFORM_PERIOD_CAP = 23;
+export const TOP_SHOP_PLATFORM_PERIOD_CAP = 25;
 
 /** Paid Popular item placements per two-week Pacific period (platform-wide). */
 export const POPULAR_ITEM_PLATFORM_PERIOD_CAP = 25;

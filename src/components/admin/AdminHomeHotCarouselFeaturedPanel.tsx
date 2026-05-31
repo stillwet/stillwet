@@ -6,39 +6,60 @@ import {
   adminSaveHomeHotCarouselFeaturedInitialState,
 } from "@/actions/admin-home-hot-carousel-featured-state";
 import { adminSaveHomeHotCarouselFeaturedProductIdsForm } from "@/actions/admin-home-hot-carousel-featured";
-import {
-  HOME_HOT_CAROUSEL_DEFAULT_DISPLAY,
-  HOME_HOT_CAROUSEL_MAX_ITEMS,
-  PLATFORM_ALL_PAGE_FEATURED_LIMIT,
-  PLATFORM_ALL_PAGE_FEATURED_SALES_WINDOW_DAYS,
-} from "@/lib/platform-all-page-featured-constants";
-import { AdminFeaturedProductPickerByShop } from "@/components/admin/AdminFeaturedProductPickerByShop";
+import { HOME_HOT_CAROUSEL_MAX_ITEMS } from "@/lib/platform-all-page-featured-constants";
+import { PromotionKind } from "@/generated/prisma/enums";
+import { AdminFeaturedListSaveButton } from "@/components/admin/AdminFeaturedListSaveButton";
+import { AdminFeaturedProductPickerLazy } from "@/components/admin/AdminFeaturedProductPickerLazy";
 
 export function AdminHomeHotCarouselFeaturedPanel(props: {
-  shops: { id: string; displayName: string }[];
-  productsByShopId: Record<string, { productId: string; label: string }[]>;
   labelsByProductId: Record<string, string>;
   initialProductIds: string[];
 }) {
-  const { shops, productsByShopId, labelsByProductId, initialProductIds } = props;
+  const { labelsByProductId, initialProductIds } = props;
   const router = useRouter();
   const [ids, setIds] = useState<string[]>(initialProductIds);
+  const [pickedLabelsByProductId, setPickedLabelsByProductId] = useState<Record<string, string>>({});
+  const [savedFlash, setSavedFlash] = useState(false);
   const [state, formAction] = useActionState(
     adminSaveHomeHotCarouselFeaturedProductIdsForm,
     adminSaveHomeHotCarouselFeaturedInitialState,
   );
 
+  const dirty = useMemo(() => {
+    if (ids.length !== initialProductIds.length) return true;
+    return ids.some((id, i) => id !== initialProductIds[i]);
+  }, [ids, initialProductIds]);
+
   useEffect(() => {
-    if (state.ok) void router.refresh();
+    setIds(initialProductIds);
+  }, [initialProductIds]);
+
+  useEffect(() => {
+    if (state.ok) {
+      setSavedFlash(true);
+      void router.refresh();
+    }
   }, [state.ok, router]);
 
-  const labelById = useMemo(() => new Map(Object.entries(labelsByProductId)), [labelsByProductId]);
+  useEffect(() => {
+    if (dirty) setSavedFlash(false);
+  }, [dirty]);
+
+  const labelById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const [id, label] of Object.entries(labelsByProductId)) m.set(id, label);
+    for (const [id, label] of Object.entries(pickedLabelsByProductId)) m.set(id, label);
+    return m;
+  }, [labelsByProductId, pickedLabelsByProductId]);
 
   function remove(id: string) {
     setIds((prev) => prev.filter((x) => x !== id));
   }
 
-  function add(id: string) {
+  function add(id: string, label?: string) {
+    if (label?.trim()) {
+      setPickedLabelsByProductId((prev) => ({ ...prev, [id]: label.trim() }));
+    }
     setIds((prev) => {
       if (prev.includes(id) || prev.length >= HOME_HOT_CAROUSEL_MAX_ITEMS) return prev;
       return [...prev, id];
@@ -61,38 +82,15 @@ export function AdminHomeHotCarouselFeaturedPanel(props: {
     <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 sm:p-5">
       <h3 className="text-sm font-semibold text-zinc-100">Hot Items List</h3>
       <p className="mt-1 max-w-3xl text-xs leading-relaxed text-zinc-500">
-        Default order follows active{" "}
-        <span className="font-medium text-zinc-400">Hot item</span> paid placements
-        (newest payment first). Saving a list pins that order on the marketing home page (up to{" "}
-        {HOME_HOT_CAROUSEL_MAX_ITEMS} items). With no saved list, visitors see up to{" "}
-        {HOME_HOT_CAROUSEL_DEFAULT_DISPLAY} items—promotions first, then highest PDP views, then any live listing.
-        Drag-free: use Up/Down to reorder. Clear all restores automatic promotion-based ordering.
+        Lists only <span className="font-medium text-zinc-400">Hot item</span> paid placements active in the
+        current Pacific promotion window (newest payment first). Reorder and Save to pin that order on the
+        marketing home page (up to {HOME_HOT_CAROUSEL_MAX_ITEMS} items). Clear all removes your pin — the public
+        site falls back to automatic promotion ordering (then views and other live listings when slots remain).
       </p>
-      <div className="mt-3 max-w-3xl border-t border-zinc-800/80 pt-3">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-600">
-          Reference — /shop/all “Hot items”
-        </p>
-        <p className="mt-1 text-xs leading-relaxed text-zinc-600">
-          The featured strip on <span className="font-mono text-zinc-500">/shop/all</span> (up to{" "}
-          {PLATFORM_ALL_PAGE_FEATURED_LIMIT} cards) is automatic. Order: (1) paid Hot item promotions,
-          newest paid first; (2) best-selling live listings from paid order lines in the last{" "}
-          {PLATFORM_ALL_PAGE_FEATURED_SALES_WINDOW_DAYS} days; (3) highest{" "}
-          <code className="text-zinc-500">Product.storefrontViewCount</code> (lifetime — we do not store views by day);
-          (4) live listings from fallback shop slugs — env{" "}
-          <code className="text-zinc-500">PLATFORM_HOT_ITEMS_FALLBACK_SHOP_SLUGS</code> (comma-separated), or default{" "}
-          default platform shop slugs (see <code className="text-zinc-500">PLATFORM_HOT_ITEMS_FALLBACK_SHOP_SLUGS</code>
-          ).
-        </p>
-      </div>
 
       {state.error ? (
         <p className="mt-3 rounded-md border border-amber-900/50 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
           {state.error}
-        </p>
-      ) : null}
-      {state.ok ? (
-        <p className="mt-3 rounded-md border border-emerald-900/50 bg-emerald-950/25 px-3 py-2 text-xs text-emerald-200/90">
-          Saved. Refresh the public home page to see changes.
         </p>
       ) : null}
 
@@ -104,7 +102,7 @@ export function AdminHomeHotCarouselFeaturedPanel(props: {
           </p>
           {ids.length === 0 ? (
             <p className="mt-2 text-xs text-zinc-600">
-              None — home carousel uses Hot item promotions, then views, then any live listing.
+              No active Hot item promotions in the current window.
             </p>
           ) : (
             <ol className="mt-2 space-y-2">
@@ -148,28 +146,17 @@ export function AdminHomeHotCarouselFeaturedPanel(props: {
           )}
         </div>
 
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Add live catalog item</p>
-          {shops.length === 0 ? (
-            <p className="mt-2 text-xs text-zinc-600">No creator shops with live marketplace listings.</p>
-          ) : (
-            <AdminFeaturedProductPickerByShop
-              shops={shops}
-              productsByShopId={productsByShopId}
-              selectedProductIds={ids}
-              maxSelectable={HOME_HOT_CAROUSEL_MAX_ITEMS}
-              onAddProduct={add}
-            />
-          )}
-        </div>
+        <AdminFeaturedProductPickerLazy
+          pickerMode="active"
+          promotionKind={PromotionKind.HOT_FEATURED_ITEM}
+          selectedProductIds={ids}
+          maxSelectable={HOME_HOT_CAROUSEL_MAX_ITEMS}
+          onAddProduct={add}
+          labelsByProductId={labelsByProductId}
+        />
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
-          >
-            Save home hot picks
-          </button>
+          <AdminFeaturedListSaveButton dirty={dirty} savedFlash={savedFlash} />
           <button
             type="button"
             className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-300 hover:underline"

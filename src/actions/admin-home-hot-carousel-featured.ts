@@ -9,6 +9,8 @@ import { marketplaceAggregatedListingWhere } from "@/lib/shop-listing-storefront
 import { HOME_HOT_CAROUSEL_MAX_ITEMS } from "@/lib/platform-all-page-featured-constants";
 import type { Prisma } from "@/generated/prisma/client";
 import { parseShopOrderedFeaturedProductIds } from "@/lib/shop-ordered-featured-product-ids";
+import { PromotionKind } from "@/generated/prisma/enums";
+import { assertProductIdsHaveActivePromotion } from "@/lib/admin-active-promotion-placements";
 import type { AdminSaveHomeHotCarouselFeaturedState } from "@/actions/admin-home-hot-carousel-featured-state";
 import { revalidatePublicStorefront } from "@/lib/revalidate-public-storefront";
 
@@ -63,6 +65,12 @@ export async function adminSaveHomeHotCarouselFeaturedProductIdsForm(
         error: `Not all IDs are on a live creator listing: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`,
       };
     }
+
+    const promoCheck = await assertProductIdsHaveActivePromotion(
+      PromotionKind.HOT_FEATURED_ITEM,
+      normalized,
+    );
+    if (!promoCheck.ok) return promoCheck;
   }
 
   try {

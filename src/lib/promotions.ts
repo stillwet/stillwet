@@ -1,4 +1,5 @@
 import { PromotionKind } from "@/generated/prisma/enums";
+import { HOT_ITEM_PLATFORM_PERIOD_CAP } from "@/lib/promotion-policy-shared";
 
 export type PromotionKindUiRow = {
   kind: PromotionKind;
@@ -54,7 +55,7 @@ export function promotionKindSurfaceDescription(kind: PromotionKind): string {
     case PromotionKind.FRONT_PAGE_ITEM:
       return 'Displays as a "hot item" on the home page.';
     case PromotionKind.HOT_FEATURED_ITEM:
-      return 'Displays as a "Hot Item" on the all items page carousel.';
+      return `Displays as a "Hot Item" on the all items page carousel. Each placement period allows for ${HOT_ITEM_PLATFORM_PERIOD_CAP} promotions. Get yours before we run out!`;
     case PromotionKind.MOST_POPULAR_OF_TAG_ITEM:
       return 'Displays first under the "Popular" filter on the all items page.';
     case PromotionKind.FEATURED_SHOP_HOME:

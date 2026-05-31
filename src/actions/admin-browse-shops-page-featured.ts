@@ -8,6 +8,7 @@ import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { SHOPS_BROWSE_PAGE_FEATURED_MAX_ITEMS } from "@/lib/platform-all-page-featured-constants";
 import type { Prisma } from "@/generated/prisma/client";
 import { parseShopOrderedFeaturedProductIds } from "@/lib/shop-ordered-featured-product-ids";
+import { CREATOR_SHOP_BASE } from "@/lib/shops-browse-page-featured-compute";
 import type { AdminSaveBrowseShopsPageFeaturedState } from "@/actions/admin-browse-shops-page-featured-state";
 import { revalidatePublicStorefront } from "@/lib/revalidate-public-storefront";
 
@@ -49,8 +50,7 @@ export async function adminSaveBrowseShopsPageFeaturedShopIdsForm(
     const rows = await prisma.shop.findMany({
       where: {
         id: { in: normalized },
-        active: true,
-        slug: { not: PLATFORM_SHOP_SLUG },
+        ...CREATOR_SHOP_BASE,
       },
       select: { id: true },
     });
@@ -59,7 +59,7 @@ export async function adminSaveBrowseShopsPageFeaturedShopIdsForm(
     if (missing.length > 0) {
       return {
         ok: false,
-        error: `Not all IDs are active creator shops: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`,
+        error: `Not all IDs are browse-listed creator shops: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`,
       };
     }
   }
