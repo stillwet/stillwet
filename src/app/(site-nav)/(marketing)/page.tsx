@@ -1,8 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AccountDeletedBanner } from "@/components/AccountDeletedBanner";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { BrandLogoLink } from "@/components/BrandLogoLink";
+import { googleSiteVerificationMetadata } from "@/lib/google-site-verification";
+
+export const metadata: Metadata = googleSiteVerificationMetadata;
 
 export default function HomePage() {
   return (
