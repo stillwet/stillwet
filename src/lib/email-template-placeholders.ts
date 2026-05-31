@@ -12,6 +12,22 @@ export function replaceActionUrlInHtmlTemplate(template: string, actionUrl: stri
 export const GIFT_SETUP_CODE_PLACEHOLDER = "{{SETUP_CODE}}";
 export const GIFT_LISTING_CODE_PLACEHOLDER = "{{LISTING_CODE}}";
 export const GIFT_LISTING_CREDITS_PLACEHOLDER = "{{LISTING_CREDITS}}";
+export const GIFT_PROMOTION_CODE_PLACEHOLDER = "{{PROMOTION_CODE}}";
+export const GIFT_PROMOTION_KIND_LABEL_PLACEHOLDER = "{{PROMOTION_KIND_LABEL}}";
+export const GIFT_PROMOTION_CREDITS_PLACEHOLDER = "{{PROMOTION_CREDITS}}";
+export const GIFT_GOOGLE_SHOPPING_CODE_PLACEHOLDER = "{{GOOGLE_SHOPPING_CODE}}";
+export const GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER = "{{GOOGLE_SHOPPING_CREDITS}}";
+
+export type GiftRedemptionEmailVars = {
+  setupCode: string;
+  listingCode: string;
+  listingCredits: string;
+  promotionCode: string;
+  promotionKindLabel: string;
+  promotionCredits: string;
+  googleShoppingCode: string;
+  googleShoppingCredits: string;
+};
 
 function escapeHtmlText(value: string): string {
   return value
@@ -23,7 +39,7 @@ function escapeHtmlText(value: string): string {
 
 export function replaceGiftCodePlaceholders(
   template: string,
-  vars: { setupCode: string; listingCode: string; listingCredits: string },
+  vars: GiftRedemptionEmailVars,
 ): string {
   return template
     .split(GIFT_SETUP_CODE_PLACEHOLDER)
@@ -31,7 +47,17 @@ export function replaceGiftCodePlaceholders(
     .split(GIFT_LISTING_CODE_PLACEHOLDER)
     .join(escapeHtmlText(vars.listingCode))
     .split(GIFT_LISTING_CREDITS_PLACEHOLDER)
-    .join(escapeHtmlText(vars.listingCredits));
+    .join(escapeHtmlText(vars.listingCredits))
+    .split(GIFT_PROMOTION_CODE_PLACEHOLDER)
+    .join(escapeHtmlText(vars.promotionCode))
+    .split(GIFT_PROMOTION_KIND_LABEL_PLACEHOLDER)
+    .join(escapeHtmlText(vars.promotionKindLabel))
+    .split(GIFT_PROMOTION_CREDITS_PLACEHOLDER)
+    .join(escapeHtmlText(vars.promotionCredits))
+    .split(GIFT_GOOGLE_SHOPPING_CODE_PLACEHOLDER)
+    .join(escapeHtmlText(vars.googleShoppingCode))
+    .split(GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER)
+    .join(escapeHtmlText(vars.googleShoppingCredits));
 }
 
 export const CONTACT_QUOTE_NAME_PLACEHOLDER = "{{CONTACT_NAME}}";

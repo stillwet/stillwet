@@ -63,6 +63,7 @@ export type ShopMinAggregateOutputType = {
   accountDeletionEmailConfirmedAt: Date | null
   inactivityWarningSentAt: Date | null
   inactivityDeactivatedAt: Date | null
+  adminFrozenAt: Date | null
   inactivityDeletionTriggeredAt: Date | null
   homeFeaturedListingId: string | null
   itemGuidelinesAcknowledgedAt: Date | null
@@ -70,6 +71,10 @@ export type ShopMinAggregateOutputType = {
   flairTypeId: string | null
   flairPurchasedAt: Date | null
   googleShoppingCredits: number | null
+  betaTesterAt: Date | null
+  betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt: Date | null
+  betaTesterOnboardingCompletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -95,6 +100,7 @@ export type ShopMaxAggregateOutputType = {
   accountDeletionEmailConfirmedAt: Date | null
   inactivityWarningSentAt: Date | null
   inactivityDeactivatedAt: Date | null
+  adminFrozenAt: Date | null
   inactivityDeletionTriggeredAt: Date | null
   homeFeaturedListingId: string | null
   itemGuidelinesAcknowledgedAt: Date | null
@@ -102,6 +108,10 @@ export type ShopMaxAggregateOutputType = {
   flairTypeId: string | null
   flairPurchasedAt: Date | null
   googleShoppingCredits: number | null
+  betaTesterAt: Date | null
+  betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt: Date | null
+  betaTesterOnboardingCompletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -128,6 +138,7 @@ export type ShopCountAggregateOutputType = {
   accountDeletionEmailConfirmedAt: number
   inactivityWarningSentAt: number
   inactivityDeactivatedAt: number
+  adminFrozenAt: number
   inactivityDeletionTriggeredAt: number
   homeFeaturedListingId: number
   itemGuidelinesAcknowledgedAt: number
@@ -139,6 +150,10 @@ export type ShopCountAggregateOutputType = {
   flairTypeId: number
   flairPurchasedAt: number
   googleShoppingCredits: number
+  betaTesterAt: number
+  betaTesterOnboardingStatus: number
+  betaTesterOnboardingCheckedAt: number
+  betaTesterOnboardingCompletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -182,6 +197,7 @@ export type ShopMinAggregateInputType = {
   accountDeletionEmailConfirmedAt?: true
   inactivityWarningSentAt?: true
   inactivityDeactivatedAt?: true
+  adminFrozenAt?: true
   inactivityDeletionTriggeredAt?: true
   homeFeaturedListingId?: true
   itemGuidelinesAcknowledgedAt?: true
@@ -189,6 +205,10 @@ export type ShopMinAggregateInputType = {
   flairTypeId?: true
   flairPurchasedAt?: true
   googleShoppingCredits?: true
+  betaTesterAt?: true
+  betaTesterOnboardingStatus?: true
+  betaTesterOnboardingCheckedAt?: true
+  betaTesterOnboardingCompletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -214,6 +234,7 @@ export type ShopMaxAggregateInputType = {
   accountDeletionEmailConfirmedAt?: true
   inactivityWarningSentAt?: true
   inactivityDeactivatedAt?: true
+  adminFrozenAt?: true
   inactivityDeletionTriggeredAt?: true
   homeFeaturedListingId?: true
   itemGuidelinesAcknowledgedAt?: true
@@ -221,6 +242,10 @@ export type ShopMaxAggregateInputType = {
   flairTypeId?: true
   flairPurchasedAt?: true
   googleShoppingCredits?: true
+  betaTesterAt?: true
+  betaTesterOnboardingStatus?: true
+  betaTesterOnboardingCheckedAt?: true
+  betaTesterOnboardingCompletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -247,6 +272,7 @@ export type ShopCountAggregateInputType = {
   accountDeletionEmailConfirmedAt?: true
   inactivityWarningSentAt?: true
   inactivityDeactivatedAt?: true
+  adminFrozenAt?: true
   inactivityDeletionTriggeredAt?: true
   homeFeaturedListingId?: true
   itemGuidelinesAcknowledgedAt?: true
@@ -258,6 +284,10 @@ export type ShopCountAggregateInputType = {
   flairTypeId?: true
   flairPurchasedAt?: true
   googleShoppingCredits?: true
+  betaTesterAt?: true
+  betaTesterOnboardingStatus?: true
+  betaTesterOnboardingCheckedAt?: true
+  betaTesterOnboardingCompletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -371,6 +401,7 @@ export type ShopGroupByOutputType = {
   accountDeletionEmailConfirmedAt: Date | null
   inactivityWarningSentAt: Date | null
   inactivityDeactivatedAt: Date | null
+  adminFrozenAt: Date | null
   inactivityDeletionTriggeredAt: Date | null
   homeFeaturedListingId: string | null
   itemGuidelinesAcknowledgedAt: Date | null
@@ -382,6 +413,10 @@ export type ShopGroupByOutputType = {
   flairTypeId: string | null
   flairPurchasedAt: Date | null
   googleShoppingCredits: number
+  betaTesterAt: Date | null
+  betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt: Date | null
+  betaTesterOnboardingCompletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ShopCountAggregateOutputType | null
@@ -431,6 +466,7 @@ export type ShopWhereInput = {
   accountDeletionEmailConfirmedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityWarningSentAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityDeactivatedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  adminFrozenAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   homeFeaturedListingId?: Prisma.StringNullableFilter<"Shop"> | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
@@ -442,6 +478,10 @@ export type ShopWhereInput = {
   flairTypeId?: Prisma.StringNullableFilter<"Shop"> | string | null
   flairPurchasedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   googleShoppingCredits?: Prisma.IntFilter<"Shop"> | number
+  betaTesterAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   homeFeaturedListing?: Prisma.XOR<Prisma.ShopListingNullableScalarRelationFilter, Prisma.ShopListingWhereInput> | null
@@ -458,12 +498,15 @@ export type ShopWhereInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseListRelationFilter
   reactivationPurchases?: Prisma.ShopReactivationPurchaseListRelationFilter
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeListRelationFilter
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseListRelationFilter
   promotionsDashboardSnapshot?: Prisma.XOR<Prisma.ShopPromotionsDashboardSnapshotNullableScalarRelationFilter, Prisma.ShopPromotionsDashboardSnapshotWhereInput> | null
   salesDashboardSnapshot?: Prisma.XOR<Prisma.ShopSalesDashboardSnapshotNullableScalarRelationFilter, Prisma.ShopSalesDashboardSnapshotWhereInput> | null
   flairType?: Prisma.XOR<Prisma.ShopFlairTypeNullableScalarRelationFilter, Prisma.ShopFlairTypeWhereInput> | null
   flairPurchases?: Prisma.ShopFlairPurchaseListRelationFilter
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseListRelationFilter
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentListRelationFilter
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceListRelationFilter
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantListRelationFilter
 }
 
 export type ShopOrderByWithRelationInput = {
@@ -488,6 +531,7 @@ export type ShopOrderByWithRelationInput = {
   accountDeletionEmailConfirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   inactivityWarningSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   inactivityDeactivatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminFrozenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   inactivityDeletionTriggeredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   homeFeaturedListingId?: Prisma.SortOrderInput | Prisma.SortOrder
   itemGuidelinesAcknowledgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -499,6 +543,10 @@ export type ShopOrderByWithRelationInput = {
   flairTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   flairPurchasedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   googleShoppingCredits?: Prisma.SortOrder
+  betaTesterAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  betaTesterOnboardingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  betaTesterOnboardingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  betaTesterOnboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   homeFeaturedListing?: Prisma.ShopListingOrderByWithRelationInput
@@ -515,12 +563,15 @@ export type ShopOrderByWithRelationInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseOrderByRelationAggregateInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseOrderByRelationAggregateInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeOrderByRelationAggregateInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseOrderByRelationAggregateInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotOrderByWithRelationInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotOrderByWithRelationInput
   flairType?: Prisma.ShopFlairTypeOrderByWithRelationInput
   flairPurchases?: Prisma.ShopFlairPurchaseOrderByRelationAggregateInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseOrderByRelationAggregateInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentOrderByRelationAggregateInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceOrderByRelationAggregateInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantOrderByRelationAggregateInput
 }
 
 export type ShopWhereUniqueInput = Prisma.AtLeast<{
@@ -549,6 +600,7 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   accountDeletionEmailConfirmedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityWarningSentAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityDeactivatedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  adminFrozenAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFilter<"Shop"> | number
@@ -559,6 +611,10 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   flairTypeId?: Prisma.StringNullableFilter<"Shop"> | string | null
   flairPurchasedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   googleShoppingCredits?: Prisma.IntFilter<"Shop"> | number
+  betaTesterAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   homeFeaturedListing?: Prisma.XOR<Prisma.ShopListingNullableScalarRelationFilter, Prisma.ShopListingWhereInput> | null
@@ -575,12 +631,15 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseListRelationFilter
   reactivationPurchases?: Prisma.ShopReactivationPurchaseListRelationFilter
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeListRelationFilter
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseListRelationFilter
   promotionsDashboardSnapshot?: Prisma.XOR<Prisma.ShopPromotionsDashboardSnapshotNullableScalarRelationFilter, Prisma.ShopPromotionsDashboardSnapshotWhereInput> | null
   salesDashboardSnapshot?: Prisma.XOR<Prisma.ShopSalesDashboardSnapshotNullableScalarRelationFilter, Prisma.ShopSalesDashboardSnapshotWhereInput> | null
   flairType?: Prisma.XOR<Prisma.ShopFlairTypeNullableScalarRelationFilter, Prisma.ShopFlairTypeWhereInput> | null
   flairPurchases?: Prisma.ShopFlairPurchaseListRelationFilter
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseListRelationFilter
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentListRelationFilter
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceListRelationFilter
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantListRelationFilter
 }, "id" | "slug" | "stripeConnectAccountId" | "homeFeaturedListingId">
 
 export type ShopOrderByWithAggregationInput = {
@@ -605,6 +664,7 @@ export type ShopOrderByWithAggregationInput = {
   accountDeletionEmailConfirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   inactivityWarningSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   inactivityDeactivatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminFrozenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   inactivityDeletionTriggeredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   homeFeaturedListingId?: Prisma.SortOrderInput | Prisma.SortOrder
   itemGuidelinesAcknowledgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -616,6 +676,10 @@ export type ShopOrderByWithAggregationInput = {
   flairTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   flairPurchasedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   googleShoppingCredits?: Prisma.SortOrder
+  betaTesterAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  betaTesterOnboardingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  betaTesterOnboardingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  betaTesterOnboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ShopCountOrderByAggregateInput
@@ -650,6 +714,7 @@ export type ShopScalarWhereWithAggregatesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   inactivityWarningSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   inactivityDeactivatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
+  adminFrozenAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   homeFeaturedListingId?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
@@ -661,6 +726,10 @@ export type ShopScalarWhereWithAggregatesInput = {
   flairTypeId?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
   flairPurchasedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   googleShoppingCredits?: Prisma.IntWithAggregatesFilter<"Shop"> | number
+  betaTesterAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableWithAggregatesFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
 }
@@ -687,6 +756,7 @@ export type ShopCreateInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -696,6 +766,10 @@ export type ShopCreateInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -712,12 +786,15 @@ export type ShopCreateInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateInput = {
@@ -742,6 +819,7 @@ export type ShopUncheckedCreateInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -753,6 +831,10 @@ export type ShopUncheckedCreateInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -768,11 +850,14 @@ export type ShopUncheckedCreateInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopUpdateInput = {
@@ -797,6 +882,7 @@ export type ShopUpdateInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -806,6 +892,10 @@ export type ShopUpdateInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -822,12 +912,15 @@ export type ShopUpdateInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateInput = {
@@ -852,6 +945,7 @@ export type ShopUncheckedUpdateInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -863,6 +957,10 @@ export type ShopUncheckedUpdateInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -878,11 +976,14 @@ export type ShopUncheckedUpdateInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateManyInput = {
@@ -907,6 +1008,7 @@ export type ShopCreateManyInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -918,6 +1020,10 @@ export type ShopCreateManyInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -944,6 +1050,7 @@ export type ShopUpdateManyMutationInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -953,6 +1060,10 @@ export type ShopUpdateManyMutationInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -979,6 +1090,7 @@ export type ShopUncheckedUpdateManyInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -990,6 +1102,10 @@ export type ShopUncheckedUpdateManyInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1016,6 +1132,7 @@ export type ShopCountOrderByAggregateInput = {
   accountDeletionEmailConfirmedAt?: Prisma.SortOrder
   inactivityWarningSentAt?: Prisma.SortOrder
   inactivityDeactivatedAt?: Prisma.SortOrder
+  adminFrozenAt?: Prisma.SortOrder
   inactivityDeletionTriggeredAt?: Prisma.SortOrder
   homeFeaturedListingId?: Prisma.SortOrder
   itemGuidelinesAcknowledgedAt?: Prisma.SortOrder
@@ -1027,6 +1144,10 @@ export type ShopCountOrderByAggregateInput = {
   flairTypeId?: Prisma.SortOrder
   flairPurchasedAt?: Prisma.SortOrder
   googleShoppingCredits?: Prisma.SortOrder
+  betaTesterAt?: Prisma.SortOrder
+  betaTesterOnboardingStatus?: Prisma.SortOrder
+  betaTesterOnboardingCheckedAt?: Prisma.SortOrder
+  betaTesterOnboardingCompletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1060,6 +1181,7 @@ export type ShopMaxOrderByAggregateInput = {
   accountDeletionEmailConfirmedAt?: Prisma.SortOrder
   inactivityWarningSentAt?: Prisma.SortOrder
   inactivityDeactivatedAt?: Prisma.SortOrder
+  adminFrozenAt?: Prisma.SortOrder
   inactivityDeletionTriggeredAt?: Prisma.SortOrder
   homeFeaturedListingId?: Prisma.SortOrder
   itemGuidelinesAcknowledgedAt?: Prisma.SortOrder
@@ -1067,6 +1189,10 @@ export type ShopMaxOrderByAggregateInput = {
   flairTypeId?: Prisma.SortOrder
   flairPurchasedAt?: Prisma.SortOrder
   googleShoppingCredits?: Prisma.SortOrder
+  betaTesterAt?: Prisma.SortOrder
+  betaTesterOnboardingStatus?: Prisma.SortOrder
+  betaTesterOnboardingCheckedAt?: Prisma.SortOrder
+  betaTesterOnboardingCompletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1092,6 +1218,7 @@ export type ShopMinOrderByAggregateInput = {
   accountDeletionEmailConfirmedAt?: Prisma.SortOrder
   inactivityWarningSentAt?: Prisma.SortOrder
   inactivityDeactivatedAt?: Prisma.SortOrder
+  adminFrozenAt?: Prisma.SortOrder
   inactivityDeletionTriggeredAt?: Prisma.SortOrder
   homeFeaturedListingId?: Prisma.SortOrder
   itemGuidelinesAcknowledgedAt?: Prisma.SortOrder
@@ -1099,6 +1226,10 @@ export type ShopMinOrderByAggregateInput = {
   flairTypeId?: Prisma.SortOrder
   flairPurchasedAt?: Prisma.SortOrder
   googleShoppingCredits?: Prisma.SortOrder
+  betaTesterAt?: Prisma.SortOrder
+  betaTesterOnboardingStatus?: Prisma.SortOrder
+  betaTesterOnboardingCheckedAt?: Prisma.SortOrder
+  betaTesterOnboardingCompletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1141,6 +1272,10 @@ export type NullableIntFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput = {
+  set?: $Enums.BetaTesterOnboardingStatus | null
 }
 
 export type ShopCreateNestedManyWithoutFlairTypeInput = {
@@ -1385,6 +1520,34 @@ export type ShopUpdateOneRequiredWithoutPromotionPurchasesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutPromotionPurchasesInput, Prisma.ShopUpdateWithoutPromotionPurchasesInput>, Prisma.ShopUncheckedUpdateWithoutPromotionPurchasesInput>
 }
 
+export type ShopCreateNestedOneWithoutPromotionCreditBalancesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutPromotionCreditBalancesInput, Prisma.ShopUncheckedCreateWithoutPromotionCreditBalancesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutPromotionCreditBalancesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutPromotionCreditBalancesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutPromotionCreditBalancesInput, Prisma.ShopUncheckedCreateWithoutPromotionCreditBalancesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutPromotionCreditBalancesInput
+  upsert?: Prisma.ShopUpsertWithoutPromotionCreditBalancesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutPromotionCreditBalancesInput, Prisma.ShopUpdateWithoutPromotionCreditBalancesInput>, Prisma.ShopUncheckedUpdateWithoutPromotionCreditBalancesInput>
+}
+
+export type ShopCreateNestedOneWithoutAdminAwardGrantsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutAdminAwardGrantsInput, Prisma.ShopUncheckedCreateWithoutAdminAwardGrantsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutAdminAwardGrantsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutAdminAwardGrantsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutAdminAwardGrantsInput, Prisma.ShopUncheckedCreateWithoutAdminAwardGrantsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutAdminAwardGrantsInput
+  upsert?: Prisma.ShopUpsertWithoutAdminAwardGrantsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutAdminAwardGrantsInput, Prisma.ShopUpdateWithoutAdminAwardGrantsInput>, Prisma.ShopUncheckedUpdateWithoutAdminAwardGrantsInput>
+}
+
 export type ShopCreateNestedOneWithoutListingCreditPackPurchasesInput = {
   create?: Prisma.XOR<Prisma.ShopCreateWithoutListingCreditPackPurchasesInput, Prisma.ShopUncheckedCreateWithoutListingCreditPackPurchasesInput>
   connectOrCreate?: Prisma.ShopCreateOrConnectWithoutListingCreditPackPurchasesInput
@@ -1427,6 +1590,22 @@ export type ShopUpdateOneRequiredWithoutReactivationPurchasesNestedInput = {
   upsert?: Prisma.ShopUpsertWithoutReactivationPurchasesInput
   connect?: Prisma.ShopWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutReactivationPurchasesInput, Prisma.ShopUpdateWithoutReactivationPurchasesInput>, Prisma.ShopUncheckedUpdateWithoutReactivationPurchasesInput>
+}
+
+export type ShopCreateNestedOneWithoutCreatorGiftPurchasesReceivedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCreatorGiftPurchasesReceivedInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneWithoutCreatorGiftPurchasesReceivedNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCreatorGiftPurchasesReceivedInput
+  upsert?: Prisma.ShopUpsertWithoutCreatorGiftPurchasesReceivedInput
+  disconnect?: Prisma.ShopWhereInput | boolean
+  delete?: Prisma.ShopWhereInput | boolean
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUpdateWithoutCreatorGiftPurchasesReceivedInput>, Prisma.ShopUncheckedUpdateWithoutCreatorGiftPurchasesReceivedInput>
 }
 
 export type ShopCreateNestedOneWithoutCreatorGiftCodesRedeemedInput = {
@@ -1499,6 +1678,7 @@ export type ShopCreateWithoutFlairTypeInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -1508,6 +1688,10 @@ export type ShopCreateWithoutFlairTypeInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -1524,11 +1708,14 @@ export type ShopCreateWithoutFlairTypeInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutFlairTypeInput = {
@@ -1553,6 +1740,7 @@ export type ShopUncheckedCreateWithoutFlairTypeInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -1563,6 +1751,10 @@ export type ShopUncheckedCreateWithoutFlairTypeInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -1578,11 +1770,14 @@ export type ShopUncheckedCreateWithoutFlairTypeInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutFlairTypeInput = {
@@ -1636,6 +1831,7 @@ export type ShopScalarWhereInput = {
   accountDeletionEmailConfirmedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityWarningSentAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityDeactivatedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  adminFrozenAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   homeFeaturedListingId?: Prisma.StringNullableFilter<"Shop"> | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
@@ -1647,6 +1843,10 @@ export type ShopScalarWhereInput = {
   flairTypeId?: Prisma.StringNullableFilter<"Shop"> | string | null
   flairPurchasedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   googleShoppingCredits?: Prisma.IntFilter<"Shop"> | number
+  betaTesterAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
 }
@@ -1673,6 +1873,7 @@ export type ShopCreateWithoutFlairPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -1682,6 +1883,10 @@ export type ShopCreateWithoutFlairPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -1698,11 +1903,14 @@ export type ShopCreateWithoutFlairPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutFlairPurchasesInput = {
@@ -1727,6 +1935,7 @@ export type ShopUncheckedCreateWithoutFlairPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -1738,6 +1947,10 @@ export type ShopUncheckedCreateWithoutFlairPurchasesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -1753,10 +1966,13 @@ export type ShopUncheckedCreateWithoutFlairPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutFlairPurchasesInput = {
@@ -1797,6 +2013,7 @@ export type ShopUpdateWithoutFlairPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1806,6 +2023,10 @@ export type ShopUpdateWithoutFlairPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -1822,11 +2043,14 @@ export type ShopUpdateWithoutFlairPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutFlairPurchasesInput = {
@@ -1851,6 +2075,7 @@ export type ShopUncheckedUpdateWithoutFlairPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1862,6 +2087,10 @@ export type ShopUncheckedUpdateWithoutFlairPurchasesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -1877,10 +2106,13 @@ export type ShopUncheckedUpdateWithoutFlairPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutGoogleShoppingPurchasesInput = {
@@ -1905,6 +2137,7 @@ export type ShopCreateWithoutGoogleShoppingPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -1914,6 +2147,10 @@ export type ShopCreateWithoutGoogleShoppingPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -1930,11 +2167,14 @@ export type ShopCreateWithoutGoogleShoppingPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutGoogleShoppingPurchasesInput = {
@@ -1959,6 +2199,7 @@ export type ShopUncheckedCreateWithoutGoogleShoppingPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -1970,6 +2211,10 @@ export type ShopUncheckedCreateWithoutGoogleShoppingPurchasesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -1985,10 +2230,13 @@ export type ShopUncheckedCreateWithoutGoogleShoppingPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutGoogleShoppingPurchasesInput = {
@@ -2029,6 +2277,7 @@ export type ShopUpdateWithoutGoogleShoppingPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2038,6 +2287,10 @@ export type ShopUpdateWithoutGoogleShoppingPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2054,11 +2307,14 @@ export type ShopUpdateWithoutGoogleShoppingPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutGoogleShoppingPurchasesInput = {
@@ -2083,6 +2339,7 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2094,6 +2351,10 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingPurchasesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2109,10 +2370,13 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutGoogleShoppingEnrollmentsInput = {
@@ -2137,6 +2401,7 @@ export type ShopCreateWithoutGoogleShoppingEnrollmentsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -2146,6 +2411,10 @@ export type ShopCreateWithoutGoogleShoppingEnrollmentsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2162,11 +2431,14 @@ export type ShopCreateWithoutGoogleShoppingEnrollmentsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutGoogleShoppingEnrollmentsInput = {
@@ -2191,6 +2463,7 @@ export type ShopUncheckedCreateWithoutGoogleShoppingEnrollmentsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -2202,6 +2475,10 @@ export type ShopUncheckedCreateWithoutGoogleShoppingEnrollmentsInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2217,10 +2494,13 @@ export type ShopUncheckedCreateWithoutGoogleShoppingEnrollmentsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutGoogleShoppingEnrollmentsInput = {
@@ -2261,6 +2541,7 @@ export type ShopUpdateWithoutGoogleShoppingEnrollmentsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2270,6 +2551,10 @@ export type ShopUpdateWithoutGoogleShoppingEnrollmentsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2286,11 +2571,14 @@ export type ShopUpdateWithoutGoogleShoppingEnrollmentsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutGoogleShoppingEnrollmentsInput = {
@@ -2315,6 +2603,7 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingEnrollmentsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2326,6 +2615,10 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingEnrollmentsInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2341,10 +2634,13 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingEnrollmentsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPromotionsDashboardSnapshotInput = {
@@ -2369,6 +2665,7 @@ export type ShopCreateWithoutPromotionsDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -2378,6 +2675,10 @@ export type ShopCreateWithoutPromotionsDashboardSnapshotInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2394,11 +2695,14 @@ export type ShopCreateWithoutPromotionsDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPromotionsDashboardSnapshotInput = {
@@ -2423,6 +2727,7 @@ export type ShopUncheckedCreateWithoutPromotionsDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -2434,6 +2739,10 @@ export type ShopUncheckedCreateWithoutPromotionsDashboardSnapshotInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2449,10 +2758,13 @@ export type ShopUncheckedCreateWithoutPromotionsDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPromotionsDashboardSnapshotInput = {
@@ -2493,6 +2805,7 @@ export type ShopUpdateWithoutPromotionsDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2502,6 +2815,10 @@ export type ShopUpdateWithoutPromotionsDashboardSnapshotInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2518,11 +2835,14 @@ export type ShopUpdateWithoutPromotionsDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPromotionsDashboardSnapshotInput = {
@@ -2547,6 +2867,7 @@ export type ShopUncheckedUpdateWithoutPromotionsDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2558,6 +2879,10 @@ export type ShopUncheckedUpdateWithoutPromotionsDashboardSnapshotInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2573,10 +2898,13 @@ export type ShopUncheckedUpdateWithoutPromotionsDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSalesDashboardSnapshotInput = {
@@ -2601,6 +2929,7 @@ export type ShopCreateWithoutSalesDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -2610,6 +2939,10 @@ export type ShopCreateWithoutSalesDashboardSnapshotInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2626,11 +2959,14 @@ export type ShopCreateWithoutSalesDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSalesDashboardSnapshotInput = {
@@ -2655,6 +2991,7 @@ export type ShopUncheckedCreateWithoutSalesDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -2666,6 +3003,10 @@ export type ShopUncheckedCreateWithoutSalesDashboardSnapshotInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2681,10 +3022,13 @@ export type ShopUncheckedCreateWithoutSalesDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSalesDashboardSnapshotInput = {
@@ -2725,6 +3069,7 @@ export type ShopUpdateWithoutSalesDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2734,6 +3079,10 @@ export type ShopUpdateWithoutSalesDashboardSnapshotInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2750,11 +3099,14 @@ export type ShopUpdateWithoutSalesDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSalesDashboardSnapshotInput = {
@@ -2779,6 +3131,7 @@ export type ShopUncheckedUpdateWithoutSalesDashboardSnapshotInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2790,6 +3143,10 @@ export type ShopUncheckedUpdateWithoutSalesDashboardSnapshotInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2805,10 +3162,13 @@ export type ShopUncheckedUpdateWithoutSalesDashboardSnapshotInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutListingSlotPromoRedemptionsInput = {
@@ -2833,6 +3193,7 @@ export type ShopCreateWithoutListingSlotPromoRedemptionsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -2842,6 +3203,10 @@ export type ShopCreateWithoutListingSlotPromoRedemptionsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2857,12 +3222,15 @@ export type ShopCreateWithoutListingSlotPromoRedemptionsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutListingSlotPromoRedemptionsInput = {
@@ -2887,6 +3255,7 @@ export type ShopUncheckedCreateWithoutListingSlotPromoRedemptionsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -2898,6 +3267,10 @@ export type ShopUncheckedCreateWithoutListingSlotPromoRedemptionsInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2912,11 +3285,14 @@ export type ShopUncheckedCreateWithoutListingSlotPromoRedemptionsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutListingSlotPromoRedemptionsInput = {
@@ -2957,6 +3333,7 @@ export type ShopUpdateWithoutListingSlotPromoRedemptionsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2966,6 +3343,10 @@ export type ShopUpdateWithoutListingSlotPromoRedemptionsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2981,12 +3362,15 @@ export type ShopUpdateWithoutListingSlotPromoRedemptionsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutListingSlotPromoRedemptionsInput = {
@@ -3011,6 +3395,7 @@ export type ShopUncheckedUpdateWithoutListingSlotPromoRedemptionsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3022,6 +3407,10 @@ export type ShopUncheckedUpdateWithoutListingSlotPromoRedemptionsInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3036,11 +3425,14 @@ export type ShopUncheckedUpdateWithoutListingSlotPromoRedemptionsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSupportThreadInput = {
@@ -3065,6 +3457,7 @@ export type ShopCreateWithoutSupportThreadInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -3074,6 +3467,10 @@ export type ShopCreateWithoutSupportThreadInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3089,12 +3486,15 @@ export type ShopCreateWithoutSupportThreadInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSupportThreadInput = {
@@ -3119,6 +3519,7 @@ export type ShopUncheckedCreateWithoutSupportThreadInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -3130,6 +3531,10 @@ export type ShopUncheckedCreateWithoutSupportThreadInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3144,11 +3549,14 @@ export type ShopUncheckedCreateWithoutSupportThreadInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSupportThreadInput = {
@@ -3189,6 +3597,7 @@ export type ShopUpdateWithoutSupportThreadInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3198,6 +3607,10 @@ export type ShopUpdateWithoutSupportThreadInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3213,12 +3626,15 @@ export type ShopUpdateWithoutSupportThreadInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSupportThreadInput = {
@@ -3243,6 +3659,7 @@ export type ShopUncheckedUpdateWithoutSupportThreadInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3254,6 +3671,10 @@ export type ShopUncheckedUpdateWithoutSupportThreadInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3268,11 +3689,14 @@ export type ShopUncheckedUpdateWithoutSupportThreadInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutOwnerNoticesInput = {
@@ -3297,6 +3721,7 @@ export type ShopCreateWithoutOwnerNoticesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -3306,6 +3731,10 @@ export type ShopCreateWithoutOwnerNoticesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3321,12 +3750,15 @@ export type ShopCreateWithoutOwnerNoticesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutOwnerNoticesInput = {
@@ -3351,6 +3783,7 @@ export type ShopUncheckedCreateWithoutOwnerNoticesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -3362,6 +3795,10 @@ export type ShopUncheckedCreateWithoutOwnerNoticesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3376,11 +3813,14 @@ export type ShopUncheckedCreateWithoutOwnerNoticesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutOwnerNoticesInput = {
@@ -3421,6 +3861,7 @@ export type ShopUpdateWithoutOwnerNoticesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3430,6 +3871,10 @@ export type ShopUpdateWithoutOwnerNoticesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3445,12 +3890,15 @@ export type ShopUpdateWithoutOwnerNoticesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutOwnerNoticesInput = {
@@ -3475,6 +3923,7 @@ export type ShopUncheckedUpdateWithoutOwnerNoticesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3486,6 +3935,10 @@ export type ShopUncheckedUpdateWithoutOwnerNoticesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3500,11 +3953,14 @@ export type ShopUncheckedUpdateWithoutOwnerNoticesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutBugFeedbackReportsInput = {
@@ -3529,6 +3985,7 @@ export type ShopCreateWithoutBugFeedbackReportsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -3538,6 +3995,10 @@ export type ShopCreateWithoutBugFeedbackReportsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3553,12 +4014,15 @@ export type ShopCreateWithoutBugFeedbackReportsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutBugFeedbackReportsInput = {
@@ -3583,6 +4047,7 @@ export type ShopUncheckedCreateWithoutBugFeedbackReportsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -3594,6 +4059,10 @@ export type ShopUncheckedCreateWithoutBugFeedbackReportsInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3608,11 +4077,14 @@ export type ShopUncheckedCreateWithoutBugFeedbackReportsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutBugFeedbackReportsInput = {
@@ -3653,6 +4125,7 @@ export type ShopUpdateWithoutBugFeedbackReportsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3662,6 +4135,10 @@ export type ShopUpdateWithoutBugFeedbackReportsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3677,12 +4154,15 @@ export type ShopUpdateWithoutBugFeedbackReportsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutBugFeedbackReportsInput = {
@@ -3707,6 +4187,7 @@ export type ShopUncheckedUpdateWithoutBugFeedbackReportsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3718,6 +4199,10 @@ export type ShopUncheckedUpdateWithoutBugFeedbackReportsInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3732,11 +4217,14 @@ export type ShopUncheckedUpdateWithoutBugFeedbackReportsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutUsersInput = {
@@ -3761,6 +4249,7 @@ export type ShopCreateWithoutUsersInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -3770,6 +4259,10 @@ export type ShopCreateWithoutUsersInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3785,12 +4278,15 @@ export type ShopCreateWithoutUsersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutUsersInput = {
@@ -3815,6 +4311,7 @@ export type ShopUncheckedCreateWithoutUsersInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -3826,6 +4323,10 @@ export type ShopUncheckedCreateWithoutUsersInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
@@ -3840,11 +4341,14 @@ export type ShopUncheckedCreateWithoutUsersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutUsersInput = {
@@ -3885,6 +4389,7 @@ export type ShopUpdateWithoutUsersInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3894,6 +4399,10 @@ export type ShopUpdateWithoutUsersInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3909,12 +4418,15 @@ export type ShopUpdateWithoutUsersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutUsersInput = {
@@ -3939,6 +4451,7 @@ export type ShopUncheckedUpdateWithoutUsersInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3950,6 +4463,10 @@ export type ShopUncheckedUpdateWithoutUsersInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
@@ -3964,11 +4481,14 @@ export type ShopUncheckedUpdateWithoutUsersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutListingsInput = {
@@ -3993,6 +4513,7 @@ export type ShopCreateWithoutListingsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -4002,6 +4523,10 @@ export type ShopCreateWithoutListingsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4017,12 +4542,15 @@ export type ShopCreateWithoutListingsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutListingsInput = {
@@ -4047,6 +4575,7 @@ export type ShopUncheckedCreateWithoutListingsInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -4058,6 +4587,10 @@ export type ShopUncheckedCreateWithoutListingsInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4072,11 +4605,14 @@ export type ShopUncheckedCreateWithoutListingsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutListingsInput = {
@@ -4106,6 +4642,7 @@ export type ShopCreateWithoutHomeFeaturedListingInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -4115,6 +4652,10 @@ export type ShopCreateWithoutHomeFeaturedListingInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
@@ -4130,12 +4671,15 @@ export type ShopCreateWithoutHomeFeaturedListingInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutHomeFeaturedListingInput = {
@@ -4160,6 +4704,7 @@ export type ShopUncheckedCreateWithoutHomeFeaturedListingInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -4170,6 +4715,10 @@ export type ShopUncheckedCreateWithoutHomeFeaturedListingInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4185,11 +4734,14 @@ export type ShopUncheckedCreateWithoutHomeFeaturedListingInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutHomeFeaturedListingInput = {
@@ -4230,6 +4782,7 @@ export type ShopUpdateWithoutListingsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4239,6 +4792,10 @@ export type ShopUpdateWithoutListingsInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -4254,12 +4811,15 @@ export type ShopUpdateWithoutListingsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutListingsInput = {
@@ -4284,6 +4844,7 @@ export type ShopUncheckedUpdateWithoutListingsInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4295,6 +4856,10 @@ export type ShopUncheckedUpdateWithoutListingsInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -4309,11 +4874,14 @@ export type ShopUncheckedUpdateWithoutListingsInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUpsertWithoutHomeFeaturedListingInput = {
@@ -4349,6 +4917,7 @@ export type ShopUpdateWithoutHomeFeaturedListingInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4358,6 +4927,10 @@ export type ShopUpdateWithoutHomeFeaturedListingInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
@@ -4373,12 +4946,15 @@ export type ShopUpdateWithoutHomeFeaturedListingInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutHomeFeaturedListingInput = {
@@ -4403,6 +4979,7 @@ export type ShopUncheckedUpdateWithoutHomeFeaturedListingInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4413,6 +4990,10 @@ export type ShopUncheckedUpdateWithoutHomeFeaturedListingInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -4428,11 +5009,14 @@ export type ShopUncheckedUpdateWithoutHomeFeaturedListingInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPromotionPurchasesInput = {
@@ -4457,6 +5041,7 @@ export type ShopCreateWithoutPromotionPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -4466,6 +5051,10 @@ export type ShopCreateWithoutPromotionPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4481,12 +5070,15 @@ export type ShopCreateWithoutPromotionPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPromotionPurchasesInput = {
@@ -4511,6 +5103,7 @@ export type ShopUncheckedCreateWithoutPromotionPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -4522,6 +5115,10 @@ export type ShopUncheckedCreateWithoutPromotionPurchasesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4536,11 +5133,14 @@ export type ShopUncheckedCreateWithoutPromotionPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPromotionPurchasesInput = {
@@ -4581,6 +5181,7 @@ export type ShopUpdateWithoutPromotionPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4590,6 +5191,10 @@ export type ShopUpdateWithoutPromotionPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -4605,12 +5210,15 @@ export type ShopUpdateWithoutPromotionPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPromotionPurchasesInput = {
@@ -4635,6 +5243,7 @@ export type ShopUncheckedUpdateWithoutPromotionPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4646,6 +5255,10 @@ export type ShopUncheckedUpdateWithoutPromotionPurchasesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -4660,11 +5273,542 @@ export type ShopUncheckedUpdateWithoutPromotionPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutPromotionCreditBalancesInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
+  users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
+  flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
+  flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutPromotionCreditBalancesInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  homeFeaturedListingId?: string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: string | null
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutPromotionCreditBalancesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutPromotionCreditBalancesInput, Prisma.ShopUncheckedCreateWithoutPromotionCreditBalancesInput>
+}
+
+export type ShopUpsertWithoutPromotionCreditBalancesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutPromotionCreditBalancesInput, Prisma.ShopUncheckedUpdateWithoutPromotionCreditBalancesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutPromotionCreditBalancesInput, Prisma.ShopUncheckedCreateWithoutPromotionCreditBalancesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutPromotionCreditBalancesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutPromotionCreditBalancesInput, Prisma.ShopUncheckedUpdateWithoutPromotionCreditBalancesInput>
+}
+
+export type ShopUpdateWithoutPromotionCreditBalancesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
+  users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
+  flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutPromotionCreditBalancesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutAdminAwardGrantsInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
+  users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
+  flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
+  flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutAdminAwardGrantsInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  homeFeaturedListingId?: string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: string | null
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutAdminAwardGrantsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutAdminAwardGrantsInput, Prisma.ShopUncheckedCreateWithoutAdminAwardGrantsInput>
+}
+
+export type ShopUpsertWithoutAdminAwardGrantsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutAdminAwardGrantsInput, Prisma.ShopUncheckedUpdateWithoutAdminAwardGrantsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutAdminAwardGrantsInput, Prisma.ShopUncheckedCreateWithoutAdminAwardGrantsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutAdminAwardGrantsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutAdminAwardGrantsInput, Prisma.ShopUncheckedUpdateWithoutAdminAwardGrantsInput>
+}
+
+export type ShopUpdateWithoutAdminAwardGrantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
+  users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
+  flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutAdminAwardGrantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutListingCreditPackPurchasesInput = {
@@ -4689,6 +5833,7 @@ export type ShopCreateWithoutListingCreditPackPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -4698,6 +5843,10 @@ export type ShopCreateWithoutListingCreditPackPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4713,12 +5862,15 @@ export type ShopCreateWithoutListingCreditPackPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutListingCreditPackPurchasesInput = {
@@ -4743,6 +5895,7 @@ export type ShopUncheckedCreateWithoutListingCreditPackPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -4754,6 +5907,10 @@ export type ShopUncheckedCreateWithoutListingCreditPackPurchasesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4768,11 +5925,14 @@ export type ShopUncheckedCreateWithoutListingCreditPackPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutListingCreditPackPurchasesInput = {
@@ -4813,6 +5973,7 @@ export type ShopUpdateWithoutListingCreditPackPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4822,6 +5983,10 @@ export type ShopUpdateWithoutListingCreditPackPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -4837,12 +6002,15 @@ export type ShopUpdateWithoutListingCreditPackPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutListingCreditPackPurchasesInput = {
@@ -4867,6 +6035,7 @@ export type ShopUncheckedUpdateWithoutListingCreditPackPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4878,6 +6047,10 @@ export type ShopUncheckedUpdateWithoutListingCreditPackPurchasesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -4892,11 +6065,14 @@ export type ShopUncheckedUpdateWithoutListingCreditPackPurchasesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSetupFeePurchasesInput = {
@@ -4921,6 +6097,7 @@ export type ShopCreateWithoutSetupFeePurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -4930,6 +6107,10 @@ export type ShopCreateWithoutSetupFeePurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4945,12 +6126,15 @@ export type ShopCreateWithoutSetupFeePurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSetupFeePurchasesInput = {
@@ -4975,6 +6159,7 @@ export type ShopUncheckedCreateWithoutSetupFeePurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -4986,6 +6171,10 @@ export type ShopUncheckedCreateWithoutSetupFeePurchasesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5000,11 +6189,14 @@ export type ShopUncheckedCreateWithoutSetupFeePurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSetupFeePurchasesInput = {
@@ -5045,6 +6237,7 @@ export type ShopUpdateWithoutSetupFeePurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5054,6 +6247,10 @@ export type ShopUpdateWithoutSetupFeePurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5069,12 +6266,15 @@ export type ShopUpdateWithoutSetupFeePurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSetupFeePurchasesInput = {
@@ -5099,6 +6299,7 @@ export type ShopUncheckedUpdateWithoutSetupFeePurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5110,6 +6311,10 @@ export type ShopUncheckedUpdateWithoutSetupFeePurchasesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5124,11 +6329,14 @@ export type ShopUncheckedUpdateWithoutSetupFeePurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutReactivationPurchasesInput = {
@@ -5153,6 +6361,7 @@ export type ShopCreateWithoutReactivationPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -5162,6 +6371,10 @@ export type ShopCreateWithoutReactivationPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5177,12 +6390,15 @@ export type ShopCreateWithoutReactivationPurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutReactivationPurchasesInput = {
@@ -5207,6 +6423,7 @@ export type ShopUncheckedCreateWithoutReactivationPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -5218,6 +6435,10 @@ export type ShopUncheckedCreateWithoutReactivationPurchasesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5232,11 +6453,14 @@ export type ShopUncheckedCreateWithoutReactivationPurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutReactivationPurchasesInput = {
@@ -5277,6 +6501,7 @@ export type ShopUpdateWithoutReactivationPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5286,6 +6511,10 @@ export type ShopUpdateWithoutReactivationPurchasesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5301,12 +6530,15 @@ export type ShopUpdateWithoutReactivationPurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutReactivationPurchasesInput = {
@@ -5331,6 +6563,7 @@ export type ShopUncheckedUpdateWithoutReactivationPurchasesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5342,6 +6575,10 @@ export type ShopUncheckedUpdateWithoutReactivationPurchasesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5356,11 +6593,278 @@ export type ShopUncheckedUpdateWithoutReactivationPurchasesInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutCreatorGiftPurchasesReceivedInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
+  users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
+  flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
+  flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  homeFeaturedListingId?: string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: string | null
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutCreatorGiftPurchasesReceivedInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput>
+}
+
+export type ShopUpsertWithoutCreatorGiftPurchasesReceivedInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUncheckedUpdateWithoutCreatorGiftPurchasesReceivedInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutCreatorGiftPurchasesReceivedInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutCreatorGiftPurchasesReceivedInput, Prisma.ShopUncheckedUpdateWithoutCreatorGiftPurchasesReceivedInput>
+}
+
+export type ShopUpdateWithoutCreatorGiftPurchasesReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
+  users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
+  flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutCreatorGiftPurchasesReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutCreatorGiftCodesRedeemedInput = {
@@ -5385,6 +6889,7 @@ export type ShopCreateWithoutCreatorGiftCodesRedeemedInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -5394,6 +6899,10 @@ export type ShopCreateWithoutCreatorGiftCodesRedeemedInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5409,12 +6918,15 @@ export type ShopCreateWithoutCreatorGiftCodesRedeemedInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutCreatorGiftCodesRedeemedInput = {
@@ -5439,6 +6951,7 @@ export type ShopUncheckedCreateWithoutCreatorGiftCodesRedeemedInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -5450,6 +6963,10 @@ export type ShopUncheckedCreateWithoutCreatorGiftCodesRedeemedInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5464,11 +6981,14 @@ export type ShopUncheckedCreateWithoutCreatorGiftCodesRedeemedInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutCreatorGiftCodesRedeemedInput = {
@@ -5509,6 +7029,7 @@ export type ShopUpdateWithoutCreatorGiftCodesRedeemedInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5518,6 +7039,10 @@ export type ShopUpdateWithoutCreatorGiftCodesRedeemedInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5533,12 +7058,15 @@ export type ShopUpdateWithoutCreatorGiftCodesRedeemedInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutCreatorGiftCodesRedeemedInput = {
@@ -5563,6 +7091,7 @@ export type ShopUncheckedUpdateWithoutCreatorGiftCodesRedeemedInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5574,6 +7103,10 @@ export type ShopUncheckedUpdateWithoutCreatorGiftCodesRedeemedInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5588,11 +7121,14 @@ export type ShopUncheckedUpdateWithoutCreatorGiftCodesRedeemedInput = {
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutOrdersInput = {
@@ -5617,6 +7153,7 @@ export type ShopCreateWithoutOrdersInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -5626,6 +7163,10 @@ export type ShopCreateWithoutOrdersInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5641,12 +7182,15 @@ export type ShopCreateWithoutOrdersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutOrdersInput = {
@@ -5671,6 +7215,7 @@ export type ShopUncheckedCreateWithoutOrdersInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -5682,6 +7227,10 @@ export type ShopUncheckedCreateWithoutOrdersInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5696,11 +7245,14 @@ export type ShopUncheckedCreateWithoutOrdersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutOrdersInput = {
@@ -5741,6 +7293,7 @@ export type ShopUpdateWithoutOrdersInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5750,6 +7303,10 @@ export type ShopUpdateWithoutOrdersInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5765,12 +7322,15 @@ export type ShopUpdateWithoutOrdersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutOrdersInput = {
@@ -5795,6 +7355,7 @@ export type ShopUncheckedUpdateWithoutOrdersInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5806,6 +7367,10 @@ export type ShopUncheckedUpdateWithoutOrdersInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5820,11 +7385,14 @@ export type ShopUncheckedUpdateWithoutOrdersInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutOrderLinesInput = {
@@ -5849,6 +7417,7 @@ export type ShopCreateWithoutOrderLinesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
   listingFeeBonusFreeSlots?: number
@@ -5858,6 +7427,10 @@ export type ShopCreateWithoutOrderLinesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5873,12 +7446,15 @@ export type ShopCreateWithoutOrderLinesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
   flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
   flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutOrderLinesInput = {
@@ -5903,6 +7479,7 @@ export type ShopUncheckedCreateWithoutOrderLinesInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -5914,6 +7491,10 @@ export type ShopUncheckedCreateWithoutOrderLinesInput = {
   flairTypeId?: string | null
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5928,11 +7509,14 @@ export type ShopUncheckedCreateWithoutOrderLinesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutOrderLinesInput = {
@@ -5973,6 +7557,7 @@ export type ShopUpdateWithoutOrderLinesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5982,6 +7567,10 @@ export type ShopUpdateWithoutOrderLinesInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5997,12 +7586,15 @@ export type ShopUpdateWithoutOrderLinesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutOrderLinesInput = {
@@ -6027,6 +7619,7 @@ export type ShopUncheckedUpdateWithoutOrderLinesInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6038,6 +7631,10 @@ export type ShopUncheckedUpdateWithoutOrderLinesInput = {
   flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -6052,11 +7649,14 @@ export type ShopUncheckedUpdateWithoutOrderLinesInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateManyFlairTypeInput = {
@@ -6081,6 +7681,7 @@ export type ShopCreateManyFlairTypeInput = {
   accountDeletionEmailConfirmedAt?: Date | string | null
   inactivityWarningSentAt?: Date | string | null
   inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
   inactivityDeletionTriggeredAt?: Date | string | null
   homeFeaturedListingId?: string | null
   itemGuidelinesAcknowledgedAt?: Date | string | null
@@ -6091,6 +7692,10 @@ export type ShopCreateManyFlairTypeInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Date | string | null
   googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -6117,6 +7722,7 @@ export type ShopUpdateWithoutFlairTypeInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
@@ -6126,6 +7732,10 @@ export type ShopUpdateWithoutFlairTypeInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -6142,11 +7752,14 @@ export type ShopUpdateWithoutFlairTypeInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutFlairTypeInput = {
@@ -6171,6 +7784,7 @@ export type ShopUncheckedUpdateWithoutFlairTypeInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6181,6 +7795,10 @@ export type ShopUncheckedUpdateWithoutFlairTypeInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -6196,11 +7814,14 @@ export type ShopUncheckedUpdateWithoutFlairTypeInput = {
   setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
   reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
   creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
   promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
   flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
   googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateManyWithoutFlairTypeInput = {
@@ -6225,6 +7846,7 @@ export type ShopUncheckedUpdateManyWithoutFlairTypeInput = {
   accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6235,6 +7857,10 @@ export type ShopUncheckedUpdateManyWithoutFlairTypeInput = {
   browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -6257,9 +7883,12 @@ export type ShopCountOutputType = {
   setupFeePurchases: number
   reactivationPurchases: number
   creatorGiftCodesRedeemed: number
+  creatorGiftPurchasesReceived: number
   flairPurchases: number
   googleShoppingPurchases: number
   googleShoppingEnrollments: number
+  promotionCreditBalances: number
+  adminAwardGrants: number
 }
 
 export type ShopCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6275,9 +7904,12 @@ export type ShopCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   setupFeePurchases?: boolean | ShopCountOutputTypeCountSetupFeePurchasesArgs
   reactivationPurchases?: boolean | ShopCountOutputTypeCountReactivationPurchasesArgs
   creatorGiftCodesRedeemed?: boolean | ShopCountOutputTypeCountCreatorGiftCodesRedeemedArgs
+  creatorGiftPurchasesReceived?: boolean | ShopCountOutputTypeCountCreatorGiftPurchasesReceivedArgs
   flairPurchases?: boolean | ShopCountOutputTypeCountFlairPurchasesArgs
   googleShoppingPurchases?: boolean | ShopCountOutputTypeCountGoogleShoppingPurchasesArgs
   googleShoppingEnrollments?: boolean | ShopCountOutputTypeCountGoogleShoppingEnrollmentsArgs
+  promotionCreditBalances?: boolean | ShopCountOutputTypeCountPromotionCreditBalancesArgs
+  adminAwardGrants?: boolean | ShopCountOutputTypeCountAdminAwardGrantsArgs
 }
 
 /**
@@ -6377,6 +8009,13 @@ export type ShopCountOutputTypeCountCreatorGiftCodesRedeemedArgs<ExtArgs extends
 /**
  * ShopCountOutputType without action
  */
+export type ShopCountOutputTypeCountCreatorGiftPurchasesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CreatorGiftPurchaseWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
 export type ShopCountOutputTypeCountFlairPurchasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ShopFlairPurchaseWhereInput
 }
@@ -6393,6 +8032,20 @@ export type ShopCountOutputTypeCountGoogleShoppingPurchasesArgs<ExtArgs extends 
  */
 export type ShopCountOutputTypeCountGoogleShoppingEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ShopListingGoogleShoppingEnrollmentWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountPromotionCreditBalancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ShopPromotionCreditBalanceWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountAdminAwardGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ShopAdminAwardGrantWhereInput
 }
 
 
@@ -6418,6 +8071,7 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   accountDeletionEmailConfirmedAt?: boolean
   inactivityWarningSentAt?: boolean
   inactivityDeactivatedAt?: boolean
+  adminFrozenAt?: boolean
   inactivityDeletionTriggeredAt?: boolean
   homeFeaturedListingId?: boolean
   itemGuidelinesAcknowledgedAt?: boolean
@@ -6429,6 +8083,10 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   flairTypeId?: boolean
   flairPurchasedAt?: boolean
   googleShoppingCredits?: boolean
+  betaTesterAt?: boolean
+  betaTesterOnboardingStatus?: boolean
+  betaTesterOnboardingCheckedAt?: boolean
+  betaTesterOnboardingCompletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
@@ -6445,12 +8103,15 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   setupFeePurchases?: boolean | Prisma.Shop$setupFeePurchasesArgs<ExtArgs>
   reactivationPurchases?: boolean | Prisma.Shop$reactivationPurchasesArgs<ExtArgs>
   creatorGiftCodesRedeemed?: boolean | Prisma.Shop$creatorGiftCodesRedeemedArgs<ExtArgs>
+  creatorGiftPurchasesReceived?: boolean | Prisma.Shop$creatorGiftPurchasesReceivedArgs<ExtArgs>
   promotionsDashboardSnapshot?: boolean | Prisma.Shop$promotionsDashboardSnapshotArgs<ExtArgs>
   salesDashboardSnapshot?: boolean | Prisma.Shop$salesDashboardSnapshotArgs<ExtArgs>
   flairType?: boolean | Prisma.Shop$flairTypeArgs<ExtArgs>
   flairPurchases?: boolean | Prisma.Shop$flairPurchasesArgs<ExtArgs>
   googleShoppingPurchases?: boolean | Prisma.Shop$googleShoppingPurchasesArgs<ExtArgs>
   googleShoppingEnrollments?: boolean | Prisma.Shop$googleShoppingEnrollmentsArgs<ExtArgs>
+  promotionCreditBalances?: boolean | Prisma.Shop$promotionCreditBalancesArgs<ExtArgs>
+  adminAwardGrants?: boolean | Prisma.Shop$adminAwardGrantsArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["shop"]>
 
@@ -6476,6 +8137,7 @@ export type ShopSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   accountDeletionEmailConfirmedAt?: boolean
   inactivityWarningSentAt?: boolean
   inactivityDeactivatedAt?: boolean
+  adminFrozenAt?: boolean
   inactivityDeletionTriggeredAt?: boolean
   homeFeaturedListingId?: boolean
   itemGuidelinesAcknowledgedAt?: boolean
@@ -6487,6 +8149,10 @@ export type ShopSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   flairTypeId?: boolean
   flairPurchasedAt?: boolean
   googleShoppingCredits?: boolean
+  betaTesterAt?: boolean
+  betaTesterOnboardingStatus?: boolean
+  betaTesterOnboardingCheckedAt?: boolean
+  betaTesterOnboardingCompletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
@@ -6515,6 +8181,7 @@ export type ShopSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   accountDeletionEmailConfirmedAt?: boolean
   inactivityWarningSentAt?: boolean
   inactivityDeactivatedAt?: boolean
+  adminFrozenAt?: boolean
   inactivityDeletionTriggeredAt?: boolean
   homeFeaturedListingId?: boolean
   itemGuidelinesAcknowledgedAt?: boolean
@@ -6526,6 +8193,10 @@ export type ShopSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   flairTypeId?: boolean
   flairPurchasedAt?: boolean
   googleShoppingCredits?: boolean
+  betaTesterAt?: boolean
+  betaTesterOnboardingStatus?: boolean
+  betaTesterOnboardingCheckedAt?: boolean
+  betaTesterOnboardingCompletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
@@ -6554,6 +8225,7 @@ export type ShopSelectScalar = {
   accountDeletionEmailConfirmedAt?: boolean
   inactivityWarningSentAt?: boolean
   inactivityDeactivatedAt?: boolean
+  adminFrozenAt?: boolean
   inactivityDeletionTriggeredAt?: boolean
   homeFeaturedListingId?: boolean
   itemGuidelinesAcknowledgedAt?: boolean
@@ -6565,11 +8237,15 @@ export type ShopSelectScalar = {
   flairTypeId?: boolean
   flairPurchasedAt?: boolean
   googleShoppingCredits?: boolean
+  betaTesterAt?: boolean
+  betaTesterOnboardingStatus?: boolean
+  betaTesterOnboardingCheckedAt?: boolean
+  betaTesterOnboardingCompletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "displayName" | "profileImageUrl" | "bio" | "welcomeMessage" | "socialLinks" | "active" | "listedOnShopsBrowse" | "stripeConnectAccountId" | "connectChargesEnabled" | "payoutsEnabled" | "editorialPriority" | "editorialPinnedUntil" | "totalSalesCents" | "storefrontViewCount" | "ownerPausedShopAt" | "accountDeletionRequestedAt" | "accountDeletionEmailConfirmedAt" | "inactivityWarningSentAt" | "inactivityDeactivatedAt" | "inactivityDeletionTriggeredAt" | "homeFeaturedListingId" | "itemGuidelinesAcknowledgedAt" | "listingFeeBonusFreeSlots" | "browseAllPageFeaturedProductIds" | "homeHotCarouselFeaturedProductIds" | "popularItemsFeaturedProductIds" | "browseShopsPageFeaturedShopIds" | "flairTypeId" | "flairPurchasedAt" | "googleShoppingCredits" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
+export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "displayName" | "profileImageUrl" | "bio" | "welcomeMessage" | "socialLinks" | "active" | "listedOnShopsBrowse" | "stripeConnectAccountId" | "connectChargesEnabled" | "payoutsEnabled" | "editorialPriority" | "editorialPinnedUntil" | "totalSalesCents" | "storefrontViewCount" | "ownerPausedShopAt" | "accountDeletionRequestedAt" | "accountDeletionEmailConfirmedAt" | "inactivityWarningSentAt" | "inactivityDeactivatedAt" | "adminFrozenAt" | "inactivityDeletionTriggeredAt" | "homeFeaturedListingId" | "itemGuidelinesAcknowledgedAt" | "listingFeeBonusFreeSlots" | "browseAllPageFeaturedProductIds" | "homeHotCarouselFeaturedProductIds" | "popularItemsFeaturedProductIds" | "browseShopsPageFeaturedShopIds" | "flairTypeId" | "flairPurchasedAt" | "googleShoppingCredits" | "betaTesterAt" | "betaTesterOnboardingStatus" | "betaTesterOnboardingCheckedAt" | "betaTesterOnboardingCompletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
 export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
   users?: boolean | Prisma.Shop$usersArgs<ExtArgs>
@@ -6585,12 +8261,15 @@ export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   setupFeePurchases?: boolean | Prisma.Shop$setupFeePurchasesArgs<ExtArgs>
   reactivationPurchases?: boolean | Prisma.Shop$reactivationPurchasesArgs<ExtArgs>
   creatorGiftCodesRedeemed?: boolean | Prisma.Shop$creatorGiftCodesRedeemedArgs<ExtArgs>
+  creatorGiftPurchasesReceived?: boolean | Prisma.Shop$creatorGiftPurchasesReceivedArgs<ExtArgs>
   promotionsDashboardSnapshot?: boolean | Prisma.Shop$promotionsDashboardSnapshotArgs<ExtArgs>
   salesDashboardSnapshot?: boolean | Prisma.Shop$salesDashboardSnapshotArgs<ExtArgs>
   flairType?: boolean | Prisma.Shop$flairTypeArgs<ExtArgs>
   flairPurchases?: boolean | Prisma.Shop$flairPurchasesArgs<ExtArgs>
   googleShoppingPurchases?: boolean | Prisma.Shop$googleShoppingPurchasesArgs<ExtArgs>
   googleShoppingEnrollments?: boolean | Prisma.Shop$googleShoppingEnrollmentsArgs<ExtArgs>
+  promotionCreditBalances?: boolean | Prisma.Shop$promotionCreditBalancesArgs<ExtArgs>
+  adminAwardGrants?: boolean | Prisma.Shop$adminAwardGrantsArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ShopIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6619,6 +8298,7 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     setupFeePurchases: Prisma.$ShopSetupFeePurchasePayload<ExtArgs>[]
     reactivationPurchases: Prisma.$ShopReactivationPurchasePayload<ExtArgs>[]
     creatorGiftCodesRedeemed: Prisma.$CreatorGiftCodePayload<ExtArgs>[]
+    creatorGiftPurchasesReceived: Prisma.$CreatorGiftPurchasePayload<ExtArgs>[]
     /**
      * * Cached JSON for the shop dashboard Promotions tab (fast reads; rebuilt on write + cron).
      */
@@ -6631,6 +8311,8 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     flairPurchases: Prisma.$ShopFlairPurchasePayload<ExtArgs>[]
     googleShoppingPurchases: Prisma.$ShopGoogleShoppingPurchasePayload<ExtArgs>[]
     googleShoppingEnrollments: Prisma.$ShopListingGoogleShoppingEnrollmentPayload<ExtArgs>[]
+    promotionCreditBalances: Prisma.$ShopPromotionCreditBalancePayload<ExtArgs>[]
+    adminAwardGrants: Prisma.$ShopAdminAwardGrantPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -6693,6 +8375,10 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      */
     inactivityDeactivatedAt: Date | null
     /**
+     * * Admin froze the shop (hidden from site; owner sees dashboard banner).
+     */
+    adminFrozenAt: Date | null
+    /**
      * * Platform started deletion cleanup after one year deactivated with no sales.
      */
     inactivityDeletionTriggeredAt: Date | null
@@ -6704,7 +8390,7 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     /**
      * *
      *    * Extra publication-fee-free slots beyond the platform default first-N free listings,
-     *    * granted from the admin Backend → Free listings tab.
+     *    * granted from the admin Backend → Award Promotions tab.
      */
     listingFeeBonusFreeSlots: number
     /**
@@ -6743,6 +8429,13 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      * * Unused Google Shopping listing credits (from pack purchases; consumed on enrollment).
      */
     googleShoppingCredits: number
+    /**
+     * * Set when the shop signs up with a beta-tester invite code.
+     */
+    betaTesterAt: Date | null
+    betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
+    betaTesterOnboardingCheckedAt: Date | null
+    betaTesterOnboardingCompletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["shop"]>
@@ -7153,12 +8846,15 @@ export interface Prisma__ShopClient<T, Null = never, ExtArgs extends runtime.Typ
   setupFeePurchases<T extends Prisma.Shop$setupFeePurchasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$setupFeePurchasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopSetupFeePurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reactivationPurchases<T extends Prisma.Shop$reactivationPurchasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$reactivationPurchasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopReactivationPurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   creatorGiftCodesRedeemed<T extends Prisma.Shop$creatorGiftCodesRedeemedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$creatorGiftCodesRedeemedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CreatorGiftCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  creatorGiftPurchasesReceived<T extends Prisma.Shop$creatorGiftPurchasesReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$creatorGiftPurchasesReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CreatorGiftPurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   promotionsDashboardSnapshot<T extends Prisma.Shop$promotionsDashboardSnapshotArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$promotionsDashboardSnapshotArgs<ExtArgs>>): Prisma.Prisma__ShopPromotionsDashboardSnapshotClient<runtime.Types.Result.GetResult<Prisma.$ShopPromotionsDashboardSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   salesDashboardSnapshot<T extends Prisma.Shop$salesDashboardSnapshotArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$salesDashboardSnapshotArgs<ExtArgs>>): Prisma.Prisma__ShopSalesDashboardSnapshotClient<runtime.Types.Result.GetResult<Prisma.$ShopSalesDashboardSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   flairType<T extends Prisma.Shop$flairTypeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$flairTypeArgs<ExtArgs>>): Prisma.Prisma__ShopFlairTypeClient<runtime.Types.Result.GetResult<Prisma.$ShopFlairTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   flairPurchases<T extends Prisma.Shop$flairPurchasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$flairPurchasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopFlairPurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleShoppingPurchases<T extends Prisma.Shop$googleShoppingPurchasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$googleShoppingPurchasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopGoogleShoppingPurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleShoppingEnrollments<T extends Prisma.Shop$googleShoppingEnrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$googleShoppingEnrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopListingGoogleShoppingEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  promotionCreditBalances<T extends Prisma.Shop$promotionCreditBalancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$promotionCreditBalancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopPromotionCreditBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  adminAwardGrants<T extends Prisma.Shop$adminAwardGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$adminAwardGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopAdminAwardGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7209,6 +8905,7 @@ export interface ShopFieldRefs {
   readonly accountDeletionEmailConfirmedAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly inactivityWarningSentAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly inactivityDeactivatedAt: Prisma.FieldRef<"Shop", 'DateTime'>
+  readonly adminFrozenAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly inactivityDeletionTriggeredAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly homeFeaturedListingId: Prisma.FieldRef<"Shop", 'String'>
   readonly itemGuidelinesAcknowledgedAt: Prisma.FieldRef<"Shop", 'DateTime'>
@@ -7220,6 +8917,10 @@ export interface ShopFieldRefs {
   readonly flairTypeId: Prisma.FieldRef<"Shop", 'String'>
   readonly flairPurchasedAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly googleShoppingCredits: Prisma.FieldRef<"Shop", 'Int'>
+  readonly betaTesterAt: Prisma.FieldRef<"Shop", 'DateTime'>
+  readonly betaTesterOnboardingStatus: Prisma.FieldRef<"Shop", 'BetaTesterOnboardingStatus'>
+  readonly betaTesterOnboardingCheckedAt: Prisma.FieldRef<"Shop", 'DateTime'>
+  readonly betaTesterOnboardingCompletedAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Shop", 'DateTime'>
 }
@@ -7949,6 +9650,30 @@ export type Shop$creatorGiftCodesRedeemedArgs<ExtArgs extends runtime.Types.Exte
 }
 
 /**
+ * Shop.creatorGiftPurchasesReceived
+ */
+export type Shop$creatorGiftPurchasesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CreatorGiftPurchase
+   */
+  select?: Prisma.CreatorGiftPurchaseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CreatorGiftPurchase
+   */
+  omit?: Prisma.CreatorGiftPurchaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CreatorGiftPurchaseInclude<ExtArgs> | null
+  where?: Prisma.CreatorGiftPurchaseWhereInput
+  orderBy?: Prisma.CreatorGiftPurchaseOrderByWithRelationInput | Prisma.CreatorGiftPurchaseOrderByWithRelationInput[]
+  cursor?: Prisma.CreatorGiftPurchaseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CreatorGiftPurchaseScalarFieldEnum | Prisma.CreatorGiftPurchaseScalarFieldEnum[]
+}
+
+/**
  * Shop.promotionsDashboardSnapshot
  */
 export type Shop$promotionsDashboardSnapshotArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -8075,6 +9800,54 @@ export type Shop$googleShoppingEnrollmentsArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.ShopListingGoogleShoppingEnrollmentScalarFieldEnum | Prisma.ShopListingGoogleShoppingEnrollmentScalarFieldEnum[]
+}
+
+/**
+ * Shop.promotionCreditBalances
+ */
+export type Shop$promotionCreditBalancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ShopPromotionCreditBalance
+   */
+  select?: Prisma.ShopPromotionCreditBalanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ShopPromotionCreditBalance
+   */
+  omit?: Prisma.ShopPromotionCreditBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ShopPromotionCreditBalanceInclude<ExtArgs> | null
+  where?: Prisma.ShopPromotionCreditBalanceWhereInput
+  orderBy?: Prisma.ShopPromotionCreditBalanceOrderByWithRelationInput | Prisma.ShopPromotionCreditBalanceOrderByWithRelationInput[]
+  cursor?: Prisma.ShopPromotionCreditBalanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ShopPromotionCreditBalanceScalarFieldEnum | Prisma.ShopPromotionCreditBalanceScalarFieldEnum[]
+}
+
+/**
+ * Shop.adminAwardGrants
+ */
+export type Shop$adminAwardGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ShopAdminAwardGrant
+   */
+  select?: Prisma.ShopAdminAwardGrantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ShopAdminAwardGrant
+   */
+  omit?: Prisma.ShopAdminAwardGrantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ShopAdminAwardGrantInclude<ExtArgs> | null
+  where?: Prisma.ShopAdminAwardGrantWhereInput
+  orderBy?: Prisma.ShopAdminAwardGrantOrderByWithRelationInput | Prisma.ShopAdminAwardGrantOrderByWithRelationInput[]
+  cursor?: Prisma.ShopAdminAwardGrantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ShopAdminAwardGrantScalarFieldEnum | Prisma.ShopAdminAwardGrantScalarFieldEnum[]
 }
 
 /**

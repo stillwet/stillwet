@@ -38,7 +38,15 @@ type ShopMeta = {
   displayName: string;
   slug: string;
   listingFeeBonusFreeSlots: number | null;
+  adminFrozenAt: Date | null;
 };
+
+function adminShopWatchEligibleShopWhere() {
+  return {
+    slug: { not: PLATFORM_SHOP_SLUG },
+    OR: [{ active: true }, { adminFrozenAt: { not: null } }],
+  };
+}
 
 function sortDetails(a: ShopWatchDetail, b: ShopWatchDetail): number {
   return a.productName.localeCompare(b.productName, undefined, { sensitivity: "base" });
@@ -199,6 +207,7 @@ function buildShopWatchRowFromListings(
     shopId: shop.id,
     displayName: shop.displayName,
     slug: shop.slug,
+    adminFrozenAt: shop.adminFrozenAt?.toISOString() ?? null,
     activeListingsCount: liveActiveCount + detailsOtherApprovedRaw.length,
     salesCount,
     paidListingsCount,
@@ -232,12 +241,13 @@ const listingSelect = {
 /** Table rows with counts only — listing details load on expand. */
 export async function loadAdminShopWatchSummaryRows(): Promise<ShopWatchRow[]> {
   const creatorShops = await prisma.shop.findMany({
-    where: { slug: { not: PLATFORM_SHOP_SLUG }, active: true },
+    where: adminShopWatchEligibleShopWhere(),
     select: {
       id: true,
       displayName: true,
       slug: true,
       listingFeeBonusFreeSlots: true,
+      adminFrozenAt: true,
     },
     orderBy: { displayName: "asc" },
   });
@@ -362,6 +372,7 @@ export async function loadAdminShopWatchSummaryRows(): Promise<ShopWatchRow[]> {
       shopId: shop.id,
       displayName: shop.displayName,
       slug: shop.slug,
+      adminFrozenAt: shop.adminFrozenAt?.toISOString() ?? null,
       activeListingsCount: (agg?.liveActiveCount ?? 0) + (agg?.approvedNotLiveCount ?? 0),
       salesCount: salesByShop.get(shop.id) ?? 0,
       paidListingsCount: paidCountByShop.get(shop.id) ?? 0,
@@ -396,12 +407,13 @@ export async function loadAdminShopWatchShopDetails(
   | "detailsOtherRejected"
 > | null> {
   const shop = await prisma.shop.findFirst({
-    where: { id: shopId, slug: { not: PLATFORM_SHOP_SLUG }, active: true },
+    where: { id: shopId, ...adminShopWatchEligibleShopWhere() },
     select: {
       id: true,
       displayName: true,
       slug: true,
       listingFeeBonusFreeSlots: true,
+      adminFrozenAt: true,
     },
   });
   if (!shop) return null;

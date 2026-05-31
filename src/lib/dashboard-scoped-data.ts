@@ -8,6 +8,7 @@ import {
   ShopGoogleShoppingPurchaseStatus,
   SupportMessageAuthor,
 } from "@/generated/prisma/enums";
+import { getPromotionCreditBalancesForShop } from "@/lib/promotion-credit-balance";
 import { prisma } from "@/lib/prisma";
 import {
   promotionStripePaymentsAvailable,
@@ -354,6 +355,8 @@ async function loadPromotionsSummaryForShopLive(
     .sort((a, b) => b.createdAtIso.localeCompare(a.createdAtIso))
     .slice(0, 40);
 
+  const promotionCreditBalances = await getPromotionCreditBalancesForShop(shopId);
+
   const totalMs = Date.now() - t0;
   if (process.env.NODE_ENV === "production" && totalMs >= 3000) {
     console.warn("[loadPromotionsSummaryForShop] slow", { shopId, totalMs, rowCount: rows.length });
@@ -361,7 +364,7 @@ async function loadPromotionsSummaryForShopLive(
     console.warn("[loadPromotionsSummaryForShop]", { shopId, totalMs, rowCount: rows.length });
   }
 
-  return { purchases, mockPromotionCheckout, stripePublishableKey };
+  return { purchases, mockPromotionCheckout, stripePublishableKey, promotionCreditBalances };
 }
 
 export async function rebuildShopPromotionsDashboardSnapshot(

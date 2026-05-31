@@ -29,12 +29,13 @@ if (!fs.existsSync(envFile)) {
 
 require("dotenv").config({ path: envFile });
 
-const neonDirect =
-  process.env.PRISMA_MIGRATE_DATABASE_URL?.trim() ||
-  process.env.xtmerchneon_POSTGRES_URL_NON_POOLING?.trim() ||
-  process.env.xtmerchneon_DATABASE_URL_UNPOOLED?.trim() ||
-  process.env.POSTGRES_URL_NON_POOLING?.trim() ||
-  process.env.DATABASE_URL_UNPOOLED?.trim();
+const SUFFIX_NON_POOLING = "_POSTGRES_URL_NON_POOLING";
+const SUFFIX_UNPOOLED = "_DATABASE_URL_UNPOOLED";
+
+function isPostgresUrl(v) {
+  const t = String(v ?? "").trim();
+  return t.startsWith("postgresql://") || t.startsWith("postgres://");
+}
 
 function isLocalHostUrl(u) {
   try {
@@ -45,18 +46,43 @@ function isLocalHostUrl(u) {
   }
 }
 
-let url = neonDirect;
-if (!url || isLocalHostUrl(url)) {
-  url =
-    process.env.xtmerchneon_POSTGRES_URL_NON_POOLING?.trim() ||
-    process.env.xtmerchneon_DATABASE_URL_UNPOOLED?.trim() ||
-    process.env.POSTGRES_URL_NON_POOLING?.trim() ||
-    "";
+function tryDirectCandidate(raw) {
+  const t = String(raw ?? "").trim();
+  if (!t || !isPostgresUrl(t) || isLocalHostUrl(t)) return undefined;
+  return t;
 }
 
-if (!url || isLocalHostUrl(url)) {
+/** Vercel + Neon integration injects prefixed vars (e.g. `stillwet_POSTGRES_URL_NON_POOLING`). */
+function integrationDirectUrlFromEnv() {
+  const found = [];
+  for (const [k, v] of Object.entries(process.env)) {
+    if (!isPostgresUrl(v)) continue;
+    if (isLocalHostUrl(String(v).trim())) continue;
+    if (
+      (k.length > SUFFIX_NON_POOLING.length && k.endsWith(SUFFIX_NON_POOLING)) ||
+      (k.length > SUFFIX_UNPOOLED.length && k.endsWith(SUFFIX_UNPOOLED))
+    ) {
+      found.push({ key: k, url: String(v).trim() });
+    }
+  }
+  if (found.length === 0) return undefined;
+  found.sort((a, b) => a.key.localeCompare(b.key));
+  if (found.length > 1) {
+    console.log(`[migrate:prod] Multiple integration direct URLs; using ${found[0].key}`);
+  }
+  return found[0].url;
+}
+
+const url =
+  tryDirectCandidate(process.env.PRISMA_MIGRATE_DATABASE_URL) ||
+  tryDirectCandidate(process.env.POSTGRES_URL_NON_POOLING) ||
+  tryDirectCandidate(process.env.DATABASE_URL_UNPOOLED) ||
+  tryDirectCandidate(process.env.DIRECT_URL) ||
+  integrationDirectUrlFromEnv();
+
+if (!url) {
   console.error(
-    "[migrate:prod] No non-local direct Postgres URL found.\n  In .env.production.local set Neon unpooled URL (e.g. xtmerchneon_POSTGRES_URL_NON_POOLING).",
+    "[migrate:prod] No non-local direct Postgres URL found.\n  In .env.production.local set POSTGRES_URL_NON_POOLING, DATABASE_URL_UNPOOLED, or the Neon integration unpooled var from `vercel env pull`.",
   );
   process.exit(1);
 }

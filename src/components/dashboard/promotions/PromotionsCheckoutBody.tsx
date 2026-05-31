@@ -20,6 +20,7 @@ export function PromotionsCheckoutBody(props: {
   computedPeriodChoices: PlacementPeriodChoiceUi[] | null;
   mockPromotionCheckout: boolean;
   stripePublishableKey: string;
+  promotionCreditsAvailable?: number;
   queryPreserve?: Record<string, string | undefined>;
 }) {
   const router = useRouter();
@@ -78,6 +79,7 @@ export function PromotionsCheckoutBody(props: {
           amountCents={selected.amountCents}
           mockPay={props.mockPromotionCheckout}
           stripePublishableKey={props.stripePublishableKey}
+          promotionCreditsAvailable={props.promotionCreditsAvailable}
         />
       ) : hasPeriodData && selected && !selected.selectable ? (
         <p className="mt-3 text-xs text-amber-200/90">

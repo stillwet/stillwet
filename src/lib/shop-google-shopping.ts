@@ -1,4 +1,5 @@
 import {
+  GOOGLE_SHOPPING_ADMIN_GRANT_PACK_ID,
   GOOGLE_SHOPPING_LEGACY_PACK_ID,
   googleShoppingCreditPackById,
   googleShoppingCreditPackPriceUsdLabel,
@@ -13,6 +14,10 @@ export function shopGoogleShoppingPurchaseHistoryLabel(row?: {
   packId?: string | null;
   creditsGranted?: number | null;
 }): string {
+  if (row?.packId === GOOGLE_SHOPPING_ADMIN_GRANT_PACK_ID) {
+    const n = row.creditsGranted ?? 1;
+    return `Google Shopping — ${n} listing credit${n === 1 ? "" : "s"} (admin grant)`;
+  }
   if (row?.packId && row.packId !== GOOGLE_SHOPPING_LEGACY_PACK_ID) {
     const pack = googleShoppingCreditPackById(row.packId);
     if (pack) {
@@ -28,6 +33,9 @@ export function shopGoogleShoppingPurchaseHistoryLabel(row?: {
 }
 
 export function shopGoogleShoppingPackPurchaseLabel(packId: string): string {
+  if (packId === GOOGLE_SHOPPING_ADMIN_GRANT_PACK_ID) {
+    return "Google Shopping — admin grant";
+  }
   const pack = googleShoppingCreditPackById(packId);
   if (!pack) return "Google Shopping credits";
   return `Google Shopping — ${pack.label}`;

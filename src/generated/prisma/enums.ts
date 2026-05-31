@@ -89,10 +89,28 @@ export type CreatorGiftPurchaseStatus = (typeof CreatorGiftPurchaseStatus)[keyof
 
 export const CreatorGiftCodeType = {
   shop_setup: 'shop_setup',
-  listing_credits: 'listing_credits'
+  listing_credits: 'listing_credits',
+  promotion_credit: 'promotion_credit',
+  google_shopping_credits: 'google_shopping_credits'
 } as const
 
 export type CreatorGiftCodeType = (typeof CreatorGiftCodeType)[keyof typeof CreatorGiftCodeType]
+
+
+export const CreatorGiftFulfillmentMode = {
+  email_codes: 'email_codes',
+  direct_to_shop: 'direct_to_shop'
+} as const
+
+export type CreatorGiftFulfillmentMode = (typeof CreatorGiftFulfillmentMode)[keyof typeof CreatorGiftFulfillmentMode]
+
+
+export const BetaTesterOnboardingStatus = {
+  in_progress: 'in_progress',
+  complete: 'complete'
+} as const
+
+export type BetaTesterOnboardingStatus = (typeof BetaTesterOnboardingStatus)[keyof typeof BetaTesterOnboardingStatus]
 
 
 export const ShopReactivationPurchaseStatus = {

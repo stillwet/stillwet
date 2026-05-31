@@ -76,6 +76,8 @@ export const ModelName = {
   ShopEmailVerificationToken: 'ShopEmailVerificationToken',
   ShopListing: 'ShopListing',
   PromotionPurchase: 'PromotionPurchase',
+  ShopPromotionCreditBalance: 'ShopPromotionCreditBalance',
+  ShopAdminAwardGrant: 'ShopAdminAwardGrant',
   ListingCreditPackPurchase: 'ListingCreditPackPurchase',
   PendingShopSignup: 'PendingShopSignup',
   ShopSetupFeePurchase: 'ShopSetupFeePurchase',
@@ -198,6 +200,7 @@ export const ShopScalarFieldEnum = {
   accountDeletionEmailConfirmedAt: 'accountDeletionEmailConfirmedAt',
   inactivityWarningSentAt: 'inactivityWarningSentAt',
   inactivityDeactivatedAt: 'inactivityDeactivatedAt',
+  adminFrozenAt: 'adminFrozenAt',
   inactivityDeletionTriggeredAt: 'inactivityDeletionTriggeredAt',
   homeFeaturedListingId: 'homeFeaturedListingId',
   itemGuidelinesAcknowledgedAt: 'itemGuidelinesAcknowledgedAt',
@@ -209,6 +212,10 @@ export const ShopScalarFieldEnum = {
   flairTypeId: 'flairTypeId',
   flairPurchasedAt: 'flairPurchasedAt',
   googleShoppingCredits: 'googleShoppingCredits',
+  betaTesterAt: 'betaTesterAt',
+  betaTesterOnboardingStatus: 'betaTesterOnboardingStatus',
+  betaTesterOnboardingCheckedAt: 'betaTesterOnboardingCheckedAt',
+  betaTesterOnboardingCompletedAt: 'betaTesterOnboardingCompletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -499,11 +506,36 @@ export const PromotionPurchaseScalarFieldEnum = {
   stripeChargeId: 'stripeChargeId',
   paidAt: 'paidAt',
   eligibleFrom: 'eligibleFrom',
+  paidViaPromotionCredit: 'paidViaPromotionCredit',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type PromotionPurchaseScalarFieldEnum = (typeof PromotionPurchaseScalarFieldEnum)[keyof typeof PromotionPurchaseScalarFieldEnum]
+
+
+export const ShopPromotionCreditBalanceScalarFieldEnum = {
+  id: 'id',
+  shopId: 'shopId',
+  kind: 'kind',
+  credits: 'credits',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ShopPromotionCreditBalanceScalarFieldEnum = (typeof ShopPromotionCreditBalanceScalarFieldEnum)[keyof typeof ShopPromotionCreditBalanceScalarFieldEnum]
+
+
+export const ShopAdminAwardGrantScalarFieldEnum = {
+  id: 'id',
+  shopId: 'shopId',
+  awardKey: 'awardKey',
+  quantity: 'quantity',
+  grantedAt: 'grantedAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type ShopAdminAwardGrantScalarFieldEnum = (typeof ShopAdminAwardGrantScalarFieldEnum)[keyof typeof ShopAdminAwardGrantScalarFieldEnum]
 
 
 export const ListingCreditPackPurchaseScalarFieldEnum = {
@@ -577,9 +609,18 @@ export type ShopReactivationPurchaseScalarFieldEnum = (typeof ShopReactivationPu
 export const CreatorGiftPurchaseScalarFieldEnum = {
   id: 'id',
   purchaserEmail: 'purchaserEmail',
+  fulfillmentMode: 'fulfillmentMode',
+  recipientShopId: 'recipientShopId',
+  giftFromName: 'giftFromName',
   setupFeeIncluded: 'setupFeeIncluded',
   listingCreditPackId: 'listingCreditPackId',
   listingCreditsGranted: 'listingCreditsGranted',
+  googleShoppingCreditPackId: 'googleShoppingCreditPackId',
+  googleShoppingCreditsGranted: 'googleShoppingCreditsGranted',
+  promotionKind: 'promotionKind',
+  promotionCreditsGranted: 'promotionCreditsGranted',
+  shopFlairIncluded: 'shopFlairIncluded',
+  isBetaTesterBatch: 'isBetaTesterBatch',
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
@@ -601,6 +642,9 @@ export const CreatorGiftCodeScalarFieldEnum = {
   code: 'code',
   codeNormalized: 'codeNormalized',
   listingCreditsGranted: 'listingCreditsGranted',
+  googleShoppingCreditsGranted: 'googleShoppingCreditsGranted',
+  promotionKind: 'promotionKind',
+  promotionCreditsGranted: 'promotionCreditsGranted',
   redeemedAt: 'redeemedAt',
   redeemedByShopId: 'redeemedByShopId',
   createdAt: 'createdAt'

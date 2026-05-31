@@ -28,20 +28,33 @@ export type AggregateCreatorGiftPurchase = {
 
 export type CreatorGiftPurchaseAvgAggregateOutputType = {
   listingCreditsGranted: number | null
+  googleShoppingCreditsGranted: number | null
+  promotionCreditsGranted: number | null
   amountCents: number | null
 }
 
 export type CreatorGiftPurchaseSumAggregateOutputType = {
   listingCreditsGranted: number | null
+  googleShoppingCreditsGranted: number | null
+  promotionCreditsGranted: number | null
   amountCents: number | null
 }
 
 export type CreatorGiftPurchaseMinAggregateOutputType = {
   id: string | null
   purchaserEmail: string | null
+  fulfillmentMode: $Enums.CreatorGiftFulfillmentMode | null
+  recipientShopId: string | null
+  giftFromName: string | null
   setupFeeIncluded: boolean | null
   listingCreditPackId: string | null
   listingCreditsGranted: number | null
+  googleShoppingCreditPackId: string | null
+  googleShoppingCreditsGranted: number | null
+  promotionKind: $Enums.PromotionKind | null
+  promotionCreditsGranted: number | null
+  shopFlairIncluded: boolean | null
+  isBetaTesterBatch: boolean | null
   amountCents: number | null
   currency: string | null
   status: $Enums.CreatorGiftPurchaseStatus | null
@@ -56,9 +69,18 @@ export type CreatorGiftPurchaseMinAggregateOutputType = {
 export type CreatorGiftPurchaseMaxAggregateOutputType = {
   id: string | null
   purchaserEmail: string | null
+  fulfillmentMode: $Enums.CreatorGiftFulfillmentMode | null
+  recipientShopId: string | null
+  giftFromName: string | null
   setupFeeIncluded: boolean | null
   listingCreditPackId: string | null
   listingCreditsGranted: number | null
+  googleShoppingCreditPackId: string | null
+  googleShoppingCreditsGranted: number | null
+  promotionKind: $Enums.PromotionKind | null
+  promotionCreditsGranted: number | null
+  shopFlairIncluded: boolean | null
+  isBetaTesterBatch: boolean | null
   amountCents: number | null
   currency: string | null
   status: $Enums.CreatorGiftPurchaseStatus | null
@@ -73,9 +95,18 @@ export type CreatorGiftPurchaseMaxAggregateOutputType = {
 export type CreatorGiftPurchaseCountAggregateOutputType = {
   id: number
   purchaserEmail: number
+  fulfillmentMode: number
+  recipientShopId: number
+  giftFromName: number
   setupFeeIncluded: number
   listingCreditPackId: number
   listingCreditsGranted: number
+  googleShoppingCreditPackId: number
+  googleShoppingCreditsGranted: number
+  promotionKind: number
+  promotionCreditsGranted: number
+  shopFlairIncluded: number
+  isBetaTesterBatch: number
   amountCents: number
   currency: number
   status: number
@@ -91,20 +122,33 @@ export type CreatorGiftPurchaseCountAggregateOutputType = {
 
 export type CreatorGiftPurchaseAvgAggregateInputType = {
   listingCreditsGranted?: true
+  googleShoppingCreditsGranted?: true
+  promotionCreditsGranted?: true
   amountCents?: true
 }
 
 export type CreatorGiftPurchaseSumAggregateInputType = {
   listingCreditsGranted?: true
+  googleShoppingCreditsGranted?: true
+  promotionCreditsGranted?: true
   amountCents?: true
 }
 
 export type CreatorGiftPurchaseMinAggregateInputType = {
   id?: true
   purchaserEmail?: true
+  fulfillmentMode?: true
+  recipientShopId?: true
+  giftFromName?: true
   setupFeeIncluded?: true
   listingCreditPackId?: true
   listingCreditsGranted?: true
+  googleShoppingCreditPackId?: true
+  googleShoppingCreditsGranted?: true
+  promotionKind?: true
+  promotionCreditsGranted?: true
+  shopFlairIncluded?: true
+  isBetaTesterBatch?: true
   amountCents?: true
   currency?: true
   status?: true
@@ -119,9 +163,18 @@ export type CreatorGiftPurchaseMinAggregateInputType = {
 export type CreatorGiftPurchaseMaxAggregateInputType = {
   id?: true
   purchaserEmail?: true
+  fulfillmentMode?: true
+  recipientShopId?: true
+  giftFromName?: true
   setupFeeIncluded?: true
   listingCreditPackId?: true
   listingCreditsGranted?: true
+  googleShoppingCreditPackId?: true
+  googleShoppingCreditsGranted?: true
+  promotionKind?: true
+  promotionCreditsGranted?: true
+  shopFlairIncluded?: true
+  isBetaTesterBatch?: true
   amountCents?: true
   currency?: true
   status?: true
@@ -136,9 +189,18 @@ export type CreatorGiftPurchaseMaxAggregateInputType = {
 export type CreatorGiftPurchaseCountAggregateInputType = {
   id?: true
   purchaserEmail?: true
+  fulfillmentMode?: true
+  recipientShopId?: true
+  giftFromName?: true
   setupFeeIncluded?: true
   listingCreditPackId?: true
   listingCreditsGranted?: true
+  googleShoppingCreditPackId?: true
+  googleShoppingCreditsGranted?: true
+  promotionKind?: true
+  promotionCreditsGranted?: true
+  shopFlairIncluded?: true
+  isBetaTesterBatch?: true
   amountCents?: true
   currency?: true
   status?: true
@@ -239,10 +301,19 @@ export type CreatorGiftPurchaseGroupByArgs<ExtArgs extends runtime.Types.Extensi
 
 export type CreatorGiftPurchaseGroupByOutputType = {
   id: string
-  purchaserEmail: string
+  purchaserEmail: string | null
+  fulfillmentMode: $Enums.CreatorGiftFulfillmentMode
+  recipientShopId: string | null
+  giftFromName: string | null
   setupFeeIncluded: boolean
   listingCreditPackId: string | null
   listingCreditsGranted: number
+  googleShoppingCreditPackId: string | null
+  googleShoppingCreditsGranted: number
+  promotionKind: $Enums.PromotionKind | null
+  promotionCreditsGranted: number
+  shopFlairIncluded: boolean
+  isBetaTesterBatch: boolean
   amountCents: number
   currency: string
   status: $Enums.CreatorGiftPurchaseStatus
@@ -279,10 +350,19 @@ export type CreatorGiftPurchaseWhereInput = {
   OR?: Prisma.CreatorGiftPurchaseWhereInput[]
   NOT?: Prisma.CreatorGiftPurchaseWhereInput | Prisma.CreatorGiftPurchaseWhereInput[]
   id?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
-  purchaserEmail?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
+  purchaserEmail?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  giftFromName?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   setupFeeIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   listingCreditPackId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   listingCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  googleShoppingCreditPackId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  promotionKind?: Prisma.EnumPromotionKindNullableFilter<"CreatorGiftPurchase"> | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  shopFlairIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  isBetaTesterBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -292,15 +372,25 @@ export type CreatorGiftPurchaseWhereInput = {
   emailedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
+  recipientShop?: Prisma.XOR<Prisma.ShopNullableScalarRelationFilter, Prisma.ShopWhereInput> | null
   codes?: Prisma.CreatorGiftCodeListRelationFilter
 }
 
 export type CreatorGiftPurchaseOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  purchaserEmail?: Prisma.SortOrder
+  purchaserEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  fulfillmentMode?: Prisma.SortOrder
+  recipientShopId?: Prisma.SortOrderInput | Prisma.SortOrder
+  giftFromName?: Prisma.SortOrderInput | Prisma.SortOrder
   setupFeeIncluded?: Prisma.SortOrder
   listingCreditPackId?: Prisma.SortOrderInput | Prisma.SortOrder
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditPackId?: Prisma.SortOrderInput | Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionKind?: Prisma.SortOrderInput | Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
+  shopFlairIncluded?: Prisma.SortOrder
+  isBetaTesterBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -310,6 +400,7 @@ export type CreatorGiftPurchaseOrderByWithRelationInput = {
   emailedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  recipientShop?: Prisma.ShopOrderByWithRelationInput
   codes?: Prisma.CreatorGiftCodeOrderByRelationAggregateInput
 }
 
@@ -320,10 +411,19 @@ export type CreatorGiftPurchaseWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CreatorGiftPurchaseWhereInput | Prisma.CreatorGiftPurchaseWhereInput[]
   OR?: Prisma.CreatorGiftPurchaseWhereInput[]
   NOT?: Prisma.CreatorGiftPurchaseWhereInput | Prisma.CreatorGiftPurchaseWhereInput[]
-  purchaserEmail?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
+  purchaserEmail?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  giftFromName?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   setupFeeIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   listingCreditPackId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   listingCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  googleShoppingCreditPackId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  promotionKind?: Prisma.EnumPromotionKindNullableFilter<"CreatorGiftPurchase"> | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  shopFlairIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  isBetaTesterBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -331,15 +431,25 @@ export type CreatorGiftPurchaseWhereUniqueInput = Prisma.AtLeast<{
   emailedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
+  recipientShop?: Prisma.XOR<Prisma.ShopNullableScalarRelationFilter, Prisma.ShopWhereInput> | null
   codes?: Prisma.CreatorGiftCodeListRelationFilter
 }, "id" | "stripeCheckoutSessionId" | "stripePaymentIntentId">
 
 export type CreatorGiftPurchaseOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  purchaserEmail?: Prisma.SortOrder
+  purchaserEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  fulfillmentMode?: Prisma.SortOrder
+  recipientShopId?: Prisma.SortOrderInput | Prisma.SortOrder
+  giftFromName?: Prisma.SortOrderInput | Prisma.SortOrder
   setupFeeIncluded?: Prisma.SortOrder
   listingCreditPackId?: Prisma.SortOrderInput | Prisma.SortOrder
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditPackId?: Prisma.SortOrderInput | Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionKind?: Prisma.SortOrderInput | Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
+  shopFlairIncluded?: Prisma.SortOrder
+  isBetaTesterBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -361,10 +471,19 @@ export type CreatorGiftPurchaseScalarWhereWithAggregatesInput = {
   OR?: Prisma.CreatorGiftPurchaseScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CreatorGiftPurchaseScalarWhereWithAggregatesInput | Prisma.CreatorGiftPurchaseScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CreatorGiftPurchase"> | string
-  purchaserEmail?: Prisma.StringWithAggregatesFilter<"CreatorGiftPurchase"> | string
+  purchaserEmail?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeWithAggregatesFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
+  giftFromName?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
   setupFeeIncluded?: Prisma.BoolWithAggregatesFilter<"CreatorGiftPurchase"> | boolean
   listingCreditPackId?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
   listingCreditsGranted?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
+  googleShoppingCreditPackId?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
+  googleShoppingCreditsGranted?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
+  promotionKind?: Prisma.EnumPromotionKindNullableWithAggregatesFilter<"CreatorGiftPurchase"> | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
+  shopFlairIncluded?: Prisma.BoolWithAggregatesFilter<"CreatorGiftPurchase"> | boolean
+  isBetaTesterBatch?: Prisma.BoolWithAggregatesFilter<"CreatorGiftPurchase"> | boolean
   amountCents?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusWithAggregatesFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
@@ -378,10 +497,18 @@ export type CreatorGiftPurchaseScalarWhereWithAggregatesInput = {
 
 export type CreatorGiftPurchaseCreateInput = {
   id?: string
-  purchaserEmail: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: string | null
   setupFeeIncluded?: boolean
   listingCreditPackId?: string | null
   listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -391,15 +518,25 @@ export type CreatorGiftPurchaseCreateInput = {
   emailedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  recipientShop?: Prisma.ShopCreateNestedOneWithoutCreatorGiftPurchasesReceivedInput
   codes?: Prisma.CreatorGiftCodeCreateNestedManyWithoutPurchaseInput
 }
 
 export type CreatorGiftPurchaseUncheckedCreateInput = {
   id?: string
-  purchaserEmail: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: string | null
+  giftFromName?: string | null
   setupFeeIncluded?: boolean
   listingCreditPackId?: string | null
   listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -414,10 +551,18 @@ export type CreatorGiftPurchaseUncheckedCreateInput = {
 
 export type CreatorGiftPurchaseUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  purchaserEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -427,15 +572,25 @@ export type CreatorGiftPurchaseUpdateInput = {
   emailedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recipientShop?: Prisma.ShopUpdateOneWithoutCreatorGiftPurchasesReceivedNestedInput
   codes?: Prisma.CreatorGiftCodeUpdateManyWithoutPurchaseNestedInput
 }
 
 export type CreatorGiftPurchaseUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  purchaserEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -450,10 +605,19 @@ export type CreatorGiftPurchaseUncheckedUpdateInput = {
 
 export type CreatorGiftPurchaseCreateManyInput = {
   id?: string
-  purchaserEmail: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: string | null
+  giftFromName?: string | null
   setupFeeIncluded?: boolean
   listingCreditPackId?: string | null
   listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -467,10 +631,18 @@ export type CreatorGiftPurchaseCreateManyInput = {
 
 export type CreatorGiftPurchaseUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  purchaserEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -484,10 +656,19 @@ export type CreatorGiftPurchaseUpdateManyMutationInput = {
 
 export type CreatorGiftPurchaseUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  purchaserEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -499,12 +680,31 @@ export type CreatorGiftPurchaseUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type CreatorGiftPurchaseListRelationFilter = {
+  every?: Prisma.CreatorGiftPurchaseWhereInput
+  some?: Prisma.CreatorGiftPurchaseWhereInput
+  none?: Prisma.CreatorGiftPurchaseWhereInput
+}
+
+export type CreatorGiftPurchaseOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type CreatorGiftPurchaseCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   purchaserEmail?: Prisma.SortOrder
+  fulfillmentMode?: Prisma.SortOrder
+  recipientShopId?: Prisma.SortOrder
+  giftFromName?: Prisma.SortOrder
   setupFeeIncluded?: Prisma.SortOrder
   listingCreditPackId?: Prisma.SortOrder
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditPackId?: Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionKind?: Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
+  shopFlairIncluded?: Prisma.SortOrder
+  isBetaTesterBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -518,15 +718,26 @@ export type CreatorGiftPurchaseCountOrderByAggregateInput = {
 
 export type CreatorGiftPurchaseAvgOrderByAggregateInput = {
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
 }
 
 export type CreatorGiftPurchaseMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   purchaserEmail?: Prisma.SortOrder
+  fulfillmentMode?: Prisma.SortOrder
+  recipientShopId?: Prisma.SortOrder
+  giftFromName?: Prisma.SortOrder
   setupFeeIncluded?: Prisma.SortOrder
   listingCreditPackId?: Prisma.SortOrder
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditPackId?: Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionKind?: Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
+  shopFlairIncluded?: Prisma.SortOrder
+  isBetaTesterBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -541,9 +752,18 @@ export type CreatorGiftPurchaseMaxOrderByAggregateInput = {
 export type CreatorGiftPurchaseMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   purchaserEmail?: Prisma.SortOrder
+  fulfillmentMode?: Prisma.SortOrder
+  recipientShopId?: Prisma.SortOrder
+  giftFromName?: Prisma.SortOrder
   setupFeeIncluded?: Prisma.SortOrder
   listingCreditPackId?: Prisma.SortOrder
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditPackId?: Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionKind?: Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
+  shopFlairIncluded?: Prisma.SortOrder
+  isBetaTesterBatch?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -557,12 +777,64 @@ export type CreatorGiftPurchaseMinOrderByAggregateInput = {
 
 export type CreatorGiftPurchaseSumOrderByAggregateInput = {
   listingCreditsGranted?: Prisma.SortOrder
+  googleShoppingCreditsGranted?: Prisma.SortOrder
+  promotionCreditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
 }
 
 export type CreatorGiftPurchaseScalarRelationFilter = {
   is?: Prisma.CreatorGiftPurchaseWhereInput
   isNot?: Prisma.CreatorGiftPurchaseWhereInput
+}
+
+export type CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput = {
+  create?: Prisma.XOR<Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput> | Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput[] | Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput[]
+  connectOrCreate?: Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput[]
+  createMany?: Prisma.CreatorGiftPurchaseCreateManyRecipientShopInputEnvelope
+  connect?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+}
+
+export type CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput = {
+  create?: Prisma.XOR<Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput> | Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput[] | Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput[]
+  connectOrCreate?: Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput[]
+  createMany?: Prisma.CreatorGiftPurchaseCreateManyRecipientShopInputEnvelope
+  connect?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+}
+
+export type CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput = {
+  create?: Prisma.XOR<Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput> | Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput[] | Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput[]
+  connectOrCreate?: Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput[]
+  upsert?: Prisma.CreatorGiftPurchaseUpsertWithWhereUniqueWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseUpsertWithWhereUniqueWithoutRecipientShopInput[]
+  createMany?: Prisma.CreatorGiftPurchaseCreateManyRecipientShopInputEnvelope
+  set?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  disconnect?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  delete?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  connect?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  update?: Prisma.CreatorGiftPurchaseUpdateWithWhereUniqueWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseUpdateWithWhereUniqueWithoutRecipientShopInput[]
+  updateMany?: Prisma.CreatorGiftPurchaseUpdateManyWithWhereWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseUpdateManyWithWhereWithoutRecipientShopInput[]
+  deleteMany?: Prisma.CreatorGiftPurchaseScalarWhereInput | Prisma.CreatorGiftPurchaseScalarWhereInput[]
+}
+
+export type CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput = {
+  create?: Prisma.XOR<Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput> | Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput[] | Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput[]
+  connectOrCreate?: Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput[]
+  upsert?: Prisma.CreatorGiftPurchaseUpsertWithWhereUniqueWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseUpsertWithWhereUniqueWithoutRecipientShopInput[]
+  createMany?: Prisma.CreatorGiftPurchaseCreateManyRecipientShopInputEnvelope
+  set?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  disconnect?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  delete?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  connect?: Prisma.CreatorGiftPurchaseWhereUniqueInput | Prisma.CreatorGiftPurchaseWhereUniqueInput[]
+  update?: Prisma.CreatorGiftPurchaseUpdateWithWhereUniqueWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseUpdateWithWhereUniqueWithoutRecipientShopInput[]
+  updateMany?: Prisma.CreatorGiftPurchaseUpdateManyWithWhereWithoutRecipientShopInput | Prisma.CreatorGiftPurchaseUpdateManyWithWhereWithoutRecipientShopInput[]
+  deleteMany?: Prisma.CreatorGiftPurchaseScalarWhereInput | Prisma.CreatorGiftPurchaseScalarWhereInput[]
+}
+
+export type EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput = {
+  set?: $Enums.CreatorGiftFulfillmentMode
+}
+
+export type NullableEnumPromotionKindFieldUpdateOperationsInput = {
+  set?: $Enums.PromotionKind | null
 }
 
 export type EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput = {
@@ -583,12 +855,20 @@ export type CreatorGiftPurchaseUpdateOneRequiredWithoutCodesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CreatorGiftPurchaseUpdateToOneWithWhereWithoutCodesInput, Prisma.CreatorGiftPurchaseUpdateWithoutCodesInput>, Prisma.CreatorGiftPurchaseUncheckedUpdateWithoutCodesInput>
 }
 
-export type CreatorGiftPurchaseCreateWithoutCodesInput = {
+export type CreatorGiftPurchaseCreateWithoutRecipientShopInput = {
   id?: string
-  purchaserEmail: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: string | null
   setupFeeIncluded?: boolean
   listingCreditPackId?: string | null
   listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -598,14 +878,131 @@ export type CreatorGiftPurchaseCreateWithoutCodesInput = {
   emailedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  codes?: Prisma.CreatorGiftCodeCreateNestedManyWithoutPurchaseInput
+}
+
+export type CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput = {
+  id?: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: string | null
+  setupFeeIncluded?: boolean
+  listingCreditPackId?: string | null
+  listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
+  amountCents: number
+  currency?: string
+  status?: $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: string | null
+  stripePaymentIntentId?: string | null
+  paidAt?: Date | string | null
+  emailedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  codes?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutPurchaseInput
+}
+
+export type CreatorGiftPurchaseCreateOrConnectWithoutRecipientShopInput = {
+  where: Prisma.CreatorGiftPurchaseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput>
+}
+
+export type CreatorGiftPurchaseCreateManyRecipientShopInputEnvelope = {
+  data: Prisma.CreatorGiftPurchaseCreateManyRecipientShopInput | Prisma.CreatorGiftPurchaseCreateManyRecipientShopInput[]
+  skipDuplicates?: boolean
+}
+
+export type CreatorGiftPurchaseUpsertWithWhereUniqueWithoutRecipientShopInput = {
+  where: Prisma.CreatorGiftPurchaseWhereUniqueInput
+  update: Prisma.XOR<Prisma.CreatorGiftPurchaseUpdateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedUpdateWithoutRecipientShopInput>
+  create: Prisma.XOR<Prisma.CreatorGiftPurchaseCreateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput>
+}
+
+export type CreatorGiftPurchaseUpdateWithWhereUniqueWithoutRecipientShopInput = {
+  where: Prisma.CreatorGiftPurchaseWhereUniqueInput
+  data: Prisma.XOR<Prisma.CreatorGiftPurchaseUpdateWithoutRecipientShopInput, Prisma.CreatorGiftPurchaseUncheckedUpdateWithoutRecipientShopInput>
+}
+
+export type CreatorGiftPurchaseUpdateManyWithWhereWithoutRecipientShopInput = {
+  where: Prisma.CreatorGiftPurchaseScalarWhereInput
+  data: Prisma.XOR<Prisma.CreatorGiftPurchaseUpdateManyMutationInput, Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopInput>
+}
+
+export type CreatorGiftPurchaseScalarWhereInput = {
+  AND?: Prisma.CreatorGiftPurchaseScalarWhereInput | Prisma.CreatorGiftPurchaseScalarWhereInput[]
+  OR?: Prisma.CreatorGiftPurchaseScalarWhereInput[]
+  NOT?: Prisma.CreatorGiftPurchaseScalarWhereInput | Prisma.CreatorGiftPurchaseScalarWhereInput[]
+  id?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
+  purchaserEmail?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  giftFromName?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  setupFeeIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  listingCreditPackId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  listingCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  googleShoppingCreditPackId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  promotionKind?: Prisma.EnumPromotionKindNullableFilter<"CreatorGiftPurchase"> | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  shopFlairIncluded?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  isBetaTesterBatch?: Prisma.BoolFilter<"CreatorGiftPurchase"> | boolean
+  amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
+  currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
+  status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  stripePaymentIntentId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
+  paidAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
+  emailedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
+}
+
+export type CreatorGiftPurchaseCreateWithoutCodesInput = {
+  id?: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: string | null
+  setupFeeIncluded?: boolean
+  listingCreditPackId?: string | null
+  listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
+  amountCents: number
+  currency?: string
+  status?: $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: string | null
+  stripePaymentIntentId?: string | null
+  paidAt?: Date | string | null
+  emailedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  recipientShop?: Prisma.ShopCreateNestedOneWithoutCreatorGiftPurchasesReceivedInput
 }
 
 export type CreatorGiftPurchaseUncheckedCreateWithoutCodesInput = {
   id?: string
-  purchaserEmail: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: string | null
+  giftFromName?: string | null
   setupFeeIncluded?: boolean
   listingCreditPackId?: string | null
   listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
@@ -635,10 +1032,45 @@ export type CreatorGiftPurchaseUpdateToOneWithWhereWithoutCodesInput = {
 
 export type CreatorGiftPurchaseUpdateWithoutCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  purchaserEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  amountCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recipientShop?: Prisma.ShopUpdateOneWithoutCreatorGiftPurchasesReceivedNestedInput
+}
+
+export type CreatorGiftPurchaseUncheckedUpdateWithoutCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  recipientShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -650,12 +1082,97 @@ export type CreatorGiftPurchaseUpdateWithoutCodesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type CreatorGiftPurchaseUncheckedUpdateWithoutCodesInput = {
+export type CreatorGiftPurchaseCreateManyRecipientShopInput = {
+  id?: string
+  purchaserEmail?: string | null
+  fulfillmentMode?: $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: string | null
+  setupFeeIncluded?: boolean
+  listingCreditPackId?: string | null
+  listingCreditsGranted?: number
+  googleShoppingCreditPackId?: string | null
+  googleShoppingCreditsGranted?: number
+  promotionKind?: $Enums.PromotionKind | null
+  promotionCreditsGranted?: number
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
+  amountCents: number
+  currency?: string
+  status?: $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: string | null
+  stripePaymentIntentId?: string | null
+  paidAt?: Date | string | null
+  emailedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type CreatorGiftPurchaseUpdateWithoutRecipientShopInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  purchaserEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  amountCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  codes?: Prisma.CreatorGiftCodeUpdateManyWithoutPurchaseNestedInput
+}
+
+export type CreatorGiftPurchaseUncheckedUpdateWithoutRecipientShopInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  amountCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  codes?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutPurchaseNestedInput
+}
+
+export type CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentMode?: Prisma.EnumCreatorGiftFulfillmentModeFieldUpdateOperationsInput | $Enums.CreatorGiftFulfillmentMode
+  giftFromName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  setupFeeIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  listingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  googleShoppingCreditPackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleShoppingCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
+  promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
+  shopFlairIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isBetaTesterBatch?: Prisma.BoolFieldUpdateOperationsInput | boolean
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
@@ -701,9 +1218,18 @@ export type CreatorGiftPurchaseCountOutputTypeCountCodesArgs<ExtArgs extends run
 export type CreatorGiftPurchaseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   purchaserEmail?: boolean
+  fulfillmentMode?: boolean
+  recipientShopId?: boolean
+  giftFromName?: boolean
   setupFeeIncluded?: boolean
   listingCreditPackId?: boolean
   listingCreditsGranted?: boolean
+  googleShoppingCreditPackId?: boolean
+  googleShoppingCreditsGranted?: boolean
+  promotionKind?: boolean
+  promotionCreditsGranted?: boolean
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -713,6 +1239,7 @@ export type CreatorGiftPurchaseSelect<ExtArgs extends runtime.Types.Extensions.I
   emailedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
   codes?: boolean | Prisma.CreatorGiftPurchase$codesArgs<ExtArgs>
   _count?: boolean | Prisma.CreatorGiftPurchaseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["creatorGiftPurchase"]>
@@ -720,9 +1247,18 @@ export type CreatorGiftPurchaseSelect<ExtArgs extends runtime.Types.Extensions.I
 export type CreatorGiftPurchaseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   purchaserEmail?: boolean
+  fulfillmentMode?: boolean
+  recipientShopId?: boolean
+  giftFromName?: boolean
   setupFeeIncluded?: boolean
   listingCreditPackId?: boolean
   listingCreditsGranted?: boolean
+  googleShoppingCreditPackId?: boolean
+  googleShoppingCreditsGranted?: boolean
+  promotionKind?: boolean
+  promotionCreditsGranted?: boolean
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -732,14 +1268,24 @@ export type CreatorGiftPurchaseSelectCreateManyAndReturn<ExtArgs extends runtime
   emailedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
 }, ExtArgs["result"]["creatorGiftPurchase"]>
 
 export type CreatorGiftPurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   purchaserEmail?: boolean
+  fulfillmentMode?: boolean
+  recipientShopId?: boolean
+  giftFromName?: boolean
   setupFeeIncluded?: boolean
   listingCreditPackId?: boolean
   listingCreditsGranted?: boolean
+  googleShoppingCreditPackId?: boolean
+  googleShoppingCreditsGranted?: boolean
+  promotionKind?: boolean
+  promotionCreditsGranted?: boolean
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -749,14 +1295,24 @@ export type CreatorGiftPurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime
   emailedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
 }, ExtArgs["result"]["creatorGiftPurchase"]>
 
 export type CreatorGiftPurchaseSelectScalar = {
   id?: boolean
   purchaserEmail?: boolean
+  fulfillmentMode?: boolean
+  recipientShopId?: boolean
+  giftFromName?: boolean
   setupFeeIncluded?: boolean
   listingCreditPackId?: boolean
   listingCreditsGranted?: boolean
+  googleShoppingCreditPackId?: boolean
+  googleShoppingCreditsGranted?: boolean
+  promotionKind?: boolean
+  promotionCreditsGranted?: boolean
+  shopFlairIncluded?: boolean
+  isBetaTesterBatch?: boolean
   amountCents?: boolean
   currency?: boolean
   status?: boolean
@@ -768,25 +1324,43 @@ export type CreatorGiftPurchaseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CreatorGiftPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaserEmail" | "setupFeeIncluded" | "listingCreditPackId" | "listingCreditsGranted" | "amountCents" | "currency" | "status" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "emailedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["creatorGiftPurchase"]>
+export type CreatorGiftPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaserEmail" | "fulfillmentMode" | "recipientShopId" | "giftFromName" | "setupFeeIncluded" | "listingCreditPackId" | "listingCreditsGranted" | "googleShoppingCreditPackId" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "shopFlairIncluded" | "isBetaTesterBatch" | "amountCents" | "currency" | "status" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "emailedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["creatorGiftPurchase"]>
 export type CreatorGiftPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
   codes?: boolean | Prisma.CreatorGiftPurchase$codesArgs<ExtArgs>
   _count?: boolean | Prisma.CreatorGiftPurchaseCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type CreatorGiftPurchaseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type CreatorGiftPurchaseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CreatorGiftPurchaseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
+}
+export type CreatorGiftPurchaseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
+}
 
 export type $CreatorGiftPurchasePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CreatorGiftPurchase"
   objects: {
+    recipientShop: Prisma.$ShopPayload<ExtArgs> | null
     codes: Prisma.$CreatorGiftCodePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    purchaserEmail: string
+    purchaserEmail: string | null
+    fulfillmentMode: $Enums.CreatorGiftFulfillmentMode
+    recipientShopId: string | null
+    giftFromName: string | null
     setupFeeIncluded: boolean
     listingCreditPackId: string | null
     listingCreditsGranted: number
+    googleShoppingCreditPackId: string | null
+    googleShoppingCreditsGranted: number
+    promotionKind: $Enums.PromotionKind | null
+    promotionCreditsGranted: number
+    shopFlairIncluded: boolean
+    /**
+     * * Batch-generated invite codes for beta testers (shop_setup codes).
+     */
+    isBetaTesterBatch: boolean
     amountCents: number
     currency: string
     status: $Enums.CreatorGiftPurchaseStatus
@@ -1190,6 +1764,7 @@ readonly fields: CreatorGiftPurchaseFieldRefs;
  */
 export interface Prisma__CreatorGiftPurchaseClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  recipientShop<T extends Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>>): Prisma.Prisma__ShopClient<runtime.Types.Result.GetResult<Prisma.$ShopPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   codes<T extends Prisma.CreatorGiftPurchase$codesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CreatorGiftPurchase$codesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CreatorGiftCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1222,9 +1797,18 @@ export interface Prisma__CreatorGiftPurchaseClient<T, Null = never, ExtArgs exte
 export interface CreatorGiftPurchaseFieldRefs {
   readonly id: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly purchaserEmail: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
+  readonly fulfillmentMode: Prisma.FieldRef<"CreatorGiftPurchase", 'CreatorGiftFulfillmentMode'>
+  readonly recipientShopId: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
+  readonly giftFromName: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly setupFeeIncluded: Prisma.FieldRef<"CreatorGiftPurchase", 'Boolean'>
   readonly listingCreditPackId: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly listingCreditsGranted: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
+  readonly googleShoppingCreditPackId: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
+  readonly googleShoppingCreditsGranted: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
+  readonly promotionKind: Prisma.FieldRef<"CreatorGiftPurchase", 'PromotionKind'>
+  readonly promotionCreditsGranted: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
+  readonly shopFlairIncluded: Prisma.FieldRef<"CreatorGiftPurchase", 'Boolean'>
+  readonly isBetaTesterBatch: Prisma.FieldRef<"CreatorGiftPurchase", 'Boolean'>
   readonly amountCents: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly status: Prisma.FieldRef<"CreatorGiftPurchase", 'CreatorGiftPurchaseStatus'>
@@ -1488,6 +2072,10 @@ export type CreatorGiftPurchaseCreateManyAndReturnArgs<ExtArgs extends runtime.T
    */
   data: Prisma.CreatorGiftPurchaseCreateManyInput | Prisma.CreatorGiftPurchaseCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CreatorGiftPurchaseIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1558,6 +2146,10 @@ export type CreatorGiftPurchaseUpdateManyAndReturnArgs<ExtArgs extends runtime.T
    * Limit how many CreatorGiftPurchases to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CreatorGiftPurchaseIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1624,6 +2216,25 @@ export type CreatorGiftPurchaseDeleteManyArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many CreatorGiftPurchases to delete.
    */
   limit?: number
+}
+
+/**
+ * CreatorGiftPurchase.recipientShop
+ */
+export type CreatorGiftPurchase$recipientShopArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Shop
+   */
+  select?: Prisma.ShopSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Shop
+   */
+  omit?: Prisma.ShopOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ShopInclude<ExtArgs> | null
+  where?: Prisma.ShopWhereInput
 }
 
 /**

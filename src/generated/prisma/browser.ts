@@ -150,6 +150,16 @@ export type ShopListing = Prisma.ShopListingModel
  */
 export type PromotionPurchase = Prisma.PromotionPurchaseModel
 /**
+ * Model ShopPromotionCreditBalance
+ * * Unredeemed admin-granted promotion credits per shop and kind.
+ */
+export type ShopPromotionCreditBalance = Prisma.ShopPromotionCreditBalanceModel
+/**
+ * Model ShopAdminAwardGrant
+ * * Audit log for admin Backend → Award Promotions grants.
+ */
+export type ShopAdminAwardGrant = Prisma.ShopAdminAwardGrantModel
+/**
  * Model ListingCreditPackPurchase
  * 
  */

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import {
+  BetaTesterOnboardingStatus,
   CreatorGiftCodeType,
   ShopReactivationPurchaseStatus,
   ShopSetupFeePurchaseStatus,
@@ -21,8 +22,14 @@ import {
   SHOP_DISPLAY_NAME_TAKEN_ERROR,
 } from "@/lib/shop-display-name-uniqueness";
 import { allocateUniqueShopSlug } from "@/lib/shop-slug";
+import { BETA_TESTER_SIGNUP_LISTING_CREDITS } from "@/lib/beta-tester-codes";
+import { applyBetaTesterSignupPerksInTransaction } from "@/lib/beta-tester-signup-perks";
 import { issueShopEmailVerificationTokenAndSend } from "@/lib/shop-email-verification";
 import { isShopLocalTwoFactorBypassEnabled } from "@/lib/shop-two-factor";
+import { notifyShopFlairAccessGranted } from "@/lib/admin-award-promotion-notices";
+import { listingFeeFreeSlotCap } from "@/lib/marketplace-constants";
+import { syncFreeListingFeeWaivers } from "@/lib/listing-fee";
+import { notifyShopFreeListingSlotsGranted } from "@/lib/shop-free-listing-grant-notice";
 import { getStripe } from "@/lib/stripe";
 import {
   buyerCheckoutTotalCents,
@@ -168,7 +175,10 @@ export async function createShopFromSignup(
           type: CreatorGiftCodeType.shop_setup,
           redeemedAt: null,
         },
-        select: { id: true },
+        select: {
+          id: true,
+          purchase: { select: { isBetaTesterBatch: true } },
+        },
       });
       if (!giftCode) return { status: "invalid_code" as const };
 
@@ -197,6 +207,12 @@ export async function createShopFromSignup(
           slug,
           displayName,
           active: true,
+          ...(giftCode.purchase.isBetaTesterBatch
+            ? {
+                betaTesterAt: new Date(),
+                betaTesterOnboardingStatus: BetaTesterOnboardingStatus.in_progress,
+              }
+            : {}),
         },
         select: { id: true },
       });
@@ -208,7 +224,22 @@ export async function createShopFromSignup(
         where: { id: giftCode.id },
         data: { redeemedByShopId: shop.id },
       });
-      return { status: "created" as const, shopUserId: user.id, email: user.email };
+
+      if (giftCode.purchase.isBetaTesterBatch) {
+        await applyBetaTesterSignupPerksInTransaction(tx, {
+          shopId: shop.id,
+          shopUserId: user.id,
+        });
+      }
+
+      return {
+        status: "created" as const,
+        shopUserId: user.id,
+        email: user.email,
+        shopId: shop.id,
+        shopSlug: slug,
+        isBetaTester: giftCode.purchase.isBetaTesterBatch,
+      };
     });
 
     if (created.status === "invalid_code") {
@@ -227,6 +258,24 @@ export async function createShopFromSignup(
     );
     if (!verifySend.ok) {
       console.error("[create-shop] verification email failed:", verifySend.error);
+    }
+
+    if (created.isBetaTester) {
+      await syncFreeListingFeeWaivers(created.shopId);
+      const shopRow = await prisma.shop.findUnique({
+        where: { id: created.shopId },
+        select: { listingFeeBonusFreeSlots: true },
+      });
+      const totalBonus = shopRow?.listingFeeBonusFreeSlots ?? BETA_TESTER_SIGNUP_LISTING_CREDITS;
+      await Promise.all([
+        notifyShopFreeListingSlotsGranted({
+          shopId: created.shopId,
+          slotsGranted: BETA_TESTER_SIGNUP_LISTING_CREDITS,
+          totalBonusSlots: totalBonus,
+          totalFreeCap: listingFeeFreeSlotCap(created.shopSlug, totalBonus),
+        }),
+        notifyShopFlairAccessGranted({ shopId: created.shopId }),
+      ]);
     }
 
     const session = await getShopOwnerSession();

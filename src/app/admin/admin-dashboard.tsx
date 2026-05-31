@@ -14,6 +14,7 @@ import {
   AdminDashboardTabPanelFallback,
 } from "./admin-dashboard-tab-panel";
 import { AdminListTab } from "@/components/admin/AdminListTab";
+import { AdminBetaTestersTabLoader } from "@/components/admin/AdminBetaTestersTabLoader";
 import { AdminShopFlairsTabLoader } from "@/components/admin/AdminShopFlairsTabLoader";
 import { AdminGoogleShoppingTabLoader } from "@/components/admin/AdminGoogleShoppingTabLoader";
 import { AdminShopWatchTabLoader } from "@/components/admin/AdminShopWatchTabLoader";
@@ -95,12 +96,14 @@ async function AdminDashboardPageBody({
     "custom-images",
     "bug-feedback",
     "shop-watch",
+    "beta-testers",
     "promotion-lists",
     "shop-leaderboard",
     "sales",
   ] as const;
   const backendTabLiterals = [
     "announcements",
+    "award-promotions",
     "free-listings",
     "admin-list",
     "printify",
@@ -175,6 +178,23 @@ async function AdminDashboardPageBody({
       }
     }
     redirect(`${ADMIN_MAIN_BASE_PATH}?${q.toString()}`);
+  }
+
+  /** Legacy tab name — Award Promotions. */
+  if (adminSection === "backend" && tabParam === "free-listings") {
+    const q = new URLSearchParams();
+    for (const [key, raw] of Object.entries(sp)) {
+      if (key === "tab") {
+        q.set("tab", "award-promotions");
+        continue;
+      }
+      if (typeof raw === "string" && raw) q.set(key, raw);
+      else if (Array.isArray(raw)) {
+        const first = raw.find((x) => typeof x === "string" && x);
+        if (typeof first === "string") q.set(key, first);
+      }
+    }
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}`);
   }
 
   type InventoryTab =
@@ -262,7 +282,7 @@ async function AdminDashboardPageBody({
 
       <div className="rounded-xl border border-zinc-800 bg-zinc-950/40">
         <nav
-          className={`border-b border-zinc-800 ${adminSection === "main" ? "" : "flex flex-nowrap gap-1 overflow-x-auto px-2 pt-2"}`}
+          className={`border-b border-zinc-800 ${adminSection === "main" || adminSection === "backend" ? "" : "flex flex-nowrap gap-1 overflow-x-auto px-2 pt-2"}`}
           aria-label={adminSection === "main" ? "Admin Dash sections" : "Backend admin sections"}
         >
           {adminSection === "main" ? (
@@ -353,6 +373,18 @@ async function AdminDashboardPageBody({
                     <AdminMainNavCount field="shopWatch" variant="muted" />
                   </Link>
                   <Link
+                    href={`${basePath}?tab=beta-testers`}
+                    role="tab"
+                    aria-selected={inventoryTab === "beta-testers"}
+                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                      inventoryTab === "beta-testers"
+                        ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                        : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+                    }`}
+                  >
+                    Beta testers
+                  </Link>
+                  <Link
                     href={`${basePath}?tab=promotion-lists`}
                     role="tab"
                     title="Count is paid merchant placements currently in their active window (Hot item, Featured shop home, Popular item, Front page)."
@@ -397,7 +429,8 @@ async function AdminDashboardPageBody({
               </div>
             </div>
           ) : (
-            <>
+            <div className="space-y-2 pb-2 pl-0 pr-2 pt-2">
+              <div className="flex flex-wrap items-center justify-start gap-1">
           <Link
             href={`${basePath}?tab=announcements`}
             role="tab"
@@ -411,16 +444,16 @@ async function AdminDashboardPageBody({
             Announcements
           </Link>
           <Link
-            href={`${basePath}?tab=free-listings`}
+            href={`${basePath}?tab=award-promotions`}
             role="tab"
-            aria-selected={inventoryTab === "free-listings"}
+            aria-selected={inventoryTab === "award-promotions"}
             className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
-              inventoryTab === "free-listings"
+              inventoryTab === "award-promotions"
                 ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                 : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
             }`}
           >
-            Free listings
+            Award Promotions
           </Link>
           <Link
             href={`${basePath}?tab=admin-list`}
@@ -472,6 +505,9 @@ async function AdminDashboardPageBody({
           >
             Google Shopping
           </Link>
+              </div>
+              <div className="border-t border-zinc-800/80 pt-2">
+                <div className="flex flex-wrap gap-1">
           <Link
             href={`${basePath}?tab=removed`}
             role="tab"
@@ -546,7 +582,9 @@ async function AdminDashboardPageBody({
           >
             Printify API
           </Link>
-            </>
+                </div>
+              </div>
+            </div>
           )}
         </nav>
 
@@ -576,6 +614,10 @@ async function AdminDashboardPageBody({
           ) : adminSection === "main" && inventoryTab === "shop-watch" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <AdminShopWatchTabLoader sp={sp} />
+            </Suspense>
+          ) : adminSection === "main" && inventoryTab === "beta-testers" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminBetaTestersTabLoader />
             </Suspense>
           ) : adminSection === "main" && inventoryTab === "promotion-lists" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

@@ -19,6 +19,7 @@ import {
   SHOP_TWO_FACTOR_CONFIRM_DEVICE_SUBJECT,
   renderShopTwoFactorConfirmDeviceHtml,
 } from "@/lib/shop-two-factor-confirm-device-email-html";
+import type { GiftRedemptionEmailVars } from "@/lib/email-template-placeholders";
 import {
   GIFT_REDEMPTION_CODE_EMAIL_SUBJECT,
   GIFT_REDEMPTION_CODE_HTML_TEMPLATE,
@@ -124,7 +125,7 @@ export function buildAdminEmailFormatEntries(
       key: "gift_creator_redemption_codes",
       label: "Gift a creator — redemption codes",
       description:
-        "Sent to the purchaser after a Gift a creator checkout. Full HTML document; use {{SETUP_CODE}}, {{LISTING_CODE}}, and {{LISTING_CREDITS}} for the purchased codes.",
+        "Sent to the purchaser after a Gift a creator checkout. Full HTML document; use {{SETUP_CODE}}, {{LISTING_CODE}}, {{LISTING_CREDITS}}, {{PROMOTION_CODE}}, {{PROMOTION_KIND_LABEL}}, {{PROMOTION_CREDITS}}, {{GOOGLE_SHOPPING_CODE}}, and {{GOOGLE_SHOPPING_CREDITS}}.",
       defaultSubject: GIFT_REDEMPTION_CODE_EMAIL_SUBJECT,
       defaultBody: GIFT_REDEMPTION_CODE_HTML_TEMPLATE,
       subject: giftCodes?.subject?.trim() || GIFT_REDEMPTION_CODE_EMAIL_SUBJECT,
@@ -164,6 +165,11 @@ export async function loadSiteEmailSendPreviewsForAdmin(
       setupCode: "SETU-PABC-1234-DEMO",
       listingCode: "LIST-PXYZ-9876-DEMO",
       listingCredits: "10",
+      promotionCode: "PROM-PDEM-0001-O123",
+      promotionKindLabel: "Hot item",
+      promotionCredits: "1",
+      googleShoppingCode: "GMC-PGMC-0005-DEMO",
+      googleShoppingCredits: "5",
     }),
     resolveShopInactivityWarningEmail(samples.shop_inactivity_deactivation_warning),
   ]);
@@ -241,11 +247,9 @@ export async function resolveShopTwoFactorConfirmDeviceEmail(confirmUrl: string)
   };
 }
 
-export async function resolveGiftRedemptionCodeEmail(vars: {
-  setupCode: string;
-  listingCode: string;
-  listingCredits: string;
-}): Promise<{ subject: string; html: string }> {
+export async function resolveGiftRedemptionCodeEmail(
+  vars: GiftRedemptionEmailVars,
+): Promise<{ subject: string; html: string }> {
   const row = await prisma.siteEmailTemplate.findUnique({
     where: { key: "gift_creator_redemption_codes" },
   });

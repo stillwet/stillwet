@@ -11,6 +11,7 @@ import {
   replaceActionUrlInHtmlTemplate,
   wrapEmailHtmlFragmentForPreview,
 } from "@/lib/email-template-placeholders";
+import { defaultGiftRedemptionEmailVars } from "@/lib/gift-redemption-code-email-html";
 import type { AdminSummaryEmailSettingsDTO } from "@/lib/admin-summary-email-settings-dto";
 import type {
   AdminEmailFormatEntry,
@@ -360,11 +361,19 @@ export function AdminEmailFormatTab(props: {
     if (!entry) return "";
     const html =
       entry.key === "gift_creator_redemption_codes"
-        ? replaceGiftCodePlaceholders(body, {
-            setupCode: "SETU-PABC-1234-DEMO",
-            listingCode: "LIST-PXYZ-9876-DEMO",
-            listingCredits: "10",
-          })
+        ? replaceGiftCodePlaceholders(
+            body,
+            defaultGiftRedemptionEmailVars({
+              setupCode: "SETU-PABC-1234-DEMO",
+              listingCode: "LIST-PXYZ-9876-DEMO",
+              listingCredits: "10",
+              promotionCode: "PROM-PDEM-0001-O123",
+              promotionKindLabel: "Hot item",
+              promotionCredits: "1",
+              googleShoppingCode: "GMC-PGMC-0005-DEMO",
+              googleShoppingCredits: "5",
+            }),
+          )
         : replaceActionUrlInHtmlTemplate(
             body,
             entry.sampleActionUrl ?? "https://example.com/preview",

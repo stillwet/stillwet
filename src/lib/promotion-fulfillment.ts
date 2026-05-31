@@ -18,7 +18,7 @@ export async function fulfillPromotionPurchasePaidIfPending(
 ): Promise<boolean> {
   const purchase = await prisma.promotionPurchase.findUnique({
     where: { id: purchaseId },
-    select: { id: true, shopId: true, status: true, amountCents: true },
+    select: { id: true, shopId: true, status: true, amountCents: true, paidViaPromotionCredit: true },
   });
   if (!purchase) return false;
   if (purchase.status === PromotionPurchaseStatus.paid) return true;
@@ -44,4 +44,14 @@ export async function fulfillPromotionPurchasePaidIfPending(
   revalidatePath("/dashboard");
   revalidateShopUpgradesDashboardPaths();
   return true;
+}
+
+/** Records a paid $0 promotion from an admin-granted credit (no Stripe). */
+export async function fulfillPromotionPurchaseFromCredit(args: {
+  shopId: string;
+  shopSlug?: string;
+}): Promise<void> {
+  void rebuildShopPromotionsDashboardSnapshot(args.shopId, args.shopSlug).catch(() => {});
+  revalidatePath("/dashboard");
+  revalidateShopUpgradesDashboardPaths();
 }

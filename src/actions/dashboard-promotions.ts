@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma, prismaShopPromotionCreditBalanceOrNull } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 import { getStripe } from "@/lib/stripe";
 import {
@@ -18,7 +18,7 @@ import {
   PromotionKind,
   PromotionPurchaseStatus,
 } from "@/generated/prisma/enums";
-import { fulfillPromotionPurchasePaidIfPending } from "@/lib/promotion-fulfillment";
+import { fulfillPromotionPurchasePaidIfPending, fulfillPromotionPurchaseFromCredit } from "@/lib/promotion-fulfillment";
 import { dashboardPromotionsUrl } from "@/lib/dashboard-promotions-path";
 import { revalidateShopUpgradesDashboardPaths } from "@/lib/dashboard-revalidate-shop-upgrades";
 import {
@@ -48,6 +48,9 @@ import {
   POPULAR_ITEM_PLATFORM_PERIOD_CAP,
   TOP_SHOP_PLATFORM_PERIOD_CAP,
 } from "@/lib/promotion-policy-shared";
+import {
+  getPromotionCreditBalance,
+} from "@/lib/promotion-credit-balance";
 import {
   getPromotionPeriodIndexContaining,
   promotionPeriodStartUtc,
@@ -467,6 +470,84 @@ export async function finalizePromotionPurchaseIntent(
     chargeId,
     paidAmountCents: pi.amount,
   });
+  return { ok: true };
+}
+
+export type RedeemPromotionCreditCheckoutResult = { ok: true } | { ok: false; error: string };
+
+/** Redeem one admin-granted promotion credit — no Stripe. */
+export async function redeemPromotionCreditCheckout(input: {
+  promotionKind: string;
+  shopListingId?: string | null;
+  placementPeriodOffset?: 0 | 1 | 2;
+}): Promise<RedeemPromotionCreditCheckoutResult> {
+  const user = await requireShopOwner();
+  const shop = user.shop;
+  if (shop.slug === PLATFORM_SHOP_SLUG) {
+    return { ok: false, error: "Not available for the platform catalog shop." };
+  }
+
+  const kind = parsePromotionKind(input.promotionKind);
+  if (!kind) return { ok: false, error: "Invalid promotion type." };
+
+  const balance = await getPromotionCreditBalance(shop.id, kind);
+  if (balance <= 0) {
+    return { ok: false, error: "No promotion credits available for this type." };
+  }
+
+  const listingIdRaw = String(input.shopListingId ?? "").trim();
+  if (!promotionKindRequiresListing(kind) && listingIdRaw) {
+    return { ok: false, error: "This promotion applies to your shop, not a single listing." };
+  }
+
+  let shopListingId: string | null = null;
+  if (listingIdRaw) {
+    const gate = await assertShopListingLiveForPromotion(shop.id, listingIdRaw);
+    if (!gate.ok) return gate;
+    shopListingId = listingIdRaw;
+  }
+
+  const placementPeriodOffset = normalizePlacementPeriodOffsetFromClient(input.placementPeriodOffset);
+  const priced = await resolvePromotionPricing(kind, placementPeriodOffset);
+  if (!priced.ok) return { ok: false, error: priced.error };
+  const { eligibleFrom } = priced;
+
+  if (!prismaShopPromotionCreditBalanceOrNull()) {
+    return {
+      ok: false,
+      error: "Promotion credits are not available on this environment yet.",
+    };
+  }
+
+  const consumed = await prisma.$transaction(async (tx) => {
+    const decremented = await tx.shopPromotionCreditBalance.updateMany({
+      where: { shopId: shop.id, kind, credits: { gt: 0 } },
+      data: { credits: { decrement: 1 } },
+    });
+    if (decremented.count === 0) return false;
+
+    await tx.promotionPurchase.create({
+      data: {
+        shopId: shop.id,
+        shopUserId: user.id,
+        kind,
+        shopListingId,
+        amountCents: 0,
+        currency: "usd",
+        status: PromotionPurchaseStatus.paid,
+        paidAt: new Date(),
+        eligibleFrom,
+        paidViaPromotionCredit: true,
+      },
+    });
+    return true;
+  });
+
+  if (!consumed) {
+    return { ok: false, error: "Could not redeem promotion credit." };
+  }
+
+  await fulfillPromotionPurchaseFromCredit({ shopId: shop.id, shopSlug: shop.slug });
   return { ok: true };
 }
 

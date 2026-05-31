@@ -10,6 +10,7 @@ export function PromotionsCheckoutShell(props: {
   computedPeriodChoices: PlacementPeriodChoiceUi[] | null;
   mockPromotionCheckout: boolean;
   stripePublishableKey: string;
+  promotionCreditsAvailable?: number;
   queryPreserve?: Record<string, string | undefined>;
 }) {
   return (

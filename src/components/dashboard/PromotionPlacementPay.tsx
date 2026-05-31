@@ -7,6 +7,7 @@ import { PromotionKind } from "@/generated/prisma/enums";
 import {
   finalizePromotionPurchaseIntent,
   mockPurchasePromotionPlacement,
+  redeemPromotionCreditCheckout,
   startPromotionPurchaseIntent,
 } from "@/actions/dashboard-promotions";
 import { PromotionCheckoutCostLine } from "@/components/dashboard/PromotionCheckoutCostLine";
@@ -26,6 +27,8 @@ export function PromotionPlacementPay(props: {
   mockPay: boolean;
   stripePublishableKey: string;
   showCostLine?: boolean;
+  promotionCreditsAvailable?: number;
+  shopListingId?: string | null;
   onPaid?: () => void;
 }) {
   const {
@@ -35,6 +38,8 @@ export function PromotionPlacementPay(props: {
     mockPay,
     stripePublishableKey,
     showCostLine = true,
+    promotionCreditsAvailable = 0,
+    shopListingId,
     onPaid,
   } = props;
   const router = useRouter();
@@ -46,13 +51,16 @@ export function PromotionPlacementPay(props: {
   const [error, setError] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
 
+  const hasPromotionCredit = promotionCreditsAvailable > 0;
+  const displayAmountCents = hasPromotionCredit ? 0 : amountCents;
+
   useEffect(() => {
     setPaid(false);
     setError(null);
-  }, [kind, placementOffset, amountCents]);
+  }, [kind, placementOffset, amountCents, promotionCreditsAvailable]);
 
   useEffect(() => {
-    if (mockPay) return;
+    if (mockPay || hasPromotionCredit) return;
     let cancelled = false;
     const mountEl = mountRef.current;
     if (!mountEl || !stripePublishableKey.trim()) return;
@@ -97,7 +105,29 @@ export function PromotionPlacementPay(props: {
       cardRef.current = null;
       stripeRef.current = null;
     };
-  }, [stripePublishableKey, mockPay, kind, placementOffset]);
+  }, [stripePublishableKey, mockPay, hasPromotionCredit, kind, placementOffset]);
+
+  async function onUseCredit() {
+    setError(null);
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await redeemPromotionCreditCheckout({
+        promotionKind: kind,
+        placementPeriodOffset: placementOffset,
+        shopListingId: shopListingId ?? undefined,
+      });
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      setPaid(true);
+      onPaid?.();
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function onMockPay() {
     setError(null);
@@ -107,6 +137,7 @@ export function PromotionPlacementPay(props: {
       const r = await mockPurchasePromotionPlacement({
         promotionKind: kind,
         placementPeriodOffset: placementOffset,
+        shopListingId: shopListingId ?? undefined,
       });
       if (!r.ok) {
         setError(r.error);
@@ -134,6 +165,7 @@ export function PromotionPlacementPay(props: {
       const started = await startPromotionPurchaseIntent({
         promotionKind: kind,
         placementPeriodOffset: placementOffset,
+        shopListingId: shopListingId ?? undefined,
       });
       if (!started.ok) {
         setError(started.error);
@@ -185,9 +217,25 @@ export function PromotionPlacementPay(props: {
   return (
     <div className="mt-2 rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-3">
       {showCostLine ? (
-        <PromotionCheckoutCostLine kind={kind} amountCents={amountCents} />
+        <PromotionCheckoutCostLine kind={kind} amountCents={displayAmountCents} />
       ) : null}
-      {canPay ? (
+      {hasPromotionCredit ? (
+        <div className={showCostLine ? "mt-3" : undefined}>
+          <p className="text-[11px] text-emerald-400/90">
+            {promotionCreditsAvailable === 1
+              ? "You have 1 promotion credit for this placement."
+              : `You have ${promotionCreditsAvailable} promotion credits for this placement.`}
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            className="mt-2 rounded border border-emerald-800/50 bg-emerald-950/30 px-3 py-1.5 text-xs font-medium text-emerald-100 hover:border-emerald-700/50 disabled:opacity-50"
+            onClick={() => void onUseCredit()}
+          >
+            {busy ? "Redeeming…" : "Use promotion credit ($0)"}
+          </button>
+        </div>
+      ) : canPay ? (
         mockPay ? (
           <div className={showCostLine ? "mt-3" : undefined}>
             <p className="text-[11px] text-amber-600/90">Mock checkout — no real charge.</p>

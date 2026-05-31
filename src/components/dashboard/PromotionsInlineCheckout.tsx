@@ -16,9 +16,10 @@ export function PromotionsInlineCheckout(props: {
   kind: PlacementCheckoutPromotionKind;
   mockPromotionCheckout: boolean;
   stripePublishableKey: string;
+  promotionCreditsAvailable?: number;
   onClose: () => void;
 }) {
-  const { kind, mockPromotionCheckout, stripePublishableKey, onClose } = props;
+  const { kind, mockPromotionCheckout, stripePublishableKey, promotionCreditsAvailable, onClose } = props;
   const [selectedOffset, setSelectedOffset] = useState<0 | 1 | 2 | null>(null);
   const [computedPeriodChoices, setComputedPeriodChoices] = useState<PlacementPeriodChoiceUi[] | null>(
     null,
@@ -63,6 +64,7 @@ export function PromotionsInlineCheckout(props: {
         computedPeriodChoices={computedPeriodChoices}
         mockPromotionCheckout={mockPromotionCheckout}
         stripePublishableKey={stripePublishableKey}
+        promotionCreditsAvailable={promotionCreditsAvailable}
         onSelectPeriod={onSelectPeriod}
         loadingOffset={periodPricingLoading ? selectedOffset : null}
         periodPricingLoading={periodPricingLoading}

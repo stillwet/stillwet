@@ -13,7 +13,16 @@ function parseSnapshotPayload(raw: unknown): DashboardPromotionsTabSummaryPayloa
   if (!Array.isArray(purchases)) return null;
   if (typeof mockPromotionCheckout !== "boolean") return null;
   if (stripePublishableKey !== null && typeof stripePublishableKey !== "string") return null;
-  return raw as DashboardPromotionsTabSummaryPayload;
+  const promotionCreditBalances =
+    isObject(raw.promotionCreditBalances) || raw.promotionCreditBalances === undefined
+      ? ((raw.promotionCreditBalances as DashboardPromotionsTabSummaryPayload["promotionCreditBalances"]) ??
+        {})
+      : null;
+  if (promotionCreditBalances === null) return null;
+  return {
+    ...(raw as DashboardPromotionsTabSummaryPayload),
+    promotionCreditBalances,
+  };
 }
 
 function snapshotDelegate() {

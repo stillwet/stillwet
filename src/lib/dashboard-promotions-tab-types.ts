@@ -1,5 +1,6 @@
 import type { DashboardPromotionPurchaseRow } from "@/lib/promotion-dashboard-ui-types";
 import type { PromotionCheckoutSlotsByKind } from "@/lib/dashboard-promotions-payload-types";
+import type { PromotionCreditBalancesByKind } from "@/lib/promotion-credit-balance";
 
 export type PromotionPurchaseLifecycle =
   | "active"
@@ -25,6 +26,7 @@ export type DashboardPromotionsTabSummaryPayload = {
   purchases: PromotionPurchaseSummaryRow[];
   mockPromotionCheckout: boolean;
   stripePublishableKey: string | null;
+  promotionCreditBalances: PromotionCreditBalancesByKind;
   checkoutSlotByKind?: PromotionCheckoutSlotsByKind;
   periodSlotUiByKind?: PromotionCheckoutSlotsByKind;
 };

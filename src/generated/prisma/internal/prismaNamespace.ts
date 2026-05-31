@@ -409,6 +409,8 @@ export const ModelName = {
   ShopEmailVerificationToken: 'ShopEmailVerificationToken',
   ShopListing: 'ShopListing',
   PromotionPurchase: 'PromotionPurchase',
+  ShopPromotionCreditBalance: 'ShopPromotionCreditBalance',
+  ShopAdminAwardGrant: 'ShopAdminAwardGrant',
   ListingCreditPackPurchase: 'ListingCreditPackPurchase',
   PendingShopSignup: 'PendingShopSignup',
   ShopSetupFeePurchase: 'ShopSetupFeePurchase',
@@ -445,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "storefrontViewEvent" | "comment"
+    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "storefrontViewEvent" | "comment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2299,6 +2301,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ShopPromotionCreditBalance: {
+      payload: Prisma.$ShopPromotionCreditBalancePayload<ExtArgs>
+      fields: Prisma.ShopPromotionCreditBalanceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ShopPromotionCreditBalanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ShopPromotionCreditBalanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>
+        }
+        findFirst: {
+          args: Prisma.ShopPromotionCreditBalanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ShopPromotionCreditBalanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>
+        }
+        findMany: {
+          args: Prisma.ShopPromotionCreditBalanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>[]
+        }
+        create: {
+          args: Prisma.ShopPromotionCreditBalanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>
+        }
+        createMany: {
+          args: Prisma.ShopPromotionCreditBalanceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ShopPromotionCreditBalanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>[]
+        }
+        delete: {
+          args: Prisma.ShopPromotionCreditBalanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>
+        }
+        update: {
+          args: Prisma.ShopPromotionCreditBalanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>
+        }
+        deleteMany: {
+          args: Prisma.ShopPromotionCreditBalanceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ShopPromotionCreditBalanceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ShopPromotionCreditBalanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>[]
+        }
+        upsert: {
+          args: Prisma.ShopPromotionCreditBalanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPromotionCreditBalancePayload>
+        }
+        aggregate: {
+          args: Prisma.ShopPromotionCreditBalanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShopPromotionCreditBalance>
+        }
+        groupBy: {
+          args: Prisma.ShopPromotionCreditBalanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShopPromotionCreditBalanceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ShopPromotionCreditBalanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShopPromotionCreditBalanceCountAggregateOutputType> | number
+        }
+      }
+    }
+    ShopAdminAwardGrant: {
+      payload: Prisma.$ShopAdminAwardGrantPayload<ExtArgs>
+      fields: Prisma.ShopAdminAwardGrantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ShopAdminAwardGrantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ShopAdminAwardGrantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>
+        }
+        findFirst: {
+          args: Prisma.ShopAdminAwardGrantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ShopAdminAwardGrantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>
+        }
+        findMany: {
+          args: Prisma.ShopAdminAwardGrantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>[]
+        }
+        create: {
+          args: Prisma.ShopAdminAwardGrantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>
+        }
+        createMany: {
+          args: Prisma.ShopAdminAwardGrantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ShopAdminAwardGrantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>[]
+        }
+        delete: {
+          args: Prisma.ShopAdminAwardGrantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>
+        }
+        update: {
+          args: Prisma.ShopAdminAwardGrantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>
+        }
+        deleteMany: {
+          args: Prisma.ShopAdminAwardGrantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ShopAdminAwardGrantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ShopAdminAwardGrantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>[]
+        }
+        upsert: {
+          args: Prisma.ShopAdminAwardGrantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopAdminAwardGrantPayload>
+        }
+        aggregate: {
+          args: Prisma.ShopAdminAwardGrantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShopAdminAwardGrant>
+        }
+        groupBy: {
+          args: Prisma.ShopAdminAwardGrantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShopAdminAwardGrantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ShopAdminAwardGrantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShopAdminAwardGrantCountAggregateOutputType> | number
+        }
+      }
+    }
     ListingCreditPackPurchase: {
       payload: Prisma.$ListingCreditPackPurchasePayload<ExtArgs>
       fields: Prisma.ListingCreditPackPurchaseFieldRefs
@@ -3975,6 +4125,7 @@ export const ShopScalarFieldEnum = {
   accountDeletionEmailConfirmedAt: 'accountDeletionEmailConfirmedAt',
   inactivityWarningSentAt: 'inactivityWarningSentAt',
   inactivityDeactivatedAt: 'inactivityDeactivatedAt',
+  adminFrozenAt: 'adminFrozenAt',
   inactivityDeletionTriggeredAt: 'inactivityDeletionTriggeredAt',
   homeFeaturedListingId: 'homeFeaturedListingId',
   itemGuidelinesAcknowledgedAt: 'itemGuidelinesAcknowledgedAt',
@@ -3986,6 +4137,10 @@ export const ShopScalarFieldEnum = {
   flairTypeId: 'flairTypeId',
   flairPurchasedAt: 'flairPurchasedAt',
   googleShoppingCredits: 'googleShoppingCredits',
+  betaTesterAt: 'betaTesterAt',
+  betaTesterOnboardingStatus: 'betaTesterOnboardingStatus',
+  betaTesterOnboardingCheckedAt: 'betaTesterOnboardingCheckedAt',
+  betaTesterOnboardingCompletedAt: 'betaTesterOnboardingCompletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4276,11 +4431,36 @@ export const PromotionPurchaseScalarFieldEnum = {
   stripeChargeId: 'stripeChargeId',
   paidAt: 'paidAt',
   eligibleFrom: 'eligibleFrom',
+  paidViaPromotionCredit: 'paidViaPromotionCredit',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type PromotionPurchaseScalarFieldEnum = (typeof PromotionPurchaseScalarFieldEnum)[keyof typeof PromotionPurchaseScalarFieldEnum]
+
+
+export const ShopPromotionCreditBalanceScalarFieldEnum = {
+  id: 'id',
+  shopId: 'shopId',
+  kind: 'kind',
+  credits: 'credits',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ShopPromotionCreditBalanceScalarFieldEnum = (typeof ShopPromotionCreditBalanceScalarFieldEnum)[keyof typeof ShopPromotionCreditBalanceScalarFieldEnum]
+
+
+export const ShopAdminAwardGrantScalarFieldEnum = {
+  id: 'id',
+  shopId: 'shopId',
+  awardKey: 'awardKey',
+  quantity: 'quantity',
+  grantedAt: 'grantedAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type ShopAdminAwardGrantScalarFieldEnum = (typeof ShopAdminAwardGrantScalarFieldEnum)[keyof typeof ShopAdminAwardGrantScalarFieldEnum]
 
 
 export const ListingCreditPackPurchaseScalarFieldEnum = {
@@ -4354,9 +4534,18 @@ export type ShopReactivationPurchaseScalarFieldEnum = (typeof ShopReactivationPu
 export const CreatorGiftPurchaseScalarFieldEnum = {
   id: 'id',
   purchaserEmail: 'purchaserEmail',
+  fulfillmentMode: 'fulfillmentMode',
+  recipientShopId: 'recipientShopId',
+  giftFromName: 'giftFromName',
   setupFeeIncluded: 'setupFeeIncluded',
   listingCreditPackId: 'listingCreditPackId',
   listingCreditsGranted: 'listingCreditsGranted',
+  googleShoppingCreditPackId: 'googleShoppingCreditPackId',
+  googleShoppingCreditsGranted: 'googleShoppingCreditsGranted',
+  promotionKind: 'promotionKind',
+  promotionCreditsGranted: 'promotionCreditsGranted',
+  shopFlairIncluded: 'shopFlairIncluded',
+  isBetaTesterBatch: 'isBetaTesterBatch',
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
@@ -4378,6 +4567,9 @@ export const CreatorGiftCodeScalarFieldEnum = {
   code: 'code',
   codeNormalized: 'codeNormalized',
   listingCreditsGranted: 'listingCreditsGranted',
+  googleShoppingCreditsGranted: 'googleShoppingCreditsGranted',
+  promotionKind: 'promotionKind',
+  promotionCreditsGranted: 'promotionCreditsGranted',
   redeemedAt: 'redeemedAt',
   redeemedByShopId: 'redeemedByShopId',
   createdAt: 'createdAt'
@@ -4737,6 +4929,20 @@ export type ListEnumFulfillmentTypeFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'BetaTesterOnboardingStatus'
+ */
+export type EnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BetaTesterOnboardingStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BetaTesterOnboardingStatus[]'
+ */
+export type ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BetaTesterOnboardingStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'ShopFlairPurchaseStatus'
  */
 export type EnumShopFlairPurchaseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShopFlairPurchaseStatus'>
@@ -4873,6 +5079,20 @@ export type EnumShopReactivationPurchaseStatusFieldRefInput<$PrismaModel> = Fiel
  * Reference to a field of type 'ShopReactivationPurchaseStatus[]'
  */
 export type ListEnumShopReactivationPurchaseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShopReactivationPurchaseStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CreatorGiftFulfillmentMode'
+ */
+export type EnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CreatorGiftFulfillmentMode'>
+    
+
+
+/**
+ * Reference to a field of type 'CreatorGiftFulfillmentMode[]'
+ */
+export type ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CreatorGiftFulfillmentMode[]'>
     
 
 
@@ -5107,6 +5327,8 @@ export type GlobalOmitConfig = {
   shopEmailVerificationToken?: Prisma.ShopEmailVerificationTokenOmit
   shopListing?: Prisma.ShopListingOmit
   promotionPurchase?: Prisma.PromotionPurchaseOmit
+  shopPromotionCreditBalance?: Prisma.ShopPromotionCreditBalanceOmit
+  shopAdminAwardGrant?: Prisma.ShopAdminAwardGrantOmit
   listingCreditPackPurchase?: Prisma.ListingCreditPackPurchaseOmit
   pendingShopSignup?: Prisma.PendingShopSignupOmit
   shopSetupFeePurchase?: Prisma.ShopSetupFeePurchaseOmit

@@ -15,6 +15,7 @@ export function PromotionsCheckoutPeriodPaySection(props: {
   computedPeriodChoices: PlacementPeriodChoiceUi[] | null;
   mockPromotionCheckout: boolean;
   stripePublishableKey: string;
+  promotionCreditsAvailable?: number;
   onSelectPeriod: (offset: 0 | 1 | 2) => void;
   loadingOffset?: 0 | 1 | 2 | null;
   periodPricingLoading?: boolean;
@@ -60,6 +61,7 @@ export function PromotionsCheckoutPeriodPaySection(props: {
           amountCents={selected.amountCents}
           mockPay={mockPromotionCheckout}
           stripePublishableKey={props.stripePublishableKey}
+          promotionCreditsAvailable={props.promotionCreditsAvailable}
         />
       ) : computed && selected && !selected.selectable ? (
         <p className="mt-3 text-xs text-amber-200/90">

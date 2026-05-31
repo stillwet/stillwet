@@ -13,5 +13,6 @@ export function buildPromotionsCheckoutSummary(
     purchases: [],
     mockPromotionCheckout: checkoutEnv.mockPromotionCheckout,
     stripePublishableKey: checkoutEnv.stripePublishableKey,
+    promotionCreditBalances: checkoutEnv.promotionCreditBalances ?? {},
   };
 }

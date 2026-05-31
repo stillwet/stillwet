@@ -257,6 +257,13 @@ export type DateTimeNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
 }
 
+export type EnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.BetaTesterOnboardingStatus | Prisma.EnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel> | $Enums.BetaTesterOnboardingStatus | null
+}
+
 export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -285,6 +292,16 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type EnumBetaTesterOnboardingStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BetaTesterOnboardingStatus | Prisma.EnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.BetaTesterOnboardingStatus | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel>
 }
 
 export type EnumShopFlairPurchaseStatusFilter<$PrismaModel = never> = {
@@ -508,11 +525,45 @@ export type EnumShopReactivationPurchaseStatusWithAggregatesFilter<$PrismaModel 
   _max?: Prisma.NestedEnumShopReactivationPurchaseStatusFilter<$PrismaModel>
 }
 
+export type EnumCreatorGiftFulfillmentModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreatorGiftFulfillmentMode | Prisma.EnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  in?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel> | $Enums.CreatorGiftFulfillmentMode
+}
+
+export type EnumPromotionKindNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PromotionKind | Prisma.EnumPromotionKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPromotionKindNullableFilter<$PrismaModel> | $Enums.PromotionKind | null
+}
+
 export type EnumCreatorGiftPurchaseStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.CreatorGiftPurchaseStatus | Prisma.EnumCreatorGiftPurchaseStatusFieldRefInput<$PrismaModel>
   in?: $Enums.CreatorGiftPurchaseStatus[] | Prisma.ListEnumCreatorGiftPurchaseStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.CreatorGiftPurchaseStatus[] | Prisma.ListEnumCreatorGiftPurchaseStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumCreatorGiftPurchaseStatusFilter<$PrismaModel> | $Enums.CreatorGiftPurchaseStatus
+}
+
+export type EnumCreatorGiftFulfillmentModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreatorGiftFulfillmentMode | Prisma.EnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  in?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreatorGiftFulfillmentModeWithAggregatesFilter<$PrismaModel> | $Enums.CreatorGiftFulfillmentMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel>
+}
+
+export type EnumPromotionKindNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PromotionKind | Prisma.EnumPromotionKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPromotionKindNullableWithAggregatesFilter<$PrismaModel> | $Enums.PromotionKind | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPromotionKindNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPromotionKindNullableFilter<$PrismaModel>
 }
 
 export type EnumCreatorGiftPurchaseStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -845,6 +896,13 @@ export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
 }
 
+export type NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.BetaTesterOnboardingStatus | Prisma.EnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel> | $Enums.BetaTesterOnboardingStatus | null
+}
+
 export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -884,6 +942,16 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumBetaTesterOnboardingStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BetaTesterOnboardingStatus | Prisma.EnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.BetaTesterOnboardingStatus[] | Prisma.ListEnumBetaTesterOnboardingStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.BetaTesterOnboardingStatus | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBetaTesterOnboardingStatusNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumShopFlairPurchaseStatusFilter<$PrismaModel = never> = {
@@ -1080,11 +1148,45 @@ export type NestedEnumShopReactivationPurchaseStatusWithAggregatesFilter<$Prisma
   _max?: Prisma.NestedEnumShopReactivationPurchaseStatusFilter<$PrismaModel>
 }
 
+export type NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreatorGiftFulfillmentMode | Prisma.EnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  in?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel> | $Enums.CreatorGiftFulfillmentMode
+}
+
+export type NestedEnumPromotionKindNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PromotionKind | Prisma.EnumPromotionKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPromotionKindNullableFilter<$PrismaModel> | $Enums.PromotionKind | null
+}
+
 export type NestedEnumCreatorGiftPurchaseStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.CreatorGiftPurchaseStatus | Prisma.EnumCreatorGiftPurchaseStatusFieldRefInput<$PrismaModel>
   in?: $Enums.CreatorGiftPurchaseStatus[] | Prisma.ListEnumCreatorGiftPurchaseStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.CreatorGiftPurchaseStatus[] | Prisma.ListEnumCreatorGiftPurchaseStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumCreatorGiftPurchaseStatusFilter<$PrismaModel> | $Enums.CreatorGiftPurchaseStatus
+}
+
+export type NestedEnumCreatorGiftFulfillmentModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreatorGiftFulfillmentMode | Prisma.EnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  in?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreatorGiftFulfillmentMode[] | Prisma.ListEnumCreatorGiftFulfillmentModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreatorGiftFulfillmentModeWithAggregatesFilter<$PrismaModel> | $Enums.CreatorGiftFulfillmentMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCreatorGiftFulfillmentModeFilter<$PrismaModel>
+}
+
+export type NestedEnumPromotionKindNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PromotionKind | Prisma.EnumPromotionKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PromotionKind[] | Prisma.ListEnumPromotionKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPromotionKindNullableWithAggregatesFilter<$PrismaModel> | $Enums.PromotionKind | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPromotionKindNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPromotionKindNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumCreatorGiftPurchaseStatusWithAggregatesFilter<$PrismaModel = never> = {

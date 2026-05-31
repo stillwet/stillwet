@@ -14,7 +14,17 @@ export const CRON_JOB_REFERENCE_ROWS: CronJobReferenceRow[] = [
     schedule: "0 7 * * *",
     frequency: "Daily at 07:00 UTC",
     status: "scheduled",
-    notes: "Rebuilds public browse snapshots. Admin summary email is intentionally skipped for now.",
+    notes:
+      "Rebuilds public browse snapshots and syncs beta tester onboarding status. Admin summary email is intentionally skipped for now.",
+  },
+  {
+    name: "Beta tester onboarding sync",
+    path: "/api/cron/beta-tester-onboarding",
+    schedule: "Manual / legacy",
+    frequency: "Once per day (via Daily maintenance)",
+    status: "manual",
+    notes:
+      "Recomputes in-progress vs complete onboarding for shops tagged Beta Tester. Scheduled through Daily maintenance at 07:00 UTC.",
   },
   {
     name: "Monthly maintenance",

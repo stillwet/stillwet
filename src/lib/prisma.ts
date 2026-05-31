@@ -6,6 +6,9 @@ import { runtimeDatabaseUrlFromEnv } from "@/lib/env-postgres-url";
 
 export type PrismaAdminInboundEmailDelegate = PrismaClient["adminInboundEmail"];
 export type PrismaModerationKeywordDelegate = PrismaClient["moderationKeyword"];
+export type PrismaShopPromotionCreditBalanceDelegate =
+  PrismaClient["shopPromotionCreditBalance"];
+export type PrismaShopAdminAwardGrantDelegate = PrismaClient["shopAdminAwardGrant"];
 
 /**
  * Bump when the Prisma schema (or generated client shape) changes so the cached `globalThis` client
@@ -14,7 +17,7 @@ export type PrismaModerationKeywordDelegate = PrismaClient["moderationKeyword"];
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v63-google-shopping-credit-packs";
+  "postgres-adapter-v71-admin-award-revoke";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -59,8 +62,16 @@ if (globalForPrisma.prismaSingletonStamp !== PRISMA_SINGLETON_STAMP) {
 }
 
 function clientHasRequiredDelegates(client: PrismaClient): boolean {
-  const c = client as { promotionPurchase?: { findMany?: unknown } };
-  return typeof c.promotionPurchase?.findMany === "function";
+  const c = client as {
+    promotionPurchase?: { findMany?: unknown };
+    shopPromotionCreditBalance?: { findMany?: unknown };
+    shopAdminAwardGrant?: { findMany?: unknown };
+  };
+  return (
+    typeof c.promotionPurchase?.findMany === "function" &&
+    typeof c.shopPromotionCreditBalance?.findMany === "function" &&
+    typeof c.shopAdminAwardGrant?.findMany === "function"
+  );
 }
 
 /**
@@ -76,7 +87,7 @@ function reconcilePrismaSingleton(): PrismaClient {
     client = createPrisma();
     if (!clientHasRequiredDelegates(client)) {
       throw new Error(
-        "PrismaClient is missing required delegates (promotionPurchase). Run `npx prisma generate`, ensure src/generated/prisma is up to date, and restart the server.",
+        "PrismaClient is missing required delegates (promotionPurchase, shopPromotionCreditBalance, shopAdminAwardGrant). Run `npx prisma generate`, ensure src/generated/prisma is up to date, and restart the server.",
       );
     }
   }
@@ -119,4 +130,32 @@ export function prismaModerationKeywordOrNull(): PrismaModerationKeywordDelegate
   const delegate = (prisma as PrismaClient & { moderationKeyword?: PrismaModerationKeywordDelegate })
     .moderationKeyword;
   return typeof delegate?.findMany === "function" ? delegate : null;
+}
+
+/**
+ * Optional delegate — Award Promotions credit balances (migration `20260528160000_shop_admin_award_promotions`).
+ */
+export function prismaShopPromotionCreditBalanceOrNull(): PrismaShopPromotionCreditBalanceDelegate | null {
+  const delegate = (
+    prisma as PrismaClient & {
+      shopPromotionCreditBalance?: PrismaShopPromotionCreditBalanceDelegate;
+    }
+  ).shopPromotionCreditBalance;
+  return typeof delegate?.findMany === "function" ? delegate : null;
+}
+
+/**
+ * Optional delegate — Award Promotions admin grant audit log (migration `20260528160000_shop_admin_award_promotions`).
+ */
+export function prismaShopAdminAwardGrantOrNull(): PrismaShopAdminAwardGrantDelegate | null {
+  const delegate = (
+    prisma as PrismaClient & { shopAdminAwardGrant?: PrismaShopAdminAwardGrantDelegate }
+  ).shopAdminAwardGrant;
+  return typeof delegate?.findMany === "function" ? delegate : null;
+}
+
+export function adminAwardPromotionsDelegatesReady(): boolean {
+  return (
+    prismaShopPromotionCreditBalanceOrNull() != null && prismaShopAdminAwardGrantOrNull() != null
+  );
 }

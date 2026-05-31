@@ -13,9 +13,12 @@ export function PromotionsCheckoutPayLazy(props: {
   amountCents: number;
   mockPay: boolean;
   stripePublishableKey: string;
+  promotionCreditsAvailable?: number;
 }) {
   const [ready, setReady] = useState(false);
   const captureScroll = usePreserveScrollOnSettled(!ready, ready);
+  const displayAmountCents =
+    (props.promotionCreditsAvailable ?? 0) > 0 ? 0 : props.amountCents;
 
   useEffect(() => {
     let cancelled = false;
@@ -27,13 +30,13 @@ export function PromotionsCheckoutPayLazy(props: {
     return () => {
       cancelled = true;
     };
-  }, [props.kind, props.placementOffset, props.amountCents, captureScroll]);
+  }, [props.kind, props.placementOffset, props.amountCents, props.promotionCreditsAvailable, captureScroll]);
 
   return (
     <>
       <PromotionCheckoutCostLine
         kind={props.kind}
-        amountCents={props.amountCents}
+        amountCents={displayAmountCents}
         loading={!ready}
       />
       {ready ? (

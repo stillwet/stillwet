@@ -5,6 +5,9 @@ export type GoogleShoppingCreditPackId = (typeof GOOGLE_SHOPPING_CREDIT_PACK_IDS
 
 export const GOOGLE_SHOPPING_LEGACY_PACK_ID = "legacy_access" as const;
 
+/** Admin Award Promotions grant — $0 purchase row for shop purchase history. */
+export const GOOGLE_SHOPPING_ADMIN_GRANT_PACK_ID = "admin_grant" as const;
+
 export type GoogleShoppingCreditPack = {
   id: GoogleShoppingCreditPackId;
   credits: number;

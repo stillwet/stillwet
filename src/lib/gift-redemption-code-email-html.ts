@@ -1,8 +1,14 @@
 import {
+  GIFT_GOOGLE_SHOPPING_CODE_PLACEHOLDER,
+  GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER,
   GIFT_LISTING_CODE_PLACEHOLDER,
   GIFT_LISTING_CREDITS_PLACEHOLDER,
+  GIFT_PROMOTION_CODE_PLACEHOLDER,
+  GIFT_PROMOTION_CREDITS_PLACEHOLDER,
+  GIFT_PROMOTION_KIND_LABEL_PLACEHOLDER,
   GIFT_SETUP_CODE_PLACEHOLDER,
   replaceGiftCodePlaceholders,
+  type GiftRedemptionEmailVars,
 } from "@/lib/email-template-placeholders";
 
 import { BRAND_MERCH_NAME } from "@/lib/site-brand";
@@ -29,14 +35,26 @@ export const GIFT_REDEMPTION_CODE_HTML_TEMPLATE = `<!DOCTYPE html>
                 </td>
               </tr>
               <tr>
-                <td style="padding:10px 0;border-top:1px solid #27272a;border-bottom:1px solid #27272a;">
+                <td style="padding:10px 0;border-top:1px solid #27272a;">
                   <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#71717a;">Listing credits (${GIFT_LISTING_CREDITS_PLACEHOLDER})</p>
                   <p style="margin:0;font-size:18px;letter-spacing:0.12em;font-weight:700;color:#fafafa;">${GIFT_LISTING_CODE_PLACEHOLDER}</p>
                 </td>
               </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #27272a;">
+                  <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#71717a;">Promotion credits — ${GIFT_PROMOTION_KIND_LABEL_PLACEHOLDER} (${GIFT_PROMOTION_CREDITS_PLACEHOLDER})</p>
+                  <p style="margin:0;font-size:18px;letter-spacing:0.12em;font-weight:700;color:#fafafa;">${GIFT_PROMOTION_CODE_PLACEHOLDER}</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #27272a;border-bottom:1px solid #27272a;">
+                  <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#71717a;">Google Shopping credits (${GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER})</p>
+                  <p style="margin:0;font-size:18px;letter-spacing:0.12em;font-weight:700;color:#fafafa;">${GIFT_GOOGLE_SHOPPING_CODE_PLACEHOLDER}</p>
+                </td>
+              </tr>
             </table>
             <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#a1a1aa;">
-              The setup code is entered on the “Create Shop” page. The listing-credit code is entered in the creator dashboard on the Request listing tab.
+              Setup codes go on the “Create Shop” page. Listing credits are redeemed on Request listing. Promotion and Google Shopping codes are redeemed on Shop upgrades.
             </p>
             <p style="margin:0;font-size:11px;line-height:1.5;color:#71717a;">
               Each code can be used once. ${BRAND_MERCH_NAME} does not send these codes directly to the creator.
@@ -50,7 +68,23 @@ export const GIFT_REDEMPTION_CODE_HTML_TEMPLATE = `<!DOCTYPE html>
 
 export function renderGiftRedemptionCodeEmailHtml(
   template: string,
-  vars: { setupCode: string; listingCode: string; listingCredits: string },
+  vars: GiftRedemptionEmailVars,
 ): string {
   return replaceGiftCodePlaceholders(template, vars);
+}
+
+export function defaultGiftRedemptionEmailVars(
+  partial: Partial<GiftRedemptionEmailVars> = {},
+): GiftRedemptionEmailVars {
+  return {
+    setupCode: "Not included",
+    listingCode: "Not included",
+    listingCredits: "0",
+    promotionCode: "Not included",
+    promotionKindLabel: "—",
+    promotionCredits: "0",
+    googleShoppingCode: "Not included",
+    googleShoppingCredits: "0",
+    ...partial,
+  };
 }

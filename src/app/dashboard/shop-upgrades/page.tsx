@@ -11,6 +11,8 @@ import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { isMockCheckoutEnabled, promotionUiUsesMockCheckout } from "@/lib/checkout-mock";
 import { loadShopFlairDashboardPayload } from "@/lib/shop-flair-dashboard-payload";
 import { loadShopGoogleShoppingDashboardPayload } from "@/lib/shop-google-shopping-dashboard-payload";
+import { getPromotionCreditBalancesForShop } from "@/lib/promotion-credit-balance";
+import { PromotionKind } from "@/generated/prisma/enums";
 
 import { PromotionsCheckoutShell } from "@/components/dashboard/PromotionsCheckoutShell";
 
@@ -186,10 +188,11 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
 
 
 
-    const [flair, googleShopping, mockPromotionCheckout] = await Promise.all([
+    const [flair, googleShopping, mockPromotionCheckout, promotionCreditBalances] = await Promise.all([
       loadShopFlairDashboardPayload(shop.id),
       loadShopGoogleShoppingDashboardPayload(shop.id),
       Promise.resolve(promotionUiUsesMockCheckout(shop.slug)),
+      getPromotionCreditBalancesForShop(shop.id),
     ]);
     const mockListingFeeCheckout = isMockCheckoutEnabled();
     const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() || null;
@@ -203,6 +206,9 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
         : null;
 
 
+
+    const promotionCreditsAvailable =
+      buyKind != null ? (promotionCreditBalances[buyKind as PromotionKind] ?? 0) : 0;
 
     return (
 
@@ -287,6 +293,7 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
                   computedPeriodChoices={computedPeriodChoices}
                   mockPromotionCheckout={mockPromotionCheckout}
                   stripePublishableKey={stripePublishableKey ?? ""}
+                  promotionCreditsAvailable={promotionCreditsAvailable}
                   queryPreserve={queryPreserve}
                 />
               ) : null

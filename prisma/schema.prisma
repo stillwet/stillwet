@@ -68,6 +68,18 @@ enum CreatorGiftPurchaseStatus {
 enum CreatorGiftCodeType {
   shop_setup
   listing_credits
+  promotion_credit
+  google_shopping_credits
+}
+
+enum CreatorGiftFulfillmentMode {
+  email_codes
+  direct_to_shop
+}
+
+enum BetaTesterOnboardingStatus {
+  in_progress
+  complete
 }
 
 enum ShopReactivationPurchaseStatus {
@@ -213,6 +225,8 @@ model Shop {
   inactivityWarningSentAt DateTime?
   /** Shop is deactivated for creator access after 90 days without a successful creator login. */
   inactivityDeactivatedAt DateTime?
+  /** Admin froze the shop (hidden from site; owner sees dashboard banner). */
+  adminFrozenAt            DateTime?
   /** Platform started deletion cleanup after one year deactivated with no sales. */
   inactivityDeletionTriggeredAt DateTime?
   homeFeaturedListingId    String?        @unique
@@ -228,7 +242,7 @@ model Shop {
   itemGuidelinesAcknowledgedAt DateTime?
   /**
    * Extra publication-fee-free slots beyond the platform default first-N free listings,
-   * granted from the admin Backend → Free listings tab.
+   * granted from the admin Backend → Award Promotions tab.
    */
   listingFeeBonusFreeSlots       Int                            @default(0)
   listingSlotPromoRedemptions    ShopListingSlotPromoRedemption[]
@@ -257,6 +271,7 @@ model Shop {
   setupFeePurchases              ShopSetupFeePurchase[]
   reactivationPurchases          ShopReactivationPurchase[]
   creatorGiftCodesRedeemed       CreatorGiftCode[]              @relation("CreatorGiftCodeRedeemedByShop")
+  creatorGiftPurchasesReceived   CreatorGiftPurchase[]          @relation("CreatorGiftPurchaseRecipientShop")
   /** Cached JSON for the shop dashboard Promotions tab (fast reads; rebuilt on write + cron). */
   promotionsDashboardSnapshot    ShopPromotionsDashboardSnapshot?
   /** Cached paid orders for the Sales tab (at most one live rebuild per Pacific calendar day). */
@@ -271,6 +286,13 @@ model Shop {
   googleShoppingCredits           Int                            @default(0)
   googleShoppingPurchases         ShopGoogleShoppingPurchase[]
   googleShoppingEnrollments       ShopListingGoogleShoppingEnrollment[]
+  promotionCreditBalances         ShopPromotionCreditBalance[]
+  adminAwardGrants                ShopAdminAwardGrant[]
+  /** Set when the shop signs up with a beta-tester invite code. */
+  betaTesterAt                    DateTime?
+  betaTesterOnboardingStatus      BetaTesterOnboardingStatus?
+  betaTesterOnboardingCheckedAt   DateTime?
+  betaTesterOnboardingCompletedAt DateTime?
   createdAt                      DateTime                       @default(now())
   updatedAt                      DateTime                       @updatedAt
 
@@ -330,7 +352,7 @@ model ShopGoogleShoppingPurchase {
   shop                  Shop                             @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopUserId            String
   shopUser              ShopUser                         @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
-  /** `gmc_pack_3` | `gmc_pack_5` | `gmc_pack_10` | `legacy_access` — see `GOOGLE_SHOPPING_CREDIT_PACKS`. */
+  /** `gmc_pack_3` | `gmc_pack_5` | `gmc_pack_10` | `legacy_access` | `admin_grant` — see `GOOGLE_SHOPPING_CREDIT_PACKS`. */
   packId                String
   creditsGranted        Int
   amountCents           Int
@@ -704,12 +726,44 @@ model PromotionPurchase {
    * Mon–Sun cycle — when null, active timing follows `paidAt` vs `eligibleFrom` rules in app code.
    */
   eligibleFrom          DateTime?
+  /** True when checkout used an admin-granted promotion credit (amountCents is 0). */
+  paidViaPromotionCredit Boolean                 @default(false)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
 
   @@index([shopId, createdAt(sort: Desc)])
   @@index([kind, status, eligibleFrom])
   @@index([kind, status, paidAt])
+}
+
+/** Unredeemed admin-granted promotion credits per shop and kind. */
+model ShopPromotionCreditBalance {
+  id        String         @id @default(cuid())
+  shopId    String
+  shop      Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  kind      PromotionKind
+  credits   Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([shopId, kind])
+  @@index([shopId])
+}
+
+/** Audit log for admin Backend → Award Promotions grants. */
+model ShopAdminAwardGrant {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  /** e.g. `free_listing_slots`, `flair_access`, `promotion_credit:HOT_FEATURED_ITEM` */
+  awardKey  String
+  quantity  Int      @default(1)
+  grantedAt DateTime @default(now())
+  revokedAt DateTime?
+
+  @@index([shopId, grantedAt(sort: Desc)])
+  @@index([grantedAt(sort: Desc)])
+  @@index([revokedAt])
 }
 
 model ListingCreditPackPurchase {
@@ -793,39 +847,54 @@ model ShopReactivationPurchase {
 }
 
 model CreatorGiftPurchase {
-  id                      String                    @id @default(cuid())
-  purchaserEmail          String
-  setupFeeIncluded        Boolean                   @default(false)
-  listingCreditPackId     String?
-  listingCreditsGranted   Int                       @default(0)
-  amountCents             Int
-  currency                String                    @default("usd")
-  status                  CreatorGiftPurchaseStatus @default(pending)
-  stripeCheckoutSessionId String?                   @unique
-  stripePaymentIntentId   String?                   @unique
-  paidAt                  DateTime?
-  emailedAt               DateTime?
-  createdAt               DateTime                  @default(now())
-  updatedAt               DateTime                  @updatedAt
+  id                           String                     @id @default(cuid())
+  purchaserEmail               String?
+  fulfillmentMode              CreatorGiftFulfillmentMode @default(email_codes)
+  recipientShopId              String?
+  recipientShop                Shop?                      @relation("CreatorGiftPurchaseRecipientShop", fields: [recipientShopId], references: [id], onDelete: SetNull)
+  giftFromName                 String?
+  setupFeeIncluded             Boolean                    @default(false)
+  listingCreditPackId          String?
+  listingCreditsGranted        Int                        @default(0)
+  googleShoppingCreditPackId   String?
+  googleShoppingCreditsGranted Int                        @default(0)
+  promotionKind                PromotionKind?
+  promotionCreditsGranted      Int                        @default(0)
+  shopFlairIncluded            Boolean                    @default(false)
+  /** Batch-generated invite codes for beta testers (shop_setup codes). */
+  isBetaTesterBatch            Boolean                    @default(false)
+  amountCents                  Int
+  currency                     String                     @default("usd")
+  status                       CreatorGiftPurchaseStatus  @default(pending)
+  stripeCheckoutSessionId      String?                    @unique
+  stripePaymentIntentId        String?                    @unique
+  paidAt                       DateTime?
+  emailedAt                    DateTime?
+  createdAt                    DateTime                   @default(now())
+  updatedAt                    DateTime                   @updatedAt
 
   codes CreatorGiftCode[]
 
   @@index([purchaserEmail])
+  @@index([recipientShopId])
   @@index([status, paidAt])
 }
 
 model CreatorGiftCode {
-  id                    String              @id @default(cuid())
-  purchaseId            String
-  purchase              CreatorGiftPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  type                  CreatorGiftCodeType
-  code                  String              @unique
-  codeNormalized        String              @unique
-  listingCreditsGranted Int                 @default(0)
-  redeemedAt            DateTime?
-  redeemedByShopId      String?
-  redeemedByShop        Shop?               @relation("CreatorGiftCodeRedeemedByShop", fields: [redeemedByShopId], references: [id], onDelete: SetNull)
-  createdAt             DateTime            @default(now())
+  id                           String              @id @default(cuid())
+  purchaseId                   String
+  purchase                     CreatorGiftPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  type                         CreatorGiftCodeType
+  code                         String              @unique
+  codeNormalized               String              @unique
+  listingCreditsGranted        Int                 @default(0)
+  googleShoppingCreditsGranted Int                 @default(0)
+  promotionKind                PromotionKind?
+  promotionCreditsGranted      Int                 @default(0)
+  redeemedAt                   DateTime?
+  redeemedByShopId             String?
+  redeemedByShop               Shop?               @relation("CreatorGiftCodeRedeemedByShop", fields: [redeemedByShopId], references: [id], onDelete: SetNull)
+  createdAt                    DateTime            @default(now())
 
   @@index([purchaseId, type])
   @@index([type, redeemedAt])

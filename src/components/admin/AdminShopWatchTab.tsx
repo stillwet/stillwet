@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { fetchAdminShopWatchShopDetails } from "@/actions/admin-shop-watch";
 import { adminDeleteShopListingRecord, adminFreezeShopListing } from "@/actions/admin-marketplace";
+import { AdminShopFreezeControls } from "@/components/admin/AdminShopFreezeControls";
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
 
 export type ShopWatchDetail = {
@@ -30,6 +31,8 @@ export type ShopWatchRow = {
   shopId: string;
   displayName: string;
   slug: string;
+  /** When set, the whole shop is admin-frozen (hidden from the public site). */
+  adminFrozenAt: string | null;
   /** Live on storefront plus approved-but-not-live rows (same roll-up as the Active column). */
   activeListingsCount: number;
   /** Paid checkout orders for this shop (`Order.status` = paid). */
@@ -609,10 +612,15 @@ export function AdminShopWatchTab(props: {
                       <td className="px-3 py-3">
                         <Link
                           href={`/s/${r.slug}`}
-                          className="font-medium text-zinc-200 underline-offset-2 hover:text-blue-300 hover:underline"
+                          className={`font-medium underline-offset-2 hover:underline ${
+                            r.adminFrozenAt
+                              ? "text-zinc-500 hover:text-zinc-300"
+                              : "text-zinc-200 hover:text-blue-300"
+                          }`}
                         >
                           {r.displayName}
                         </Link>
+                        <AdminShopFreezeControls shopId={r.shopId} adminFrozenAt={r.adminFrozenAt} />
                       </td>
                       <td className="px-3 py-3 text-center tabular-nums text-zinc-200">{r.activeListingsCount}</td>
                       <td className="px-3 py-3 text-center tabular-nums text-violet-200/90">{r.salesCount}</td>

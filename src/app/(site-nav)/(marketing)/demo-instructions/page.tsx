@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
+import { dashQueryParamForTabId } from "@/lib/dashboard-dash-query";
 import { BRAND_NAME } from "@/lib/site-brand";
+import { getShopOwnerSessionReadonly } from "@/lib/session";
+import { shopFlairAccessPriceUsdLabel } from "@/lib/shop-flair";
 
 const DEMO_SURVEY_URL = "https://www.jotform.com/form/261326846259061";
 
-export default function DemoInstructionsPage() {
+export default async function DemoInstructionsPage() {
+  const owner = await getShopOwnerSessionReadonly();
+  const isLoggedIn = Boolean(owner.shopUserId);
+  const supportDashboardHref = `/dashboard?dash=${encodeURIComponent(dashQueryParamForTabId("support"))}`;
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-16">
       <p className="store-kicker text-blue-300/80">Beta testing</p>
@@ -19,7 +26,7 @@ export default function DemoInstructionsPage() {
 
       <div className="mt-10 space-y-8 text-sm leading-relaxed text-zinc-400">
         <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5">
-          <h2 className="text-base font-semibold text-zinc-100">1. Create your shop</h2>
+          <h2 className="text-base font-semibold text-zinc-100">1. Create shop + follow onboarding</h2>
           <p className="mt-3">
             Sign up for a shop with your coupon code. Complete the shop onboarding.
           </p>
@@ -31,21 +38,11 @@ export default function DemoInstructionsPage() {
           </Link>
         </section>
 
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5">
-          <h2 className="text-base font-semibold text-zinc-100">2. Remember this is demo-only</h2>
-          <p className="mt-3">
-            The website is in beta testing, so all payments are demo-only for now. The site will go live later
-            this year, at which time your listings can be bought for real money.
-          </p>
-          <p className="mt-3">
-            An announcement will be sent when real sales and live payments are available.
-          </p>
-        </section>
-
         <section className="rounded-2xl border border-blue-500/25 bg-blue-500/10 p-5">
-          <h2 className="text-base font-semibold text-blue-100">3. Fill out the tester survey</h2>
+          <h2 className="text-base font-semibold text-blue-100">2. Fill out the tester survey</h2>
           <p className="mt-3 text-blue-100/85">
-            When you complete onboarding, please complete the tester survey.
+            If you do not fill out the survey, you will not receive the promotional credits (listed
+            below).
           </p>
           <a
             href={DEMO_SURVEY_URL}
@@ -55,6 +52,56 @@ export default function DemoInstructionsPage() {
           >
             Open tester survey
           </a>
+        </section>
+
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5">
+          <h2 className="text-base font-semibold text-zinc-100">More Tester Info</h2>
+          <ul className="mt-3 list-disc space-y-4 pl-5">
+            <li>
+              <span className="block text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                Testers receive
+              </span>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Shop setup fee waived ($15)</li>
+                <li>10 free listings ($5)</li>
+                <li>Free shop flair ({shopFlairAccessPriceUsdLabel().replace(".00", "")})</li>
+                <li className="-ml-5 list-none italic text-zinc-500">
+                  Testers that do not complete onboarding and the survey will not receive promotion
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span className="block text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                Demo payments
+              </span>
+              <p className="mt-2">
+                The website is in beta testing, so all payments are demo-only for now. The site will go live
+                later this year, at which time your listings can be bought for real money.
+              </p>
+              <p className="mt-2">
+                An announcement will be sent when real sales and live payments are available.
+              </p>
+            </li>
+          </ul>
+        </section>
+
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5">
+          <h2 className="text-base font-semibold text-zinc-100">Need Help?</h2>
+          <p className="mt-3">
+            {isLoggedIn ? (
+              <>
+                Start a{" "}
+                <Link href={supportDashboardHref} className="text-blue-400/90 hover:underline">
+                  support chat
+                </Link>{" "}
+                via your shop dashboard
+              </>
+            ) : (
+              <Link href="/dashboard/login" className="text-blue-400/90 hover:underline">
+                Log in to access shop dashboard
+              </Link>
+            )}
+          </p>
         </section>
       </div>
 

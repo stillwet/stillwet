@@ -12,7 +12,7 @@ export function formatCreatorGiftCode(normalized: string): string {
   return clean.match(/.{1,4}/g)?.join("-") ?? clean;
 }
 
-export function generateCreatorGiftCode(prefix: "SETUP" | "LIST"): {
+export function generateCreatorGiftCode(prefix: "SETUP" | "LIST" | "PROMO" | "GMC"): {
   code: string;
   codeNormalized: string;
 } {

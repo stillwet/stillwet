@@ -28,6 +28,8 @@ There is **no** separate “Available at Build Time” toggle. For each variable
 
 From your project folder, with **production** Postgres URL in the environment:
 
+**Fresh Vercel + Neon account:** log into the new Vercel team, **link** the repo project, connect **Neon** under Storage (or paste Neon URLs in Environment Variables), **Redeploy**, then pull env locally (Option B) before migrating.
+
 **Option A — paste URL once (simplest)**
 
 In [Vercel](https://vercel.com) → your project → **Settings → Environment Variables**, copy the value of **`POSTGRES_PRISMA_URL`** or **`POSTGRES_URL_NON_POOLING`** (direct is better for migrate).

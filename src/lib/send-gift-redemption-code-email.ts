@@ -1,4 +1,5 @@
 import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import type { GiftRedemptionEmailVars } from "@/lib/email-template-placeholders";
 import { resolveGiftRedemptionCodeEmail } from "@/lib/site-email-template-service";
 
 type SendResult = { ok: true } | { ok: false; error: string };
@@ -16,12 +17,9 @@ function resendUserFacingError(status: number, body: string): string {
   return msg ? `Email could not be sent (${status}): ${msg}` : `Email could not be sent (HTTP ${status}).`;
 }
 
-export async function sendGiftRedemptionCodeEmail(args: {
-  toEmail: string;
-  setupCode: string;
-  listingCode: string;
-  listingCredits: string;
-}): Promise<SendResult> {
+export async function sendGiftRedemptionCodeEmail(
+  args: GiftRedemptionEmailVars & { toEmail: string },
+): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const fromResult = resolveShopTransactionalEmailFrom([
     process.env.SHOP_GIFT_CODE_EMAIL_FROM,
@@ -32,7 +30,7 @@ export async function sendGiftRedemptionCodeEmail(args: {
   if (!apiKey) {
     if (process.env.NODE_ENV === "development") {
       console.info(
-        `[gift-code-email] (no RESEND_API_KEY) codes for ${args.toEmail}: setup=${args.setupCode} listing=${args.listingCode}`,
+        `[gift-code-email] (no RESEND_API_KEY) codes for ${args.toEmail}: setup=${args.setupCode} listing=${args.listingCode} promo=${args.promotionCode} gmc=${args.googleShoppingCode}`,
       );
       return { ok: true };
     }
@@ -46,6 +44,11 @@ export async function sendGiftRedemptionCodeEmail(args: {
     setupCode: args.setupCode,
     listingCode: args.listingCode,
     listingCredits: args.listingCredits,
+    promotionCode: args.promotionCode,
+    promotionKindLabel: args.promotionKindLabel,
+    promotionCredits: args.promotionCredits,
+    googleShoppingCode: args.googleShoppingCode,
+    googleShoppingCredits: args.googleShoppingCredits,
   });
 
   const res = await fetch("https://api.resend.com/emails", {

@@ -942,7 +942,7 @@ export type $ShopGoogleShoppingPurchasePayload<ExtArgs extends runtime.Types.Ext
     shopId: string
     shopUserId: string
     /**
-     * * `gmc_pack_3` | `gmc_pack_5` | `gmc_pack_10` | `legacy_access` — see `GOOGLE_SHOPPING_CREDIT_PACKS`.
+     * * `gmc_pack_3` | `gmc_pack_5` | `gmc_pack_10` | `legacy_access` | `admin_grant` — see `GOOGLE_SHOPPING_CREDIT_PACKS`.
      */
     packId: string
     creditsGranted: number

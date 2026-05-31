@@ -67,11 +67,16 @@ import {
   type AdminModerationKeywordRow,
   type AdminModerationKeywordSpotlightRow,
 } from "@/components/admin/AdminModerationKeywordsTab";
-import { AdminShopFreeListingsTab } from "@/components/admin/AdminShopFreeListingsTab";
+import { AdminAwardPromotionsTab } from "@/components/admin/AdminAwardPromotionsTab";
 import {
+  adminAwardCatalog,
+  loadAdminRecentAwardGrants,
+  loadAdminAwardPromotionsMigrationRequired,
   loadAdminShopSlugPickerOptions,
   loadAdminShopsWithBonusFreeListingSlots,
-} from "@/actions/admin-shop-free-listings";
+  loadAdminShopsWithGoogleShoppingCredits,
+  loadAdminShopsWithPromotionCreditBalances,
+} from "@/actions/admin-award-promotions";
 import {
   loadModerationKeywordAdminRows,
   loadModerationKeywordPhrases,
@@ -356,6 +361,40 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
     const n = Number.parseInt(typeof sp.fl_total_cap === "string" ? sp.fl_total_cap : "", 10);
     return Number.isFinite(n) ? n : undefined;
   })();
+  const apErr =
+    typeof sp.ap_err === "string"
+      ? sp.ap_err
+      : typeof sp.fl_err === "string"
+        ? sp.fl_err
+        : undefined;
+  const apSaved = sp.ap_saved === "1" || sp.fl_saved === "1";
+  const apRevoked = sp.ap_revoked === "1";
+  const apShop =
+    typeof sp.ap_shop === "string" ? sp.ap_shop : typeof sp.fl_shop === "string" ? sp.fl_shop : undefined;
+  const apGranted = (() => {
+    const raw =
+      typeof sp.ap_granted === "string"
+        ? sp.ap_granted
+        : typeof sp.fl_granted === "string"
+          ? sp.fl_granted
+          : "";
+    const n = Number.parseInt(raw, 10);
+    return Number.isFinite(n) ? n : undefined;
+  })();
+  const apDetail =
+    typeof sp.ap_detail === "string"
+      ? sp.ap_detail
+      : flSaved && flShop
+        ? `${flTotalBonus ?? 0} bonus slot${(flTotalBonus ?? 0) === 1 ? "" : "s"} (${flTotalCap ?? 0} fee-free total)`
+        : undefined;
+  const apAwardLabel = (() => {
+    const key = typeof sp.ap_award === "string" ? sp.ap_award : undefined;
+    if (key) {
+      return adminAwardCatalog().find((d) => d.catalogKey === key)?.label;
+    }
+    if (flSaved) return "free listing slot";
+    return undefined;
+  })();
   const savedTagId =
     typeof sp.saved_tag_id === "string" ? sp.saved_tag_id : undefined;
   const pfyHook = typeof sp.pfyHook === "string" ? sp.pfyHook : undefined;
@@ -602,15 +641,23 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
     }
   }
 
-  const freeListingTabData =
-    adminSection === "backend" && inventoryTab === "free-listings"
+  const awardPromotionsTabData =
+    adminSection === "backend" && inventoryTab === "award-promotions"
       ? await Promise.all([
           loadAdminShopsWithBonusFreeListingSlots(),
+          loadAdminShopsWithPromotionCreditBalances(),
+          loadAdminShopsWithGoogleShoppingCredits(),
+          loadAdminRecentAwardGrants(),
           loadAdminShopSlugPickerOptions(),
+          loadAdminAwardPromotionsMigrationRequired(),
         ])
       : null;
-  const freeListingGrantRows = freeListingTabData?.[0] ?? [];
-  const freeListingShopPickerOptions = freeListingTabData?.[1] ?? [];
+  const freeListingGrantRows = awardPromotionsTabData?.[0] ?? [];
+  const promotionCreditBalanceRows = awardPromotionsTabData?.[1] ?? [];
+  const googleShoppingCreditRows = awardPromotionsTabData?.[2] ?? [];
+  const recentAwardGrantRows = awardPromotionsTabData?.[3] ?? [];
+  const awardPromotionsShopPickerOptions = awardPromotionsTabData?.[4] ?? [];
+  const awardPromotionsMigrationRequired = awardPromotionsTabData?.[5] ?? false;
 
   const supplementImagePendingWhere = {
     ownerSupplementPendingImageUrl: { not: null },
@@ -885,16 +932,21 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
               kwErr={kwErr}
               kwSaved={kwSaved}
             />
-          ) : inventoryTab === "free-listings" ? (
-            <AdminShopFreeListingsTab
+          ) : inventoryTab === "award-promotions" ? (
+            <AdminAwardPromotionsTab
               grantRows={freeListingGrantRows}
-              shopPickerOptions={freeListingShopPickerOptions}
-              flErr={flErr}
-              flSaved={flSaved}
-              flShop={flShop}
-              flGranted={flGranted}
-              flTotalBonus={flTotalBonus}
-              flTotalCap={flTotalCap}
+              promotionCreditRows={promotionCreditBalanceRows}
+              googleShoppingCreditRows={googleShoppingCreditRows}
+              recentGrantRows={recentAwardGrantRows}
+              shopPickerOptions={awardPromotionsShopPickerOptions}
+              apErr={apErr}
+              apSaved={apSaved}
+              apRevoked={apRevoked}
+              apShop={apShop}
+              apAwardLabel={apAwardLabel}
+              apGranted={apGranted}
+              apDetail={apDetail}
+              migrationRequired={awardPromotionsMigrationRequired}
             />
           ) : inventoryTab === "tags" ? (
             <section id="tags" aria-label="Shop tags">
