@@ -49,36 +49,60 @@ function finalizeRuntimeDatabaseUrl(url: string): string {
   return normalizePostgresUrlForDevelopment(normalized);
 }
 
+function isLocalDatabaseHost(url: string): boolean {
+  try {
+    const h = new URL(url).hostname.toLowerCase();
+    return h === "localhost" || h === "127.0.0.1" || h === "[::1]";
+  } catch {
+    return false;
+  }
+}
+
+function tryRuntimeUrlCandidate(raw: string | undefined): string | undefined {
+  const t = raw?.trim();
+  if (!t || !isPostgresUrl(t)) return undefined;
+  if (process.env.NODE_ENV === "production" && isLocalDatabaseHost(t)) return undefined;
+  return t;
+}
+
+const RUNTIME_URL_ENV_KEYS = [
+  "POSTGRES_PRISMA_URL",
+  "DATABASE_URL",
+  "POSTGRES_URL",
+  "DIRECT_URL",
+] as const;
+
+function runtimeDatabaseUrlCandidates(): { key: string; url: string }[] {
+  const found: { key: string; url: string }[] = [];
+  for (const key of RUNTIME_URL_ENV_KEYS) {
+    const url = tryRuntimeUrlCandidate(process.env[key]);
+    if (url) found.push({ key, url });
+  }
+  const integrated = integrationPooledUrlEntry();
+  if (integrated) found.push(integrated);
+  return found;
+}
+
+/** Env vars set to localhost Postgres — ignored in production (see VERCEL.md). */
+export function productionLocalhostDatabaseUrlKeys(): string[] {
+  if (process.env.NODE_ENV !== "production") return [];
+  const keys: string[] = [];
+  for (const key of RUNTIME_URL_ENV_KEYS) {
+    const raw = process.env[key]?.trim();
+    if (raw && isPostgresUrl(raw) && isLocalDatabaseHost(raw)) keys.push(key);
+  }
+  return keys;
+}
+
 /** Which env var supplied the runtime URL (name only — for `/api/health` and logs). */
 export function runtimeDatabaseUrlSourceKey(): string | undefined {
-  if (process.env.POSTGRES_PRISMA_URL?.trim() && isPostgresUrl(process.env.POSTGRES_PRISMA_URL)) {
-    return "POSTGRES_PRISMA_URL";
-  }
-  if (process.env.DATABASE_URL?.trim() && isPostgresUrl(process.env.DATABASE_URL)) {
-    return "DATABASE_URL";
-  }
-  if (process.env.POSTGRES_URL?.trim() && isPostgresUrl(process.env.POSTGRES_URL)) {
-    return "POSTGRES_URL";
-  }
-  if (process.env.DIRECT_URL?.trim() && isPostgresUrl(process.env.DIRECT_URL)) {
-    return "DIRECT_URL";
-  }
-  return integrationPooledUrlEntry()?.key;
+  return runtimeDatabaseUrlCandidates()[0]?.key;
 }
 
 export function runtimeDatabaseUrlFromEnv(): string | undefined {
-  const standard =
-    process.env.POSTGRES_PRISMA_URL?.trim() ||
-    process.env.DATABASE_URL?.trim() ||
-    process.env.POSTGRES_URL?.trim() ||
-    process.env.DIRECT_URL?.trim();
-  if (standard && isPostgresUrl(standard)) {
-    return finalizeRuntimeDatabaseUrl(standard);
-  }
-
-  const integrated = integrationPooledUrl();
-  if (integrated) {
-    return finalizeRuntimeDatabaseUrl(integrated);
+  const chosen = runtimeDatabaseUrlCandidates()[0];
+  if (chosen) {
+    return finalizeRuntimeDatabaseUrl(chosen.url);
   }
 
   if (process.env.NODE_ENV === "development") {
@@ -124,15 +148,6 @@ function integrationPooledUrl(): string | undefined {
 
 const SUFFIX_NON_POOLING = "_POSTGRES_URL_NON_POOLING";
 const SUFFIX_UNPOOLED = "_DATABASE_URL_UNPOOLED";
-
-function isLocalDatabaseHost(url: string): boolean {
-  try {
-    const h = new URL(url).hostname.toLowerCase();
-    return h === "localhost" || h === "127.0.0.1" || h === "[::1]";
-  } catch {
-    return false;
-  }
-}
 
 function tryMigrateDirectCandidate(raw: string | undefined): string | undefined {
   const t = raw?.trim();

@@ -17,11 +17,25 @@ export async function register() {
     return;
   }
 
-  const { runtimeDatabaseUrlFromEnv } = await import("./lib/env-postgres-url");
+  const { productionLocalhostDatabaseUrlKeys, runtimeDatabaseUrlFromEnv } =
+    await import("./lib/env-postgres-url");
+  const ignoredLocalDb = productionLocalhostDatabaseUrlKeys();
+  if (ignoredLocalDb.length > 0) {
+    console.error(
+      `[stillwet] Ignoring localhost Postgres env in production (${ignoredLocalDb.join(", ")}). Use Neon POSTGRES_PRISMA_URL on Vercel — see VERCEL.md.`,
+    );
+  }
   const dbUrl = runtimeDatabaseUrlFromEnv();
   if (!dbUrl) {
     console.error(
       "[stillwet] No DATABASE_URL or POSTGRES_PRISMA_URL — shop and admin need Postgres. Set env on Vercel and redeploy. See VERCEL.md §5.",
+    );
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (appUrl && /localhost|127\.0\.0\.1|\[::1\]/i.test(appUrl)) {
+    console.error(
+      "[stillwet] NEXT_PUBLIC_APP_URL points at localhost in production — set https://stillwet.com on Vercel and redeploy.",
     );
   }
 

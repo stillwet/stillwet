@@ -1,4 +1,5 @@
 import {
+  productionLocalhostDatabaseUrlKeys,
   runtimeDatabaseUrlFromEnv,
   runtimeDatabaseUrlSourceKey,
 } from "@/lib/env-postgres-url";
@@ -41,6 +42,14 @@ export async function GET() {
   const passwordResetLinkOrigin = emailLinkOrigin();
   const hasSessionSecret = (process.env.SESSION_SECRET?.trim().length ?? 0) >= 32;
   const hasAdminPassword = Boolean(process.env.ADMIN_PASSWORD?.trim());
+  const localhostDbKeys = productionLocalhostDatabaseUrlKeys();
+  const appUrl = publicAppBaseUrl() ?? null;
+  const appUrlLooksLocal =
+    process.env.NODE_ENV === "production" &&
+    Boolean(
+      appUrl &&
+        /localhost|127\.0\.0\.1|\[::1\]/i.test(appUrl),
+    );
 
   return Response.json(
     {
@@ -50,8 +59,18 @@ export async function GET() {
         ok: dbOk,
         source: dbSource,
         error: dbError,
+        ignoredLocalhostEnvKeys: localhostDbKeys.length > 0 ? localhostDbKeys : undefined,
       },
-      appUrl: publicAppBaseUrl() ?? null,
+      configWarnings:
+        localhostDbKeys.length > 0 || appUrlLooksLocal
+          ? {
+              localhostDatabaseUrlEnvKeys: localhostDbKeys.length > 0 ? localhostDbKeys : undefined,
+              appUrlLooksLocal: appUrlLooksLocal || undefined,
+              hint:
+                "Production is using local dev values. In Vercel → Production env: remove or replace localhost DATABASE_URL with Neon (POSTGRES_PRISMA_URL), and set NEXT_PUBLIC_APP_URL=https://stillwet.com.",
+            }
+          : undefined,
+      appUrl,
       hasSessionSecret,
       hasAdminPassword,
       passwordReset: {
