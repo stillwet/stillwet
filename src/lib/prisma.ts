@@ -25,6 +25,11 @@ const globalForPrisma = globalThis as unknown as {
   prismaSingletonStamp?: string;
 };
 
+/** Next sets this during `next build`; Postgres must not be required at compile time. */
+function isNextProductionBuild(): boolean {
+  return process.env.NEXT_PHASE === "phase-production-build";
+}
+
 function createPrisma(): PrismaClient {
   const connectionString = runtimeDatabaseUrlFromEnv();
   if (!connectionString) {
@@ -99,8 +104,19 @@ function reconcilePrismaSingleton(): PrismaClient {
 /**
  * Real `PrismaClient` instance — do not wrap in `Proxy` (breaks Prisma query engine).
  * `let`: {@link reconcilePrismaSingleton} may replace the instance; `export const` would freeze stale refs.
+ *
+ * During `next build` without a database URL, skip init so route modules can load (Vercel may lack
+ * Neon until Production env is fixed). Runtime on Vercel always has env vars when configured.
  */
-export let prisma: PrismaClient = reconcilePrismaSingleton();
+export let prisma: PrismaClient;
+
+if (runtimeDatabaseUrlFromEnv()) {
+  prisma = reconcilePrismaSingleton();
+} else if (isNextProductionBuild()) {
+  prisma = undefined as unknown as PrismaClient;
+} else {
+  prisma = reconcilePrismaSingleton();
+}
 
 /**
  * Re-run reconciliation and sync {@link prisma} (call after codegen hot-reloads in rare dev cases).

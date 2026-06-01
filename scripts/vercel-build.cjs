@@ -100,19 +100,27 @@ function resolveVercelBuildDatabaseUrl() {
   return { ok: false, localhostKeys };
 }
 
-function assertVercelProductionDatabaseEnv() {
+function logVercelDatabaseEnvDiagnostics() {
   if (!shouldCleanNextForVercel()) return;
+
+  const dbRelatedKeys = Object.keys(process.env)
+    .filter((k) => /POSTGRES|DATABASE|NEON|PRISMA/i.test(k))
+    .sort();
+  console.log(
+    `[build] Database-related env keys on this worker: ${dbRelatedKeys.join(", ") || "(none)"}`,
+  );
 
   const resolved = resolveVercelBuildDatabaseUrl();
   if (resolved.ok) {
-    console.log(`[build] Production database env OK (${resolved.key})`);
+    console.log(`[build] Postgres URL resolved for build/runtime (${resolved.key})`);
     return;
   }
 
   const lines = [
     "",
-    "========== BUILD FAILED (database env) ==========",
-    "No reachable Postgres URL for this Vercel build.",
+    "========== BUILD WARN (database env) ==========",
+    "No reachable Postgres URL on this Vercel worker.",
+    "Build will continue; fix Production env before the site can serve data.",
   ];
   if (resolved.localhostKeys.length > 0) {
     lines.push(
@@ -120,16 +128,15 @@ function assertVercelProductionDatabaseEnv() {
     );
   }
   lines.push(
-    "Fix: Vercel → Settings → Environment Variables → Production:",
+    "Fix: Vercel project that owns stillwet.com → Settings → Environment Variables → Production:",
     "  • Delete DATABASE_URL if it is postgresql://…@127.0.0.1:5432/…",
     "  • Link Neon (Storage) OR set POSTGRES_PRISMA_URL to your Neon pooled URL",
     "  • Set NEXT_PUBLIC_APP_URL=https://stillwet.com",
-    "Then redeploy. See VERCEL.md.",
-    "=================================================",
+    "After deploy, open /api/health — database.ok must be true.",
+    "===============================================",
     "",
   );
-  for (const line of lines) console.error(`[build] ${line}`);
-  process.exit(1);
+  for (const line of lines) console.warn(`[build] ${line}`);
 }
 
 function runOptionalSchemaSync() {
@@ -164,7 +171,7 @@ function runOptionalSchemaSync() {
 
 resetNextDirOnVercel("before prisma generate");
 
-assertVercelProductionDatabaseEnv();
+logVercelDatabaseEnvDiagnostics();
 
 run("npx prisma generate --schema prisma/schema.prisma");
 runOptionalSchemaSync();
