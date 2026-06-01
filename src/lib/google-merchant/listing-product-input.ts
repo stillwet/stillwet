@@ -3,6 +3,7 @@ import { productHref } from "@/lib/marketplace-constants";
 import type { GoogleMerchantConfig } from "@/lib/google-merchant/config";
 import { productImageUrls } from "@/lib/product-media";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
+import type { Prisma } from "@/generated/prisma/client";
 import type {
   GoogleMerchantProductInput,
 } from "@/lib/google-merchant/types";
@@ -29,7 +30,7 @@ export type GoogleMerchantListingSource = {
     slug: string;
     name: string;
     imageUrl: string | null;
-    imageGallery: unknown;
+    imageGallery: Prisma.JsonValue | null;
   };
   /** Optional resolved storefront description (admin catalog). */
   description?: string;

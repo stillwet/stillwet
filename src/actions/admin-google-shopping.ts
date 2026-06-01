@@ -49,7 +49,7 @@ export async function adminRunGoogleMerchantSync(): Promise<AdminRunGoogleMercha
       batchSize: 500,
       pollStatus: true,
     });
-    return { ok: true, ...result };
+    return result;
   } catch (e) {
     console.error("[adminRunGoogleMerchantSync]", e);
     return { ok: false, error: "Google Merchant sync failed." };

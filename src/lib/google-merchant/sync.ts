@@ -1,5 +1,4 @@
 import { GoogleMerchantSyncStatus } from "@/generated/prisma/enums";
-import { resolveAdminCatalogStorefrontText } from "@/lib/storefront-product-detail";
 import {
   deleteGoogleMerchantProductInput,
   getGoogleMerchantProduct,
@@ -15,6 +14,8 @@ import {
   hashGoogleMerchantProductInput,
   type GoogleMerchantListingSource,
 } from "@/lib/google-merchant/listing-product-input";
+import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const REFRESH_AFTER_MS = 25 * 24 * 60 * 60 * 1000;
@@ -59,7 +60,7 @@ const enrollmentSelect = {
       },
     },
   },
-} as const;
+} satisfies Prisma.ShopListingGoogleShoppingEnrollmentSelect;
 
 type EnrollmentRow = Awaited<
   ReturnType<typeof loadEnrollmentForSync>
@@ -95,10 +96,10 @@ async function loadEnrollmentsForReconcile(limit: number) {
 
 async function toListingSource(row: NonNullable<EnrollmentRow>): Promise<GoogleMerchantListingSource> {
   const product = row.shopListing.product;
-  const description = await resolveAdminCatalogStorefrontText(
-    product,
-    { baselineCatalogPickEncoded: row.shopListing.baselineCatalogPickEncoded },
-  );
+  const description = await resolveEnrollmentStorefrontDescription({
+    baselineCatalogPickEncoded: row.shopListing.baselineCatalogPickEncoded,
+    adminCatalogItemPlatformLinks: product.adminCatalogItemPlatformLinks,
+  });
 
   return {
     enrollmentId: row.id,
@@ -126,6 +127,30 @@ async function toListingSource(row: NonNullable<EnrollmentRow>): Promise<GoogleM
     },
     description,
   };
+}
+
+async function resolveEnrollmentStorefrontDescription(args: {
+  baselineCatalogPickEncoded: string | null;
+  adminCatalogItemPlatformLinks: Array<{ storefrontDescription: string | null }>;
+}): Promise<string> {
+  const baseline = args.baselineCatalogPickEncoded?.trim() || "";
+  if (baseline) {
+    const pick = parseBaselinePick(baseline);
+    if (pick) {
+      const item = await prisma.adminCatalogItem.findUnique({
+        where: { id: pick.itemId },
+        select: { storefrontDescription: true },
+      });
+      const t = item?.storefrontDescription?.trim() || "";
+      if (t) return t;
+    }
+  }
+
+  for (const x of args.adminCatalogItemPlatformLinks) {
+    const t = x.storefrontDescription?.trim() || "";
+    if (t) return t;
+  }
+  return "";
 }
 
 async function markEnrollmentError(enrollmentId: string, error: string): Promise<void> {

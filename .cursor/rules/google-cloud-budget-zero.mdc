@@ -1,0 +1,22 @@
+---
+description: Require explicit approval for any Google Cloud usage that could cost money (budget $0)
+alwaysApply: true
+---
+
+# Google Cloud budget is $0 — ask before using
+
+The project’s Google Cloud (GCP) budget is **$0**.
+
+Before doing **any** work that would require enabling/using Google Cloud in a way that could incur charges, you must:
+
+- Explain what would be used (which GCP product(s), what for, what environment)
+- Give a rough cost estimate or confirm it should remain $0
+- Ask the user for explicit approval **in this chat** before proceeding
+
+Examples of “could cost money”:
+
+- Enabling paid APIs/services or attaching a billing account to unlock usage
+- Creating/running workloads on Cloud Run / Compute Engine / Cloud Functions
+- Setting up paid logging sinks, BigQuery exports, Pub/Sub usage at scale
+
+If the task can be done without GCP charges (or entirely outside GCP), prefer that approach.

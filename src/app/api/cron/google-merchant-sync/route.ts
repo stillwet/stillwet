@@ -20,5 +20,5 @@ export async function GET(req: Request) {
     pollStatus: true,
   });
 
-  return NextResponse.json({ ok: true, ...result });
+  return NextResponse.json(result);
 }
