@@ -31,6 +31,11 @@ import {
   AdminMainNavCount,
   AdminShellCountsProvider,
 } from "@/components/admin/AdminMainShellClient";
+import { AdminDatabaseConfigPanel } from "@/components/admin/AdminDatabaseConfigPanel";
+import {
+  productionLocalhostDatabaseUrlKeys,
+  runtimeDatabaseUrlFromEnv,
+} from "@/lib/env-postgres-url";
 export const dynamic = "force-dynamic";
 
 export type AdminDashboardSection = "main" | "backend";
@@ -221,6 +226,12 @@ async function AdminDashboardPageBody({
     }
     q.set("tab", "admin-list");
     redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}`);
+  }
+
+  if (!runtimeDatabaseUrlFromEnv()) {
+    return (
+      <AdminDatabaseConfigPanel localhostEnvKeys={productionLocalhostDatabaseUrlKeys()} />
+    );
   }
 
   // Baseline catalog seed only where the admin list / requests tab needs it — not every main visit.

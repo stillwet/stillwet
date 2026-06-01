@@ -20,9 +20,16 @@ export default function AdminError({
   const looksLikeStaleClient =
     /Unknown argument `/i.test(msg) ||
     /Cannot read properties of undefined \(reading 'count'\)/i.test(msg);
+  /** Postgres missing or Prisma not initialized (common when Neon is not linked on Vercel). */
+  const looksLikeMissingPostgres =
+    /No database URL|missing_database_url|POSTGRES_PRISMA_URL/i.test(msg) ||
+    /Cannot read properties of undefined \(reading '(?:findMany|count|adminCatalogItem)'\)/i.test(
+      msg,
+    );
   /** Postgres or migrations behind (missing column/table). */
   const looksLikeDb =
     !looksLikeStaleClient &&
+    !looksLikeMissingPostgres &&
     (/does not exist|Unknown column|P20\d{2}/i.test(msg) ||
       (/invalid.*prisma.*invocation/i.test(msg) && /column|relation|migrate/i.test(msg)));
 
@@ -32,7 +39,9 @@ export default function AdminError({
       <p className="mt-2 text-red-200/80">
         {looksLikeStaleClient
           ? "The running app is using an outdated Prisma Client (Turbopack cache, a long-lived dev process, or a cached `globalThis` Prisma singleton). The schema or generated client on disk is newer than what this Node process loaded (for example a new model delegate or field like `creatorRemovedFromShopAt`)."
-          : looksLikeDb
+          : looksLikeMissingPostgres
+            ? "This deployment has no Postgres URL (or Prisma could not connect). On Vercel → Production for stillwet.com: link Neon or set POSTGRES_PRISMA_URL, remove localhost DATABASE_URL/DIRECT_URL, redeploy, then confirm /api/health shows database.ok: true."
+            : looksLikeDb
             ? "The database does not match the current Prisma schema (for example a missing column from migration `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table from `20260516120000_moderation_keyword`). Apply pending migrations to that database, then reload."
             : "Something went wrong while loading this page. Check the server log for the stack trace."}
       </p>
@@ -49,6 +58,20 @@ export default function AdminError({
             <code className="rounded bg-zinc-950/80 px-1 py-0.5 font-mono text-[11px] text-zinc-300">.next</code>{" "}
             folder, then start <code className="font-mono text-[11px]">npm run dev</code> again.
           </li>
+        </ol>
+      ) : null}
+      {looksLikeMissingPostgres ? (
+        <ol className="mt-4 list-decimal space-y-2 pl-5 text-xs text-red-200/75">
+          <li>
+            Open{" "}
+            <Link href="/api/health" className="text-red-100/90 underline">
+              /api/health
+            </Link>{" "}
+            — if <code className="font-mono text-[11px]">database.ok</code> is false, fix Vercel
+            Production env first.
+          </li>
+          <li>Vercel → StillWet project → Storage → Connect Neon (or set POSTGRES_PRISMA_URL).</li>
+          <li>Redeploy, then run migrations: npm run db:migrate:prod (after vercel env pull).</li>
         </ol>
       ) : null}
       {looksLikeDb ? (

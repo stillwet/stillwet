@@ -18,16 +18,26 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.join(__dirname, "..");
-const envFile = path.join(root, ".env.production.local");
+const envLoadOrder = [
+  path.join(root, ".env.production.local"),
+  path.join(root, ".env"),
+  path.join(root, ".env.neon-verify"),
+];
 
-if (!fs.existsSync(envFile)) {
+const loaded = [];
+for (const file of envLoadOrder) {
+  if (!fs.existsSync(file)) continue;
+  require("dotenv").config({ path: file, override: true });
+  loaded.push(path.basename(file));
+}
+if (loaded.length === 0) {
   console.error(
-    "[migrate:prod] Missing .env.production.local\n  Run: npx vercel env pull .env.production.local --environment production",
+    "[migrate:prod] No .env.production.local, .env, or .env.neon-verify found.\n" +
+      "  Paste Neon POSTGRES_URL_NON_POOLING into .env or run: npx vercel env pull .env.production.local --environment production",
   );
   process.exit(1);
 }
-
-require("dotenv").config({ path: envFile });
+console.log(`[migrate:prod] Loaded env from: ${loaded.join(" → ")} (last wins)`);
 
 const SUFFIX_NON_POOLING = "_POSTGRES_URL_NON_POOLING";
 const SUFFIX_UNPOOLED = "_DATABASE_URL_UNPOOLED";
@@ -82,7 +92,7 @@ const url =
 
 if (!url) {
   console.error(
-    "[migrate:prod] No non-local direct Postgres URL found.\n  In .env.production.local set POSTGRES_URL_NON_POOLING, DATABASE_URL_UNPOOLED, or the Neon integration unpooled var from `vercel env pull`.",
+    "[migrate:prod] No non-local direct Postgres URL found.\n  Set POSTGRES_URL_NON_POOLING in .env.neon-verify, .env, or .env.production.local (Neon direct / unpooled URL).",
   );
   process.exit(1);
 }
