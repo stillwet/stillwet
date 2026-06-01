@@ -43,7 +43,86 @@ function resetNextDirOnVercel(label) {
 
 function run(cmd) {
   console.log(`[build] ${cmd}`);
-  execSync(cmd, { stdio: "inherit", env: process.env, shell: true });
+  try {
+    execSync(cmd, { stdio: "inherit", env: process.env, shell: true });
+  } catch (e) {
+    if (e && typeof e === "object" && e.status != null) {
+      console.error(`[build] Command failed (exit ${e.status}): ${cmd}`);
+    }
+    throw e;
+  }
+}
+
+function isPostgresUrl(v) {
+  const t = String(v ?? "").trim();
+  return t.startsWith("postgresql://") || t.startsWith("postgres://");
+}
+
+function isLocalDatabaseHost(url) {
+  try {
+    const h = new URL(url).hostname.toLowerCase();
+    return h === "localhost" || h === "127.0.0.1" || h === "[::1]";
+  } catch {
+    return true;
+  }
+}
+
+/** Mirrors src/lib/env-postgres-url.ts — must stay in sync for Vercel preflight. */
+function resolveVercelBuildDatabaseUrl() {
+  const localhostKeys = [];
+  const standardKeys = ["POSTGRES_PRISMA_URL", "DATABASE_URL", "POSTGRES_URL", "DIRECT_URL"];
+  for (const key of standardKeys) {
+    const raw = process.env[key]?.trim();
+    if (!raw || !isPostgresUrl(raw)) continue;
+    if (isLocalDatabaseHost(raw)) {
+      localhostKeys.push(key);
+      continue;
+    }
+    return { ok: true, key };
+  }
+
+  const integrated = [];
+  for (const [k, v] of Object.entries(process.env)) {
+    const raw = String(v ?? "").trim();
+    if (!raw || !isPostgresUrl(raw) || isLocalDatabaseHost(raw)) continue;
+    if (
+      (k.length > "_POSTGRES_PRISMA_URL".length && k.endsWith("_POSTGRES_PRISMA_URL")) ||
+      (k.length > "_DATABASE_URL".length && k.endsWith("_DATABASE_URL"))
+    ) {
+      integrated.push(k);
+    }
+  }
+  integrated.sort();
+  if (integrated.length > 0) {
+    return { ok: true, key: integrated[0] };
+  }
+
+  return { ok: false, localhostKeys };
+}
+
+function assertVercelProductionDatabaseEnv() {
+  if (!shouldCleanNextForVercel()) return;
+
+  const resolved = resolveVercelBuildDatabaseUrl();
+  if (resolved.ok) {
+    console.log(`[build] Production database env OK (${resolved.key})`);
+    return;
+  }
+
+  console.error("");
+  console.error("[build] FATAL: No reachable Postgres URL for this Vercel build.");
+  if (resolved.localhostKeys.length > 0) {
+    console.error(
+      `[build] These Production env vars point at localhost (Docker) and are ignored on Vercel: ${resolved.localhostKeys.join(", ")}`,
+    );
+  }
+  console.error("[build] Fix in Vercel → Project → Settings → Environment Variables → Production:");
+  console.error("[build]   1. Delete DATABASE_URL if it is postgresql://…@127.0.0.1:5432/… (local dev only).");
+  console.error("[build]   2. Set POSTGRES_PRISMA_URL to your Neon pooled URL (or link Neon integration).");
+  console.error("[build]   3. Set NEXT_PUBLIC_APP_URL=https://stillwet.com");
+  console.error("[build] Then redeploy. See VERCEL.md § Environment variables.");
+  console.error("");
+  process.exit(1);
 }
 
 function runOptionalSchemaSync() {
@@ -77,6 +156,8 @@ function runOptionalSchemaSync() {
 }
 
 resetNextDirOnVercel("before prisma generate");
+
+assertVercelProductionDatabaseEnv();
 
 run("npx prisma generate --schema prisma/schema.prisma");
 runOptionalSchemaSync();

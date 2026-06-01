@@ -125,6 +125,7 @@ function integrationPooledUrlEntry(): { key: string; url: string } | undefined {
   const found: { key: string; url: string }[] = [];
   for (const [k, v] of Object.entries(process.env)) {
     if (!v?.trim() || !isPostgresUrl(v)) continue;
+    if (process.env.NODE_ENV === "production" && isLocalDatabaseHost(v.trim())) continue;
     if (
       (k.length > SUFFIX_PRISMA.length && k.endsWith(SUFFIX_PRISMA)) ||
       (k.length > SUFFIX_DB.length && k.endsWith(SUFFIX_DB))
