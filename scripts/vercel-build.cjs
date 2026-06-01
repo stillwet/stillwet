@@ -109,19 +109,26 @@ function assertVercelProductionDatabaseEnv() {
     return;
   }
 
-  console.error("");
-  console.error("[build] FATAL: No reachable Postgres URL for this Vercel build.");
+  const lines = [
+    "",
+    "========== BUILD FAILED (database env) ==========",
+    "No reachable Postgres URL for this Vercel build.",
+  ];
   if (resolved.localhostKeys.length > 0) {
-    console.error(
-      `[build] These Production env vars point at localhost (Docker) and are ignored on Vercel: ${resolved.localhostKeys.join(", ")}`,
+    lines.push(
+      `Ignored localhost vars: ${resolved.localhostKeys.join(", ")} (Docker — not reachable on Vercel).`,
     );
   }
-  console.error("[build] Fix in Vercel → Project → Settings → Environment Variables → Production:");
-  console.error("[build]   1. Delete DATABASE_URL if it is postgresql://…@127.0.0.1:5432/… (local dev only).");
-  console.error("[build]   2. Set POSTGRES_PRISMA_URL to your Neon pooled URL (or link Neon integration).");
-  console.error("[build]   3. Set NEXT_PUBLIC_APP_URL=https://stillwet.com");
-  console.error("[build] Then redeploy. See VERCEL.md § Environment variables.");
-  console.error("");
+  lines.push(
+    "Fix: Vercel → Settings → Environment Variables → Production:",
+    "  • Delete DATABASE_URL if it is postgresql://…@127.0.0.1:5432/…",
+    "  • Link Neon (Storage) OR set POSTGRES_PRISMA_URL to your Neon pooled URL",
+    "  • Set NEXT_PUBLIC_APP_URL=https://stillwet.com",
+    "Then redeploy. See VERCEL.md.",
+    "=================================================",
+    "",
+  );
+  for (const line of lines) console.error(`[build] ${line}`);
   process.exit(1);
 }
 
