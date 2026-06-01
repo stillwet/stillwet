@@ -4200,7 +4200,16 @@ export const ShopListingGoogleShoppingEnrollmentScalarFieldEnum = {
   shopId: 'shopId',
   shopListingId: 'shopListingId',
   enrolledAt: 'enrolledAt',
-  enrolledByShopUserId: 'enrolledByShopUserId'
+  enrolledByShopUserId: 'enrolledByShopUserId',
+  gmcOfferId: 'gmcOfferId',
+  gmcProductName: 'gmcProductName',
+  gmcSyncStatus: 'gmcSyncStatus',
+  gmcSyncPayloadHash: 'gmcSyncPayloadHash',
+  gmcLastSyncedAt: 'gmcLastSyncedAt',
+  gmcLastSyncError: 'gmcLastSyncError',
+  gmcApprovalStatus: 'gmcApprovalStatus',
+  gmcLastStatusPollAt: 'gmcLastStatusPollAt',
+  gmcRemovedFromMerchantAt: 'gmcRemovedFromMerchantAt'
 } as const
 
 export type ShopListingGoogleShoppingEnrollmentScalarFieldEnum = (typeof ShopListingGoogleShoppingEnrollmentScalarFieldEnum)[keyof typeof ShopListingGoogleShoppingEnrollmentScalarFieldEnum]
@@ -4968,6 +4977,20 @@ export type EnumShopGoogleShoppingPurchaseStatusFieldRefInput<$PrismaModel> = Fi
  * Reference to a field of type 'ShopGoogleShoppingPurchaseStatus[]'
  */
 export type ListEnumShopGoogleShoppingPurchaseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShopGoogleShoppingPurchaseStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'GoogleMerchantSyncStatus'
+ */
+export type EnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleMerchantSyncStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'GoogleMerchantSyncStatus[]'
+ */
+export type ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleMerchantSyncStatus[]'>
     
 
 

@@ -118,6 +118,7 @@ export async function assignGoogleShoppingCreditsToListings(
         data: uniqueIds.map((shopListingId) => ({
           shopId,
           shopListingId,
+          gmcOfferId: shopListingId,
           enrolledAt: now,
           enrolledByShopUserId: shopUserId,
         })),
@@ -135,5 +136,14 @@ export async function assignGoogleShoppingCreditsToListings(
 
   revalidateShopUpgradesDashboardPaths();
   revalidatePath("/admin");
+
+  void import("@/lib/google-merchant/sync")
+    .then(({ syncGoogleMerchantEnrollmentsByListingIds }) =>
+      syncGoogleMerchantEnrollmentsByListingIds(uniqueIds),
+    )
+    .catch((err) => {
+      console.error("[google-merchant] post-enroll sync failed:", err);
+    });
+
   return { ok: true, enrolledCount: n };
 }

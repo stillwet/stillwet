@@ -368,6 +368,13 @@ model ShopGoogleShoppingPurchase {
   @@index([status, paidAt])
 }
 
+enum GoogleMerchantSyncStatus {
+  pending
+  synced
+  error
+  removed
+}
+
 /** Immutable GMC enrollment for one shop listing (assigned when credits are consumed). */
 model ShopListingGoogleShoppingEnrollment {
   id                   String      @id @default(cuid())
@@ -378,8 +385,22 @@ model ShopListingGoogleShoppingEnrollment {
   enrolledAt           DateTime    @default(now())
   enrolledByShopUserId String
   enrolledByShopUser   ShopUser    @relation(fields: [enrolledByShopUserId], references: [id], onDelete: Cascade)
+  /** Stable Merchant API offerId (defaults to shopListingId). */
+  gmcOfferId           String
+  /** Google resource name, e.g. accounts/…/products/en~US~…. */
+  gmcProductName       String?     @db.VarChar(512)
+  gmcSyncStatus        GoogleMerchantSyncStatus @default(pending)
+  /** SHA-256 of mapped ProductInput payload — skip API when unchanged. */
+  gmcSyncPayloadHash   String?     @db.VarChar(64)
+  gmcLastSyncedAt      DateTime?
+  gmcLastSyncError     String?     @db.Text
+  /** Cached approval summary from products.get (e.g. approved, pending, disapproved). */
+  gmcApprovalStatus    String?     @db.VarChar(64)
+  gmcLastStatusPollAt  DateTime?
+  gmcRemovedFromMerchantAt DateTime?
 
   @@index([shopId, enrolledAt(sort: Desc)])
+  @@index([gmcSyncStatus, gmcLastSyncedAt])
 }
 
 /** Precomputed `DashboardPromotionsTabSummaryPayload` per shop — avoids live Postgres stalls on tab open. */

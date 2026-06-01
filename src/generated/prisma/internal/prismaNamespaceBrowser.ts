@@ -275,7 +275,16 @@ export const ShopListingGoogleShoppingEnrollmentScalarFieldEnum = {
   shopId: 'shopId',
   shopListingId: 'shopListingId',
   enrolledAt: 'enrolledAt',
-  enrolledByShopUserId: 'enrolledByShopUserId'
+  enrolledByShopUserId: 'enrolledByShopUserId',
+  gmcOfferId: 'gmcOfferId',
+  gmcProductName: 'gmcProductName',
+  gmcSyncStatus: 'gmcSyncStatus',
+  gmcSyncPayloadHash: 'gmcSyncPayloadHash',
+  gmcLastSyncedAt: 'gmcLastSyncedAt',
+  gmcLastSyncError: 'gmcLastSyncError',
+  gmcApprovalStatus: 'gmcApprovalStatus',
+  gmcLastStatusPollAt: 'gmcLastStatusPollAt',
+  gmcRemovedFromMerchantAt: 'gmcRemovedFromMerchantAt'
 } as const
 
 export type ShopListingGoogleShoppingEnrollmentScalarFieldEnum = (typeof ShopListingGoogleShoppingEnrollmentScalarFieldEnum)[keyof typeof ShopListingGoogleShoppingEnrollmentScalarFieldEnum]

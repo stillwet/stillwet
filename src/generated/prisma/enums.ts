@@ -167,6 +167,16 @@ export const ShopGoogleShoppingPurchaseStatus = {
 export type ShopGoogleShoppingPurchaseStatus = (typeof ShopGoogleShoppingPurchaseStatus)[keyof typeof ShopGoogleShoppingPurchaseStatus]
 
 
+export const GoogleMerchantSyncStatus = {
+  pending: 'pending',
+  synced: 'synced',
+  error: 'error',
+  removed: 'removed'
+} as const
+
+export type GoogleMerchantSyncStatus = (typeof GoogleMerchantSyncStatus)[keyof typeof GoogleMerchantSyncStatus]
+
+
 export const SupportMessageAuthor = {
   creator: 'creator',
   admin: 'admin'

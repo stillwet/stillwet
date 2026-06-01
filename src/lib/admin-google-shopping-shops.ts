@@ -11,6 +11,10 @@ export type AdminGoogleShoppingEnrollmentRow = {
   listingLabel: string;
   enrolledAt: string;
   listingUrl: string;
+  gmcSyncStatus: string;
+  gmcApprovalStatus: string | null;
+  gmcLastSyncedAt: string | null;
+  gmcLastSyncError: string | null;
 };
 
 const ADMIN_ENROLLMENT_EXPORT_LIMIT = 5000;
@@ -26,6 +30,10 @@ export async function loadAdminGoogleShoppingEnrollments(): Promise<
     select: {
       shopListingId: true,
       enrolledAt: true,
+      gmcSyncStatus: true,
+      gmcApprovalStatus: true,
+      gmcLastSyncedAt: true,
+      gmcLastSyncError: true,
       shop: {
         select: {
           slug: true,
@@ -52,6 +60,10 @@ export async function loadAdminGoogleShoppingEnrollments(): Promise<
       listingLabel: shopListingLabelForGoogleShopping(r.shopListing),
       enrolledAt: r.enrolledAt.toISOString(),
       listingUrl: `${base}${productHref(r.shop.slug, r.shopListing.product.slug)}`,
+      gmcSyncStatus: r.gmcSyncStatus,
+      gmcApprovalStatus: r.gmcApprovalStatus,
+      gmcLastSyncedAt: r.gmcLastSyncedAt?.toISOString() ?? null,
+      gmcLastSyncError: r.gmcLastSyncError,
     }));
 }
 
@@ -69,6 +81,10 @@ export function buildGoogleShoppingEnrollmentsCsv(rows: AdminGoogleShoppingEnrol
     "listing_label",
     "enrolled_at",
     "listing_url",
+    "gmc_sync_status",
+    "gmc_approval_status",
+    "gmc_last_synced_at",
+    "gmc_last_sync_error",
   ];
   const lines = [
     header.join(","),
@@ -81,6 +97,10 @@ export function buildGoogleShoppingEnrollmentsCsv(rows: AdminGoogleShoppingEnrol
         csvEscape(r.listingLabel),
         csvEscape(r.enrolledAt),
         csvEscape(r.listingUrl),
+        csvEscape(r.gmcSyncStatus),
+        csvEscape(r.gmcApprovalStatus ?? ""),
+        csvEscape(r.gmcLastSyncedAt ?? ""),
+        csvEscape(r.gmcLastSyncError ?? ""),
       ].join(","),
     ),
   ];

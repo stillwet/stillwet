@@ -5,6 +5,7 @@ import {
   buildGoogleShoppingEnrollmentsCsv,
   loadAdminGoogleShoppingEnrollments,
 } from "@/lib/admin-google-shopping-shops";
+import { reconcileGoogleMerchantEnrollments } from "@/lib/google-merchant/sync";
 import { getAdminSessionReadonly } from "@/lib/session";
 
 async function requireAdmin() {
@@ -14,6 +15,18 @@ async function requireAdmin() {
 
 export type AdminExportGoogleShoppingEnrollmentsCsvResult =
   | { ok: true; csv: string; filename: string }
+  | { ok: false; error: string };
+
+export type AdminRunGoogleMerchantSyncResult =
+  | {
+      ok: true;
+      processed: number;
+      insertedOrUpdated: number;
+      removed: number;
+      unchanged: number;
+      errors: number;
+      statusPolled: number;
+    }
   | { ok: false; error: string };
 
 export async function adminExportGoogleShoppingEnrollmentsCsv(): Promise<AdminExportGoogleShoppingEnrollmentsCsvResult> {
@@ -26,5 +39,19 @@ export async function adminExportGoogleShoppingEnrollmentsCsv(): Promise<AdminEx
   } catch (e) {
     console.error("[adminExportGoogleShoppingEnrollmentsCsv]", e);
     return { ok: false, error: "Could not build export." };
+  }
+}
+
+export async function adminRunGoogleMerchantSync(): Promise<AdminRunGoogleMerchantSyncResult> {
+  await requireAdmin();
+  try {
+    const result = await reconcileGoogleMerchantEnrollments({
+      batchSize: 500,
+      pollStatus: true,
+    });
+    return { ok: true, ...result };
+  } catch (e) {
+    console.error("[adminRunGoogleMerchantSync]", e);
+    return { ok: false, error: "Google Merchant sync failed." };
   }
 }

@@ -338,6 +338,23 @@ export type EnumShopGoogleShoppingPurchaseStatusWithAggregatesFilter<$PrismaMode
   _max?: Prisma.NestedEnumShopGoogleShoppingPurchaseStatusFilter<$PrismaModel>
 }
 
+export type EnumGoogleMerchantSyncStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleMerchantSyncStatus | Prisma.EnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel> | $Enums.GoogleMerchantSyncStatus
+}
+
+export type EnumGoogleMerchantSyncStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleMerchantSyncStatus | Prisma.EnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleMerchantSyncStatusWithAggregatesFilter<$PrismaModel> | $Enums.GoogleMerchantSyncStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel>
+}
+
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -986,6 +1003,23 @@ export type NestedEnumShopGoogleShoppingPurchaseStatusWithAggregatesFilter<$Pris
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumShopGoogleShoppingPurchaseStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumShopGoogleShoppingPurchaseStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleMerchantSyncStatus | Prisma.EnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel> | $Enums.GoogleMerchantSyncStatus
+}
+
+export type NestedEnumGoogleMerchantSyncStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleMerchantSyncStatus | Prisma.EnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleMerchantSyncStatus[] | Prisma.ListEnumGoogleMerchantSyncStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleMerchantSyncStatusWithAggregatesFilter<$PrismaModel> | $Enums.GoogleMerchantSyncStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleMerchantSyncStatusFilter<$PrismaModel>
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =

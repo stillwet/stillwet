@@ -30,6 +30,15 @@ export type ShopListingGoogleShoppingEnrollmentMinAggregateOutputType = {
   shopListingId: string | null
   enrolledAt: Date | null
   enrolledByShopUserId: string | null
+  gmcOfferId: string | null
+  gmcProductName: string | null
+  gmcSyncStatus: $Enums.GoogleMerchantSyncStatus | null
+  gmcSyncPayloadHash: string | null
+  gmcLastSyncedAt: Date | null
+  gmcLastSyncError: string | null
+  gmcApprovalStatus: string | null
+  gmcLastStatusPollAt: Date | null
+  gmcRemovedFromMerchantAt: Date | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentMaxAggregateOutputType = {
@@ -38,6 +47,15 @@ export type ShopListingGoogleShoppingEnrollmentMaxAggregateOutputType = {
   shopListingId: string | null
   enrolledAt: Date | null
   enrolledByShopUserId: string | null
+  gmcOfferId: string | null
+  gmcProductName: string | null
+  gmcSyncStatus: $Enums.GoogleMerchantSyncStatus | null
+  gmcSyncPayloadHash: string | null
+  gmcLastSyncedAt: Date | null
+  gmcLastSyncError: string | null
+  gmcApprovalStatus: string | null
+  gmcLastStatusPollAt: Date | null
+  gmcRemovedFromMerchantAt: Date | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCountAggregateOutputType = {
@@ -46,6 +64,15 @@ export type ShopListingGoogleShoppingEnrollmentCountAggregateOutputType = {
   shopListingId: number
   enrolledAt: number
   enrolledByShopUserId: number
+  gmcOfferId: number
+  gmcProductName: number
+  gmcSyncStatus: number
+  gmcSyncPayloadHash: number
+  gmcLastSyncedAt: number
+  gmcLastSyncError: number
+  gmcApprovalStatus: number
+  gmcLastStatusPollAt: number
+  gmcRemovedFromMerchantAt: number
   _all: number
 }
 
@@ -56,6 +83,15 @@ export type ShopListingGoogleShoppingEnrollmentMinAggregateInputType = {
   shopListingId?: true
   enrolledAt?: true
   enrolledByShopUserId?: true
+  gmcOfferId?: true
+  gmcProductName?: true
+  gmcSyncStatus?: true
+  gmcSyncPayloadHash?: true
+  gmcLastSyncedAt?: true
+  gmcLastSyncError?: true
+  gmcApprovalStatus?: true
+  gmcLastStatusPollAt?: true
+  gmcRemovedFromMerchantAt?: true
 }
 
 export type ShopListingGoogleShoppingEnrollmentMaxAggregateInputType = {
@@ -64,6 +100,15 @@ export type ShopListingGoogleShoppingEnrollmentMaxAggregateInputType = {
   shopListingId?: true
   enrolledAt?: true
   enrolledByShopUserId?: true
+  gmcOfferId?: true
+  gmcProductName?: true
+  gmcSyncStatus?: true
+  gmcSyncPayloadHash?: true
+  gmcLastSyncedAt?: true
+  gmcLastSyncError?: true
+  gmcApprovalStatus?: true
+  gmcLastStatusPollAt?: true
+  gmcRemovedFromMerchantAt?: true
 }
 
 export type ShopListingGoogleShoppingEnrollmentCountAggregateInputType = {
@@ -72,6 +117,15 @@ export type ShopListingGoogleShoppingEnrollmentCountAggregateInputType = {
   shopListingId?: true
   enrolledAt?: true
   enrolledByShopUserId?: true
+  gmcOfferId?: true
+  gmcProductName?: true
+  gmcSyncStatus?: true
+  gmcSyncPayloadHash?: true
+  gmcLastSyncedAt?: true
+  gmcLastSyncError?: true
+  gmcApprovalStatus?: true
+  gmcLastStatusPollAt?: true
+  gmcRemovedFromMerchantAt?: true
   _all?: true
 }
 
@@ -153,6 +207,15 @@ export type ShopListingGoogleShoppingEnrollmentGroupByOutputType = {
   shopListingId: string
   enrolledAt: Date
   enrolledByShopUserId: string
+  gmcOfferId: string
+  gmcProductName: string | null
+  gmcSyncStatus: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash: string | null
+  gmcLastSyncedAt: Date | null
+  gmcLastSyncError: string | null
+  gmcApprovalStatus: string | null
+  gmcLastStatusPollAt: Date | null
+  gmcRemovedFromMerchantAt: Date | null
   _count: ShopListingGoogleShoppingEnrollmentCountAggregateOutputType | null
   _min: ShopListingGoogleShoppingEnrollmentMinAggregateOutputType | null
   _max: ShopListingGoogleShoppingEnrollmentMaxAggregateOutputType | null
@@ -182,6 +245,15 @@ export type ShopListingGoogleShoppingEnrollmentWhereInput = {
   shopListingId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
   enrolledAt?: Prisma.DateTimeFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string
   enrolledByShopUserId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcOfferId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcProductName?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFilter<"ShopListingGoogleShoppingEnrollment"> | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastSyncedAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcLastSyncError?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcApprovalStatus?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastStatusPollAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
   shopListing?: Prisma.XOR<Prisma.ShopListingScalarRelationFilter, Prisma.ShopListingWhereInput>
   enrolledByShopUser?: Prisma.XOR<Prisma.ShopUserScalarRelationFilter, Prisma.ShopUserWhereInput>
@@ -193,6 +265,15 @@ export type ShopListingGoogleShoppingEnrollmentOrderByWithRelationInput = {
   shopListingId?: Prisma.SortOrder
   enrolledAt?: Prisma.SortOrder
   enrolledByShopUserId?: Prisma.SortOrder
+  gmcOfferId?: Prisma.SortOrder
+  gmcProductName?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcSyncStatus?: Prisma.SortOrder
+  gmcSyncPayloadHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcLastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcLastSyncError?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcApprovalStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcLastStatusPollAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcRemovedFromMerchantAt?: Prisma.SortOrderInput | Prisma.SortOrder
   shop?: Prisma.ShopOrderByWithRelationInput
   shopListing?: Prisma.ShopListingOrderByWithRelationInput
   enrolledByShopUser?: Prisma.ShopUserOrderByWithRelationInput
@@ -207,6 +288,15 @@ export type ShopListingGoogleShoppingEnrollmentWhereUniqueInput = Prisma.AtLeast
   shopId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
   enrolledAt?: Prisma.DateTimeFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string
   enrolledByShopUserId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcOfferId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcProductName?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFilter<"ShopListingGoogleShoppingEnrollment"> | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastSyncedAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcLastSyncError?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcApprovalStatus?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastStatusPollAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
   shopListing?: Prisma.XOR<Prisma.ShopListingScalarRelationFilter, Prisma.ShopListingWhereInput>
   enrolledByShopUser?: Prisma.XOR<Prisma.ShopUserScalarRelationFilter, Prisma.ShopUserWhereInput>
@@ -218,6 +308,15 @@ export type ShopListingGoogleShoppingEnrollmentOrderByWithAggregationInput = {
   shopListingId?: Prisma.SortOrder
   enrolledAt?: Prisma.SortOrder
   enrolledByShopUserId?: Prisma.SortOrder
+  gmcOfferId?: Prisma.SortOrder
+  gmcProductName?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcSyncStatus?: Prisma.SortOrder
+  gmcSyncPayloadHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcLastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcLastSyncError?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcApprovalStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcLastStatusPollAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  gmcRemovedFromMerchantAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ShopListingGoogleShoppingEnrollmentCountOrderByAggregateInput
   _max?: Prisma.ShopListingGoogleShoppingEnrollmentMaxOrderByAggregateInput
   _min?: Prisma.ShopListingGoogleShoppingEnrollmentMinOrderByAggregateInput
@@ -232,11 +331,29 @@ export type ShopListingGoogleShoppingEnrollmentScalarWhereWithAggregatesInput = 
   shopListingId?: Prisma.StringWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string
   enrolledAt?: Prisma.DateTimeWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string
   enrolledByShopUserId?: Prisma.StringWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcOfferId?: Prisma.StringWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcProductName?: Prisma.StringNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.StringNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcLastSyncError?: Prisma.StringNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcApprovalStatus?: Prisma.StringNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastStatusPollAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateInput = {
   id?: string
   enrolledAt?: Date | string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
   shop: Prisma.ShopCreateNestedOneWithoutGoogleShoppingEnrollmentsInput
   shopListing: Prisma.ShopListingCreateNestedOneWithoutGoogleShoppingEnrollmentInput
   enrolledByShopUser: Prisma.ShopUserCreateNestedOneWithoutGoogleShoppingEnrollmentsInput
@@ -248,11 +365,29 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedCreateInput = {
   shopListingId: string
   enrolledAt?: Date | string
   enrolledByShopUserId: string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   shop?: Prisma.ShopUpdateOneRequiredWithoutGoogleShoppingEnrollmentsNestedInput
   shopListing?: Prisma.ShopListingUpdateOneRequiredWithoutGoogleShoppingEnrollmentNestedInput
   enrolledByShopUser?: Prisma.ShopUserUpdateOneRequiredWithoutGoogleShoppingEnrollmentsNestedInput
@@ -264,6 +399,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateInput = {
   shopListingId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolledByShopUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateManyInput = {
@@ -272,11 +416,29 @@ export type ShopListingGoogleShoppingEnrollmentCreateManyInput = {
   shopListingId: string
   enrolledAt?: Date | string
   enrolledByShopUserId: string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyInput = {
@@ -285,6 +447,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyInput = {
   shopListingId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolledByShopUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentListRelationFilter = {
@@ -303,6 +474,15 @@ export type ShopListingGoogleShoppingEnrollmentCountOrderByAggregateInput = {
   shopListingId?: Prisma.SortOrder
   enrolledAt?: Prisma.SortOrder
   enrolledByShopUserId?: Prisma.SortOrder
+  gmcOfferId?: Prisma.SortOrder
+  gmcProductName?: Prisma.SortOrder
+  gmcSyncStatus?: Prisma.SortOrder
+  gmcSyncPayloadHash?: Prisma.SortOrder
+  gmcLastSyncedAt?: Prisma.SortOrder
+  gmcLastSyncError?: Prisma.SortOrder
+  gmcApprovalStatus?: Prisma.SortOrder
+  gmcLastStatusPollAt?: Prisma.SortOrder
+  gmcRemovedFromMerchantAt?: Prisma.SortOrder
 }
 
 export type ShopListingGoogleShoppingEnrollmentMaxOrderByAggregateInput = {
@@ -311,6 +491,15 @@ export type ShopListingGoogleShoppingEnrollmentMaxOrderByAggregateInput = {
   shopListingId?: Prisma.SortOrder
   enrolledAt?: Prisma.SortOrder
   enrolledByShopUserId?: Prisma.SortOrder
+  gmcOfferId?: Prisma.SortOrder
+  gmcProductName?: Prisma.SortOrder
+  gmcSyncStatus?: Prisma.SortOrder
+  gmcSyncPayloadHash?: Prisma.SortOrder
+  gmcLastSyncedAt?: Prisma.SortOrder
+  gmcLastSyncError?: Prisma.SortOrder
+  gmcApprovalStatus?: Prisma.SortOrder
+  gmcLastStatusPollAt?: Prisma.SortOrder
+  gmcRemovedFromMerchantAt?: Prisma.SortOrder
 }
 
 export type ShopListingGoogleShoppingEnrollmentMinOrderByAggregateInput = {
@@ -319,6 +508,15 @@ export type ShopListingGoogleShoppingEnrollmentMinOrderByAggregateInput = {
   shopListingId?: Prisma.SortOrder
   enrolledAt?: Prisma.SortOrder
   enrolledByShopUserId?: Prisma.SortOrder
+  gmcOfferId?: Prisma.SortOrder
+  gmcProductName?: Prisma.SortOrder
+  gmcSyncStatus?: Prisma.SortOrder
+  gmcSyncPayloadHash?: Prisma.SortOrder
+  gmcLastSyncedAt?: Prisma.SortOrder
+  gmcLastSyncError?: Prisma.SortOrder
+  gmcApprovalStatus?: Prisma.SortOrder
+  gmcLastStatusPollAt?: Prisma.SortOrder
+  gmcRemovedFromMerchantAt?: Prisma.SortOrder
 }
 
 export type ShopListingGoogleShoppingEnrollmentNullableScalarRelationFilter = {
@@ -366,6 +564,10 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNes
   update?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateWithWhereUniqueWithoutShopInput | Prisma.ShopListingGoogleShoppingEnrollmentUpdateWithWhereUniqueWithoutShopInput[]
   updateMany?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithWhereWithoutShopInput | Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithWhereWithoutShopInput[]
   deleteMany?: Prisma.ShopListingGoogleShoppingEnrollmentScalarWhereInput | Prisma.ShopListingGoogleShoppingEnrollmentScalarWhereInput[]
+}
+
+export type EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput = {
+  set?: $Enums.GoogleMerchantSyncStatus
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutEnrolledByShopUserInput = {
@@ -445,6 +647,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateOneWithoutShopList
 export type ShopListingGoogleShoppingEnrollmentCreateWithoutShopInput = {
   id?: string
   enrolledAt?: Date | string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
   shopListing: Prisma.ShopListingCreateNestedOneWithoutGoogleShoppingEnrollmentInput
   enrolledByShopUser: Prisma.ShopUserCreateNestedOneWithoutGoogleShoppingEnrollmentsInput
 }
@@ -454,6 +665,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedCreateWithoutShopInput =
   shopListingId: string
   enrolledAt?: Date | string
   enrolledByShopUserId: string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateOrConnectWithoutShopInput = {
@@ -491,11 +711,29 @@ export type ShopListingGoogleShoppingEnrollmentScalarWhereInput = {
   shopListingId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
   enrolledAt?: Prisma.DateTimeFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string
   enrolledByShopUserId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcOfferId?: Prisma.StringFilter<"ShopListingGoogleShoppingEnrollment"> | string
+  gmcProductName?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFilter<"ShopListingGoogleShoppingEnrollment"> | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastSyncedAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcLastSyncError?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcApprovalStatus?: Prisma.StringNullableFilter<"ShopListingGoogleShoppingEnrollment"> | string | null
+  gmcLastStatusPollAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.DateTimeNullableFilter<"ShopListingGoogleShoppingEnrollment"> | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateWithoutEnrolledByShopUserInput = {
   id?: string
   enrolledAt?: Date | string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
   shop: Prisma.ShopCreateNestedOneWithoutGoogleShoppingEnrollmentsInput
   shopListing: Prisma.ShopListingCreateNestedOneWithoutGoogleShoppingEnrollmentInput
 }
@@ -505,6 +743,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedCreateWithoutEnrolledByS
   shopId: string
   shopListingId: string
   enrolledAt?: Date | string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateOrConnectWithoutEnrolledByShopUserInput = {
@@ -536,6 +783,15 @@ export type ShopListingGoogleShoppingEnrollmentUpdateManyWithWhereWithoutEnrolle
 export type ShopListingGoogleShoppingEnrollmentCreateWithoutShopListingInput = {
   id?: string
   enrolledAt?: Date | string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
   shop: Prisma.ShopCreateNestedOneWithoutGoogleShoppingEnrollmentsInput
   enrolledByShopUser: Prisma.ShopUserCreateNestedOneWithoutGoogleShoppingEnrollmentsInput
 }
@@ -545,6 +801,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedCreateWithoutShopListing
   shopId: string
   enrolledAt?: Date | string
   enrolledByShopUserId: string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateOrConnectWithoutShopListingInput = {
@@ -566,6 +831,15 @@ export type ShopListingGoogleShoppingEnrollmentUpdateToOneWithWhereWithoutShopLi
 export type ShopListingGoogleShoppingEnrollmentUpdateWithoutShopListingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   shop?: Prisma.ShopUpdateOneRequiredWithoutGoogleShoppingEnrollmentsNestedInput
   enrolledByShopUser?: Prisma.ShopUserUpdateOneRequiredWithoutGoogleShoppingEnrollmentsNestedInput
 }
@@ -575,6 +849,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateWithoutShopListing
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolledByShopUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateManyShopInput = {
@@ -582,11 +865,29 @@ export type ShopListingGoogleShoppingEnrollmentCreateManyShopInput = {
   shopListingId: string
   enrolledAt?: Date | string
   enrolledByShopUserId: string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUpdateWithoutShopInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   shopListing?: Prisma.ShopListingUpdateOneRequiredWithoutGoogleShoppingEnrollmentNestedInput
   enrolledByShopUser?: Prisma.ShopUserUpdateOneRequiredWithoutGoogleShoppingEnrollmentsNestedInput
 }
@@ -596,6 +897,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateWithoutShopInput =
   shopListingId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolledByShopUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopInput = {
@@ -603,6 +913,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopInp
   shopListingId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolledByShopUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentCreateManyEnrolledByShopUserInput = {
@@ -610,11 +929,29 @@ export type ShopListingGoogleShoppingEnrollmentCreateManyEnrolledByShopUserInput
   shopId: string
   shopListingId: string
   enrolledAt?: Date | string
+  gmcOfferId: string
+  gmcProductName?: string | null
+  gmcSyncStatus?: $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: string | null
+  gmcLastSyncedAt?: Date | string | null
+  gmcLastSyncError?: string | null
+  gmcApprovalStatus?: string | null
+  gmcLastStatusPollAt?: Date | string | null
+  gmcRemovedFromMerchantAt?: Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUpdateWithoutEnrolledByShopUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   shop?: Prisma.ShopUpdateOneRequiredWithoutGoogleShoppingEnrollmentsNestedInput
   shopListing?: Prisma.ShopListingUpdateOneRequiredWithoutGoogleShoppingEnrollmentNestedInput
 }
@@ -624,6 +961,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateWithoutEnrolledByS
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   shopListingId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutEnrolledByShopUserInput = {
@@ -631,6 +977,15 @@ export type ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutEnrolle
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   shopListingId?: Prisma.StringFieldUpdateOperationsInput | string
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gmcOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  gmcProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcSyncStatus?: Prisma.EnumGoogleMerchantSyncStatusFieldUpdateOperationsInput | $Enums.GoogleMerchantSyncStatus
+  gmcSyncPayloadHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcLastSyncError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gmcLastStatusPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gmcRemovedFromMerchantAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -641,6 +996,15 @@ export type ShopListingGoogleShoppingEnrollmentSelect<ExtArgs extends runtime.Ty
   shopListingId?: boolean
   enrolledAt?: boolean
   enrolledByShopUserId?: boolean
+  gmcOfferId?: boolean
+  gmcProductName?: boolean
+  gmcSyncStatus?: boolean
+  gmcSyncPayloadHash?: boolean
+  gmcLastSyncedAt?: boolean
+  gmcLastSyncError?: boolean
+  gmcApprovalStatus?: boolean
+  gmcLastStatusPollAt?: boolean
+  gmcRemovedFromMerchantAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopListing?: boolean | Prisma.ShopListingDefaultArgs<ExtArgs>
   enrolledByShopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -652,6 +1016,15 @@ export type ShopListingGoogleShoppingEnrollmentSelectCreateManyAndReturn<ExtArgs
   shopListingId?: boolean
   enrolledAt?: boolean
   enrolledByShopUserId?: boolean
+  gmcOfferId?: boolean
+  gmcProductName?: boolean
+  gmcSyncStatus?: boolean
+  gmcSyncPayloadHash?: boolean
+  gmcLastSyncedAt?: boolean
+  gmcLastSyncError?: boolean
+  gmcApprovalStatus?: boolean
+  gmcLastStatusPollAt?: boolean
+  gmcRemovedFromMerchantAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopListing?: boolean | Prisma.ShopListingDefaultArgs<ExtArgs>
   enrolledByShopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -663,6 +1036,15 @@ export type ShopListingGoogleShoppingEnrollmentSelectUpdateManyAndReturn<ExtArgs
   shopListingId?: boolean
   enrolledAt?: boolean
   enrolledByShopUserId?: boolean
+  gmcOfferId?: boolean
+  gmcProductName?: boolean
+  gmcSyncStatus?: boolean
+  gmcSyncPayloadHash?: boolean
+  gmcLastSyncedAt?: boolean
+  gmcLastSyncError?: boolean
+  gmcApprovalStatus?: boolean
+  gmcLastStatusPollAt?: boolean
+  gmcRemovedFromMerchantAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopListing?: boolean | Prisma.ShopListingDefaultArgs<ExtArgs>
   enrolledByShopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -674,9 +1056,18 @@ export type ShopListingGoogleShoppingEnrollmentSelectScalar = {
   shopListingId?: boolean
   enrolledAt?: boolean
   enrolledByShopUserId?: boolean
+  gmcOfferId?: boolean
+  gmcProductName?: boolean
+  gmcSyncStatus?: boolean
+  gmcSyncPayloadHash?: boolean
+  gmcLastSyncedAt?: boolean
+  gmcLastSyncError?: boolean
+  gmcApprovalStatus?: boolean
+  gmcLastStatusPollAt?: boolean
+  gmcRemovedFromMerchantAt?: boolean
 }
 
-export type ShopListingGoogleShoppingEnrollmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopListingId" | "enrolledAt" | "enrolledByShopUserId", ExtArgs["result"]["shopListingGoogleShoppingEnrollment"]>
+export type ShopListingGoogleShoppingEnrollmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopListingId" | "enrolledAt" | "enrolledByShopUserId" | "gmcOfferId" | "gmcProductName" | "gmcSyncStatus" | "gmcSyncPayloadHash" | "gmcLastSyncedAt" | "gmcLastSyncError" | "gmcApprovalStatus" | "gmcLastStatusPollAt" | "gmcRemovedFromMerchantAt", ExtArgs["result"]["shopListingGoogleShoppingEnrollment"]>
 export type ShopListingGoogleShoppingEnrollmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopListing?: boolean | Prisma.ShopListingDefaultArgs<ExtArgs>
@@ -706,6 +1097,27 @@ export type $ShopListingGoogleShoppingEnrollmentPayload<ExtArgs extends runtime.
     shopListingId: string
     enrolledAt: Date
     enrolledByShopUserId: string
+    /**
+     * * Stable Merchant API offerId (defaults to shopListingId).
+     */
+    gmcOfferId: string
+    /**
+     * * Google resource name, e.g. accounts/…/products/en~US~….
+     */
+    gmcProductName: string | null
+    gmcSyncStatus: $Enums.GoogleMerchantSyncStatus
+    /**
+     * * SHA-256 of mapped ProductInput payload — skip API when unchanged.
+     */
+    gmcSyncPayloadHash: string | null
+    gmcLastSyncedAt: Date | null
+    gmcLastSyncError: string | null
+    /**
+     * * Cached approval summary from products.get (e.g. approved, pending, disapproved).
+     */
+    gmcApprovalStatus: string | null
+    gmcLastStatusPollAt: Date | null
+    gmcRemovedFromMerchantAt: Date | null
   }, ExtArgs["result"]["shopListingGoogleShoppingEnrollment"]>
   composites: {}
 }
@@ -1137,6 +1549,15 @@ export interface ShopListingGoogleShoppingEnrollmentFieldRefs {
   readonly shopListingId: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
   readonly enrolledAt: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'DateTime'>
   readonly enrolledByShopUserId: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
+  readonly gmcOfferId: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
+  readonly gmcProductName: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
+  readonly gmcSyncStatus: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'GoogleMerchantSyncStatus'>
+  readonly gmcSyncPayloadHash: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
+  readonly gmcLastSyncedAt: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'DateTime'>
+  readonly gmcLastSyncError: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
+  readonly gmcApprovalStatus: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'String'>
+  readonly gmcLastStatusPollAt: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'DateTime'>
+  readonly gmcRemovedFromMerchantAt: Prisma.FieldRef<"ShopListingGoogleShoppingEnrollment", 'DateTime'>
 }
     
 

@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { AdminGoogleShoppingExportButton } from "@/components/admin/AdminGoogleShoppingExportButton";
+import {
+  AdminGoogleShoppingSyncButton,
+  GmcSyncStatusBadge,
+} from "@/components/admin/AdminGoogleShoppingSyncButton";
 import { loadAdminGoogleShoppingEnrollments } from "@/lib/admin-google-shopping-shops";
+import { googleMerchantSyncEnabled } from "@/lib/google-merchant/config";
 
 export async function AdminGoogleShoppingTab() {
   const rows = await loadAdminGoogleShoppingEnrollments();
+  const merchantApiConfigured = googleMerchantSyncEnabled();
 
   return (
     <section className="space-y-6" aria-label="Google Shopping enrolled listings">
@@ -11,11 +17,23 @@ export async function AdminGoogleShoppingTab() {
         <div>
           <h2 className="text-lg font-semibold text-zinc-100">Google Shopping</h2>
           <p className="mt-1 max-w-2xl text-sm text-zinc-500">
-            Listings creators permanently enrolled for the platform Google Merchant Center feed. Use
-            the CSV for feed operations (<code className="text-zinc-400">listing_url</code> per row).
+            Creators spend one credit per listing to enroll here. New enrollments push to Google right
+            away when Merchant API sync is enabled; a reconcile job every two days updates price and
+            image changes. Use <span className="text-zinc-400">Sync to Merchant Center</span> anytime
+            for a manual run.
           </p>
+          {!merchantApiConfigured ? (
+            <p className="mt-2 text-xs text-amber-200/80">
+              Merchant API sync is off — set{" "}
+              <code className="text-amber-100/90">GOOGLE_MERCHANT_SYNC_ENABLED=1</code> and related
+              env vars on Vercel.
+            </p>
+          ) : null}
         </div>
-        <AdminGoogleShoppingExportButton />
+        <div className="flex flex-col items-end gap-2">
+          <AdminGoogleShoppingSyncButton />
+          <AdminGoogleShoppingExportButton />
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -30,6 +48,8 @@ export async function AdminGoogleShoppingTab() {
                 <th className="px-4 py-3 font-medium">Shop</th>
                 <th className="px-4 py-3 font-medium">Listing</th>
                 <th className="px-4 py-3 font-medium">Enrolled</th>
+                <th className="px-4 py-3 font-medium">GMC sync</th>
+                <th className="px-4 py-3 font-medium">Google approval</th>
                 <th className="px-4 py-3 font-medium">Shop active</th>
               </tr>
             </thead>
@@ -49,12 +69,31 @@ export async function AdminGoogleShoppingTab() {
                     >
                       {row.listingLabel}
                     </Link>
+                    {row.gmcLastSyncError ? (
+                      <p className="mt-1 max-w-xs text-[11px] leading-snug text-red-300/80">
+                        {row.gmcLastSyncError}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3 text-zinc-400">
                     {new Intl.DateTimeFormat("en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     }).format(new Date(row.enrolledAt))}
+                  </td>
+                  <td className="px-4 py-3">
+                    <GmcSyncStatusBadge status={row.gmcSyncStatus} />
+                    {row.gmcLastSyncedAt ? (
+                      <span className="mt-0.5 block text-[11px] text-zinc-600">
+                        {new Intl.DateTimeFormat("en-US", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        }).format(new Date(row.gmcLastSyncedAt))}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-400">
+                    {row.gmcApprovalStatus ?? "—"}
                   </td>
                   <td className="px-4 py-3">
                     {row.shopActive ? (
