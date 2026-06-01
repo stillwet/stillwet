@@ -105,17 +105,33 @@ function reconcilePrismaSingleton(): PrismaClient {
  * Real `PrismaClient` instance — do not wrap in `Proxy` (breaks Prisma query engine).
  * `let`: {@link reconcilePrismaSingleton} may replace the instance; `export const` would freeze stale refs.
  *
- * During `next build` without a database URL, skip init so route modules can load (Vercel may lack
- * Neon until Production env is fixed). Runtime on Vercel always has env vars when configured.
+ * Never throw at import time when Postgres is unset — misconfigured Vercel env must not 500 every route
+ * (including `/api/health`). Call {@link ensurePrismaClient} before queries at runtime.
  */
 export let prisma: PrismaClient;
 
-if (runtimeDatabaseUrlFromEnv()) {
+const dbUrlAtImport = runtimeDatabaseUrlFromEnv();
+if (dbUrlAtImport) {
   prisma = reconcilePrismaSingleton();
-} else if (isNextProductionBuild()) {
-  prisma = undefined as unknown as PrismaClient;
+} else if (process.env.NODE_ENV === "development" && !isNextProductionBuild()) {
+  prisma = reconcilePrismaSingleton();
 } else {
+  prisma = undefined as unknown as PrismaClient;
+}
+
+/** Lazily connect when env is fixed or was unavailable at cold-start import. */
+export function ensurePrismaClient(): PrismaClient {
+  if (globalForPrisma.prisma) {
+    prisma = globalForPrisma.prisma;
+    return prisma;
+  }
+  if (!runtimeDatabaseUrlFromEnv()) {
+    throw new Error(
+      "No database URL. Set POSTGRES_PRISMA_URL or link Neon on Vercel (Production). Remove localhost DATABASE_URL.",
+    );
+  }
   prisma = reconcilePrismaSingleton();
+  return prisma;
 }
 
 /**

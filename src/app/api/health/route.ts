@@ -3,13 +3,13 @@ import {
   runtimeDatabaseUrlFromEnv,
   runtimeDatabaseUrlSourceKey,
 } from "@/lib/env-postgres-url";
-import { prisma } from "@/lib/prisma";
 import { emailLinkOrigin, publicAppBaseUrl } from "@/lib/public-app-url";
 
 export const runtime = "nodejs";
 
 /**
  * Liveness + quick config hints (no secrets). Use after deploy to confirm DB + env wiring.
+ * Does not import `@/lib/prisma` at module load — misconfigured env must still return JSON.
  */
 export async function GET() {
   const hasDatabaseUrl = Boolean(runtimeDatabaseUrlFromEnv());
@@ -18,7 +18,8 @@ export async function GET() {
   let dbError: string | undefined;
   if (hasDatabaseUrl) {
     try {
-      await prisma.$queryRaw`SELECT 1 AS ok`;
+      const { ensurePrismaClient } = await import("@/lib/prisma");
+      await ensurePrismaClient().$queryRaw`SELECT 1 AS ok`;
       dbOk = true;
     } catch (e) {
       dbError =
@@ -51,6 +52,15 @@ export async function GET() {
         /localhost|127\.0\.0\.1|\[::1\]/i.test(appUrl),
     );
 
+  const neonIntegrationKeys = Object.keys(process.env)
+    .filter(
+      (k) =>
+        k.endsWith("_POSTGRES_PRISMA_URL") ||
+        k.endsWith("_DATABASE_URL") ||
+        k.endsWith("_POSTGRES_URL"),
+    )
+    .sort();
+
   return Response.json(
     {
       ok: dbOk,
@@ -60,14 +70,17 @@ export async function GET() {
         source: dbSource,
         error: dbError,
         ignoredLocalhostEnvKeys: localhostDbKeys.length > 0 ? localhostDbKeys : undefined,
+        neonIntegrationEnvKeys:
+          neonIntegrationKeys.length > 0 ? neonIntegrationKeys : undefined,
       },
       configWarnings:
-        localhostDbKeys.length > 0 || appUrlLooksLocal
+        localhostDbKeys.length > 0 || appUrlLooksLocal || !hasDatabaseUrl
           ? {
               localhostDatabaseUrlEnvKeys: localhostDbKeys.length > 0 ? localhostDbKeys : undefined,
               appUrlLooksLocal: appUrlLooksLocal || undefined,
+              missingDatabaseUrl: !hasDatabaseUrl || undefined,
               hint:
-                "Production is using local dev values. In Vercel → Production env: remove or replace localhost DATABASE_URL with Neon (POSTGRES_PRISMA_URL), and set NEXT_PUBLIC_APP_URL=https://stillwet.com.",
+                "In Vercel → Production (project that owns stillwet.com): delete localhost DATABASE_URL, link Neon or set POSTGRES_PRISMA_URL, set NEXT_PUBLIC_APP_URL=https://stillwet.com, redeploy.",
             }
           : undefined,
       appUrl,
