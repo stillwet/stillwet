@@ -1,21 +1,21 @@
 import sharp from "sharp";
+import {
+  LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES,
+  LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES,
+} from "@/lib/listing-request-artwork-limits";
 
 /**
  * Site image compression tiers:
  * - **~100 KiB WebP** — shop profile avatar, optional listing supplement photos, admin listing
  *   secondary images, bug/feedback screenshots (fast storefront loads).
- * - **Listing request artwork** — {@link prepareListingRequestArtworkUpload}: **not** run through that
- *   pipeline; PNG/JPEG/WebP are stored up to {@link LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES} for print review.
+ * - **Listing request artwork** — {@link prepareListingRequestArtworkUpload} in this module (server only);
+ *   limits in `listing-request-artwork-limits.ts`.
  */
 
 const PROFILE_MAX_BYTES = 100 * 1024;
 /** Optional per-listing owner photo on the storefront (same cap as profile avatar). */
 const LISTING_SUPPLEMENT_MAX_BYTES = 100 * 1024;
 const LISTING_SUPPLEMENT_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
-/** Max upload size for listing request artwork (before processing). */
-export const LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
-/** Stored listing request file on R2 (original PNG/JPEG or high-quality WebP). */
-export const LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES = 20 * 1024 * 1024;
 
 const LISTING_MAX_BYTES = LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES;
 const LISTING_MAX_SOURCE_BYTES = LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES;

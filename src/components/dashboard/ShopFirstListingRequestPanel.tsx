@@ -10,7 +10,7 @@ import { ListingArtworkCropDialog, ARTWORK_TRANSPARENCY_PREVIEW_STYLE } from "@/
 import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
-import { LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES } from "@/lib/shop-setup-image";
+import { LISTING_REQUEST_ARTWORK_MAX_SOURCE_MB } from "@/lib/listing-request-artwork-limits";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -326,7 +326,7 @@ export function ShopFirstListingRequestPanel(props: {
         setMessage({
           tone: "err",
           text: bodyTooLarge
-            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES / (1024 * 1024)} MB and redeploy if this persists.`
+            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${LISTING_REQUEST_ARTWORK_MAX_SOURCE_MB} MB and redeploy if this persists.`
             : msg || "Could not submit your listing. Try again or contact support.",
         });
         return;
@@ -617,8 +617,7 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to{" "}
-            {LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES / (1024 * 1024)} MB — stored at full quality for print
+            Artwork file (PNG or JPEG, up to {LISTING_REQUEST_ARTWORK_MAX_SOURCE_MB} MB — stored at full quality for print
             review; shop profile and storefront photos are compressed separately)
             <input
               ref={listingFileRef}

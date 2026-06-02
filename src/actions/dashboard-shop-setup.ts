@@ -16,8 +16,8 @@ import {
   putPublicR2Object,
   shopProfileAvatarObjectKey,
 } from "@/lib/r2-upload";
+import { LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES } from "@/lib/listing-request-artwork-limits";
 import {
-  LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES,
   prepareListingRequestArtworkUpload,
   compressShopProfileImageWebp,
 } from "@/lib/shop-setup-image";

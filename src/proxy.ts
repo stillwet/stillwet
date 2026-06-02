@@ -85,6 +85,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/dashboard/verify-email") ||
     pathname.startsWith("/dashboard/confirm-device") ||
     pathname.startsWith("/api/site-access") ||
+    (process.env.NODE_ENV === "development" && pathname.startsWith("/api/dev/")) ||
     pathname.startsWith("/api/health") ||
     pathname.startsWith("/api/dashboard/") ||
     pathname.startsWith("/api/webhooks/") ||
