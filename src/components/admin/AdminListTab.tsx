@@ -1,19 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { loadAdminCatalogItemsForListTab } from "@/lib/admin-baseline-catalog-rows";
 import { AdminListAddItemForm } from "@/components/admin/AdminListAddItemForm";
 import { AdminListItemsPanel } from "@/components/admin/AdminListItemsPanel";
 
 export async function AdminListTab() {
   const [items, allTags] = await Promise.all([
-    prisma.adminCatalogItem.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      include: {
-        catalogTags: {
-          include: {
-            tag: { select: { id: true, name: true, slug: true } },
-          },
-        },
-      },
-    }),
+    loadAdminCatalogItemsForListTab(),
     prisma.tag.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       select: { id: true, name: true, slug: true },
@@ -32,6 +24,7 @@ export async function AdminListTab() {
     itemPrintAreaWidthPx: item.itemPrintAreaWidthPx,
     itemPrintAreaHeightPx: item.itemPrintAreaHeightPx,
     itemMinArtworkDpi: item.itemMinArtworkDpi,
+    itemLargeListingArtwork: item.itemLargeListingArtwork,
     tags: item.catalogTags.map((ct) => ({
       id: ct.tag.id,
       name: ct.tag.name,

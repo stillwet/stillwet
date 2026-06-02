@@ -19,6 +19,7 @@ export function AdminListAddItemForm() {
   const [itemPrintAreaWidthPx, setItemPrintAreaWidthPx] = useState("");
   const [itemPrintAreaHeightPx, setItemPrintAreaHeightPx] = useState("");
   const [itemMinArtworkDpi, setItemMinArtworkDpi] = useState("");
+  const [itemLargeListingArtwork, setItemLargeListingArtwork] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function submit(e: React.FormEvent) {
@@ -59,6 +60,7 @@ export function AdminListAddItemForm() {
     fd.set("itemPrintAreaWidthPx", itemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
+    if (itemLargeListingArtwork) fd.set("itemLargeListingArtwork", "1");
 
     startTransition(async () => {
       await adminAddCatalogItem(fd);
@@ -71,6 +73,7 @@ export function AdminListAddItemForm() {
       setItemPrintAreaWidthPx("");
       setItemPrintAreaHeightPx("");
       setItemMinArtworkDpi("");
+      setItemLargeListingArtwork(false);
       router.refresh();
     });
   }
@@ -107,10 +110,12 @@ export function AdminListAddItemForm() {
           printAreaWidthPx={itemPrintAreaWidthPx}
           printAreaHeightPx={itemPrintAreaHeightPx}
           minArtworkDpi={itemMinArtworkDpi}
+          largeListingArtwork={itemLargeListingArtwork}
           onChangeImageRequirementLabel={setItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setItemMinArtworkDpi}
+          onChangeLargeListingArtwork={setItemLargeListingArtwork}
         />
 
         {error ? (

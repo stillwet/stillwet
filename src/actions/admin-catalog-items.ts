@@ -10,6 +10,7 @@ import {
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
+import { isMissingLargeListingArtworkColumn } from "@/lib/admin-baseline-catalog-rows";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -28,6 +29,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemPrintAreaWidthPx: number | null;
       itemPrintAreaHeightPx: number | null;
       itemMinArtworkDpi: number | null;
+      itemLargeListingArtwork: boolean;
     }
   | { ok: false } {
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
@@ -42,6 +44,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     String(formData.get("itemMinArtworkDpi") ?? ""),
   );
   if (!ar.ok) return { ok: false };
+  const itemLargeListingArtwork = formData.get("itemLargeListingArtwork") === "1";
   return {
     ok: true,
     itemExampleListingUrl: v.exampleListingUrl,
@@ -51,6 +54,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     itemPrintAreaWidthPx: ar.itemPrintAreaWidthPx,
     itemPrintAreaHeightPx: ar.itemPrintAreaHeightPx,
     itemMinArtworkDpi: ar.itemMinArtworkDpi,
+    itemLargeListingArtwork,
   };
 }
 
@@ -69,22 +73,29 @@ export async function adminAddCatalogItem(formData: FormData) {
   const maxSort = await prisma.adminCatalogItem.aggregate({ _max: { sortOrder: true } });
   const sortOrder = (maxSort._max.sortOrder ?? 0) + 1;
 
-  await prisma.adminCatalogItem.create({
-    data: {
-      name: name.slice(0, 300),
-      sortOrder,
-      storefrontDescription,
-      variants: EMPTY_VARIANTS_JSON,
-      itemExampleListingUrl: itemLevel.itemExampleListingUrl,
-      itemMinPriceCents: itemLevel.itemMinPriceCents,
-      itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
-      itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
-      itemMinArtworkLongEdgePx: null,
-      itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
-      itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
-      itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
-    },
-  });
+  const createData = {
+    name: name.slice(0, 300),
+    sortOrder,
+    storefrontDescription,
+    variants: EMPTY_VARIANTS_JSON,
+    itemExampleListingUrl: itemLevel.itemExampleListingUrl,
+    itemMinPriceCents: itemLevel.itemMinPriceCents,
+    itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
+    itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
+    itemMinArtworkLongEdgePx: null,
+    itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
+    itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
+    itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
+    itemLargeListingArtwork: itemLevel.itemLargeListingArtwork,
+  };
+
+  try {
+    await prisma.adminCatalogItem.create({ data: createData });
+  } catch (e) {
+    if (!isMissingLargeListingArtworkColumn(e)) throw e;
+    const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
+    await prisma.adminCatalogItem.create({ data: withoutLarge });
+  }
   revalidateAdminViews();
 }
 
@@ -101,28 +112,39 @@ export async function adminUpdateCatalogItem(formData: FormData) {
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
     : null;
 
+  const updateData = {
+    name: name.slice(0, 300),
+    variants: EMPTY_VARIANTS_JSON,
+    storefrontDescription,
+    itemExampleListingUrl: itemLevel.itemExampleListingUrl,
+    itemMinPriceCents: itemLevel.itemMinPriceCents,
+    itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
+    itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
+    itemMinArtworkLongEdgePx: null,
+    itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
+    itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
+    itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
+    itemLargeListingArtwork: itemLevel.itemLargeListingArtwork,
+    /** FK scalars are not on `updateMany` mutation input; disconnect clears the link like `itemPlatformProductId: null`. */
+    itemPlatformProduct: { disconnect: true },
+  };
+
   try {
     await prisma.adminCatalogItem.update({
       where: { id },
-      data: {
-        name: name.slice(0, 300),
-        variants: EMPTY_VARIANTS_JSON,
-        storefrontDescription,
-        itemExampleListingUrl: itemLevel.itemExampleListingUrl,
-        itemMinPriceCents: itemLevel.itemMinPriceCents,
-        itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
-        itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
-        itemMinArtworkLongEdgePx: null,
-        itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
-        itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
-        itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
-        /** FK scalars are not on `updateMany` mutation input; disconnect clears the link like `itemPlatformProductId: null`. */
-        itemPlatformProduct: { disconnect: true },
-      },
+      data: updateData,
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") return;
-    throw e;
+    if (isMissingLargeListingArtworkColumn(e)) {
+      const { itemLargeListingArtwork: _omit, ...withoutLarge } = updateData;
+      await prisma.adminCatalogItem.update({
+        where: { id },
+        data: withoutLarge,
+      });
+    } else {
+      throw e;
+    }
   }
   revalidateAdminViews();
 }

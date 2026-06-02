@@ -22,6 +22,7 @@ import {
 } from "@/lib/r2-upload";
 import { ensureBaselineAdminCatalogIfEmpty } from "@/lib/seed-baseline-admin-catalog";
 import { buildShopBaselineCatalogGroups } from "@/lib/shop-baseline-catalog";
+import { loadAdminBaselineCatalogRows } from "@/lib/admin-baseline-catalog-rows";
 import { listingRejectionReasonTextForCard, resolveListingRejectionNoticeBody } from "@/lib/shop-listing-rejection-notice";
 import {
   resolveCatalogPrefillFromBaselinePickEncoded,
@@ -715,27 +716,10 @@ export async function loadDashboardScopedChunks(
     return defaults;
   }
 
-  const adminCatalogSelect = {
-    id: true,
-    name: true,
-    itemExampleListingUrl: true,
-    itemMinPriceCents: true,
-    itemGoodsServicesCostCents: true,
-    itemImageRequirementLabel: true,
-    itemPrintAreaWidthPx: true,
-    itemPrintAreaHeightPx: true,
-    itemMinArtworkDpi: true,
-  } as const;
-
-  let adminCatalogRows: Awaited<
-    ReturnType<typeof prisma.adminCatalogItem.findMany<{ select: typeof adminCatalogSelect }>>
-  > = [];
+  let adminCatalogRows: Awaited<ReturnType<typeof loadAdminBaselineCatalogRows>> = [];
 
   if (!isPlatform && (scopeSet.has("listingsBody") || scopeSet.has("requestListingCatalog"))) {
-    adminCatalogRows = await prisma.adminCatalogItem.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      select: adminCatalogSelect,
-    });
+    adminCatalogRows = await loadAdminBaselineCatalogRows();
   }
 
   const adminCatalogById = new Map<string, AdminCatalogRowForDisplay>(
@@ -939,10 +923,7 @@ export async function loadDashboardScopedChunks(
         const rows =
           adminCatalogRows.length > 0
             ? adminCatalogRows
-            : await prisma.adminCatalogItem.findMany({
-                orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-                select: adminCatalogSelect,
-              });
+            : await loadAdminBaselineCatalogRows();
         const catalogGroups = buildShopBaselineCatalogGroups(rows);
 
         const draftListingForRequestPrefill = await prisma.shopListing.findFirst({

@@ -2,25 +2,31 @@
 
 import { PRINT_AREA_REFERENCE_DPI } from "@/lib/listing-artwork-print-area";
 
+import { LISTING_REQUEST_ARTWORK_LARGE_MAX_MB } from "@/lib/listing-request-artwork-limits";
+
 /** Per catalog item: optional print-area pixels, optional min DPI vs. reference, plus note for creators. */
 export function AdminCatalogArtworkRequirementFields({
   imageRequirementLabel,
   printAreaWidthPx,
   printAreaHeightPx,
   minArtworkDpi,
+  largeListingArtwork,
   onChangeImageRequirementLabel,
   onChangePrintAreaWidthPx,
   onChangePrintAreaHeightPx,
   onChangeMinArtworkDpi,
+  onChangeLargeListingArtwork,
 }: {
   imageRequirementLabel: string;
   printAreaWidthPx: string;
   printAreaHeightPx: string;
   minArtworkDpi: string;
+  largeListingArtwork: boolean;
   onChangeImageRequirementLabel: (v: string) => void;
   onChangePrintAreaWidthPx: (v: string) => void;
   onChangePrintAreaHeightPx: (v: string) => void;
   onChangeMinArtworkDpi: (v: string) => void;
+  onChangeLargeListingArtwork: (v: boolean) => void;
 }) {
   return (
     <div className="space-y-3 border-t border-zinc-800/80 pt-4">
@@ -71,6 +77,18 @@ export function AdminCatalogArtworkRequirementFields({
           />
         </label>
       </div>
+      <label className="flex cursor-pointer items-start gap-2 text-xs text-zinc-400">
+        <input
+          type="checkbox"
+          checked={largeListingArtwork}
+          onChange={(e) => onChangeLargeListingArtwork(e.target.checked)}
+          className="mt-0.5 rounded border-zinc-600 bg-zinc-900"
+        />
+        <span>
+          Allow large listing artwork uploads (up to {LISTING_REQUEST_ARTWORK_LARGE_MAX_MB} MB). Default
+          catalog items are limited to 15 MB.
+        </span>
+      </label>
     </div>
   );
 }

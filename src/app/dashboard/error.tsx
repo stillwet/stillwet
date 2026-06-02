@@ -34,7 +34,7 @@ export default function DashboardError({
         {looksLikeStaleClient
           ? "The running app is using an outdated Prisma Client. Run `npx prisma generate`, redeploy, or restart the server so delegates like `moderationKeyword` are available."
           : looksLikeUploadOrAction
-            ? "A listing upload or dashboard refresh failed (often artwork over the server size limit). Redeploy the latest build, try a smaller image (under 10 MB), or open the Listings tab after a full page reload."
+            ? "A listing upload or dashboard refresh failed (often artwork over the server size limit). Redeploy the latest build, try a smaller image (most items: 15 MB; special items: 30 MB), or open the Listings tab after a full page reload."
             : looksLikeDb
               ? "Production Postgres may be missing a recent migration (for example `20260516120000_moderation_keyword` or `listingFeeBonusFreeSlots` on Shop). Apply pending migrations, then redeploy."
               : "Something went wrong while loading the shop dashboard. Check Vercel → Logs for the stack trace."}

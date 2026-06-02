@@ -17,7 +17,7 @@ export type PrismaShopAdminAwardGrantDelegate = PrismaClient["shopAdminAwardGran
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v74-creator-gift-code-admin-notes";
+  "postgres-adapter-v75-admin-catalog-large-listing-artwork";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

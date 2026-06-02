@@ -16,6 +16,7 @@ import {
 } from "@/lib/admin-catalog-item";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
+import { LISTING_REQUEST_ARTWORK_LARGE_MAX_MB } from "@/lib/listing-request-artwork-limits";
 
 export type AdminListItemTag = {
   id: string;
@@ -35,6 +36,7 @@ export type AdminListItemSerializable = {
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
   itemMinArtworkDpi: number | null;
+  itemLargeListingArtwork: boolean;
   tags: AdminListItemTag[];
 };
 
@@ -227,6 +229,7 @@ export function AdminListItemsPanel({
   const [editItemPrintAreaWidthPx, setEditItemPrintAreaWidthPx] = useState("");
   const [editItemPrintAreaHeightPx, setEditItemPrintAreaHeightPx] = useState("");
   const [editItemMinArtworkDpi, setEditItemMinArtworkDpi] = useState("");
+  const [editItemLargeListingArtwork, setEditItemLargeListingArtwork] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [deletePending, startDeleteTransition] = useTransition();
@@ -287,6 +290,7 @@ export function AdminListItemsPanel({
       item.itemPrintAreaHeightPx != null ? String(item.itemPrintAreaHeightPx) : "",
     );
     setEditItemMinArtworkDpi(item.itemMinArtworkDpi != null ? String(item.itemMinArtworkDpi) : "");
+    setEditItemLargeListingArtwork(item.itemLargeListingArtwork);
     setEditError(null);
     setEditingId(itemId);
   }
@@ -302,6 +306,7 @@ export function AdminListItemsPanel({
     setEditItemPrintAreaWidthPx("");
     setEditItemPrintAreaHeightPx("");
     setEditItemMinArtworkDpi("");
+    setEditItemLargeListingArtwork(false);
     setEditError(null);
   }
 
@@ -344,6 +349,7 @@ export function AdminListItemsPanel({
     fd.set("itemPrintAreaWidthPx", editItemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", editItemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
+    if (editItemLargeListingArtwork) fd.set("itemLargeListingArtwork", "1");
     startTransition(async () => {
       await adminUpdateCatalogItem(fd);
       cancelEdit();
@@ -388,10 +394,12 @@ export function AdminListItemsPanel({
               printAreaWidthPx={editItemPrintAreaWidthPx}
               printAreaHeightPx={editItemPrintAreaHeightPx}
               minArtworkDpi={editItemMinArtworkDpi}
+              largeListingArtwork={editItemLargeListingArtwork}
               onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
               onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
               onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
               onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
+              onChangeLargeListingArtwork={setEditItemLargeListingArtwork}
             />
             {editError ? (
               <p className="text-xs text-amber-200/90" role="alert">
@@ -478,24 +486,32 @@ export function AdminListItemsPanel({
                   {minPriceDisplayText(item.itemMinPriceCents, item.itemExampleListingUrl ?? "")}
                 </td>
                 <td className="max-w-[12rem] p-3 align-top text-zinc-400">
-                  {item.itemPrintAreaWidthPx != null &&
-                  item.itemPrintAreaHeightPx != null &&
-                  item.itemPrintAreaWidthPx > 0 &&
-                  item.itemPrintAreaHeightPx > 0 ? (
-                    <div className="text-[11px] leading-relaxed">
-                      {item.itemImageRequirementLabel?.trim() ? (
-                        <p className="text-zinc-300">{item.itemImageRequirementLabel.trim()}</p>
-                      ) : null}
-                      <p className="mt-0.5 tabular-nums text-zinc-500">
-                        Print area: {item.itemPrintAreaWidthPx}×{item.itemPrintAreaHeightPx}px
-                      </p>
-                      {item.itemMinArtworkDpi != null && item.itemMinArtworkDpi > 0 ? (
-                        <p className="mt-0.5 tabular-nums text-zinc-500">Min DPI: {item.itemMinArtworkDpi}</p>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <span className="text-zinc-600">—</span>
-                  )}
+                  <div className="text-[11px] leading-relaxed">
+                    <p className="tabular-nums text-zinc-500">
+                      Upload:{" "}
+                      {item.itemLargeListingArtwork
+                        ? `${LISTING_REQUEST_ARTWORK_LARGE_MAX_MB} MB`
+                        : "15 MB"}
+                    </p>
+                    {item.itemPrintAreaWidthPx != null &&
+                    item.itemPrintAreaHeightPx != null &&
+                    item.itemPrintAreaWidthPx > 0 &&
+                    item.itemPrintAreaHeightPx > 0 ? (
+                      <>
+                        {item.itemImageRequirementLabel?.trim() ? (
+                          <p className="mt-0.5 text-zinc-300">{item.itemImageRequirementLabel.trim()}</p>
+                        ) : null}
+                        <p className="mt-0.5 tabular-nums text-zinc-500">
+                          Print area: {item.itemPrintAreaWidthPx}×{item.itemPrintAreaHeightPx}px
+                        </p>
+                        {item.itemMinArtworkDpi != null && item.itemMinArtworkDpi > 0 ? (
+                          <p className="mt-0.5 tabular-nums text-zinc-500">Min DPI: {item.itemMinArtworkDpi}</p>
+                        ) : null}
+                      </>
+                    ) : item.itemImageRequirementLabel?.trim() ? (
+                      <p className="mt-0.5 text-zinc-300">{item.itemImageRequirementLabel.trim()}</p>
+                    ) : null}
+                  </div>
                 </td>
               </tr>
             ))}

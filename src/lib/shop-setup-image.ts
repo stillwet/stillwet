@@ -1,8 +1,5 @@
 import sharp from "sharp";
-import {
-  LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES,
-  LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES,
-} from "@/lib/listing-request-artwork-limits";
+import { LISTING_REQUEST_ARTWORK_PLATFORM_MAX_BYTES } from "@/lib/listing-request-artwork-limits";
 
 /**
  * Site image compression tiers:
@@ -17,8 +14,7 @@ const PROFILE_MAX_BYTES = 100 * 1024;
 const LISTING_SUPPLEMENT_MAX_BYTES = 100 * 1024;
 const LISTING_SUPPLEMENT_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
 
-const LISTING_MAX_BYTES = LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES;
-const LISTING_MAX_SOURCE_BYTES = LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES;
+const LISTING_PLATFORM_MAX_BYTES = LISTING_REQUEST_ARTWORK_PLATFORM_MAX_BYTES;
 
 /** Avatar for shop profile: WebP, must fit under 100 KiB. */
 export async function compressShopProfileImageWebp(
@@ -105,16 +101,17 @@ export type ListingRequestArtworkUpload = {
 
 /**
  * Listing request artwork for admin / print review — **not** compressed to ~100 KiB like storefront images.
- * Stores the uploaded PNG, JPEG, or WebP bytes as-is when within {@link LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES}.
+ * Stores the uploaded PNG, JPEG, or WebP bytes as-is when within `maxBytes` (per catalog item).
  */
 export async function prepareListingRequestArtworkUpload(
   input: Buffer,
+  maxBytes: number = LISTING_PLATFORM_MAX_BYTES,
 ): Promise<ListingRequestArtworkUpload | null> {
-  if (input.length > LISTING_MAX_SOURCE_BYTES) return null;
+  if (input.length > maxBytes) return null;
   try {
     const meta = await sharp(input, { failOn: "none" }).metadata();
     if (meta.format === "svg" || meta.format === "gif") return null;
-    if (input.length > LISTING_MAX_BYTES) return null;
+    if (input.length > maxBytes) return null;
 
     if (meta.format === "png") {
       return { body: input, contentType: "image/png", fileExtension: "png" };

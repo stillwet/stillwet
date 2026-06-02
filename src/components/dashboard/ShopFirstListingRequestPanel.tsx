@@ -10,7 +10,10 @@ import { ListingArtworkCropDialog, ARTWORK_TRANSPARENCY_PREVIEW_STYLE } from "@/
 import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
-import { LISTING_REQUEST_ARTWORK_MAX_SOURCE_MB } from "@/lib/listing-request-artwork-limits";
+import {
+  listingRequestArtworkMaxBytes,
+  listingRequestArtworkMaxMb,
+} from "@/lib/listing-request-artwork-limits";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -235,6 +238,10 @@ export function ShopFirstListingRequestPanel(props: {
     return null;
   }, [catalogGroups, listingProductId]);
 
+  const largeListingArtwork = selectedCatalogGroup?.option.largeListingArtwork ?? false;
+  const listingArtworkMaxMb = listingRequestArtworkMaxMb(largeListingArtwork);
+  const listingArtworkMaxBytes = listingRequestArtworkMaxBytes(largeListingArtwork);
+
   useEffect(() => {
     setListingSubmitArtworkFile(null);
     setListingHasFile(false);
@@ -326,7 +333,7 @@ export function ShopFirstListingRequestPanel(props: {
         setMessage({
           tone: "err",
           text: bodyTooLarge
-            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${LISTING_REQUEST_ARTWORK_MAX_SOURCE_MB} MB and redeploy if this persists.`
+            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${listingArtworkMaxMb} MB for this item (or redeploy if the limit was recently raised).`
             : msg || "Could not submit your listing. Try again or contact support.",
         });
         return;
@@ -402,6 +409,13 @@ export function ShopFirstListingRequestPanel(props: {
     printAreaW != null && printAreaH != null && printAreaW > 0 && printAreaH > 0,
   );
   const minArtworkDpi = selectedCatalogGroup?.option.minArtworkDpi ?? null;
+  const listingArtworkFileSizeError = (() => {
+    const f = listingSubmitArtworkFile;
+    if (f && f.size > listingArtworkMaxBytes) {
+      return `File is too large (max ${listingArtworkMaxMb} MB for this item).`;
+    }
+    return null;
+  })();
   const printExportDimensionsError = (() => {
     if (!requiresPrintCrop || listingSubmitArtworkFile == null || !listingArtworkPixels) return null;
     if (printAreaW == null || printAreaH == null) return null;
@@ -410,7 +424,8 @@ export function ShopFirstListingRequestPanel(props: {
     }
     return null;
   })();
-  const listingArtworkResolutionError = listingArtworkMeasureError ?? printExportDimensionsError;
+  const listingArtworkResolutionError =
+    listingArtworkFileSizeError ?? listingArtworkMeasureError ?? printExportDimensionsError;
   const listingArtworkResolutionPending = Boolean(
     listingArtworkPreviewUrl && !listingArtworkPixels && !listingArtworkMeasureError,
   );
@@ -617,8 +632,8 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {LISTING_REQUEST_ARTWORK_MAX_SOURCE_MB} MB — stored at full quality for print
-            review; shop profile and storefront photos are compressed separately)
+            Artwork file (PNG or JPEG, up to {listingArtworkMaxMb} MB for this item — stored at full quality for
+            print review; shop profile and storefront photos are compressed separately)
             <input
               ref={listingFileRef}
               type="file"
@@ -628,9 +643,18 @@ export function ShopFirstListingRequestPanel(props: {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 setListingSubmitArtworkFile(null);
+                setListingArtworkMeasureError(null);
                 if (!file || !file.type.startsWith("image/")) {
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
+                  return;
+                }
+                if (file.size > listingArtworkMaxBytes) {
+                  setListingHasFile(false);
+                  setListingArtworkPreviewUrl(null);
+                  setListingArtworkMeasureError(
+                    `File is too large (max ${listingArtworkMaxMb} MB for this item).`,
+                  );
                   return;
                 }
                 const pw = selectedCatalogGroup?.option.printAreaWidthPx ?? null;

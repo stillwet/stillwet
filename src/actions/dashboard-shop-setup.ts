@@ -16,7 +16,11 @@ import {
   putPublicR2Object,
   shopProfileAvatarObjectKey,
 } from "@/lib/r2-upload";
-import { LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES } from "@/lib/listing-request-artwork-limits";
+import {
+  listingRequestArtworkMaxBytes,
+  listingRequestArtworkMaxMb,
+} from "@/lib/listing-request-artwork-limits";
+import { loadAdminCatalogItemArtworkPolicy } from "@/lib/admin-baseline-catalog-rows";
 import {
   prepareListingRequestArtworkUpload,
   compressShopProfileImageWebp,
@@ -432,65 +436,62 @@ export async function submitFirstListingSetup(
     };
   }
 
+  let largeListingArtwork = false;
+  let printAreaW: number | null = null;
+  let printAreaH: number | null = null;
+  let catalogImageRequirementLabel: string | null = null;
+
+  if (baselinePick) {
+    const adminItem = await loadAdminCatalogItemArtworkPolicy(baselinePick.itemId);
+    largeListingArtwork = adminItem?.itemLargeListingArtwork ?? false;
+    catalogImageRequirementLabel = adminItem?.itemImageRequirementLabel?.trim() || null;
+    const pw = adminItem?.itemPrintAreaWidthPx ?? null;
+    const ph = adminItem?.itemPrintAreaHeightPx ?? null;
+    if (pw != null && ph != null && pw > 0 && ph > 0) {
+      printAreaW = pw;
+      printAreaH = ph;
+    }
+  }
+
+  const artworkMaxBytes = listingRequestArtworkMaxBytes(largeListingArtwork);
+  const artworkMaxMb = listingRequestArtworkMaxMb(largeListingArtwork);
+
   const file = formData.get("listingArtwork");
   if (!file || !(file instanceof Blob) || file.size === 0) {
     return { ok: false, error: "Upload a print-ready artwork file." };
   }
-  if (file.size > LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES) {
+  if (file.size > artworkMaxBytes) {
     return {
       ok: false,
-      error: `Artwork file is too large (max ${LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES / (1024 * 1024)} MB).`,
+      error: `Artwork file is too large (max ${artworkMaxMb} MB for this item).`,
     };
   }
 
   const rawBuf = Buffer.from(await file.arrayBuffer());
 
-  let preserveListingArtworkPixels = false;
-  let printAreaW: number | null = null;
-  let printAreaH: number | null = null;
-
-  if (baselinePick) {
-    const adminItem = await prisma.adminCatalogItem.findUnique({
-      where: { id: baselinePick.itemId },
-      select: {
-        itemImageRequirementLabel: true,
-        itemPrintAreaWidthPx: true,
-        itemPrintAreaHeightPx: true,
-      },
-    });
-    const pw = adminItem?.itemPrintAreaWidthPx ?? null;
-    const ph = adminItem?.itemPrintAreaHeightPx ?? null;
-    const hasPrintArea = pw != null && ph != null && pw > 0 && ph > 0;
-
-    if (hasPrintArea) {
-      printAreaW = pw;
-      printAreaH = ph;
-      const dims = await widthHeightPxFromImageBuffer(rawBuf);
-      if (!dims) {
-        return {
-          ok: false,
-          error: "Could not read image dimensions. Use a valid PNG or JPEG file.",
-        };
-      }
-      if (!exportedImageMeetsPrintDimensions(dims.w, dims.h, pw, ph)) {
-        const note = adminItem?.itemImageRequirementLabel?.trim();
-        return {
-          ok: false,
-          error: note
-            ? `Artwork must be exactly ${pw}×${ph}px for this item (${note}). This file is ${dims.w}×${dims.h}px.`
-            : `Artwork must be exactly ${pw}×${ph}px for this item. This file is ${dims.w}×${dims.h}px.`,
-        };
-      }
-      preserveListingArtworkPixels = true;
+  if (printAreaW != null && printAreaH != null) {
+    const dims = await widthHeightPxFromImageBuffer(rawBuf);
+    if (!dims) {
+      return {
+        ok: false,
+        error: "Could not read image dimensions. Use a valid PNG or JPEG file.",
+      };
+    }
+    if (!exportedImageMeetsPrintDimensions(dims.w, dims.h, printAreaW, printAreaH)) {
+      return {
+        ok: false,
+        error: catalogImageRequirementLabel
+          ? `Artwork must be exactly ${printAreaW}×${printAreaH}px for this item (${catalogImageRequirementLabel}). This file is ${dims.w}×${dims.h}px.`
+          : `Artwork must be exactly ${printAreaW}×${printAreaH}px for this item. This file is ${dims.w}×${dims.h}px.`,
+      };
     }
   }
 
-  const artwork = await prepareListingRequestArtworkUpload(rawBuf);
+  const artwork = await prepareListingRequestArtworkUpload(rawBuf, artworkMaxBytes);
   if (!artwork) {
     return {
       ok: false,
-      error:
-        "Could not use that artwork file. Upload a PNG or JPEG (or WebP) up to 20 MB. For print-area items, use the exact pixel size required.",
+      error: `Could not use that artwork file. Upload a PNG or JPEG (or WebP) up to ${artworkMaxMb} MB. For print-area items, use the exact pixel size required.`,
     };
   }
 
@@ -499,8 +500,7 @@ export async function submitFirstListingSetup(
     if (!outDims || !exportedImageMeetsPrintDimensions(outDims.w, outDims.h, printAreaW, printAreaH)) {
       return {
         ok: false,
-        error:
-          "Artwork must match the exact print pixel size for this item. Re-export as PNG or JPEG at that size (up to 20 MB) and try again.",
+        error: `Artwork must match the exact print pixel size for this item. Re-export as PNG or JPEG at that size (up to ${artworkMaxMb} MB) and try again.`,
       };
     }
   }

@@ -178,10 +178,12 @@ async function main() {
       itemPrintAreaWidthPx: number | null;
       itemPrintAreaHeightPx: number | null;
       itemMinArtworkDpi: number | null;
+      itemLargeListingArtwork: boolean;
     }>(
       `SELECT "sortOrder", name, "storefrontDescription", "itemExampleListingUrl",
               "itemMinPriceCents", "itemGoodsServicesCostCents", "itemImageRequirementLabel",
-              "itemMinArtworkLongEdgePx", "itemPrintAreaWidthPx", "itemPrintAreaHeightPx", "itemMinArtworkDpi"
+              "itemMinArtworkLongEdgePx", "itemPrintAreaWidthPx", "itemPrintAreaHeightPx", "itemMinArtworkDpi",
+              "itemLargeListingArtwork"
        FROM "AdminCatalogItem"
        ORDER BY "sortOrder", name`,
     );
@@ -257,11 +259,12 @@ async function main() {
             "itemPlatformProductId", "itemExampleListingUrl", "itemMinPriceCents",
             "itemGoodsServicesCostCents", "itemImageRequirementLabel",
             "itemMinArtworkLongEdgePx", "itemPrintAreaWidthPx", "itemPrintAreaHeightPx", "itemMinArtworkDpi",
+            "itemLargeListingArtwork",
             "createdAt", "updatedAt"
           ) VALUES (
             $1, $2, $3, $4, '[]'::jsonb,
-            NULL, $5, $6, $7, $8, $9, $10, $11, $12,
-            $13::timestamptz, $14::timestamptz
+            NULL, $5, $6, $7, $8, $9, $10, $11, $12, $13,
+            $14::timestamptz, $15::timestamptz
           )`,
           [
             id,
@@ -276,6 +279,7 @@ async function main() {
             row.itemPrintAreaWidthPx,
             row.itemPrintAreaHeightPx,
             row.itemMinArtworkDpi,
+            row.itemLargeListingArtwork,
             now,
             now,
           ],

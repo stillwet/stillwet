@@ -1064,6 +1064,10 @@ model AdminCatalogItem {
    * (reference: print W×H are assumed specified at 300 DPI).
    */
   itemMinArtworkDpi Int?
+  /**
+   * When true, listing request artwork may be up to 30 MB; otherwise 15 MB (see listing-request-artwork-limits).
+   */
+  itemLargeListingArtwork Boolean @default(false)
   catalogTags           AdminCatalogItemTag[]
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
