@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
 import nextDynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
@@ -1155,7 +1155,6 @@ export function DashboardMainTabs(props: {
   } = props;
 
   const tabFetch = useDashboardTabFetch({ enabled: clientTabFetch, isPlatform });
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const afterListingSubmitted = useCallback(() => {
@@ -1163,13 +1162,10 @@ export function DashboardMainTabs(props: {
     p.set("dash", dashQueryParamForTabId("listings"));
     p.set("listingSubmitted", "1");
     const q = p.toString();
-    router.push(q ? `/dashboard?${q}` : "/dashboard?dash=listings&listingSubmitted=1");
-    router.refresh();
-    if (clientTabFetch) {
-      void tabFetch.loadTab("listings", { force: true });
-      void tabFetch.loadTab("requestListingCatalog", { force: true });
-    }
-  }, [clientTabFetch, dashboardQueryPreserve, router, tabFetch]);
+    const href = q ? `/dashboard?${q}` : "/dashboard?dash=listings&listingSubmitted=1";
+    // Full navigation after a large server action avoids RSC "unexpected response" races from push+refresh.
+    window.location.assign(href);
+  }, [dashboardQueryPreserve]);
 
   const [loadedFlags, setLoadedFlags] = useState(initialTabDataLoaded);
   const [listings, setListings] = useState(initialListings);

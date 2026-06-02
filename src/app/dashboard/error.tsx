@@ -19,8 +19,11 @@ export default function DashboardError({
     /Unknown argument `/i.test(msg) ||
     /Cannot read properties of undefined \(reading 'count'\)/i.test(msg) ||
     /moderationKeyword/i.test(msg);
+  const looksLikeUploadOrAction =
+    /body exceeded|1\s*mb limit|unexpected response was received from the server/i.test(msg);
   const looksLikeDb =
     !looksLikeStaleClient &&
+    !looksLikeUploadOrAction &&
     (/does not exist|Unknown column|P20\d{2}|relation\s+"ModerationKeyword"/i.test(msg) ||
       (/invalid.*prisma.*invocation/i.test(msg) && /column|relation|migrate/i.test(msg)));
 
@@ -30,9 +33,11 @@ export default function DashboardError({
       <p className="mt-3 text-sm leading-relaxed text-zinc-400">
         {looksLikeStaleClient
           ? "The running app is using an outdated Prisma Client. Run `npx prisma generate`, redeploy, or restart the server so delegates like `moderationKeyword` are available."
-          : looksLikeDb
-            ? "Production Postgres may be missing a recent migration (for example `20260516120000_moderation_keyword` or `listingFeeBonusFreeSlots` on Shop). Apply pending migrations, then redeploy."
-            : "Something went wrong while loading the shop dashboard. Check Vercel → Logs for the stack trace."}
+          : looksLikeUploadOrAction
+            ? "A listing upload or dashboard refresh failed (often artwork over the server size limit). Redeploy the latest build, try a smaller image (under 10 MB), or open the Listings tab after a full page reload."
+            : looksLikeDb
+              ? "Production Postgres may be missing a recent migration (for example `20260516120000_moderation_keyword` or `listingFeeBonusFreeSlots` on Shop). Apply pending migrations, then redeploy."
+              : "Something went wrong while loading the shop dashboard. Check Vercel → Logs for the stack trace."}
       </p>
       {looksLikeDb ? (
         <p className="mt-3 text-sm leading-relaxed text-zinc-400">

@@ -1,11 +1,24 @@
 import sharp from "sharp";
 
+/**
+ * Site image compression tiers:
+ * - **~100 KiB WebP** — shop profile avatar, optional listing supplement photos, admin listing
+ *   secondary images, bug/feedback screenshots (fast storefront loads).
+ * - **Listing request artwork** — {@link prepareListingRequestArtworkUpload}: **not** run through that
+ *   pipeline; PNG/JPEG/WebP are stored up to {@link LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES} for print review.
+ */
+
 const PROFILE_MAX_BYTES = 100 * 1024;
 /** Optional per-listing owner photo on the storefront (same cap as profile avatar). */
 const LISTING_SUPPLEMENT_MAX_BYTES = 100 * 1024;
 const LISTING_SUPPLEMENT_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
-const LISTING_MAX_BYTES = 4 * 1024 * 1024;
-const LISTING_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
+/** Max upload size for listing request artwork (before processing). */
+export const LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
+/** Stored listing request file on R2 (original PNG/JPEG or high-quality WebP). */
+export const LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES = 20 * 1024 * 1024;
+
+const LISTING_MAX_BYTES = LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES;
+const LISTING_MAX_SOURCE_BYTES = LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES;
 
 /** Avatar for shop profile: WebP, must fit under 100 KiB. */
 export async function compressShopProfileImageWebp(
@@ -84,62 +97,35 @@ export async function compressShopListingSupplementPhotoWebp(
   }
 }
 
-export type CompressShopListingArtworkOpts = {
-  /** When true, only rotate + WebP encode (no resize) so print-area pixel dimensions are preserved. */
-  preservePixelDimensions?: boolean;
+export type ListingRequestArtworkUpload = {
+  body: Buffer;
+  contentType: "image/webp" | "image/png" | "image/jpeg";
+  fileExtension: "webp" | "png" | "jpeg";
 };
 
-/** Listing artwork for print review: high quality WebP, cap ~4 MiB. */
-export async function compressShopListingArtworkWebp(
+/**
+ * Listing request artwork for admin / print review — **not** compressed to ~100 KiB like storefront images.
+ * Stores the uploaded PNG, JPEG, or WebP bytes as-is when within {@link LISTING_REQUEST_ARTWORK_MAX_STORED_BYTES}.
+ */
+export async function prepareListingRequestArtworkUpload(
   input: Buffer,
-  opts?: CompressShopListingArtworkOpts,
-): Promise<Buffer | null> {
+): Promise<ListingRequestArtworkUpload | null> {
   if (input.length > LISTING_MAX_SOURCE_BYTES) return null;
   try {
     const meta = await sharp(input, { failOn: "none" }).metadata();
-    if (meta.format === "svg") return null;
+    if (meta.format === "svg" || meta.format === "gif") return null;
+    if (input.length > LISTING_MAX_BYTES) return null;
 
-    if (opts?.preservePixelDimensions) {
-      const tryEncodePreserve = async (quality: number) =>
-        sharp(input, { failOn: "none" })
-          .rotate()
-          .webp({ quality, effort: 4, smartSubsample: true })
-          .toBuffer();
-      let q = 94;
-      let buf = await tryEncodePreserve(q);
-      while (buf.length > LISTING_MAX_BYTES && q > 50) {
-        q -= 3;
-        buf = await tryEncodePreserve(Math.max(q, 50));
-      }
-      if (buf.length > LISTING_MAX_BYTES) return null;
-      return buf;
+    if (meta.format === "png") {
+      return { body: input, contentType: "image/png", fileExtension: "png" };
     }
-
-    const tryEncode = async (maxDim: number, quality: number) =>
-      sharp(input, { failOn: "none" })
-        .rotate()
-        .resize({
-          width: maxDim,
-          height: maxDim,
-          fit: "inside",
-          withoutEnlargement: true,
-        })
-        .webp({ quality, effort: 4, smartSubsample: true })
-        .toBuffer();
-
-    let q = 94;
-    let maxDim = 4096;
-    let buf = await tryEncode(maxDim, q);
-    while (buf.length > LISTING_MAX_BYTES && q > 70) {
-      q -= 4;
-      buf = await tryEncode(maxDim, q);
+    if (meta.format === "jpeg" || meta.format === "jpg") {
+      return { body: input, contentType: "image/jpeg", fileExtension: "jpeg" };
     }
-    while (buf.length > LISTING_MAX_BYTES && maxDim > 1600) {
-      maxDim = Math.floor(maxDim * 0.88);
-      buf = await tryEncode(maxDim, Math.max(q, 72));
+    if (meta.format === "webp") {
+      return { body: input, contentType: "image/webp", fileExtension: "webp" };
     }
-    if (buf.length > LISTING_MAX_BYTES) return null;
-    return buf;
+    return null;
   } catch {
     return null;
   }

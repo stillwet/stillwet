@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
    */
   experimental: {
     lockDistDir: false,
+    /** Listing request uploads artwork via Server Action (up to 20 MB in dashboard-shop-setup). Default is 1 MB. */
+    serverActions: {
+      bodySizeLimit: "22mb",
+    },
+    /** Next 16 proxy buffers bodies for middleware; default 10 MB truncates large listing artwork. */
+    proxyClientMaxBodySize: "22mb",
   },
   /**
    * First compile of a route segment can exceed the default chunk script timeout on slow disks /

@@ -17,7 +17,8 @@ import {
   shopProfileAvatarObjectKey,
 } from "@/lib/r2-upload";
 import {
-  compressShopListingArtworkWebp,
+  LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES,
+  prepareListingRequestArtworkUpload,
   compressShopProfileImageWebp,
 } from "@/lib/shop-setup-image";
 import {
@@ -435,8 +436,11 @@ export async function submitFirstListingSetup(
   if (!file || !(file instanceof Blob) || file.size === 0) {
     return { ok: false, error: "Upload a print-ready artwork file." };
   }
-  if (file.size > 20 * 1024 * 1024) {
-    return { ok: false, error: "Artwork file is too large (max 20 MB before processing)." };
+  if (file.size > LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES) {
+    return {
+      ok: false,
+      error: `Artwork file is too large (max ${LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES / (1024 * 1024)} MB).`,
+    };
   }
 
   const rawBuf = Buffer.from(await file.arrayBuffer());
@@ -481,32 +485,31 @@ export async function submitFirstListingSetup(
     }
   }
 
-  const webp = await compressShopListingArtworkWebp(rawBuf, {
-    ...(preserveListingArtworkPixels ? { preservePixelDimensions: true } : {}),
-  });
-  if (!webp) {
+  const artwork = await prepareListingRequestArtworkUpload(rawBuf);
+  if (!artwork) {
     return {
       ok: false,
-      error: "Could not process that artwork. Use a PNG or JPEG under 20 MB.",
+      error:
+        "Could not use that artwork file. Upload a PNG or JPEG (or WebP) up to 20 MB. For print-area items, use the exact pixel size required.",
     };
   }
 
   if (printAreaW != null && printAreaH != null) {
-    const outDims = await widthHeightPxFromImageBuffer(webp);
+    const outDims = await widthHeightPxFromImageBuffer(artwork.body);
     if (!outDims || !exportedImageMeetsPrintDimensions(outDims.w, outDims.h, printAreaW, printAreaH)) {
       return {
         ok: false,
         error:
-          "Artwork dimensions were lost during processing (file too large after WebP encode). Export a slightly smaller JPEG or PNG and try again.",
+          "Artwork must match the exact print pixel size for this item. Re-export as PNG or JPEG at that size (up to 20 MB) and try again.",
       };
     }
   }
 
-  const key = `shops/${shop.id}/listing-request/${randomUUID()}.webp`;
+  const key = `shops/${shop.id}/listing-request/${randomUUID()}.${artwork.fileExtension}`;
   const url = await putPublicR2Object({
     key,
-    body: webp,
-    contentType: "image/webp",
+    body: artwork.body,
+    contentType: artwork.contentType,
   });
 
   const existing = await prisma.shopListing.findUnique({

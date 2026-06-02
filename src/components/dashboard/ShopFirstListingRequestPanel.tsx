@@ -10,6 +10,7 @@ import { ListingArtworkCropDialog, ARTWORK_TRANSPARENCY_PREVIEW_STYLE } from "@/
 import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
+import { LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES } from "@/lib/shop-setup-image";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -314,7 +315,22 @@ export function ShopFirstListingRequestPanel(props: {
     setListingBlurbModerationBlurError(null);
     setListingKeywordsModerationBlurError(null);
     startListingTransition(async () => {
-      const r: ShopSetupActionResult = await submitFirstListingSetup(fd);
+      let r: ShopSetupActionResult;
+      try {
+        r = await submitFirstListingSetup(fd);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        const bodyTooLarge =
+          /body exceeded|1\s*mb limit|413|payload too large/i.test(msg) ||
+          /unexpected response was received from the server/i.test(msg);
+        setMessage({
+          tone: "err",
+          text: bodyTooLarge
+            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES / (1024 * 1024)} MB and redeploy if this persists.`
+            : msg || "Could not submit your listing. Try again or contact support.",
+        });
+        return;
+      }
       if (r.ok) {
         setMessage({
           tone: "ok",
@@ -601,7 +617,9 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG recommended)
+            Artwork file (PNG or JPEG, up to{" "}
+            {LISTING_REQUEST_ARTWORK_MAX_SOURCE_BYTES / (1024 * 1024)} MB — stored at full quality for print
+            review; shop profile and storefront photos are compressed separately)
             <input
               ref={listingFileRef}
               type="file"
