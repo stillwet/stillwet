@@ -7,6 +7,7 @@ import {
   MAX_CHECKOUT_TIP_CENTS,
   clampCheckoutTipCents,
 } from "@/lib/checkout-tip";
+import { STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE } from "@/lib/storefront-buyer-checkout";
 
 const PRESETS = [200, 500];
 
@@ -15,6 +16,7 @@ type Props = {
   subtotalCents: number;
   shippingCents: number;
   estimatedSalesTaxRate: number | null;
+  buyerCheckoutDisabled?: boolean;
 };
 
 function formatPrice(cents: number) {
@@ -29,6 +31,7 @@ export function CheckoutForm({
   subtotalCents,
   shippingCents,
   estimatedSalesTaxRate,
+  buyerCheckoutDisabled = false,
 }: Props) {
   const [tipCents, setTipCents] = useState(0);
   const [customTip, setCustomTip] = useState("");
@@ -187,11 +190,22 @@ export function CheckoutForm({
               : `${formatPrice(subtotalCents + (tipAllowed ? tipCents : 0) + shippingCents)} + tax`}
           </span>
         </div>
-        <p className="mt-3 text-center text-xs leading-relaxed text-zinc-600">
-          Tax is finalized at payment from your shipping address. Pay with card or Cash App Pay (US) in the
-          secure checkout window on this page.
-        </p>
+        {!buyerCheckoutDisabled ? (
+          <p className="mt-3 text-center text-xs leading-relaxed text-zinc-600">
+            Tax is finalized at payment from your shipping address. Pay with card or Cash App Pay (US) in
+            the secure checkout window on this page.
+          </p>
+        ) : null}
       </div>
+
+      {buyerCheckoutDisabled ? (
+        <p
+          className="rounded-lg border border-blue-900/40 bg-blue-950/25 px-3 py-2 text-center text-sm leading-relaxed text-blue-200/90"
+          role="status"
+        >
+          {STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE}
+        </p>
+      ) : null}
 
       {error && (
         <p className="rounded-lg bg-amber-950/50 px-3 py-2 text-center text-sm text-amber-200">
@@ -201,10 +215,14 @@ export function CheckoutForm({
 
       <button
         type="submit"
-        disabled={pending}
-        className="w-full rounded-xl bg-blue-900 py-3 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50"
+        disabled={pending || buyerCheckoutDisabled}
+        className="w-full rounded-xl bg-blue-900 py-3 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {pending ? "Loading checkout…" : "Continue to payment"}
+        {buyerCheckoutDisabled
+          ? "Checkout unavailable"
+          : pending
+            ? "Loading checkout…"
+            : "Continue to payment"}
       </button>
     </form>
     {embeddedClientSecret && stripePublishableKey ? (

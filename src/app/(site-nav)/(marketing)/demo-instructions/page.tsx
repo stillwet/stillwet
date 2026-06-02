@@ -7,6 +7,9 @@ import { shopFlairAccessPriceUsdLabel } from "@/lib/shop-flair";
 
 const DEMO_SURVEY_URL = "https://www.jotform.com/form/261326846259061";
 
+/** Reads shop-owner session cookies for the support link — cannot be statically generated. */
+export const dynamic = "force-dynamic";
+
 export default async function DemoInstructionsPage() {
   const owner = await getShopOwnerSessionReadonly();
   const isLoggedIn = Boolean(owner.shopUserId);

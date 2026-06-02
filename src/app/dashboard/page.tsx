@@ -90,6 +90,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const connectReason =
     typeof sp.reason === "string" ? sp.reason : Array.isArray(sp.reason) ? sp.reason[0] : undefined;
   const fee = typeof sp.fee === "string" ? sp.fee : undefined;
+  const listingSubmitted = sp.listingSubmitted === "1";
   const promo = typeof sp.promo === "string" ? sp.promo : undefined;
   const promoErr =
     typeof sp.promoErr === "string"
@@ -456,6 +457,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </div>
       </div>
 
+      {listingSubmitted ? (
+        <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90">
+          Listing submitted for review. Admin approval usually takes 1–3 days. Check the{" "}
+          <strong className="font-medium text-emerald-100/95">Listings</strong> tab for status.
+        </p>
+      ) : null}
       {fee === "ok" ? (
         <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90">
           Listing fee payment received (or mock checkout). You can continue with your listing workflow.

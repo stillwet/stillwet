@@ -34,6 +34,10 @@ import { resolveAdminCatalogStorefrontText } from "@/lib/storefront-product-deta
 import type { StorefrontProduct } from "@/lib/product-storefront";
 import { storefrontListingDisplayTitle } from "@/lib/storefront-listing-display-name";
 import { storefrontStripeCheckoutBranding } from "@/lib/stripe-checkout-branding";
+import {
+  isStorefrontBuyerCheckoutDisabled,
+  STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE,
+} from "@/lib/storefront-buyer-checkout";
 
 export type CheckoutResult =
   | { ok: true; mode: "redirect"; url: string }
@@ -51,6 +55,10 @@ function appUrl() {
 export async function startCheckout(formData: FormData): Promise<CheckoutResult> {
   const base = appUrl();
   if (!base.ok) return base;
+
+  if (isStorefrontBuyerCheckoutDisabled()) {
+    return { ok: false, error: STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE };
+  }
 
   const session = await getCartSessionReadonly();
   const listingIds = Object.keys(session.items).filter(

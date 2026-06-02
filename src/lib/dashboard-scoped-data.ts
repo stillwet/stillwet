@@ -682,7 +682,14 @@ export async function loadDashboardScopedChunks(
   const scopeSet = new Set(scopes);
   const needBaseline = scopeSet.has("listingsBody") || scopeSet.has("requestListingCatalog");
   if (needBaseline) {
-    await ensureBaselineAdminCatalogIfEmpty(prisma);
+    try {
+      await ensureBaselineAdminCatalogIfEmpty(prisma);
+    } catch (e) {
+      console.error(
+        "[loadDashboardScopedChunks] ensureBaselineAdminCatalogIfEmpty failed (check migrations / Product seed rows)",
+        e,
+      );
+    }
   }
 
   const emptyGroups: DashboardGroupedListingSections = { live: [], request: [], removed: [] };

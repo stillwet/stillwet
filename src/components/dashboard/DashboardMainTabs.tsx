@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
 import nextDynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
@@ -1007,6 +1007,21 @@ function ListingCard({
 
 type TabId = DashboardMainTabId;
 
+function DashboardTabLoadFailed(props: { message: string; onRetry: () => void }) {
+  return (
+    <div className="rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-3 text-sm text-amber-200/90">
+      <p>{props.message}</p>
+      <button
+        type="button"
+        className="mt-2 rounded-md border border-amber-800/60 px-2.5 py-1 text-xs text-amber-100 hover:bg-amber-950/50"
+        onClick={props.onRetry}
+      >
+        Try again
+      </button>
+    </div>
+  );
+}
+
 function normalizeDashboardMainTab(
   i: TabId | undefined,
   opts: {
@@ -1140,7 +1155,21 @@ export function DashboardMainTabs(props: {
   } = props;
 
   const tabFetch = useDashboardTabFetch({ enabled: clientTabFetch, isPlatform });
+  const router = useRouter();
   const searchParams = useSearchParams();
+
+  const afterListingSubmitted = useCallback(() => {
+    const p = new URLSearchParams(dashboardQueryPreserve);
+    p.set("dash", dashQueryParamForTabId("listings"));
+    p.set("listingSubmitted", "1");
+    const q = p.toString();
+    router.push(q ? `/dashboard?${q}` : "/dashboard?dash=listings&listingSubmitted=1");
+    router.refresh();
+    if (clientTabFetch) {
+      void tabFetch.loadTab("listings", { force: true });
+      void tabFetch.loadTab("requestListingCatalog", { force: true });
+    }
+  }, [clientTabFetch, dashboardQueryPreserve, router, tabFetch]);
 
   const [loadedFlags, setLoadedFlags] = useState(initialTabDataLoaded);
   const [listings, setListings] = useState(initialListings);
@@ -1529,7 +1558,12 @@ export function DashboardMainTabs(props: {
           hidden={activeTab !== "requestListing"}
           className="pt-6"
         >
-          {!effectiveLoadedFlags.requestListingCatalog ? (
+          {clientTabFetch && tabFetch.failedTabs.requestListingCatalog ? (
+            <DashboardTabLoadFailed
+              message="Could not load the listing catalog. Your listing may still have been saved — open the Listings tab or try again."
+              onRetry={() => tabFetch.retryTab("requestListingCatalog")}
+            />
+          ) : !effectiveLoadedFlags.requestListingCatalog ? (
             <div className="flex items-center gap-2 py-8 text-sm text-zinc-500">
               <span
                 className="inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-zinc-600 border-t-blue-500/90"
@@ -1549,6 +1583,7 @@ export function DashboardMainTabs(props: {
               mockListingFeeCheckout={mockListingFeeCheckout}
               stripePublishableKey={stripePublishableKey}
               moderationPhrases={effectiveModerationPhrases}
+              onListingSubmittedSuccess={afterListingSubmitted}
               embedded
             />
           ) : null}
@@ -1592,7 +1627,14 @@ export function DashboardMainTabs(props: {
         hidden={activeTab !== "listings"}
         className="pt-4"
       >
-        {!effectiveLoadedFlags.listings ? (
+        {clientTabFetch && tabFetch.failedTabs.listings ? (
+          activeTab === "listings" ? (
+            <DashboardTabLoadFailed
+              message="Could not load your listings. Try again, or refresh the page."
+              onRetry={() => tabFetch.retryTab("listings")}
+            />
+          ) : null
+        ) : !effectiveLoadedFlags.listings ? (
           activeTab === "listings" ? (
           <div className="flex items-center gap-2 py-10 text-sm text-zinc-500">
             <span

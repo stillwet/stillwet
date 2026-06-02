@@ -558,11 +558,15 @@ export async function submitFirstListingSetup(
       });
 
   if (baselinePick) {
-    await syncProductTagsForNewBaselineListing({
-      adminCatalogItemId: baselinePick.itemId,
-      productId,
-      shopSlug: shop.slug,
-    });
+    try {
+      await syncProductTagsForNewBaselineListing({
+        adminCatalogItemId: baselinePick.itemId,
+        productId,
+        shopSlug: shop.slug,
+      });
+    } catch (e) {
+      console.error("[submitFirstListingSetup] baseline tag sync failed (listing still saved)", e);
+    }
   }
 
   const gate = await downgradeSubmittedToDraftIfListingFeeUnpaid(

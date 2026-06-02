@@ -1,3 +1,4 @@
+import { isStorefrontBuyerCheckoutDisabled } from "@/lib/storefront-buyer-checkout";
 import { getShippingFlatCents } from "@/lib/shipping";
 import {
   estimatedTaxCents,
@@ -28,6 +29,8 @@ export type CartCheckoutState = {
   estimatedTotalCents: number | null;
   estimatedSalesTaxRate: number | null;
   tipAllowed: boolean;
+  /** When true, cart UI disables payment; {@link startCheckout} rejects on the server. */
+  buyerCheckoutDisabled: boolean;
 };
 
 export async function loadCartCheckoutState(): Promise<CartCheckoutState> {
@@ -59,5 +62,6 @@ export async function loadCartCheckoutState(): Promise<CartCheckoutState> {
     estimatedTotalCents,
     estimatedSalesTaxRate: rate,
     tipAllowed,
+    buyerCheckoutDisabled: isStorefrontBuyerCheckoutDisabled(),
   };
 }

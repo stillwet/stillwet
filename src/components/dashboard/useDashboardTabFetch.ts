@@ -86,19 +86,20 @@ export function useDashboardTabFetch(options: {
   } | null>(null);
   const [moderationKeywordPhrases, setModerationKeywordPhrases] = useState<string[]>([]);
   const [tabLoadError, setTabLoadError] = useState<string | null>(null);
+  const [failedTabs, setFailedTabs] = useState<Partial<Record<TabFetchId, boolean>>>({});
 
   const markLoaded = useCallback((tab: TabFetchId) => {
     setLoadedFlags((f) => ({ ...f, [tab]: true }));
   }, []);
 
   const loadTab = useCallback(
-    async (tab: TabFetchId) => {
+    async (tab: TabFetchId, options?: { force?: boolean }) => {
       if (!enabled) return;
 
       if (tab === "orders" && !isPlatform) {
         const today = pacificCalendarDateKey();
-        if (readSalesPeriodGate() === today && loadedFlags.orders) return;
-      } else if (loadedFlags[tab]) {
+        if (!options?.force && readSalesPeriodGate() === today && loadedFlags.orders) return;
+      } else if (!options?.force && loadedFlags[tab]) {
         return;
       }
 
@@ -161,6 +162,8 @@ export function useDashboardTabFetch(options: {
           }
         } catch {
           setTabLoadError("Could not load this tab. Try again.");
+          setFailedTabs((f) => ({ ...f, [tab]: true }));
+          markLoaded(tab);
         } finally {
           delete inflightRef.current[tab];
         }
@@ -170,6 +173,16 @@ export function useDashboardTabFetch(options: {
       await run;
     },
     [enabled, isPlatform, loadedFlags, markLoaded],
+  );
+
+  const retryTab = useCallback(
+    (tab: TabFetchId) => {
+      setFailedTabs((f) => ({ ...f, [tab]: false }));
+      setLoadedFlags((f) => ({ ...f, [tab]: false }));
+      delete inflightRef.current[tab];
+      void loadTab(tab, { force: true });
+    },
+    [loadTab],
   );
 
   return {
@@ -182,6 +195,8 @@ export function useDashboardTabFetch(options: {
     requestListingCatalog,
     moderationKeywordPhrases,
     tabLoadError,
+    failedTabs,
+    retryTab,
     loadTab,
   };
 }

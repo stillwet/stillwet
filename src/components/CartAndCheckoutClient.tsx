@@ -194,6 +194,7 @@ export function CartAndCheckoutClient({
           subtotalCents={subtotal}
           shippingCents={shippingCents}
           estimatedSalesTaxRate={state.estimatedSalesTaxRate}
+          buyerCheckoutDisabled={state.buyerCheckoutDisabled}
         />
       </div>
 

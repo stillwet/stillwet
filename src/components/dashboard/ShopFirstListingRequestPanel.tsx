@@ -100,6 +100,8 @@ export function ShopFirstListingRequestPanel(props: {
   stripePublishableKey?: string | null;
   embedded?: boolean;
   moderationPhrases?: readonly string[];
+  /** After a successful submit — e.g. switch to Listings tab and refresh server onboarding state. */
+  onListingSubmittedSuccess?: () => void;
 }) {
   const {
     catalogGroups,
@@ -118,6 +120,7 @@ export function ShopFirstListingRequestPanel(props: {
     stripePublishableKey = null,
     embedded,
     moderationPhrases = [],
+    onListingSubmittedSuccess,
   } = props;
 
   const router = useRouter();
@@ -332,7 +335,11 @@ export function ShopFirstListingRequestPanel(props: {
         setListingSubmitArtworkFile(null);
         setListingArtworkPreviewUrl(null);
         if (listingFileRef.current) listingFileRef.current.value = "";
-        router.refresh();
+        if (onListingSubmittedSuccess) {
+          onListingSubmittedSuccess();
+        } else {
+          router.refresh();
+        }
       } else {
         setMessage({ tone: "err", text: r.error });
       }
