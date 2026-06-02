@@ -1,5 +1,24 @@
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { AdminBaselineRow } from "@/lib/shop-baseline-catalog";
+
+const LARGE_LISTING_ARTWORK_MIGRATION = "20260603120000_admin_catalog_large_listing_artwork";
+
+export { LARGE_LISTING_ARTWORK_MIGRATION };
+
+export function isMissingLargeListingArtworkColumn(e: unknown): boolean {
+  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+    if (e.code === "P2022") return true;
+    const column = e.meta?.column;
+    if (typeof column === "string" && /itemLargeListingArtwork/i.test(column)) return true;
+  }
+  const msg = e instanceof Error ? e.message : String(e);
+  return (
+    /itemLargeListingArtwork/i.test(msg) &&
+    (/does not exist|Unknown column|column .* does not exist|P2022|42703/i.test(msg) ||
+      /Invalid `prisma\.adminCatalogItem\.(findMany|findUnique|update|create)/i.test(msg))
+  );
+}
 
 const adminCatalogSelectBase = {
   id: true,
@@ -17,16 +36,6 @@ const adminCatalogSelectWithLarge = {
   ...adminCatalogSelectBase,
   itemLargeListingArtwork: true,
 } as const;
-
-export function isMissingLargeListingArtworkColumn(e: unknown): boolean {
-  if (!e || typeof e !== "object") return false;
-  const code = "code" in e ? String((e as { code?: string }).code) : "";
-  const msg = e instanceof Error ? e.message : String(e);
-  return (
-    code === "P2022" ||
-    (/itemLargeListingArtwork/i.test(msg) && /does not exist|Unknown column|column/i.test(msg))
-  );
-}
 
 function mapAdminCatalogRow(
   row: {
@@ -67,7 +76,7 @@ export async function loadAdminBaselineCatalogRows(): Promise<AdminBaselineRow[]
   } catch (e) {
     if (!isMissingLargeListingArtworkColumn(e)) throw e;
     console.warn(
-      "[admin catalog] itemLargeListingArtwork column missing — using 15 MB artwork limit until migration 20260603120000_admin_catalog_large_listing_artwork is applied",
+      `[admin catalog] itemLargeListingArtwork column missing — using 15 MB artwork limit until migration ${LARGE_LISTING_ARTWORK_MIGRATION} is applied`,
     );
     const rows = await prisma.adminCatalogItem.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -167,7 +176,7 @@ export async function loadAdminCatalogItemsForListTab() {
   } catch (e) {
     if (!isMissingLargeListingArtworkColumn(e)) throw e;
     console.warn(
-      "[admin catalog] itemLargeListingArtwork column missing — admin list uses 15 MB default until migration 20260603120000_admin_catalog_large_listing_artwork is applied",
+      `[admin catalog] itemLargeListingArtwork column missing — admin list uses 15 MB default until migration ${LARGE_LISTING_ARTWORK_MIGRATION} is applied`,
     );
     const rows = await prisma.adminCatalogItem.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],

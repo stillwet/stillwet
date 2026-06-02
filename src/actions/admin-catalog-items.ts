@@ -10,9 +10,16 @@ import {
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
-import { isMissingLargeListingArtworkColumn } from "@/lib/admin-baseline-catalog-rows";
+import {
+  isMissingLargeListingArtworkColumn,
+  LARGE_LISTING_ARTWORK_MIGRATION,
+} from "@/lib/admin-baseline-catalog-rows";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
+
+export type AdminCatalogItemSaveResult =
+  | { ok: true }
+  | { ok: false; error: string };
 
 async function requireAdmin() {
   const session = await getAdminSessionReadonly();
@@ -58,13 +65,13 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
   };
 }
 
-export async function adminAddCatalogItem(formData: FormData) {
+export async function adminAddCatalogItem(formData: FormData): Promise<AdminCatalogItemSaveResult> {
   await requireAdmin();
   const name = String(formData.get("itemName") ?? "").trim();
-  if (!name) return;
+  if (!name) return { ok: false, error: "Enter an item name." };
 
   const itemLevel = itemLevelFromFormWhenNoVariants(formData);
-  if (!itemLevel.ok) return;
+  if (!itemLevel.ok) return { ok: false, error: "Check item price and artwork fields." };
   const storefrontDescriptionRaw = String(formData.get("storefrontDescription") ?? "");
   const storefrontDescription = storefrontDescriptionRaw.trim()
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
@@ -92,21 +99,42 @@ export async function adminAddCatalogItem(formData: FormData) {
   try {
     await prisma.adminCatalogItem.create({ data: createData });
   } catch (e) {
-    if (!isMissingLargeListingArtworkColumn(e)) throw e;
-    const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
-    await prisma.adminCatalogItem.create({ data: withoutLarge });
+    if (isMissingLargeListingArtworkColumn(e)) {
+      if (itemLevel.itemLargeListingArtwork) {
+        const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
+        try {
+          await prisma.adminCatalogItem.create({ data: withoutLarge });
+          revalidateAdminViews();
+          return {
+            ok: false,
+            error: `Large artwork uploads need migration ${LARGE_LISTING_ARTWORK_MIGRATION} on this database. Item saved without the 30 MB flag.`,
+          };
+        } catch (e2) {
+          console.error("[adminAddCatalogItem] retry without large artwork", e2);
+          return { ok: false, error: "Could not save this catalog item." };
+        }
+      }
+      const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
+      await prisma.adminCatalogItem.create({ data: withoutLarge });
+    } else {
+      console.error("[adminAddCatalogItem]", e);
+      return { ok: false, error: "Could not save this catalog item." };
+    }
   }
   revalidateAdminViews();
+  return { ok: true };
 }
 
-export async function adminUpdateCatalogItem(formData: FormData) {
+export async function adminUpdateCatalogItem(
+  formData: FormData,
+): Promise<AdminCatalogItemSaveResult> {
   await requireAdmin();
   const id = String(formData.get("itemId") ?? "").trim();
   const name = String(formData.get("itemName") ?? "").trim();
-  if (!id || !name) return;
+  if (!id || !name) return { ok: false, error: "Missing item id or name." };
 
   const itemLevel = itemLevelFromFormWhenNoVariants(formData);
-  if (!itemLevel.ok) return;
+  if (!itemLevel.ok) return { ok: false, error: "Check item price and artwork fields." };
   const storefrontDescriptionRaw = String(formData.get("storefrontDescription") ?? "");
   const storefrontDescription = storefrontDescriptionRaw.trim()
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
@@ -135,18 +163,34 @@ export async function adminUpdateCatalogItem(formData: FormData) {
       data: updateData,
     });
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") return;
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+      return { ok: false, error: "That catalog item no longer exists." };
+    }
     if (isMissingLargeListingArtworkColumn(e)) {
       const { itemLargeListingArtwork: _omit, ...withoutLarge } = updateData;
-      await prisma.adminCatalogItem.update({
-        where: { id },
-        data: withoutLarge,
-      });
-    } else {
-      throw e;
+      try {
+        await prisma.adminCatalogItem.update({
+          where: { id },
+          data: withoutLarge,
+        });
+        revalidateAdminViews();
+        if (itemLevel.itemLargeListingArtwork) {
+          return {
+            ok: false,
+            error: `Large artwork uploads need migration ${LARGE_LISTING_ARTWORK_MIGRATION} on production. Other fields were saved; run npm run db:migrate:prod, then check the box again.`,
+          };
+        }
+        return { ok: true };
+      } catch (e2) {
+        console.error("[adminUpdateCatalogItem] retry without large artwork", e2);
+        return { ok: false, error: "Could not save changes to this catalog item." };
+      }
     }
+    console.error("[adminUpdateCatalogItem]", e);
+    return { ok: false, error: "Could not save changes to this catalog item." };
   }
   revalidateAdminViews();
+  return { ok: true };
 }
 
 export async function adminDeleteCatalogItem(formData: FormData) {

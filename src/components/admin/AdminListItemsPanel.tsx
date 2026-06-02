@@ -351,7 +351,11 @@ export function AdminListItemsPanel({
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
     if (editItemLargeListingArtwork) fd.set("itemLargeListingArtwork", "1");
     startTransition(async () => {
-      await adminUpdateCatalogItem(fd);
+      const result = await adminUpdateCatalogItem(fd);
+      if (!result.ok) {
+        setEditError(result.error);
+        return;
+      }
       cancelEdit();
       router.refresh();
     });

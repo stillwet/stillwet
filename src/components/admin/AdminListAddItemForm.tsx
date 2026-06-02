@@ -63,7 +63,11 @@ export function AdminListAddItemForm() {
     if (itemLargeListingArtwork) fd.set("itemLargeListingArtwork", "1");
 
     startTransition(async () => {
-      await adminAddCatalogItem(fd);
+      const result = await adminAddCatalogItem(fd);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setItemName("");
       setStorefrontDescription("");
       setItemExampleListingUrl("");

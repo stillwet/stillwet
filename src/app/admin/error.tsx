@@ -42,7 +42,7 @@ export default function AdminError({
           : looksLikeMissingPostgres
             ? "This deployment has no Postgres URL (or Prisma could not connect). On Vercel → Production for stillwet.com: link Neon or set POSTGRES_PRISMA_URL, remove localhost DATABASE_URL/DIRECT_URL, redeploy, then confirm /api/health shows database.ok: true."
             : looksLikeDb
-            ? "The database does not match the current Prisma schema (for example a missing column from migration `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table from `20260516120000_moderation_keyword`). Apply pending migrations to that database, then reload."
+            ? "The database does not match the current Prisma schema (for example migration `20260603120000_admin_catalog_large_listing_artwork` for large listing artwork, `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table). Apply pending migrations to that database, then reload."
             : "Something went wrong while loading this page. Check the server log for the stack trace."}
       </p>
       {looksLikeStaleClient ? (
