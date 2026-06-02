@@ -12,6 +12,7 @@ const DRAWER_SEED: CartCheckoutState = {
   estimatedTotalCents: null,
   estimatedSalesTaxRate: null,
   tipAllowed: false,
+  buyerCheckoutDisabled: false,
 };
 
 export function CartDrawer({
