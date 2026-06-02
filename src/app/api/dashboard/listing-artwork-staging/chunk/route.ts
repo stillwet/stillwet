@@ -12,6 +12,8 @@ import {
 import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 
+export const runtime = "nodejs";
+
 const MAX_PARTS = Math.ceil(
   listingRequestArtworkUploadMaxBytes() / LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES,
 ) + 2;
@@ -59,9 +61,19 @@ export async function POST(request: Request) {
   }
 
   const body = Buffer.from(await chunk.arrayBuffer());
-  const ok = await putListingArtworkStagingPart(stagingKey, partIndex, body);
-  if (!ok) {
-    return NextResponse.json({ error: "Could not store upload chunk." }, { status: 500 });
+  const put = await putListingArtworkStagingPart(stagingKey, partIndex, body);
+  if (!put.ok) {
+    console.error("[listing-artwork-staging/chunk] R2 put failed", {
+      shopId: shop.id,
+      stagingKey,
+      partIndex,
+      error: put.error,
+    });
+    const hint =
+      process.env.NODE_ENV === "development"
+        ? `Could not store upload chunk: ${put.error}`
+        : "Could not store upload chunk. Check R2 credentials and Object Write permission, then try again.";
+    return NextResponse.json({ error: hint }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

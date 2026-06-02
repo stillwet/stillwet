@@ -52,9 +52,9 @@ async function main() {
   for (let i = 0; i < partCount; i++) {
     const start = i * chunkSize;
     const part = png.subarray(start, Math.min(png.length, start + chunkSize));
-    const ok = await putListingArtworkStagingPart(stagingKey, i, Buffer.from(part));
-    if (!ok) {
-      console.error(`FAILED: could not write part ${i}`);
+    const put = await putListingArtworkStagingPart(stagingKey, i, Buffer.from(part));
+    if (!put.ok) {
+      console.error(`FAILED: could not write part ${i}: ${put.error}`);
       process.exit(1);
     }
   }

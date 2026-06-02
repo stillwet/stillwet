@@ -16,11 +16,13 @@ import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draf
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
   LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES,
+  listingRequestArtworkPreCropMaxMb,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 import { listingArtworkStagingChunkCount } from "@/lib/listing-artwork-staging-chunks";
+import { compressListingArtworkSourceIfNeeded } from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -161,6 +163,7 @@ export function ShopFirstListingRequestPanel(props: {
     current: number;
     total: number;
   } | null>(null);
+  const [artworkSourcePreparing, setArtworkSourcePreparing] = useState(false);
   const [listingSavedFlash, setListingSavedFlash] = useState(false);
   const [listingStorefrontBlurb, setListingStorefrontBlurb] = useState("");
   const [keywordTokens, setKeywordTokens] = useState<string[]>([]);
@@ -252,6 +255,44 @@ export function ShopFirstListingRequestPanel(props: {
   const listingArtworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
   const listingArtworkUploadMaxBytes = listingRequestArtworkUploadMaxBytes();
   const listingArtworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
+  const listingArtworkPreCropMaxMb = listingRequestArtworkPreCropMaxMb();
+
+  async function applyListingArtworkPickedFile(file: File) {
+    setListingSubmitArtworkFile(null);
+    setListingArtworkMeasureError(null);
+    setArtworkSourcePreparing(true);
+    try {
+      const prepared = await compressListingArtworkSourceIfNeeded(file);
+      if (!prepared.ok) {
+        setListingHasFile(false);
+        setListingArtworkPreviewUrl(null);
+        setListingArtworkMeasureError(prepared.error);
+        return;
+      }
+      const ready = prepared.file;
+      const pw = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
+      const ph = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
+      const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
+      if (needCrop) {
+        setCropSourceObjectUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(ready);
+        });
+        setCropDialogOpen(true);
+        setListingHasFile(false);
+        setListingArtworkPreviewUrl(null);
+        return;
+      }
+      setListingSubmitArtworkFile(ready);
+      setListingHasFile(true);
+      setListingArtworkPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(ready);
+      });
+    } finally {
+      setArtworkSourcePreparing(false);
+    }
+  }
 
   useEffect(() => {
     setListingSubmitArtworkFile(null);
@@ -511,7 +552,7 @@ export function ShopFirstListingRequestPanel(props: {
     listingArtworkPreviewUrl && !listingArtworkPixels && !listingArtworkMeasureError,
   );
 
-  const hasArtworkReady = requiresPrintCrop ? listingSubmitArtworkFile != null : listingHasFile;
+  const hasArtworkReady = listingSubmitArtworkFile != null;
 
   const listingCanSubmit =
     Boolean(listingProductId) &&
@@ -521,6 +562,7 @@ export function ShopFirstListingRequestPanel(props: {
     !listingArtworkResolutionError &&
     !listingArtworkResolutionPending;
   const artworkUploadInProgress = artworkUploadProgress != null;
+  const artworkBusy = artworkSourcePreparing || artworkUploadInProgress;
   const artworkUploadPercent =
     artworkUploadProgress && artworkUploadProgress.total > 0
       ? Math.round((artworkUploadProgress.current / artworkUploadProgress.total) * 100)
@@ -530,15 +572,15 @@ export function ShopFirstListingRequestPanel(props: {
   const listingSubmitSubmittedFlash =
     listingSavedFlash && !listingCanSubmit && !isListingPending;
   const listingBtnClass =
-    isListingPending || artworkUploadInProgress
+    isListingPending || artworkBusy
     ? btnPrimarySaving
     : !listingFormReady
       ? listingSavedFlash
         ? btnPrimarySaved
         : btnPrimaryDisabled
       : btnPrimary;
-  const isListingFormSubmitDisabled = !listingFormReady || isListingPending || artworkUploadInProgress;
-  const freezeListingRequestFields = isListingPending || artworkUploadInProgress;
+  const isListingFormSubmitDisabled = !listingFormReady || isListingPending || artworkBusy;
+  const freezeListingRequestFields = isListingPending || artworkBusy;
 
   return (
     <div
@@ -719,8 +761,9 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — saved for admin review up to{" "}
-            {listingArtworkStoredMaxMb} MB at print pixel size)
+            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — files over {listingArtworkPreCropMaxMb}{" "}
+            MB are compressed in your browser before crop; saved for admin review up to {listingArtworkStoredMaxMb}{" "}
+            MB at print pixel size)
             <input
               ref={listingFileRef}
               type="file"
@@ -729,14 +772,15 @@ export function ShopFirstListingRequestPanel(props: {
               disabled={freezeListingRequestFields}
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                setListingSubmitArtworkFile(null);
-                setListingArtworkMeasureError(null);
                 if (!file || !file.type.startsWith("image/")) {
+                  setListingSubmitArtworkFile(null);
+                  setListingArtworkMeasureError(null);
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
                   return;
                 }
                 if (file.size > listingArtworkUploadMaxBytes) {
+                  setListingSubmitArtworkFile(null);
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
                   setListingArtworkMeasureError(
@@ -744,24 +788,15 @@ export function ShopFirstListingRequestPanel(props: {
                   );
                   return;
                 }
-                const pw = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
-                const ph = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
-                const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
-                if (needCrop) {
-                  setCropSourceObjectUrl((prev) => {
-                    if (prev) URL.revokeObjectURL(prev);
-                    return URL.createObjectURL(file);
-                  });
-                  setCropDialogOpen(true);
-                  setListingHasFile(false);
-                  setListingArtworkPreviewUrl(null);
-                  return;
-                }
-                setListingHasFile(true);
-                setListingArtworkPreviewUrl(URL.createObjectURL(file));
+                void applyListingArtworkPickedFile(file);
               }}
               className="mt-1 block w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200 disabled:cursor-not-allowed"
             />
+            {artworkSourcePreparing ? (
+              <p className="mt-2 text-[11px] text-zinc-500" role="status">
+                Preparing image (compressing large files to {listingArtworkPreCropMaxMb} MB before crop)…
+              </p>
+            ) : null}
             {requiresPrintCrop && !listingSubmitArtworkFile ? (
               <p className="mt-2 text-[11px] text-zinc-500">
                 After you choose an image, a crop window opens. You must complete cropping before you can submit.
@@ -897,7 +932,20 @@ export function ShopFirstListingRequestPanel(props: {
             className={`inline-flex min-h-[2.5rem] items-center justify-center gap-2 ${listingBtnClass}`}
             aria-busy={isListingPending || artworkUploadInProgress}
           >
-            {artworkUploadProgress ? (
+            {artworkSourcePreparing ? (
+              <p className="mt-3 text-[11px] text-zinc-500" role="status">
+                Preparing artwork…
+              </p>
+            ) : null}
+            {artworkSourcePreparing ? (
+              <>
+                <span
+                  className="size-4 shrink-0 animate-spin rounded-full border-2 border-zinc-500/80 border-t-zinc-950"
+                  aria-hidden
+                />
+                <span>Preparing artwork…</span>
+              </>
+            ) : artworkUploadProgress ? (
               <>
                 <span
                   className="size-4 shrink-0 animate-spin rounded-full border-2 border-zinc-500/80 border-t-zinc-950"

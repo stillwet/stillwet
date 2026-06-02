@@ -98,26 +98,49 @@ function listingArtworkStagingPartKey(stagingKey: string, partIndex: number): st
   return `${stagingKey}/parts/part-${String(partIndex).padStart(4, "0")}`;
 }
 
+export type PutListingArtworkStagingPartResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
 export async function putListingArtworkStagingPart(
   stagingKey: string,
   partIndex: number,
   body: Buffer,
-): Promise<boolean> {
+): Promise<PutListingArtworkStagingPartResult> {
   const bucket = readR2BucketName();
-  if (!bucket || partIndex < 0 || body.length === 0) return false;
-  try {
-    await r2S3Client().send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: listingArtworkStagingPartKey(stagingKey, partIndex),
-        Body: body,
-        ContentType: "application/octet-stream",
-      }),
-    );
-    return true;
-  } catch {
-    return false;
+  if (!bucket) return { ok: false, error: "R2 bucket not configured" };
+  if (partIndex < 0) return { ok: false, error: "Invalid part index" };
+  if (body.length === 0) return { ok: false, error: "Empty chunk body" };
+
+  const Key = listingArtworkStagingPartKey(stagingKey, partIndex);
+  const client = r2S3Client();
+  let lastError = "unknown";
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key,
+          Body: body,
+          ContentType: "application/octet-stream",
+        }),
+      );
+      return { ok: true };
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e);
+      console.error("[r2] putListingArtworkStagingPart failed", {
+        stagingKey,
+        partIndex,
+        key: Key,
+        attempt,
+        error: lastError,
+      });
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 400));
+    }
   }
+
+  return { ok: false, error: lastError };
 }
 
 /** Staged listing artwork (single PUT or chunked parts under `{key}/parts/`). */
@@ -199,6 +222,9 @@ function r2S3Client(): S3Client {
     endpoint: r2S3Endpoint(),
     credentials: { accessKeyId, secretAccessKey },
     forcePathStyle: true,
+    /** R2 is not full S3 — SDK ≥3.729 default checksums break PutObject/GetObject. */
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 }
 
