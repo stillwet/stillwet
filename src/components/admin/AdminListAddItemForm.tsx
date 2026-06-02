@@ -1,15 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { adminAddCatalogItem } from "@/actions/admin-catalog-items";
+import { useActionState, useEffect, useState } from "react";
+import {
+  adminAddCatalogItemFormAction,
+  type AdminCatalogItemSaveResult,
+} from "@/actions/admin-catalog-items";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
 import { parseAdminCatalogItemArtworkForm, validateItemLevelWhenNoVariants } from "@/lib/admin-catalog-item";
 
 export function AdminListAddItemForm() {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
   const [itemName, setItemName] = useState("");
   const [storefrontDescription, setStorefrontDescription] = useState("");
   const [itemExampleListingUrl, setItemExampleListingUrl] = useState("");
@@ -20,14 +22,35 @@ export function AdminListAddItemForm() {
   const [itemPrintAreaHeightPx, setItemPrintAreaHeightPx] = useState("");
   const [itemMinArtworkDpi, setItemMinArtworkDpi] = useState("");
   const [itemLargeListingArtwork, setItemLargeListingArtwork] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  const [saveState, saveAction, savePending] = useActionState<
+    AdminCatalogItemSaveResult | null,
+    FormData
+  >(adminAddCatalogItemFormAction, null);
+
+  useEffect(() => {
+    if (saveState?.ok !== true) return;
+    setItemName("");
+    setStorefrontDescription("");
+    setItemExampleListingUrl("");
+    setItemMinPriceDollars("");
+    setItemGoodsServicesCostDollars("");
+    setItemImageRequirementLabel("");
+    setItemPrintAreaWidthPx("");
+    setItemPrintAreaHeightPx("");
+    setItemMinArtworkDpi("");
+    setItemLargeListingArtwork(false);
+    setClientError(null);
+    router.refresh();
+  }, [saveState, router]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
+    setClientError(null);
     const name = itemName.trim();
     if (!name) {
-      setError("Enter an item name.");
+      setClientError("Enter an item name.");
       return;
     }
     const itemLevel = validateItemLevelWhenNoVariants(
@@ -36,7 +59,7 @@ export function AdminListAddItemForm() {
       itemGoodsServicesCostDollars,
     );
     if (!itemLevel.ok) {
-      setError(itemLevel.error);
+      setClientError(itemLevel.error);
       return;
     }
     const ar = parseAdminCatalogItemArtworkForm(
@@ -46,7 +69,7 @@ export function AdminListAddItemForm() {
       itemMinArtworkDpi,
     );
     if (!ar.ok) {
-      setError(ar.error);
+      setClientError(ar.error);
       return;
     }
 
@@ -61,37 +84,11 @@ export function AdminListAddItemForm() {
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
     fd.set("itemLargeListingArtwork", itemLargeListingArtwork ? "1" : "0");
-
-    startTransition(async () => {
-      try {
-        const result = await adminAddCatalogItem(fd);
-        if (!result || result.ok === false) {
-          setError(
-            result?.ok === false
-              ? result.error
-              : "Save did not complete. Redeploy the latest build if this persists.",
-          );
-          return;
-        }
-        setItemName("");
-        setStorefrontDescription("");
-        setItemExampleListingUrl("");
-        setItemMinPriceDollars("");
-        setItemGoodsServicesCostDollars("");
-        setItemImageRequirementLabel("");
-        setItemPrintAreaWidthPx("");
-        setItemPrintAreaHeightPx("");
-        setItemMinArtworkDpi("");
-        setItemLargeListingArtwork(false);
-        router.refresh();
-      } catch (err) {
-        console.error("[AdminListAddItemForm] save item", err);
-        setError(
-          err instanceof Error ? err.message : "Could not save this item. Try again or check server logs.",
-        );
-      }
-    });
+    saveAction(fd);
   }
+
+  const serverError = saveState?.ok === false ? saveState.error : null;
+  const displayError = clientError ?? serverError;
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
@@ -133,18 +130,18 @@ export function AdminListAddItemForm() {
           onChangeLargeListingArtwork={setItemLargeListingArtwork}
         />
 
-        {error ? (
+        {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">
-            {error}
+            {displayError}
           </p>
         ) : null}
 
         <button
           type="submit"
-          disabled={pending}
+          disabled={savePending}
           className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
         >
-          {pending ? "Saving…" : "Save item"}
+          {savePending ? "Saving…" : "Save item"}
         </button>
       </form>
     </div>

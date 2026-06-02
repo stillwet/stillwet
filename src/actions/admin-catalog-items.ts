@@ -22,6 +22,38 @@ export type AdminCatalogItemSaveResult =
   | { ok: true }
   | { ok: false; error: string };
 
+function catalogItemSaveErrorFromUnknown(e: unknown, logLabel: string): string {
+  if (isStalePrismaClientForLargeArtwork(e)) {
+    return "This server build is outdated (missing the large-artwork field). Redeploy production from the latest commit, then try again.";
+  }
+  if (e instanceof Prisma.PrismaClientValidationError) {
+    const msg = e.message;
+    if (/itemLargeListingArtwork/i.test(msg)) {
+      return "Could not save the 30 MB artwork setting — redeploy the latest build, then try again.";
+    }
+    console.error(`[${logLabel}] validation`, e);
+    return "Invalid catalog item data. Check the fields and try again.";
+  }
+  console.error(`[${logLabel}]`, e);
+  return "Could not save this catalog item.";
+}
+
+/** For `useActionState` — wraps update and returns a serializable result. */
+export async function adminUpdateCatalogItemFormAction(
+  _prev: AdminCatalogItemSaveResult | null,
+  formData: FormData,
+): Promise<AdminCatalogItemSaveResult> {
+  return adminUpdateCatalogItem(formData);
+}
+
+/** For `useActionState` — wraps create and returns a serializable result. */
+export async function adminAddCatalogItemFormAction(
+  _prev: AdminCatalogItemSaveResult | null,
+  formData: FormData,
+): Promise<AdminCatalogItemSaveResult> {
+  return adminAddCatalogItem(formData);
+}
+
 async function requireAdmin() {
   const session = await getAdminSessionReadonly();
   if (!session.isAdmin) redirect("/admin/login");
@@ -125,15 +157,13 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
             error: `Large artwork uploads need migration ${LARGE_LISTING_ARTWORK_MIGRATION} on this database. Item saved without the 30 MB flag.`,
           };
         } catch (e2) {
-          console.error("[adminAddCatalogItem] retry without large artwork", e2);
-          return { ok: false, error: "Could not save this catalog item." };
+          return { ok: false, error: catalogItemSaveErrorFromUnknown(e2, "adminAddCatalogItem") };
         }
       }
       const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
       await prisma.adminCatalogItem.create({ data: withoutLarge });
     } else {
-      console.error("[adminAddCatalogItem]", e);
-      return { ok: false, error: "Could not save this catalog item." };
+      return { ok: false, error: catalogItemSaveErrorFromUnknown(e, "adminAddCatalogItem") };
     }
   }
   revalidateAdminViews();
@@ -202,12 +232,10 @@ export async function adminUpdateCatalogItem(
         }
         return { ok: true };
       } catch (e2) {
-        console.error("[adminUpdateCatalogItem] retry without large artwork", e2);
-        return { ok: false, error: "Could not save changes to this catalog item." };
+        return { ok: false, error: catalogItemSaveErrorFromUnknown(e2, "adminUpdateCatalogItem") };
       }
     }
-    console.error("[adminUpdateCatalogItem]", e);
-    return { ok: false, error: "Could not save changes to this catalog item." };
+    return { ok: false, error: catalogItemSaveErrorFromUnknown(e, "adminUpdateCatalogItem") };
   }
   revalidateAdminViews();
   return { ok: true };
