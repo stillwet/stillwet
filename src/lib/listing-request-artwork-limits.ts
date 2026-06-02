@@ -1,8 +1,8 @@
 /**
  * Listing request artwork limits (client-safe — no sharp).
  *
- * - **Picker** (browser): up to 30 MB; files over 20 MB are re-encoded in-browser before crop (see pre-crop cap).
- * - **Upload** (post-crop / no crop): up to 30 MB to staging.
+ * - **Picker** (browser): up to 30 MB; files over 15 MB are re-encoded in-browser to ≤15 MB before crop.
+ * - **Upload** (post-crop): up to 30 MB to staging (chunked).
  * - **Stored** (R2 after crop): up to 15 MB via dimension-preserving compression on the server.
  *
  * Profile / supplement images use ~100 KiB WebP in `shop-setup-image.ts`.
@@ -12,11 +12,11 @@
 /** Max bytes accepted on upload (post-crop submit or non-crop path). */
 export const LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES = 30 * 1024 * 1024;
 
-/** Re-encode in the browser before crop when the picked file exceeds this size. */
-export const LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES = 20 * 1024 * 1024;
-
 /** Max bytes written to R2 after optional server compression (same pixel dimensions). */
 export const LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES = 15 * 1024 * 1024;
+
+/** Browser re-encode cap before crop — same as stored max so upload + crop work on a ≤15 MB source. */
+export const LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES;
 
 /** Largest listing artwork allowed anywhere (Next.js body limit should exceed this). */
 export const LISTING_REQUEST_ARTWORK_PLATFORM_MAX_BYTES = LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES;

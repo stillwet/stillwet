@@ -50,69 +50,54 @@ function r2S3Endpoint(): string {
   return `https://${id}.r2.cloudflarestorage.com`;
 }
 
-/** Upload bytes and return the public HTTPS URL (R2_PUBLIC_BASE_URL + / + key). */
-export async function putPublicR2Object(params: {
+type R2SdkErrorShape = {
+  name?: string;
+  Code?: string;
+  message?: string;
+};
+
+/** User-safe message from an AWS SDK / R2 PutObject failure. */
+export function formatR2ErrorForClient(error: unknown): string {
+  const e = error as R2SdkErrorShape;
+  const name = e?.name ?? e?.Code ?? "";
+  const msg = (e?.message ?? (error instanceof Error ? error.message : String(error))).trim();
+
+  if (name === "AccessDenied" || /access denied/i.test(msg)) {
+    return (
+      "Cloudflare R2 denied write access. In the dashboard, edit your R2 API token so it has Object Read & Write on this bucket (not read-only, and not limited to the listing/ prefix only — shop artwork uses shops/)."
+    );
+  }
+  if (name === "InvalidAccessKeyId" || /invalid access key/i.test(msg)) {
+    return "R2 access key on the server is invalid. Check R2_ACCESS_KEY_ID in Vercel env.";
+  }
+  if (name === "SignatureDoesNotMatch" || /signature/i.test(msg)) {
+    return "R2 secret key does not match the access key. Check R2_SECRET_ACCESS_KEY in Vercel env.";
+  }
+  if (name === "NoSuchBucket" || /no such bucket/i.test(msg)) {
+    return "R2 bucket name in server config was not found. Check R2_BUCKET in Vercel env.";
+  }
+  if (
+    name === "NotImplemented" ||
+    /not implemented|x-amz-checksum|checksum/i.test(msg)
+  ) {
+    return "R2 rejected the upload request (often an SDK checksum issue). Redeploy the latest build and try again.";
+  }
+  if (msg) return `Storage upload failed: ${msg.slice(0, 240)}`;
+  return "Storage upload failed. Check R2 credentials and Object Write permission on the bucket.";
+}
+
+export type PutR2ObjectResult = { ok: true } | { ok: false; error: string };
+
+/** Low-level PutObject to the configured bucket (shared by public URLs and staging parts). */
+export async function putR2ObjectBytes(params: {
   key: string;
   body: Buffer;
   contentType: string;
-}): Promise<string> {
-  const bucket = readR2BucketName();
-  const accessKeyId = readR2Env("R2_ACCESS_KEY_ID");
-  const secretAccessKey = readR2Env("R2_SECRET_ACCESS_KEY");
-  const baseUrl = readR2Env("R2_PUBLIC_BASE_URL")?.replace(/\/$/, "");
-
-  if (!bucket || !accessKeyId || !secretAccessKey || !baseUrl) {
-    throw new Error("R2 bucket credentials or R2_PUBLIC_BASE_URL missing");
-  }
-
-  const client = r2S3Client();
-
-  await client.send(
-    new PutObjectCommand({
-      Bucket: bucket,
-      Key: params.key,
-      Body: params.body,
-      ContentType: params.contentType,
-    }),
-  );
-
-  return `${baseUrl}/${params.key}`;
-}
-
-const LISTING_ARTWORK_STAGING_SEGMENT = "listing-request-staging";
-
-/** Temporary key for browser PUT before submit processes and moves to `listing-request/`. */
-export function shopListingArtworkStagingObjectKey(shopId: string, fileExtension: string): string {
-  const ext = fileExtension.replace(/^\./, "").toLowerCase() || "bin";
-  return `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/${randomUUID()}.${ext}`;
-}
-
-export function isListingArtworkStagingKeyForShop(key: string, shopId: string): boolean {
-  const prefix = `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/`;
-  const k = key.trim();
-  if (!k.startsWith(prefix) || k.includes("..")) return false;
-  return k.length > prefix.length;
-}
-
-function listingArtworkStagingPartKey(stagingKey: string, partIndex: number): string {
-  return `${stagingKey}/parts/part-${String(partIndex).padStart(4, "0")}`;
-}
-
-export type PutListingArtworkStagingPartResult =
-  | { ok: true }
-  | { ok: false; error: string };
-
-export async function putListingArtworkStagingPart(
-  stagingKey: string,
-  partIndex: number,
-  body: Buffer,
-): Promise<PutListingArtworkStagingPartResult> {
+}): Promise<PutR2ObjectResult> {
   const bucket = readR2BucketName();
   if (!bucket) return { ok: false, error: "R2 bucket not configured" };
-  if (partIndex < 0) return { ok: false, error: "Invalid part index" };
-  if (body.length === 0) return { ok: false, error: "Empty chunk body" };
+  if (params.body.length === 0) return { ok: false, error: "Empty upload body" };
 
-  const Key = listingArtworkStagingPartKey(stagingKey, partIndex);
   const client = r2S3Client();
   let lastError = "unknown";
 
@@ -121,26 +106,100 @@ export async function putListingArtworkStagingPart(
       await client.send(
         new PutObjectCommand({
           Bucket: bucket,
-          Key,
-          Body: body,
-          ContentType: "application/octet-stream",
+          Key: params.key,
+          Body: params.body,
+          ContentType: params.contentType,
         }),
       );
       return { ok: true };
-    } catch (e) {
-      lastError = e instanceof Error ? e.message : String(e);
-      console.error("[r2] putListingArtworkStagingPart failed", {
-        stagingKey,
-        partIndex,
-        key: Key,
+    } catch (err) {
+      lastError = formatR2ErrorForClient(err);
+      console.error("[r2] putR2ObjectBytes failed", {
+        key: params.key,
         attempt,
-        error: lastError,
+        error: err instanceof Error ? err.message : String(err),
       });
       if (attempt === 0) await new Promise((r) => setTimeout(r, 400));
     }
   }
 
   return { ok: false, error: lastError };
+}
+
+/** Upload bytes and return the public HTTPS URL (R2_PUBLIC_BASE_URL + / + key). */
+export async function putPublicR2Object(params: {
+  key: string;
+  body: Buffer;
+  contentType: string;
+}): Promise<string> {
+  const baseUrl = readR2Env("R2_PUBLIC_BASE_URL")?.replace(/\/$/, "");
+  if (!baseUrl || !readR2Env("R2_ACCESS_KEY_ID") || !readR2Env("R2_SECRET_ACCESS_KEY")) {
+    throw new Error("R2 bucket credentials or R2_PUBLIC_BASE_URL missing");
+  }
+
+  const put = await putR2ObjectBytes(params);
+  if (!put.ok) throw new Error(put.error);
+
+  return `${baseUrl}/${params.key}`;
+}
+
+const LISTING_ARTWORK_STAGING_SEGMENT = "listing-request-staging";
+
+/** Temporary upload id before submit processes and moves to `listing-request/`. */
+export function shopListingArtworkStagingObjectKey(shopId: string, _fileExtension?: string): string {
+  return `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/${randomUUID()}`;
+}
+
+export function isListingArtworkStagingKeyForShop(key: string, shopId: string): boolean {
+  const prefix = `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/`;
+  const k = key.trim();
+  if (!k.startsWith(prefix) || k.includes("..")) return false;
+  const rest = k.slice(prefix.length);
+  if (!rest || rest.includes("/")) return false;
+  if (/^[0-9a-f-]{36}$/i.test(rest)) return true;
+  /** Legacy keys included a file extension before `/parts/`. */
+  return /^[0-9a-f-]{36}\.[a-z0-9]{2,5}$/i.test(rest);
+}
+
+/** One-byte write + delete under `shops/{shopId}/listing-request-staging/` to verify token scope. */
+export async function verifyListingArtworkStagingR2Write(
+  shopId: string,
+): Promise<PutR2ObjectResult> {
+  const probeKey = `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/.write-probe`;
+  const put = await putR2ObjectBytes({
+    key: probeKey,
+    body: Buffer.from("1"),
+    contentType: "text/plain",
+  });
+  if (!put.ok) return put;
+
+  const bucket = readR2BucketName();
+  if (!bucket) return { ok: false, error: "R2 bucket not configured" };
+  try {
+    await r2S3Client().send(new DeleteObjectCommand({ Bucket: bucket, Key: probeKey }));
+  } catch (err) {
+    console.warn("[r2] verifyListingArtworkStagingR2Write: probe delete failed", err);
+  }
+  return { ok: true };
+}
+
+function listingArtworkStagingPartKey(stagingKey: string, partIndex: number): string {
+  return `${stagingKey}/parts/part-${String(partIndex).padStart(4, "0")}`;
+}
+
+export type PutListingArtworkStagingPartResult = PutR2ObjectResult;
+
+export async function putListingArtworkStagingPart(
+  stagingKey: string,
+  partIndex: number,
+  body: Buffer,
+): Promise<PutListingArtworkStagingPartResult> {
+  if (partIndex < 0) return { ok: false, error: "Invalid part index" };
+  return putR2ObjectBytes({
+    key: listingArtworkStagingPartKey(stagingKey, partIndex),
+    body,
+    contentType: "application/octet-stream",
+  });
 }
 
 /** Staged listing artwork (single PUT or chunked parts under `{key}/parts/`). */
@@ -211,13 +270,18 @@ export async function getR2ObjectBuffer(key: string): Promise<Buffer | null> {
   }
 }
 
+let r2S3ClientSingleton: S3Client | null = null;
+
 function r2S3Client(): S3Client {
+  if (r2S3ClientSingleton) return r2S3ClientSingleton;
+
   const accessKeyId = readR2Env("R2_ACCESS_KEY_ID");
   const secretAccessKey = readR2Env("R2_SECRET_ACCESS_KEY");
   if (!accessKeyId || !secretAccessKey) {
     throw new Error("R2 credentials missing");
   }
-  return new S3Client({
+
+  const client = new S3Client({
     region: "auto",
     endpoint: r2S3Endpoint(),
     credentials: { accessKeyId, secretAccessKey },
@@ -226,6 +290,25 @@ function r2S3Client(): S3Client {
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
   });
+
+  client.middlewareStack.add(
+    (next) => async (args) => {
+      const req = args.request as { headers?: Record<string, string> };
+      if (req?.headers) {
+        for (const key of Object.keys(req.headers)) {
+          const lower = key.toLowerCase();
+          if (lower.startsWith("x-amz-checksum") || lower === "x-amz-sdk-checksum-algorithm") {
+            delete req.headers[key];
+          }
+        }
+      }
+      return next(args);
+    },
+    { step: "build", name: "r2StripChecksumHeaders" },
+  );
+
+  r2S3ClientSingleton = client;
+  return client;
 }
 
 /** Map a browser URL back to object key if it lives under R2_PUBLIC_BASE_URL. */

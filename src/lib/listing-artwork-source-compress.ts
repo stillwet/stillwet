@@ -1,9 +1,14 @@
 import {
   LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES,
-  listingRequestArtworkPreCropMaxMb,
+  LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  listingRequestArtworkStoredMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 
-export { LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES, listingRequestArtworkPreCropMaxMb };
+export {
+  LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES,
+  LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  listingRequestArtworkStoredMaxMb as listingArtworkPreCropTargetMaxMb,
+};
 
 function canvasToBlob(
   canvas: HTMLCanvasElement,
@@ -94,8 +99,8 @@ export async function compressListingArtworkSourceIfNeeded(
   }
 
   const preferAlpha = file.type === "image/png" || file.type === "image/webp";
-  const cap = LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES;
-  const capMb = listingRequestArtworkPreCropMaxMb();
+  const cap = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES;
+  const capMb = listingRequestArtworkStoredMaxMb();
 
   let scale = 1;
   for (let attempt = 0; attempt < 12; attempt++) {

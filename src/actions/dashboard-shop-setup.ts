@@ -19,6 +19,7 @@ import {
   putPublicR2Object,
   shopListingArtworkStagingObjectKey,
   shopProfileAvatarObjectKey,
+  verifyListingArtworkStagingR2Write,
 } from "@/lib/r2-upload";
 import {
   listingRequestArtworkStoredMaxMb,
@@ -322,11 +323,16 @@ export async function createListingArtworkStagingUpload(
   if (byteSize > uploadMax) {
     return { ok: false, error: `Artwork file is too large (max ${uploadMaxMb} MB upload).` };
   }
-  const ext = listingArtworkExtensionForContentType(contentType);
-  if (!ext) {
+  if (!listingArtworkExtensionForContentType(contentType)) {
     return { ok: false, error: "Use a PNG, JPEG, or WebP artwork file." };
   }
-  const stagingKey = shopListingArtworkStagingObjectKey(user.shop.id, ext);
+
+  const writeCheck = await verifyListingArtworkStagingR2Write(user.shop.id);
+  if (!writeCheck.ok) {
+    return { ok: false, error: writeCheck.error };
+  }
+
+  const stagingKey = shopListingArtworkStagingObjectKey(user.shop.id);
   return { ok: true, stagingKey };
 }
 

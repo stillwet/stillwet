@@ -69,11 +69,10 @@ export async function POST(request: Request) {
       partIndex,
       error: put.error,
     });
-    const hint =
-      process.env.NODE_ENV === "development"
-        ? `Could not store upload chunk: ${put.error}`
-        : "Could not store upload chunk. Check R2 credentials and Object Write permission, then try again.";
-    return NextResponse.json({ error: hint }, { status: 500 });
+    return NextResponse.json(
+      { error: `Could not store upload chunk. ${put.error}` },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ ok: true });

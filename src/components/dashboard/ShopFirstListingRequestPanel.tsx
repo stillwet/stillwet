@@ -16,7 +16,6 @@ import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draf
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
   LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES,
-  listingRequestArtworkPreCropMaxMb,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
@@ -255,7 +254,6 @@ export function ShopFirstListingRequestPanel(props: {
   const listingArtworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
   const listingArtworkUploadMaxBytes = listingRequestArtworkUploadMaxBytes();
   const listingArtworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
-  const listingArtworkPreCropMaxMb = listingRequestArtworkPreCropMaxMb();
 
   async function applyListingArtworkPickedFile(file: File) {
     setListingSubmitArtworkFile(null);
@@ -761,9 +759,9 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — files over {listingArtworkPreCropMaxMb}{" "}
-            MB are compressed in your browser before crop; saved for admin review up to {listingArtworkStoredMaxMb}{" "}
-            MB at print pixel size)
+            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — files over {listingArtworkStoredMaxMb} MB are
+            compressed in your browser to {listingArtworkStoredMaxMb} MB before crop; final file stored up to{" "}
+            {listingArtworkStoredMaxMb} MB at print pixel size)
             <input
               ref={listingFileRef}
               type="file"
@@ -794,7 +792,7 @@ export function ShopFirstListingRequestPanel(props: {
             />
             {artworkSourcePreparing ? (
               <p className="mt-2 text-[11px] text-zinc-500" role="status">
-                Preparing image (compressing large files to {listingArtworkPreCropMaxMb} MB before crop)…
+                Preparing image (compressing to {listingArtworkStoredMaxMb} MB before crop)…
               </p>
             ) : null}
             {requiresPrintCrop && !listingSubmitArtworkFile ? (

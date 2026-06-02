@@ -4,8 +4,8 @@
  * Usage: npx tsx scripts/verify-listing-artwork-staging.ts
  * Prod:  node scripts/with-production-env.cjs node_modules/tsx/dist/cli.mjs scripts/verify-listing-artwork-staging.ts
  */
+import { config } from "dotenv";
 import sharp from "sharp";
-import { prisma } from "../src/lib/prisma";
 import {
   deleteListingArtworkStaging,
   isR2UploadConfigured,
@@ -17,19 +17,16 @@ import { listingArtworkStagingChunkCount } from "../src/lib/listing-artwork-stag
 import { LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES } from "../src/lib/listing-request-artwork-limits";
 
 async function main() {
+  config({ path: ".env" });
+  config({ path: ".env.local", override: true });
+
   if (!isR2UploadConfigured()) {
     console.error("R2 not configured — set R2_* env vars first.");
     process.exit(1);
   }
 
-  const shop = await prisma.shop.findFirst({
-    where: { slug: { not: "stillwet" } },
-    select: { id: true, slug: true },
-  });
-  if (!shop) {
-    console.error("No shop found for staging test.");
-    process.exit(1);
-  }
+  const shopId = String(process.env.R2_VERIFY_SHOP_ID ?? "").trim() || "verify-shop";
+  const shopSlug = String(process.env.R2_VERIFY_SHOP_SLUG ?? "").trim() || shopId;
 
   const png = await sharp({
     create: {
@@ -42,11 +39,11 @@ async function main() {
     .png()
     .toBuffer();
 
-  const stagingKey = shopListingArtworkStagingObjectKey(shop.id, "png");
+  const stagingKey = shopListingArtworkStagingObjectKey(shopId);
   const chunkSize = LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES;
   const partCount = listingArtworkStagingChunkCount(png.length);
 
-  console.log(`Shop: ${shop.slug}, staging key: ${stagingKey}`);
+  console.log(`Shop: ${shopSlug} (${shopId}), staging key: ${stagingKey}`);
   console.log(`PNG ${png.length} bytes → ${partCount} chunk(s)`);
 
   for (let i = 0; i < partCount; i++) {
@@ -78,4 +75,4 @@ main()
     console.error("FAILED:", e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => {});
