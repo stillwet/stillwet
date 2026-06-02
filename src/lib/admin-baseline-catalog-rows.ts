@@ -6,7 +6,15 @@ const LARGE_LISTING_ARTWORK_MIGRATION = "20260603120000_admin_catalog_large_list
 
 export { LARGE_LISTING_ARTWORK_MIGRATION };
 
+/** Deployed app older than schema (generated client lacks `itemLargeListingArtwork`). */
+export function isStalePrismaClientForLargeArtwork(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  return /Unknown argument `itemLargeListingArtwork`/i.test(msg);
+}
+
+/** Postgres column not migrated yet — not the same as an unknown Prisma Client field. */
 export function isMissingLargeListingArtworkColumn(e: unknown): boolean {
+  if (isStalePrismaClientForLargeArtwork(e)) return false;
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     if (e.code === "P2022") return true;
     const column = e.meta?.column;
@@ -15,8 +23,9 @@ export function isMissingLargeListingArtworkColumn(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);
   return (
     /itemLargeListingArtwork/i.test(msg) &&
-    (/does not exist|Unknown column|column .* does not exist|P2022|42703/i.test(msg) ||
-      /Invalid `prisma\.adminCatalogItem\.(findMany|findUnique|update|create)/i.test(msg))
+    (/does not exist|Unknown column|column .* does not exist|42703/i.test(msg) ||
+      (/Invalid `prisma\.adminCatalogItem\.(findMany|findUnique|update|create)/i.test(msg) &&
+        /does not exist/i.test(msg)))
   );
 }
 

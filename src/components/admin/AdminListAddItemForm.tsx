@@ -60,25 +60,36 @@ export function AdminListAddItemForm() {
     fd.set("itemPrintAreaWidthPx", itemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
-    if (itemLargeListingArtwork) fd.set("itemLargeListingArtwork", "1");
+    fd.set("itemLargeListingArtwork", itemLargeListingArtwork ? "1" : "0");
 
     startTransition(async () => {
-      const result = await adminAddCatalogItem(fd);
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await adminAddCatalogItem(fd);
+        if (!result || result.ok === false) {
+          setError(
+            result?.ok === false
+              ? result.error
+              : "Save did not complete. Redeploy the latest build if this persists.",
+          );
+          return;
+        }
+        setItemName("");
+        setStorefrontDescription("");
+        setItemExampleListingUrl("");
+        setItemMinPriceDollars("");
+        setItemGoodsServicesCostDollars("");
+        setItemImageRequirementLabel("");
+        setItemPrintAreaWidthPx("");
+        setItemPrintAreaHeightPx("");
+        setItemMinArtworkDpi("");
+        setItemLargeListingArtwork(false);
+        router.refresh();
+      } catch (err) {
+        console.error("[AdminListAddItemForm] save item", err);
+        setError(
+          err instanceof Error ? err.message : "Could not save this item. Try again or check server logs.",
+        );
       }
-      setItemName("");
-      setStorefrontDescription("");
-      setItemExampleListingUrl("");
-      setItemMinPriceDollars("");
-      setItemGoodsServicesCostDollars("");
-      setItemImageRequirementLabel("");
-      setItemPrintAreaWidthPx("");
-      setItemPrintAreaHeightPx("");
-      setItemMinArtworkDpi("");
-      setItemLargeListingArtwork(false);
-      router.refresh();
     });
   }
 

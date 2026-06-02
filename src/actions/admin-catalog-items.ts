@@ -12,6 +12,7 @@ import {
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
 import {
   isMissingLargeListingArtworkColumn,
+  isStalePrismaClientForLargeArtwork,
   LARGE_LISTING_ARTWORK_MIGRATION,
 } from "@/lib/admin-baseline-catalog-rows";
 
@@ -26,6 +27,13 @@ async function requireAdmin() {
   if (!session.isAdmin) redirect("/admin/login");
 }
 
+function parseLargeListingArtworkFromForm(formData: FormData): boolean {
+  const raw = formData.get("itemLargeListingArtwork");
+  if (raw == null) return false;
+  const s = String(raw).trim().toLowerCase();
+  return s === "1" || s === "true" || s === "on" || s === "yes";
+}
+
 function itemLevelFromFormWhenNoVariants(formData: FormData):
   | {
       ok: true;
@@ -38,20 +46,20 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemMinArtworkDpi: number | null;
       itemLargeListingArtwork: boolean;
     }
-  | { ok: false } {
+  | { ok: false; error: string } {
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
   const itemPrice = String(formData.get("itemMinPriceDollars") ?? "");
   const itemGs = String(formData.get("itemGoodsServicesCostDollars") ?? "");
   const v = validateItemLevelWhenNoVariants(itemEx, itemPrice, itemGs);
-  if (!v.ok) return { ok: false };
+  if (!v.ok) return { ok: false, error: v.error };
   const ar = parseAdminCatalogItemArtworkForm(
     String(formData.get("itemImageRequirementLabel") ?? ""),
     String(formData.get("itemPrintAreaWidthPx") ?? ""),
     String(formData.get("itemPrintAreaHeightPx") ?? ""),
     String(formData.get("itemMinArtworkDpi") ?? ""),
   );
-  if (!ar.ok) return { ok: false };
-  const itemLargeListingArtwork = formData.get("itemLargeListingArtwork") === "1";
+  if (!ar.ok) return { ok: false, error: ar.error };
+  const itemLargeListingArtwork = parseLargeListingArtworkFromForm(formData);
   return {
     ok: true,
     itemExampleListingUrl: v.exampleListingUrl,
@@ -71,7 +79,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
   if (!name) return { ok: false, error: "Enter an item name." };
 
   const itemLevel = itemLevelFromFormWhenNoVariants(formData);
-  if (!itemLevel.ok) return { ok: false, error: "Check item price and artwork fields." };
+  if (!itemLevel.ok) return { ok: false, error: itemLevel.error };
   const storefrontDescriptionRaw = String(formData.get("storefrontDescription") ?? "");
   const storefrontDescription = storefrontDescriptionRaw.trim()
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
@@ -99,6 +107,13 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
   try {
     await prisma.adminCatalogItem.create({ data: createData });
   } catch (e) {
+    if (isStalePrismaClientForLargeArtwork(e)) {
+      return {
+        ok: false,
+        error:
+          "This server build is outdated (missing the large-artwork field). Redeploy production from the latest commit, then try again.",
+      };
+    }
     if (isMissingLargeListingArtworkColumn(e)) {
       if (itemLevel.itemLargeListingArtwork) {
         const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
@@ -134,7 +149,7 @@ export async function adminUpdateCatalogItem(
   if (!id || !name) return { ok: false, error: "Missing item id or name." };
 
   const itemLevel = itemLevelFromFormWhenNoVariants(formData);
-  if (!itemLevel.ok) return { ok: false, error: "Check item price and artwork fields." };
+  if (!itemLevel.ok) return { ok: false, error: itemLevel.error };
   const storefrontDescriptionRaw = String(formData.get("storefrontDescription") ?? "");
   const storefrontDescription = storefrontDescriptionRaw.trim()
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
@@ -153,8 +168,6 @@ export async function adminUpdateCatalogItem(
     itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
     itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
     itemLargeListingArtwork: itemLevel.itemLargeListingArtwork,
-    /** FK scalars are not on `updateMany` mutation input; disconnect clears the link like `itemPlatformProductId: null`. */
-    itemPlatformProduct: { disconnect: true },
   };
 
   try {
@@ -165,6 +178,13 @@ export async function adminUpdateCatalogItem(
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
       return { ok: false, error: "That catalog item no longer exists." };
+    }
+    if (isStalePrismaClientForLargeArtwork(e)) {
+      return {
+        ok: false,
+        error:
+          "This server build is outdated (missing the large-artwork field). Redeploy production from the latest commit, then try again.",
+      };
     }
     if (isMissingLargeListingArtworkColumn(e)) {
       const { itemLargeListingArtwork: _omit, ...withoutLarge } = updateData;

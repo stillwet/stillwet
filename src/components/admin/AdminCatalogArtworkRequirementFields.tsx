@@ -80,6 +80,8 @@ export function AdminCatalogArtworkRequirementFields({
       <label className="flex cursor-pointer items-start gap-2 text-xs text-zinc-400">
         <input
           type="checkbox"
+          name="itemLargeListingArtwork"
+          value="1"
           checked={largeListingArtwork}
           onChange={(e) => onChangeLargeListingArtwork(e.target.checked)}
           className="mt-0.5 rounded border-zinc-600 bg-zinc-900"

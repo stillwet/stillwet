@@ -349,15 +349,26 @@ export function AdminListItemsPanel({
     fd.set("itemPrintAreaWidthPx", editItemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", editItemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
-    if (editItemLargeListingArtwork) fd.set("itemLargeListingArtwork", "1");
+    fd.set("itemLargeListingArtwork", editItemLargeListingArtwork ? "1" : "0");
     startTransition(async () => {
-      const result = await adminUpdateCatalogItem(fd);
-      if (!result.ok) {
-        setEditError(result.error);
-        return;
+      try {
+        const result = await adminUpdateCatalogItem(fd);
+        if (!result || result.ok === false) {
+          setEditError(
+            result?.ok === false
+              ? result.error
+              : "Save did not complete. Redeploy the latest build if this persists.",
+          );
+          return;
+        }
+        cancelEdit();
+        router.refresh();
+      } catch (err) {
+        console.error("[AdminListItemsPanel] save item", err);
+        setEditError(
+          err instanceof Error ? err.message : "Could not save changes. Try again or check server logs.",
+        );
       }
-      cancelEdit();
-      router.refresh();
     });
   }
 
