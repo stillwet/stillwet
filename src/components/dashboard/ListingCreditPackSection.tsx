@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { redeemListingCreditGiftCode } from "@/actions/dashboard-listing-credits";
+import { useState } from "react";
 import type { UnpaidPublicationFeeListingRow } from "@/lib/listing-fee-unpaid-rows";
 import {
   CREATOR_FREE_LISTINGS_MESSAGE_COUNT,
@@ -42,10 +41,6 @@ export function ListingCreditPackSection(props: {
   const { unpaidListings, freeListingSlots, stripePublishableKey, mockListingFeeCheckout } = props;
 
   const [payPanelPack, setPayPanelPack] = useState<ListingCreditPack | null>(null);
-  const [redeemState, redeemAction, redeemPending] = useActionState(
-    redeemListingCreditGiftCode,
-    undefined,
-  );
   const hasUnpaid = unpaidListings.length > 0;
 
   return (
@@ -68,42 +63,6 @@ export function ListingCreditPackSection(props: {
         </ul>
         <FreeListingSlotsHint slots={freeListingSlots} />
       </div>
-
-      <form action={redeemAction} className="rounded-lg border border-zinc-800 bg-zinc-900/35 p-3">
-        <label className="block text-xs font-medium uppercase tracking-wide text-zinc-500">
-          Redeem listing credit gift code
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-            <input
-              type="text"
-              name="giftCode"
-              autoComplete="off"
-              placeholder="LIST-..."
-              className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm uppercase tracking-[0.16em] text-zinc-100"
-            />
-            <button
-              type="submit"
-              disabled={redeemPending}
-              className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-700 disabled:opacity-50"
-            >
-              {redeemPending ? "Redeeming…" : "Redeem"}
-            </button>
-          </div>
-        </label>
-        {redeemState?.ok ? (
-          <p className="mt-2 text-xs text-emerald-300">
-            Redeemed {redeemState.creditsGranted}{" "}
-            {redeemState.creditsGranted === 1 ? "listing credit" : "listing credits"}.
-          </p>
-        ) : redeemState ? (
-          <p className="mt-2 text-xs text-amber-300" role="alert">
-            {redeemState.error}
-          </p>
-        ) : (
-          <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-            Gifted listing credit codes can be used once by one shop.
-          </p>
-        )}
-      </form>
 
       {hasUnpaid ? (
         <div className="rounded-lg border border-amber-900/40 bg-amber-950/20 px-3 py-2 text-xs text-amber-200/90">

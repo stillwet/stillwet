@@ -30,11 +30,14 @@ export default async function PublicConfirmDevicePage({ searchParams }: PageProp
   if (res.ok) {
     await trustDeviceForUser(res.shopUserId, res.deviceIdHash);
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col px-4 py-16">
-        <h1 className="text-xl font-semibold text-zinc-50">Device confirmed</h1>
+      <main className="mx-auto flex min-h-[60vh] max-w-md flex-col px-4 py-16">
+        <h1 className="text-xl font-semibold text-zinc-50">Success! This device is verified</h1>
         <p className="mt-4 text-sm text-zinc-400">
           Return to the device you’re signing in on. It should finish logging in automatically.
         </p>
+        <Link href="/dashboard/login" className="mt-6 text-sm text-blue-400 hover:underline">
+          Go to login
+        </Link>
       </main>
     );
   }

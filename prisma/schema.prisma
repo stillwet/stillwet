@@ -917,6 +917,8 @@ model CreatorGiftCode {
   redeemedAt                   DateTime?
   redeemedByShopId             String?
   redeemedByShop               Shop?               @relation("CreatorGiftCodeRedeemedByShop", fields: [redeemedByShopId], references: [id], onDelete: SetNull)
+  /** Optional internal admin notes (beta / waived-fee code tracker). */
+  adminNotes                   String?
   createdAt                    DateTime            @default(now())
 
   @@index([purchaseId, type])

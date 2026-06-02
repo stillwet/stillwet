@@ -76,12 +76,14 @@ export async function proxy(request: NextRequest) {
 
   if (
     pathname.startsWith("/gate") ||
+    pathname.startsWith("/confirm-device") ||
     pathname.startsWith("/dashboard/login") ||
     pathname.startsWith("/dashboard/forgot-password") ||
     pathname.startsWith("/dashboard/preview-reset-email") ||
     pathname.startsWith("/dashboard/preview-verify-email") ||
     pathname.startsWith("/dashboard/reset-password") ||
     pathname.startsWith("/dashboard/verify-email") ||
+    pathname.startsWith("/dashboard/confirm-device") ||
     pathname.startsWith("/api/site-access") ||
     pathname.startsWith("/api/health") ||
     pathname.startsWith("/api/dashboard/") ||

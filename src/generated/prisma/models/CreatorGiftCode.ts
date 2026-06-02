@@ -50,6 +50,7 @@ export type CreatorGiftCodeMinAggregateOutputType = {
   promotionCreditsGranted: number | null
   redeemedAt: Date | null
   redeemedByShopId: string | null
+  adminNotes: string | null
   createdAt: Date | null
 }
 
@@ -65,6 +66,7 @@ export type CreatorGiftCodeMaxAggregateOutputType = {
   promotionCreditsGranted: number | null
   redeemedAt: Date | null
   redeemedByShopId: string | null
+  adminNotes: string | null
   createdAt: Date | null
 }
 
@@ -80,6 +82,7 @@ export type CreatorGiftCodeCountAggregateOutputType = {
   promotionCreditsGranted: number
   redeemedAt: number
   redeemedByShopId: number
+  adminNotes: number
   createdAt: number
   _all: number
 }
@@ -109,6 +112,7 @@ export type CreatorGiftCodeMinAggregateInputType = {
   promotionCreditsGranted?: true
   redeemedAt?: true
   redeemedByShopId?: true
+  adminNotes?: true
   createdAt?: true
 }
 
@@ -124,6 +128,7 @@ export type CreatorGiftCodeMaxAggregateInputType = {
   promotionCreditsGranted?: true
   redeemedAt?: true
   redeemedByShopId?: true
+  adminNotes?: true
   createdAt?: true
 }
 
@@ -139,6 +144,7 @@ export type CreatorGiftCodeCountAggregateInputType = {
   promotionCreditsGranted?: true
   redeemedAt?: true
   redeemedByShopId?: true
+  adminNotes?: true
   createdAt?: true
   _all?: true
 }
@@ -241,6 +247,7 @@ export type CreatorGiftCodeGroupByOutputType = {
   promotionCreditsGranted: number
   redeemedAt: Date | null
   redeemedByShopId: string | null
+  adminNotes: string | null
   createdAt: Date
   _count: CreatorGiftCodeCountAggregateOutputType | null
   _avg: CreatorGiftCodeAvgAggregateOutputType | null
@@ -279,6 +286,7 @@ export type CreatorGiftCodeWhereInput = {
   promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftCode"> | number
   redeemedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftCode"> | Date | string | null
   redeemedByShopId?: Prisma.StringNullableFilter<"CreatorGiftCode"> | string | null
+  adminNotes?: Prisma.StringNullableFilter<"CreatorGiftCode"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CreatorGiftCode"> | Date | string
   purchase?: Prisma.XOR<Prisma.CreatorGiftPurchaseScalarRelationFilter, Prisma.CreatorGiftPurchaseWhereInput>
   redeemedByShop?: Prisma.XOR<Prisma.ShopNullableScalarRelationFilter, Prisma.ShopWhereInput> | null
@@ -296,6 +304,7 @@ export type CreatorGiftCodeOrderByWithRelationInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   redeemedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   redeemedByShopId?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   purchase?: Prisma.CreatorGiftPurchaseOrderByWithRelationInput
   redeemedByShop?: Prisma.ShopOrderByWithRelationInput
@@ -316,6 +325,7 @@ export type CreatorGiftCodeWhereUniqueInput = Prisma.AtLeast<{
   promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftCode"> | number
   redeemedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftCode"> | Date | string | null
   redeemedByShopId?: Prisma.StringNullableFilter<"CreatorGiftCode"> | string | null
+  adminNotes?: Prisma.StringNullableFilter<"CreatorGiftCode"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CreatorGiftCode"> | Date | string
   purchase?: Prisma.XOR<Prisma.CreatorGiftPurchaseScalarRelationFilter, Prisma.CreatorGiftPurchaseWhereInput>
   redeemedByShop?: Prisma.XOR<Prisma.ShopNullableScalarRelationFilter, Prisma.ShopWhereInput> | null
@@ -333,6 +343,7 @@ export type CreatorGiftCodeOrderByWithAggregationInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   redeemedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   redeemedByShopId?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.CreatorGiftCodeCountOrderByAggregateInput
   _avg?: Prisma.CreatorGiftCodeAvgOrderByAggregateInput
@@ -356,6 +367,7 @@ export type CreatorGiftCodeScalarWhereWithAggregatesInput = {
   promotionCreditsGranted?: Prisma.IntWithAggregatesFilter<"CreatorGiftCode"> | number
   redeemedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CreatorGiftCode"> | Date | string | null
   redeemedByShopId?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftCode"> | string | null
+  adminNotes?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftCode"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CreatorGiftCode"> | Date | string
 }
 
@@ -369,6 +381,7 @@ export type CreatorGiftCodeCreateInput = {
   promotionKind?: $Enums.PromotionKind | null
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
+  adminNotes?: string | null
   createdAt?: Date | string
   purchase: Prisma.CreatorGiftPurchaseCreateNestedOneWithoutCodesInput
   redeemedByShop?: Prisma.ShopCreateNestedOneWithoutCreatorGiftCodesRedeemedInput
@@ -386,6 +399,7 @@ export type CreatorGiftCodeUncheckedCreateInput = {
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
   redeemedByShopId?: string | null
+  adminNotes?: string | null
   createdAt?: Date | string
 }
 
@@ -399,6 +413,7 @@ export type CreatorGiftCodeUpdateInput = {
   promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchase?: Prisma.CreatorGiftPurchaseUpdateOneRequiredWithoutCodesNestedInput
   redeemedByShop?: Prisma.ShopUpdateOneWithoutCreatorGiftCodesRedeemedNestedInput
@@ -416,6 +431,7 @@ export type CreatorGiftCodeUncheckedUpdateInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   redeemedByShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -431,6 +447,7 @@ export type CreatorGiftCodeCreateManyInput = {
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
   redeemedByShopId?: string | null
+  adminNotes?: string | null
   createdAt?: Date | string
 }
 
@@ -444,6 +461,7 @@ export type CreatorGiftCodeUpdateManyMutationInput = {
   promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -459,6 +477,7 @@ export type CreatorGiftCodeUncheckedUpdateManyInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   redeemedByShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -484,6 +503,7 @@ export type CreatorGiftCodeCountOrderByAggregateInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   redeemedAt?: Prisma.SortOrder
   redeemedByShopId?: Prisma.SortOrder
+  adminNotes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -505,6 +525,7 @@ export type CreatorGiftCodeMaxOrderByAggregateInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   redeemedAt?: Prisma.SortOrder
   redeemedByShopId?: Prisma.SortOrder
+  adminNotes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -520,6 +541,7 @@ export type CreatorGiftCodeMinOrderByAggregateInput = {
   promotionCreditsGranted?: Prisma.SortOrder
   redeemedAt?: Prisma.SortOrder
   redeemedByShopId?: Prisma.SortOrder
+  adminNotes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -627,6 +649,7 @@ export type CreatorGiftCodeCreateWithoutRedeemedByShopInput = {
   promotionKind?: $Enums.PromotionKind | null
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
+  adminNotes?: string | null
   createdAt?: Date | string
   purchase: Prisma.CreatorGiftPurchaseCreateNestedOneWithoutCodesInput
 }
@@ -642,6 +665,7 @@ export type CreatorGiftCodeUncheckedCreateWithoutRedeemedByShopInput = {
   promotionKind?: $Enums.PromotionKind | null
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
+  adminNotes?: string | null
   createdAt?: Date | string
 }
 
@@ -686,6 +710,7 @@ export type CreatorGiftCodeScalarWhereInput = {
   promotionCreditsGranted?: Prisma.IntFilter<"CreatorGiftCode"> | number
   redeemedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftCode"> | Date | string | null
   redeemedByShopId?: Prisma.StringNullableFilter<"CreatorGiftCode"> | string | null
+  adminNotes?: Prisma.StringNullableFilter<"CreatorGiftCode"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CreatorGiftCode"> | Date | string
 }
 
@@ -699,6 +724,7 @@ export type CreatorGiftCodeCreateWithoutPurchaseInput = {
   promotionKind?: $Enums.PromotionKind | null
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
+  adminNotes?: string | null
   createdAt?: Date | string
   redeemedByShop?: Prisma.ShopCreateNestedOneWithoutCreatorGiftCodesRedeemedInput
 }
@@ -714,6 +740,7 @@ export type CreatorGiftCodeUncheckedCreateWithoutPurchaseInput = {
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
   redeemedByShopId?: string | null
+  adminNotes?: string | null
   createdAt?: Date | string
 }
 
@@ -754,6 +781,7 @@ export type CreatorGiftCodeCreateManyRedeemedByShopInput = {
   promotionKind?: $Enums.PromotionKind | null
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
+  adminNotes?: string | null
   createdAt?: Date | string
 }
 
@@ -767,6 +795,7 @@ export type CreatorGiftCodeUpdateWithoutRedeemedByShopInput = {
   promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchase?: Prisma.CreatorGiftPurchaseUpdateOneRequiredWithoutCodesNestedInput
 }
@@ -782,6 +811,7 @@ export type CreatorGiftCodeUncheckedUpdateWithoutRedeemedByShopInput = {
   promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -796,6 +826,7 @@ export type CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopInput = {
   promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -810,6 +841,7 @@ export type CreatorGiftCodeCreateManyPurchaseInput = {
   promotionCreditsGranted?: number
   redeemedAt?: Date | string | null
   redeemedByShopId?: string | null
+  adminNotes?: string | null
   createdAt?: Date | string
 }
 
@@ -823,6 +855,7 @@ export type CreatorGiftCodeUpdateWithoutPurchaseInput = {
   promotionKind?: Prisma.NullableEnumPromotionKindFieldUpdateOperationsInput | $Enums.PromotionKind | null
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   redeemedByShop?: Prisma.ShopUpdateOneWithoutCreatorGiftCodesRedeemedNestedInput
 }
@@ -838,6 +871,7 @@ export type CreatorGiftCodeUncheckedUpdateWithoutPurchaseInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   redeemedByShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -852,6 +886,7 @@ export type CreatorGiftCodeUncheckedUpdateManyWithoutPurchaseInput = {
   promotionCreditsGranted?: Prisma.IntFieldUpdateOperationsInput | number
   redeemedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   redeemedByShopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -869,6 +904,7 @@ export type CreatorGiftCodeSelect<ExtArgs extends runtime.Types.Extensions.Inter
   promotionCreditsGranted?: boolean
   redeemedAt?: boolean
   redeemedByShopId?: boolean
+  adminNotes?: boolean
   createdAt?: boolean
   purchase?: boolean | Prisma.CreatorGiftPurchaseDefaultArgs<ExtArgs>
   redeemedByShop?: boolean | Prisma.CreatorGiftCode$redeemedByShopArgs<ExtArgs>
@@ -886,6 +922,7 @@ export type CreatorGiftCodeSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   promotionCreditsGranted?: boolean
   redeemedAt?: boolean
   redeemedByShopId?: boolean
+  adminNotes?: boolean
   createdAt?: boolean
   purchase?: boolean | Prisma.CreatorGiftPurchaseDefaultArgs<ExtArgs>
   redeemedByShop?: boolean | Prisma.CreatorGiftCode$redeemedByShopArgs<ExtArgs>
@@ -903,6 +940,7 @@ export type CreatorGiftCodeSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   promotionCreditsGranted?: boolean
   redeemedAt?: boolean
   redeemedByShopId?: boolean
+  adminNotes?: boolean
   createdAt?: boolean
   purchase?: boolean | Prisma.CreatorGiftPurchaseDefaultArgs<ExtArgs>
   redeemedByShop?: boolean | Prisma.CreatorGiftCode$redeemedByShopArgs<ExtArgs>
@@ -920,10 +958,11 @@ export type CreatorGiftCodeSelectScalar = {
   promotionCreditsGranted?: boolean
   redeemedAt?: boolean
   redeemedByShopId?: boolean
+  adminNotes?: boolean
   createdAt?: boolean
 }
 
-export type CreatorGiftCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseId" | "type" | "code" | "codeNormalized" | "listingCreditsGranted" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "redeemedAt" | "redeemedByShopId" | "createdAt", ExtArgs["result"]["creatorGiftCode"]>
+export type CreatorGiftCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseId" | "type" | "code" | "codeNormalized" | "listingCreditsGranted" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "redeemedAt" | "redeemedByShopId" | "adminNotes" | "createdAt", ExtArgs["result"]["creatorGiftCode"]>
 export type CreatorGiftCodeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchase?: boolean | Prisma.CreatorGiftPurchaseDefaultArgs<ExtArgs>
   redeemedByShop?: boolean | Prisma.CreatorGiftCode$redeemedByShopArgs<ExtArgs>
@@ -955,6 +994,10 @@ export type $CreatorGiftCodePayload<ExtArgs extends runtime.Types.Extensions.Int
     promotionCreditsGranted: number
     redeemedAt: Date | null
     redeemedByShopId: string | null
+    /**
+     * * Optional internal admin notes (beta / waived-fee code tracker).
+     */
+    adminNotes: string | null
     createdAt: Date
   }, ExtArgs["result"]["creatorGiftCode"]>
   composites: {}
@@ -1392,6 +1435,7 @@ export interface CreatorGiftCodeFieldRefs {
   readonly promotionCreditsGranted: Prisma.FieldRef<"CreatorGiftCode", 'Int'>
   readonly redeemedAt: Prisma.FieldRef<"CreatorGiftCode", 'DateTime'>
   readonly redeemedByShopId: Prisma.FieldRef<"CreatorGiftCode", 'String'>
+  readonly adminNotes: Prisma.FieldRef<"CreatorGiftCode", 'String'>
   readonly createdAt: Prisma.FieldRef<"CreatorGiftCode", 'DateTime'>
 }
     

@@ -89,12 +89,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const connect = typeof sp.connect === "string" ? sp.connect : undefined;
   const connectReason =
     typeof sp.reason === "string" ? sp.reason : Array.isArray(sp.reason) ? sp.reason[0] : undefined;
-  const emailVerify =
-    typeof sp.emailVerify === "string"
-      ? sp.emailVerify
-      : Array.isArray(sp.emailVerify)
-        ? sp.emailVerify[0]
-        : undefined;
   const fee = typeof sp.fee === "string" ? sp.fee : undefined;
   const promo = typeof sp.promo === "string" ? sp.promo : undefined;
   const promoErr =
@@ -481,17 +475,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               : connectReason === "stripe"
                 ? "Stripe returned an error while starting listing fee checkout. Try again or contact support."
                 : "Something went wrong with the listing fee payment. Open the Listings tab and try paying again, or contact support."}
-        </p>
-      ) : null}
-      {!isPlatform && emailVerify === "ok" ? (
-        <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90">
-          Your email address is verified.
-        </p>
-      ) : null}
-      {!isPlatform && emailVerify && emailVerify !== "ok" ? (
-        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-amber-200/90">
-          Email verification link was invalid or expired. Use{" "}
-          <strong className="text-amber-100/90">Resend verification email</strong> on the Onboarding tab.
         </p>
       ) : null}
       {!isPlatform && delConfirm === "ok" ? (

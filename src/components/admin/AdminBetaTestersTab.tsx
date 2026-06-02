@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminBetaTesterDeleteCodeButton } from "@/components/admin/AdminBetaTesterDeleteCodeButton";
 import { AdminBetaTesterShopFreezeToggle } from "@/components/admin/AdminBetaTesterShopFreezeToggle";
+import { AdminCreatorGiftCodeNotesField } from "@/components/admin/AdminCreatorGiftCodeNotesField";
 import { AdminGenerateBetaTesterCodesControls } from "@/components/admin/AdminGenerateBetaTesterCodesControls";
 import type { AdminBetaTesterDashboardPayload } from "@/lib/admin-beta-testers-load";
 import { BetaTesterOnboardingStatus } from "@/generated/prisma/enums";
@@ -54,13 +55,14 @@ export function AdminBetaTestersTab(props: { payload: AdminBetaTesterDashboardPa
       <div>
         <h3 className="text-sm font-medium text-zinc-200">Code tracker</h3>
         <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
-          <div className="grid grid-cols-[1fr_0.6fr_1fr_0.85fr_0.75fr_0.9fr_0.5fr] gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+          <div className="grid grid-cols-[1fr_0.6fr_1fr_0.85fr_0.75fr_0.9fr_1.2fr_0.5fr] gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
             <span>Code</span>
             <span>Status</span>
             <span>Shop name</span>
             <span>Account created</span>
             <span>Onboarding complete</span>
             <span>Frozen</span>
+            <span>Notes</span>
             <span>Delete</span>
           </div>
           {codes.length === 0 ? (
@@ -69,7 +71,7 @@ export function AdminBetaTestersTab(props: { payload: AdminBetaTesterDashboardPa
             codes.map((row) => (
               <div
                 key={row.code}
-                className="grid grid-cols-[1fr_0.6fr_1fr_0.85fr_0.75fr_0.9fr_0.5fr] gap-3 border-b border-zinc-900 px-4 py-3 text-sm last:border-b-0"
+                className="grid grid-cols-[1fr_0.6fr_1fr_0.85fr_0.75fr_0.9fr_1.2fr_0.5fr] gap-3 border-b border-zinc-900 px-4 py-3 text-sm last:border-b-0"
               >
                 <div>
                   <code className="text-zinc-200">{row.code}</code>
@@ -128,6 +130,12 @@ export function AdminBetaTestersTab(props: { payload: AdminBetaTesterDashboardPa
                   <AdminBetaTesterShopFreezeToggle
                     shopId={row.shopFreeze?.shopId ?? null}
                     adminFrozenAt={row.shopFreeze?.adminFrozenAt ?? null}
+                  />
+                </div>
+                <div>
+                  <AdminCreatorGiftCodeNotesField
+                    codeId={row.codeId}
+                    initialNotes={row.adminNotes}
                   />
                 </div>
                 <div>

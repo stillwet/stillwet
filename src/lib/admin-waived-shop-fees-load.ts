@@ -5,6 +5,7 @@ export type AdminWaivedShopFeeCodeRow = {
   codeId: string;
   code: string;
   createdAt: string;
+  adminNotes: string | null;
   status: "unused" | "used";
   shopName: string | null;
   shopSlug: string | null;
@@ -30,6 +31,7 @@ export async function loadAdminWaivedShopFeesDashboardPayload(): Promise<AdminWa
       id: true,
       code: true,
       createdAt: true,
+      adminNotes: true,
       redeemedAt: true,
       redeemedByShopId: true,
       redeemedByShop: {
@@ -68,6 +70,7 @@ export async function loadAdminWaivedShopFeesDashboardPayload(): Promise<AdminWa
       codeId: row.id,
       code: row.code,
       createdAt: row.createdAt.toISOString(),
+      adminNotes: row.adminNotes,
       status: used ? "used" : "unused",
       shopName: shop?.displayName ?? null,
       shopSlug: shop?.slug ?? null,

@@ -15,6 +15,7 @@ export type AdminBetaTesterCodeRow = {
   codeId: string;
   code: string;
   createdAt: string;
+  adminNotes: string | null;
   status: "unused" | "used";
   shopAccount: {
     shopId: string;
@@ -70,11 +71,12 @@ const redeemedShopSelect = {
   },
 } as const;
 
-function unusedCodeRow(codeId: string, code: string, createdAt: Date): AdminBetaTesterCodeRow {
+function unusedCodeRow(codeId: string, code: string, createdAt: Date, adminNotes: string | null): AdminBetaTesterCodeRow {
   return {
     codeId,
     code,
     createdAt: createdAt.toISOString(),
+    adminNotes,
     status: "unused",
     shopAccount: null,
     shopFreeze: null,
@@ -95,6 +97,7 @@ export async function loadAdminBetaTesterDashboardPayload(): Promise<AdminBetaTe
       id: true,
       code: true,
       createdAt: true,
+      adminNotes: true,
       redeemedAt: true,
       redeemedByShopId: true,
       redeemedByShop: {
@@ -133,7 +136,7 @@ export async function loadAdminBetaTesterDashboardPayload(): Promise<AdminBetaTe
       (row.redeemedByShopId ? (shopsById.get(row.redeemedByShopId) ?? null) : null);
 
     if (!row.redeemedAt && !shop) {
-      return unusedCodeRow(row.id, row.code, row.createdAt);
+      return unusedCodeRow(row.id, row.code, row.createdAt, row.adminNotes);
     }
 
     if (!shop) {
@@ -141,6 +144,7 @@ export async function loadAdminBetaTesterDashboardPayload(): Promise<AdminBetaTe
         codeId: row.id,
         code: row.code,
         createdAt: row.createdAt.toISOString(),
+        adminNotes: row.adminNotes,
         status: "used",
         shopAccount: null,
         shopFreeze: null,
@@ -175,6 +179,7 @@ export async function loadAdminBetaTesterDashboardPayload(): Promise<AdminBetaTe
       codeId: row.id,
       code: row.code,
       createdAt: row.createdAt.toISOString(),
+      adminNotes: row.adminNotes,
       status: "used",
       shopAccount: {
         shopId: shop.id,

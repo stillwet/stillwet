@@ -27,6 +27,7 @@
     "db:seed": "prisma db seed --schema prisma/schema.prisma",
     "db:seed:admin-catalog-if-empty": "tsx scripts/seed-admin-catalog-if-empty.ts",
     "db:sync:admin-catalog": "tsx scripts/sync-admin-catalog-from-remote.ts",
+    "db:copy-admin-config": "tsx scripts/copy-admin-config-to-prod.ts",
     "generate:beta-tester-codes": "tsx scripts/generate-beta-tester-codes.ts",
     "test:r2": "tsx scripts/test-r2-upload.ts",
     "r2:prune-listings": "tsx scripts/r2-prune-orphan-listings.ts",

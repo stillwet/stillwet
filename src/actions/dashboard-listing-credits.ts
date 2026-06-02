@@ -2,12 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { CreatorGiftCodeType, ListingCreditPackPurchaseStatus } from "@/generated/prisma/enums";
-import { normalizeCreatorGiftCode } from "@/lib/creator-gift-codes";
+import { ListingCreditPackPurchaseStatus } from "@/generated/prisma/enums";
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { fulfillListingCreditPackPurchaseIfPending } from "@/lib/listing-credit-pack-fulfillment";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
-import { syncFreeListingFeeWaivers } from "@/lib/listing-fee";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
@@ -194,71 +192,4 @@ export async function mockPurchaseListingCreditPack(
   }
   revalidatePath("/dashboard");
   return { ok: true };
-}
-
-export type RedeemListingCreditGiftCodeResult =
-  | { ok: true; creditsGranted: number }
-  | { ok: false; error: string };
-
-export async function redeemListingCreditGiftCode(
-  _prev: RedeemListingCreditGiftCodeResult | undefined,
-  formData: FormData,
-): Promise<RedeemListingCreditGiftCodeResult> {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) {
-    return { ok: false, error: "Not available for the platform catalog shop." };
-  }
-
-  const codeNormalized = normalizeCreatorGiftCode(String(formData.get("giftCode") ?? ""));
-  if (!codeNormalized) return { ok: false, error: "Enter a listing credit gift code." };
-
-  const redeemed = await prisma.$transaction(async (tx) => {
-    const code = await tx.creatorGiftCode.findFirst({
-      where: {
-        codeNormalized,
-        type: CreatorGiftCodeType.listing_credits,
-        redeemedAt: null,
-      },
-      select: { id: true, listingCreditsGranted: true },
-    });
-    if (!code || code.listingCreditsGranted <= 0) return null;
-
-    const updated = await tx.creatorGiftCode.updateMany({
-      where: { id: code.id, redeemedAt: null },
-      data: { redeemedAt: new Date(), redeemedByShopId: shop.id },
-    });
-    if (updated.count === 0) return null;
-
-    await tx.shop.update({
-      where: { id: shop.id },
-      data: {
-        listingFeeBonusFreeSlots: { increment: code.listingCreditsGranted },
-      },
-    });
-    await tx.shopListingSlotPromoRedemption.create({
-      data: {
-        shopId: shop.id,
-        couponCodeNormalized: codeNormalized,
-        slotsGranted: code.listingCreditsGranted,
-      },
-    });
-    return { creditsGranted: code.listingCreditsGranted };
-  });
-
-  if (!redeemed) {
-    return { ok: false, error: "That listing credit gift code is invalid or has already been used." };
-  }
-
-  await syncFreeListingFeeWaivers(shop.id);
-  const n = redeemed.creditsGranted;
-  await prisma.shopOwnerNotice.create({
-    data: {
-      shopId: shop.id,
-      kind: "listing_credit_gift_redeemed",
-      body: n === 1 ? "You redeemed 1 listing credit." : `You redeemed ${n} listing credits.`,
-    },
-  });
-  revalidatePath("/dashboard");
-  return { ok: true, creditsGranted: n };
 }
