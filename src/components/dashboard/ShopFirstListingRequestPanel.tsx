@@ -15,11 +15,12 @@ import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
-  LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_BYTES,
+  LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
+import { listingArtworkStagingChunkCount } from "@/lib/listing-artwork-staging-chunks";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -156,6 +157,10 @@ export function ShopFirstListingRequestPanel(props: {
   const [listingArtworkPreviewUrl, setListingArtworkPreviewUrl] = useState<string | null>(null);
   const [listingArtworkPixels, setListingArtworkPixels] = useState<{ w: number; h: number } | null>(null);
   const [listingArtworkMeasureError, setListingArtworkMeasureError] = useState<string | null>(null);
+  const [artworkUploadProgress, setArtworkUploadProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
   const [listingSavedFlash, setListingSavedFlash] = useState(false);
   const [listingStorefrontBlurb, setListingStorefrontBlurb] = useState("");
   const [keywordTokens, setKeywordTokens] = useState<string[]>([]);
@@ -329,31 +334,59 @@ export function ShopFirstListingRequestPanel(props: {
     if (!(art instanceof File) || art.size === 0) {
       return { ok: false, error: "Upload a print-ready artwork file." };
     }
-    if (art.size <= LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_BYTES) {
-      return { ok: true };
+    if (art.size > listingArtworkUploadMaxBytes) {
+      return {
+        ok: false,
+        error: `Artwork file is too large (max ${listingArtworkUploadMaxMb} MB upload).`,
+      };
     }
+
     const prep = await createListingArtworkStagingUpload(art.type, art.size);
     if (!prep.ok) return prep;
-    let putRes: Response;
+
+    const totalParts = listingArtworkStagingChunkCount(art.size);
+    setArtworkUploadProgress({ current: 0, total: totalParts });
+
+    const chunkSize = LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES;
+    let partIndex = 0;
     try {
-      putRes = await fetch(prep.uploadUrl, {
-        method: "PUT",
-        body: art,
-        headers: { "Content-Type": art.type || "application/octet-stream" },
-      });
-    } catch {
-      return {
-        ok: false,
-        error:
-          "Direct artwork upload failed (network or CORS). Ask the operator to allow browser PUT on the R2 bucket from this site.",
-      };
+      for (let offset = 0; offset < art.size; offset += chunkSize, partIndex++) {
+        const slice = art.slice(offset, offset + chunkSize);
+        const chunkFd = new FormData();
+        chunkFd.set("stagingKey", prep.stagingKey);
+        chunkFd.set("partIndex", String(partIndex));
+        chunkFd.set("chunk", slice, `part-${partIndex}`);
+        let chunkRes: Response;
+        try {
+          chunkRes = await fetch("/api/dashboard/listing-artwork-staging/chunk", {
+            method: "POST",
+            body: chunkFd,
+          });
+        } catch {
+          return {
+            ok: false,
+            error: "Artwork upload failed (network). Check your connection and try again.",
+          };
+        }
+        if (!chunkRes.ok) {
+          let detail = "";
+          try {
+            const j = (await chunkRes.json()) as { error?: string };
+            detail = j.error?.trim() ?? "";
+          } catch {
+            /* ignore */
+          }
+          return {
+            ok: false,
+            error: detail || `Artwork upload failed (${chunkRes.status}). Try again.`,
+          };
+        }
+        setArtworkUploadProgress({ current: partIndex + 1, total: totalParts });
+      }
+    } finally {
+      setArtworkUploadProgress(null);
     }
-    if (!putRes.ok) {
-      return {
-        ok: false,
-        error: `Direct artwork upload failed (${putRes.status}). Try again.`,
-      };
-    }
+
     fd.delete("listingArtwork");
     fd.set("listingArtworkStagingKey", prep.stagingKey);
     return { ok: true };
@@ -381,7 +414,7 @@ export function ShopFirstListingRequestPanel(props: {
         setMessage({
           tone: "err",
           text: bodyTooLarge
-            ? `Upload hit a server request limit. Files over ~3.5 MB should upload directly to storage first — refresh and try again, or use a file up to ${listingArtworkUploadMaxMb} MB.`
+            ? "Upload hit a server request limit. Refresh the page and try again — artwork should upload in the background before submit."
             : msg || "Could not submit your listing. Try again or contact support.",
         });
         return;
@@ -487,19 +520,25 @@ export function ShopFirstListingRequestPanel(props: {
     hasArtworkReady &&
     !listingArtworkResolutionError &&
     !listingArtworkResolutionPending;
+  const artworkUploadInProgress = artworkUploadProgress != null;
+  const artworkUploadPercent =
+    artworkUploadProgress && artworkUploadProgress.total > 0
+      ? Math.round((artworkUploadProgress.current / artworkUploadProgress.total) * 100)
+      : 0;
   /** Form fields complete and Stripe ready when a publication fee would apply. */
   const listingFormReady = listingCanSubmit;
   const listingSubmitSubmittedFlash =
     listingSavedFlash && !listingCanSubmit && !isListingPending;
-  const listingBtnClass = isListingPending
+  const listingBtnClass =
+    isListingPending || artworkUploadInProgress
     ? btnPrimarySaving
     : !listingFormReady
       ? listingSavedFlash
         ? btnPrimarySaved
         : btnPrimaryDisabled
       : btnPrimary;
-  const isListingFormSubmitDisabled = !listingFormReady || isListingPending;
-  const freezeListingRequestFields = isListingPending;
+  const isListingFormSubmitDisabled = !listingFormReady || isListingPending || artworkUploadInProgress;
+  const freezeListingRequestFields = isListingPending || artworkUploadInProgress;
 
   return (
     <div
@@ -680,8 +719,8 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — large files upload directly to
-            storage; saved for admin review up to {listingArtworkStoredMaxMb} MB at print pixel size)
+            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — saved for admin review up to{" "}
+            {listingArtworkStoredMaxMb} MB at print pixel size)
             <input
               ref={listingFileRef}
               type="file"
@@ -831,14 +870,44 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           </div>
           </form>
+          {artworkUploadProgress ? (
+            <div className="mt-3 space-y-1.5" role="status" aria-live="polite">
+              <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                <span>Uploading artwork…</span>
+                <span className="tabular-nums">
+                  {artworkUploadProgress.current}/{artworkUploadProgress.total} parts ({artworkUploadPercent}
+                  %)
+                </span>
+              </div>
+              <div
+                className="h-1.5 overflow-hidden rounded-full bg-zinc-800"
+                aria-hidden
+              >
+                <div
+                  className="h-full rounded-full bg-zinc-300 transition-[width] duration-200 ease-out"
+                  style={{ width: `${artworkUploadPercent}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
           <button
             type="submit"
             form={listingRequestFormId}
             disabled={isListingFormSubmitDisabled}
             className={`inline-flex min-h-[2.5rem] items-center justify-center gap-2 ${listingBtnClass}`}
-            aria-busy={isListingPending}
+            aria-busy={isListingPending || artworkUploadInProgress}
           >
-            {isListingPending ? (
+            {artworkUploadProgress ? (
+              <>
+                <span
+                  className="size-4 shrink-0 animate-spin rounded-full border-2 border-zinc-500/80 border-t-zinc-950"
+                  aria-hidden
+                />
+                <span>
+                  Uploading artwork ({artworkUploadProgress.current}/{artworkUploadProgress.total})…
+                </span>
+              </>
+            ) : isListingPending ? (
               <>
                 <span
                   className="size-4 shrink-0 animate-spin rounded-full border-2 border-zinc-500/80 border-t-zinc-950"
@@ -932,7 +1001,7 @@ export function ShopFirstListingRequestPanel(props: {
               </button>
               <button
                 type="button"
-                disabled={!attestationChecked || !feeConsentOk || isListingPending}
+                disabled={!attestationChecked || !feeConsentOk || isListingPending || artworkUploadInProgress}
                 className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => {
                   const fd = pendingListingFdRef.current;
@@ -946,7 +1015,11 @@ export function ShopFirstListingRequestPanel(props: {
                   void handleListingSubmit(fd);
                 }}
               >
-                Submit for review
+                {artworkUploadProgress
+                  ? `Uploading artwork (${artworkUploadProgress.current}/${artworkUploadProgress.total})…`
+                  : isListingPending
+                    ? "Submitting…"
+                    : "Submit for review"}
               </button>
             </div>
           </div>

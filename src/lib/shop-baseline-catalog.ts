@@ -18,8 +18,6 @@ export type ShopSetupCatalogOption = {
   printAreaHeightPx: number | null;
   /** When set with print area, crop must cover extra source pixels vs. 300 DPI template (see listing-artwork-print-area). */
   minArtworkDpi: number | null;
-  /** When true, listing request artwork may be up to 30 MB instead of 15 MB. */
-  largeListingArtwork: boolean;
 };
 
 /** One admin catalog item as a single selectable row. */
@@ -42,7 +40,6 @@ export function flattenShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup[]
     printAreaWidthPx: g.option.printAreaWidthPx,
     printAreaHeightPx: g.option.printAreaHeightPx,
     minArtworkDpi: g.option.minArtworkDpi,
-    largeListingArtwork: g.option.largeListingArtwork,
   }));
 }
 
@@ -58,7 +55,6 @@ export type AdminBaselineRow = {
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
   itemMinArtworkDpi: number | null;
-  itemLargeListingArtwork: boolean;
 };
 
 export type ParsedBaselinePick =
@@ -136,7 +132,6 @@ export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopS
             : null,
         minArtworkDpi:
           item.itemMinArtworkDpi != null && item.itemMinArtworkDpi > 0 ? item.itemMinArtworkDpi : null,
-        largeListingArtwork: item.itemLargeListingArtwork ?? false,
       },
     });
   }

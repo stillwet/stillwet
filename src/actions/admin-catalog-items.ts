@@ -10,11 +10,6 @@ import {
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
-import {
-  isMissingLargeListingArtworkColumn,
-  isStalePrismaClientForLargeArtwork,
-  LARGE_LISTING_ARTWORK_MIGRATION,
-} from "@/lib/admin-baseline-catalog-rows";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -23,14 +18,7 @@ export type AdminCatalogItemSaveResult =
   | { ok: false; error: string };
 
 function catalogItemSaveErrorFromUnknown(e: unknown, logLabel: string): string {
-  if (isStalePrismaClientForLargeArtwork(e)) {
-    return "This server build is outdated (missing the large-artwork field). Redeploy production from the latest commit, then try again.";
-  }
   if (e instanceof Prisma.PrismaClientValidationError) {
-    const msg = e.message;
-    if (/itemLargeListingArtwork/i.test(msg)) {
-      return "Could not save the 30 MB artwork setting — redeploy the latest build, then try again.";
-    }
     console.error(`[${logLabel}] validation`, e);
     return "Invalid catalog item data. Check the fields and try again.";
   }
@@ -59,13 +47,6 @@ async function requireAdmin() {
   if (!session.isAdmin) redirect("/admin/login");
 }
 
-function parseLargeListingArtworkFromForm(formData: FormData): boolean {
-  const raw = formData.get("itemLargeListingArtwork");
-  if (raw == null) return false;
-  const s = String(raw).trim().toLowerCase();
-  return s === "1" || s === "true" || s === "on" || s === "yes";
-}
-
 function itemLevelFromFormWhenNoVariants(formData: FormData):
   | {
       ok: true;
@@ -76,7 +57,6 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemPrintAreaWidthPx: number | null;
       itemPrintAreaHeightPx: number | null;
       itemMinArtworkDpi: number | null;
-      itemLargeListingArtwork: boolean;
     }
   | { ok: false; error: string } {
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
@@ -91,7 +71,6 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     String(formData.get("itemMinArtworkDpi") ?? ""),
   );
   if (!ar.ok) return { ok: false, error: ar.error };
-  const itemLargeListingArtwork = parseLargeListingArtworkFromForm(formData);
   return {
     ok: true,
     itemExampleListingUrl: v.exampleListingUrl,
@@ -101,7 +80,6 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     itemPrintAreaWidthPx: ar.itemPrintAreaWidthPx,
     itemPrintAreaHeightPx: ar.itemPrintAreaHeightPx,
     itemMinArtworkDpi: ar.itemMinArtworkDpi,
-    itemLargeListingArtwork,
   };
 }
 
@@ -120,51 +98,25 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
   const maxSort = await prisma.adminCatalogItem.aggregate({ _max: { sortOrder: true } });
   const sortOrder = (maxSort._max.sortOrder ?? 0) + 1;
 
-  const createData = {
-    name: name.slice(0, 300),
-    sortOrder,
-    storefrontDescription,
-    variants: EMPTY_VARIANTS_JSON,
-    itemExampleListingUrl: itemLevel.itemExampleListingUrl,
-    itemMinPriceCents: itemLevel.itemMinPriceCents,
-    itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
-    itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
-    itemMinArtworkLongEdgePx: null,
-    itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
-    itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
-    itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
-    itemLargeListingArtwork: itemLevel.itemLargeListingArtwork,
-  };
-
   try {
-    await prisma.adminCatalogItem.create({ data: createData });
+    await prisma.adminCatalogItem.create({
+      data: {
+        name: name.slice(0, 300),
+        sortOrder,
+        storefrontDescription,
+        variants: EMPTY_VARIANTS_JSON,
+        itemExampleListingUrl: itemLevel.itemExampleListingUrl,
+        itemMinPriceCents: itemLevel.itemMinPriceCents,
+        itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
+        itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
+        itemMinArtworkLongEdgePx: null,
+        itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
+        itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
+        itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
+      },
+    });
   } catch (e) {
-    if (isStalePrismaClientForLargeArtwork(e)) {
-      return {
-        ok: false,
-        error:
-          "This server build is outdated (missing the large-artwork field). Redeploy production from the latest commit, then try again.",
-      };
-    }
-    if (isMissingLargeListingArtworkColumn(e)) {
-      if (itemLevel.itemLargeListingArtwork) {
-        const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
-        try {
-          await prisma.adminCatalogItem.create({ data: withoutLarge });
-          revalidateAdminViews();
-          return {
-            ok: false,
-            error: `Large artwork uploads need migration ${LARGE_LISTING_ARTWORK_MIGRATION} on this database. Item saved without the 30 MB flag.`,
-          };
-        } catch (e2) {
-          return { ok: false, error: catalogItemSaveErrorFromUnknown(e2, "adminAddCatalogItem") };
-        }
-      }
-      const { itemLargeListingArtwork: _omit, ...withoutLarge } = createData;
-      await prisma.adminCatalogItem.create({ data: withoutLarge });
-    } else {
-      return { ok: false, error: catalogItemSaveErrorFromUnknown(e, "adminAddCatalogItem") };
-    }
+    return { ok: false, error: catalogItemSaveErrorFromUnknown(e, "adminAddCatalogItem") };
   }
   revalidateAdminViews();
   return { ok: true };
@@ -185,55 +137,26 @@ export async function adminUpdateCatalogItem(
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
     : null;
 
-  const updateData = {
-    name: name.slice(0, 300),
-    variants: EMPTY_VARIANTS_JSON,
-    storefrontDescription,
-    itemExampleListingUrl: itemLevel.itemExampleListingUrl,
-    itemMinPriceCents: itemLevel.itemMinPriceCents,
-    itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
-    itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
-    itemMinArtworkLongEdgePx: null,
-    itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
-    itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
-    itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
-    itemLargeListingArtwork: itemLevel.itemLargeListingArtwork,
-  };
-
   try {
     await prisma.adminCatalogItem.update({
       where: { id },
-      data: updateData,
+      data: {
+        name: name.slice(0, 300),
+        variants: EMPTY_VARIANTS_JSON,
+        storefrontDescription,
+        itemExampleListingUrl: itemLevel.itemExampleListingUrl,
+        itemMinPriceCents: itemLevel.itemMinPriceCents,
+        itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
+        itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
+        itemMinArtworkLongEdgePx: null,
+        itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
+        itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
+        itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
+      },
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
       return { ok: false, error: "That catalog item no longer exists." };
-    }
-    if (isStalePrismaClientForLargeArtwork(e)) {
-      return {
-        ok: false,
-        error:
-          "This server build is outdated (missing the large-artwork field). Redeploy production from the latest commit, then try again.",
-      };
-    }
-    if (isMissingLargeListingArtworkColumn(e)) {
-      const { itemLargeListingArtwork: _omit, ...withoutLarge } = updateData;
-      try {
-        await prisma.adminCatalogItem.update({
-          where: { id },
-          data: withoutLarge,
-        });
-        revalidateAdminViews();
-        if (itemLevel.itemLargeListingArtwork) {
-          return {
-            ok: false,
-            error: `Large artwork uploads need migration ${LARGE_LISTING_ARTWORK_MIGRATION} on production. Other fields were saved; run npm run db:migrate:prod, then check the box again.`,
-          };
-        }
-        return { ok: true };
-      } catch (e2) {
-        return { ok: false, error: catalogItemSaveErrorFromUnknown(e2, "adminUpdateCatalogItem") };
-      }
     }
     return { ok: false, error: catalogItemSaveErrorFromUnknown(e, "adminUpdateCatalogItem") };
   }

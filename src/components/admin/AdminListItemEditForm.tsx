@@ -31,7 +31,6 @@ export type AdminListItemSerializable = {
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
   itemMinArtworkDpi: number | null;
-  itemLargeListingArtwork: boolean;
   tags: AdminListItemTag[];
 };
 
@@ -69,9 +68,6 @@ export function AdminListItemEditForm({
   );
   const [editItemMinArtworkDpi, setEditItemMinArtworkDpi] = useState(
     item.itemMinArtworkDpi != null ? String(item.itemMinArtworkDpi) : "",
-  );
-  const [editItemLargeListingArtwork, setEditItemLargeListingArtwork] = useState(
-    item.itemLargeListingArtwork,
   );
   const [clientError, setClientError] = useState<string | null>(null);
 
@@ -125,7 +121,6 @@ export function AdminListItemEditForm({
     fd.set("itemPrintAreaWidthPx", editItemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", editItemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
-    fd.set("itemLargeListingArtwork", editItemLargeListingArtwork ? "1" : "0");
     saveAction(fd);
   }
 
@@ -163,12 +158,10 @@ export function AdminListItemEditForm({
           printAreaWidthPx={editItemPrintAreaWidthPx}
           printAreaHeightPx={editItemPrintAreaHeightPx}
           minArtworkDpi={editItemMinArtworkDpi}
-          largeListingArtwork={editItemLargeListingArtwork}
           onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
-          onChangeLargeListingArtwork={setEditItemLargeListingArtwork}
         />
         {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">

@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
    */
   experimental: {
     lockDistDir: false,
-    /** Listing artwork > ~3.5 MB uses direct R2 upload; this covers smaller server-action submits. */
+    /** All listing artwork uses chunked staging API; proxy limit applies to chunk route bodies. */
     proxyClientMaxBodySize: "32mb",
   },
   /**

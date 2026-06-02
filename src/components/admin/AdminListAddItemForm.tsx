@@ -21,7 +21,6 @@ export function AdminListAddItemForm() {
   const [itemPrintAreaWidthPx, setItemPrintAreaWidthPx] = useState("");
   const [itemPrintAreaHeightPx, setItemPrintAreaHeightPx] = useState("");
   const [itemMinArtworkDpi, setItemMinArtworkDpi] = useState("");
-  const [itemLargeListingArtwork, setItemLargeListingArtwork] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
 
   const [saveState, saveAction, savePending] = useActionState<
@@ -40,7 +39,6 @@ export function AdminListAddItemForm() {
     setItemPrintAreaWidthPx("");
     setItemPrintAreaHeightPx("");
     setItemMinArtworkDpi("");
-    setItemLargeListingArtwork(false);
     setClientError(null);
     router.refresh();
   }, [saveState, router]);
@@ -83,7 +81,6 @@ export function AdminListAddItemForm() {
     fd.set("itemPrintAreaWidthPx", itemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
-    fd.set("itemLargeListingArtwork", itemLargeListingArtwork ? "1" : "0");
     saveAction(fd);
   }
 
@@ -122,12 +119,10 @@ export function AdminListAddItemForm() {
           printAreaWidthPx={itemPrintAreaWidthPx}
           printAreaHeightPx={itemPrintAreaHeightPx}
           minArtworkDpi={itemMinArtworkDpi}
-          largeListingArtwork={itemLargeListingArtwork}
           onChangeImageRequirementLabel={setItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setItemMinArtworkDpi}
-          onChangeLargeListingArtwork={setItemLargeListingArtwork}
         />
 
         {displayError ? (

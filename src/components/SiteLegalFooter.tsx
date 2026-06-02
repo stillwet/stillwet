@@ -25,15 +25,19 @@ export function SiteLegalFooter() {
         <a href="/shop-regulations" className="store-kicker text-zinc-600 transition hover:text-zinc-400">
           Shop regulations
         </a>
-        <a href="/admin" className="store-kicker text-zinc-600 transition hover:text-zinc-400">
-          Admin
-        </a>
       </nav>
       {supportAvailable ? (
         <div className="mt-6 max-w-md mx-auto">
           <SupportSiteCta />
         </div>
       ) : null}
+      <a
+        href="/admin"
+        className="fixed bottom-3 right-4 z-30 text-[10px] text-zinc-800 transition hover:text-zinc-700"
+        aria-label="Admin"
+      >
+        Admin
+      </a>
     </footer>
   );
 }

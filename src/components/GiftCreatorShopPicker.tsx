@@ -128,7 +128,7 @@ export function GiftCreatorShopPicker(props: {
             required
             autoComplete="off"
             spellCheck={false}
-            placeholder="Search by shop name or slug"
+            placeholder="Search by shop name"
             role="combobox"
             aria-autocomplete="list"
             aria-expanded={showList}
@@ -184,7 +184,6 @@ export function GiftCreatorShopPicker(props: {
                     onClick={() => pickShop(s)}
                   >
                     <span className="font-medium text-zinc-100">{s.displayName}</span>
-                    <span className="ml-2 font-mono text-xs text-zinc-500">{s.slug}</span>
                   </button>
                 </li>
               ))}

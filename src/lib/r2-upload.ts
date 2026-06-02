@@ -94,6 +94,61 @@ export function isListingArtworkStagingKeyForShop(key: string, shopId: string): 
   return k.length > prefix.length;
 }
 
+function listingArtworkStagingPartKey(stagingKey: string, partIndex: number): string {
+  return `${stagingKey}/parts/part-${String(partIndex).padStart(4, "0")}`;
+}
+
+export async function putListingArtworkStagingPart(
+  stagingKey: string,
+  partIndex: number,
+  body: Buffer,
+): Promise<boolean> {
+  const bucket = readR2BucketName();
+  if (!bucket || partIndex < 0 || body.length === 0) return false;
+  try {
+    await r2S3Client().send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: listingArtworkStagingPartKey(stagingKey, partIndex),
+        Body: body,
+        ContentType: "application/octet-stream",
+      }),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Staged listing artwork (single PUT or chunked parts under `{key}/parts/`). */
+export async function loadListingArtworkStagingBuffer(stagingKey: string): Promise<Buffer | null> {
+  const partPrefix = `${stagingKey}/parts/`;
+  let partKeys: string[] = [];
+  try {
+    partKeys = (await listR2ObjectKeysWithPrefix(partPrefix)).sort();
+  } catch {
+    return null;
+  }
+  if (partKeys.length > 0) {
+    const buffers: Buffer[] = [];
+    for (const key of partKeys) {
+      const part = await getR2ObjectBuffer(key);
+      if (!part || part.length === 0) return null;
+      buffers.push(part);
+    }
+    return Buffer.concat(buffers);
+  }
+  return getR2ObjectBuffer(stagingKey);
+}
+
+export async function deleteListingArtworkStaging(stagingKey: string): Promise<void> {
+  const keys = [
+    ...(await listR2ObjectKeysWithPrefix(`${stagingKey}/parts/`)),
+    stagingKey,
+  ];
+  if (keys.length > 0) await deleteR2ObjectsByKeys(keys);
+}
+
 /** Presigned PUT URL so large files bypass Vercel server-action body limits. */
 export async function createPresignedR2PutUrl(params: {
   key: string;

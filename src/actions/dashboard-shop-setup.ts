@@ -9,12 +9,12 @@ import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums";
 import {
-  createPresignedR2PutUrl,
-  deleteR2ObjectsByKeys,
   deleteLegacyShopProfileAvatarKeys,
-  getR2ObjectBuffer,
+  deleteListingArtworkStaging,
+  deleteR2ObjectsByKeys,
   isListingArtworkStagingKeyForShop,
   isR2UploadConfigured,
+  loadListingArtworkStagingBuffer,
   publicUrlToR2ObjectKey,
   putPublicR2Object,
   shopListingArtworkStagingObjectKey,
@@ -294,7 +294,7 @@ export async function uploadShopProfileImageSetup(
 }
 
 export type ListingArtworkStagingUploadResult =
-  | { ok: true; uploadUrl: string; stagingKey: string }
+  | { ok: true; stagingKey: string }
   | { ok: false; error: string };
 
 function listingArtworkExtensionForContentType(contentType: string): string | null {
@@ -327,16 +327,7 @@ export async function createListingArtworkStagingUpload(
     return { ok: false, error: "Use a PNG, JPEG, or WebP artwork file." };
   }
   const stagingKey = shopListingArtworkStagingObjectKey(user.shop.id, ext);
-  try {
-    const uploadUrl = await createPresignedR2PutUrl({
-      key: stagingKey,
-      contentType: contentType.split(";")[0].trim(),
-    });
-    return { ok: true, uploadUrl, stagingKey };
-  } catch (e) {
-    console.error("[createListingArtworkStagingUpload]", e);
-    return { ok: false, error: "Could not start direct artwork upload. Try again." };
-  }
+  return { ok: true, stagingKey };
 }
 
 export async function submitFirstListingSetup(
@@ -514,7 +505,7 @@ export async function submitFirstListingSetup(
     if (!isListingArtworkStagingKeyForShop(stagingKeyRaw, shop.id)) {
       return { ok: false, error: "Invalid artwork upload reference. Try uploading again." };
     }
-    const staged = await getR2ObjectBuffer(stagingKeyRaw);
+    const staged = await loadListingArtworkStagingBuffer(stagingKeyRaw);
     if (!staged || staged.length === 0) {
       return {
         ok: false,
@@ -530,17 +521,11 @@ export async function submitFirstListingSetup(
     rawBuf = staged;
     stagingKeyToDelete = stagingKeyRaw;
   } else {
-    const file = formData.get("listingArtwork");
-    if (!file || !(file instanceof Blob) || file.size === 0) {
-      return { ok: false, error: "Upload a print-ready artwork file." };
-    }
-    if (file.size > artworkUploadMaxBytes) {
-      return {
-        ok: false,
-        error: `Artwork file is too large (max ${artworkUploadMaxMb} MB upload).`,
-      };
-    }
-    rawBuf = Buffer.from(await file.arrayBuffer());
+    return {
+      ok: false,
+      error:
+        "Artwork upload did not finish. Refresh the page and submit again — your file uploads in the background before review.",
+    };
   }
 
   if (printAreaW != null && printAreaH != null) {
@@ -589,7 +574,7 @@ export async function submitFirstListingSetup(
   });
 
   if (stagingKeyToDelete) {
-    await deleteR2ObjectsByKeys([stagingKeyToDelete]);
+    await deleteListingArtworkStaging(stagingKeyToDelete);
   }
 
   const existing = await prisma.shopListing.findUnique({
