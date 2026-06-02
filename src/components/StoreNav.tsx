@@ -27,7 +27,7 @@ export function StoreNav({
   cartQty: number;
   /** When omitted, use legacy platform URLs (`/shop/...`). */
   shopSlug?: string;
-  /** Shop owner session email; when set, replaces “Log In” on platform. */
+  /** Shop owner session email; when set, replaces “Log In” / “Sign Up” on platform. */
   shopOwnerEmail?: string;
   /** Shop display name for the dashboard link (preferred over email local-part). */
   shopOwnerDisplayName?: string;
@@ -87,12 +87,21 @@ export function StoreNav({
                 {shopOwnerDisplayName ?? dashboardLinkFallbackFromEmail(shopOwnerEmail)}
               </a>
             ) : !tenant ? (
-              <a
-                href="/dashboard/login"
-                className="shrink-0 text-xs font-medium tracking-wide text-zinc-400 transition hover:text-white"
-              >
-                Log In
-              </a>
+              <div className="flex shrink-0 items-center gap-3">
+                <Link
+                  href="/dashboard/login"
+                  className="text-xs font-medium tracking-wide text-zinc-400 transition hover:text-white"
+                >
+                  Log In
+                </Link>
+                <span aria-hidden className="h-3 w-px shrink-0 bg-zinc-700" />
+                <Link
+                  href="/create-shop"
+                  className="text-xs font-medium tracking-wide text-zinc-400 transition hover:text-white"
+                >
+                  Sign Up
+                </Link>
+              </div>
             ) : null}
           </div>
           <nav className="flex flex-1 flex-wrap items-center justify-end gap-x-5 gap-y-2 sm:gap-x-7">
