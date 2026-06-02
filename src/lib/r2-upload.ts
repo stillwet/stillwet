@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   CopyObjectCommand,
   DeleteObjectCommand,
@@ -6,6 +7,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /**
  * Read `process.env` case-insensitively for `NAME` (e.g. `r2_Bucket` matches `R2_BUCKET`).
@@ -75,6 +77,60 @@ export async function putPublicR2Object(params: {
   );
 
   return `${baseUrl}/${params.key}`;
+}
+
+const LISTING_ARTWORK_STAGING_SEGMENT = "listing-request-staging";
+
+/** Temporary key for browser PUT before submit processes and moves to `listing-request/`. */
+export function shopListingArtworkStagingObjectKey(shopId: string, fileExtension: string): string {
+  const ext = fileExtension.replace(/^\./, "").toLowerCase() || "bin";
+  return `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/${randomUUID()}.${ext}`;
+}
+
+export function isListingArtworkStagingKeyForShop(key: string, shopId: string): boolean {
+  const prefix = `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/`;
+  const k = key.trim();
+  if (!k.startsWith(prefix) || k.includes("..")) return false;
+  return k.length > prefix.length;
+}
+
+/** Presigned PUT URL so large files bypass Vercel server-action body limits. */
+export async function createPresignedR2PutUrl(params: {
+  key: string;
+  contentType: string;
+  expiresInSeconds?: number;
+}): Promise<string> {
+  const bucket = readR2BucketName();
+  if (!bucket) throw new Error("R2 bucket missing");
+  const client = r2S3Client();
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: params.key,
+    ContentType: params.contentType,
+  });
+  return getSignedUrl(client as unknown as Parameters<typeof getSignedUrl>[0], command, {
+    expiresIn: params.expiresInSeconds ?? 900,
+  });
+}
+
+export async function getR2ObjectBuffer(key: string): Promise<Buffer | null> {
+  const bucket = readR2BucketName();
+  if (!bucket) return null;
+  try {
+    const res = await r2S3Client().send(
+      new GetObjectCommand({ Bucket: bucket, Key: key }),
+    );
+    const chunks: Uint8Array[] = [];
+    if (res.Body) {
+      for await (const chunk of res.Body as AsyncIterable<Uint8Array>) {
+        chunks.push(chunk);
+      }
+    }
+    if (chunks.length === 0) return null;
+    return Buffer.concat(chunks);
+  } catch {
+    return null;
+  }
 }
 
 function r2S3Client(): S3Client {

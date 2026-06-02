@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
-import { submitFirstListingSetup, type ShopSetupActionResult } from "@/actions/dashboard-shop-setup";
+import {
+  createListingArtworkStagingUpload,
+  submitFirstListingSetup,
+  type ShopSetupActionResult,
+} from "@/actions/dashboard-shop-setup";
 import { ItemGuidelinesPopup } from "@/components/ItemGuidelinesPopup";
 import { ListingSearchKeywordsChipInput } from "@/components/dashboard/ListingSearchKeywordsChipInput";
 import { ListingArtworkCropDialog, ARTWORK_TRANSPARENCY_PREVIEW_STYLE } from "@/components/dashboard/ListingArtworkCropDialog";
@@ -11,6 +15,7 @@ import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
+  LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_BYTES,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
@@ -317,12 +322,54 @@ export function ShopFirstListingRequestPanel(props: {
     return Math.round(parsed * 100) > SHOP_LISTING_MAX_PRICE_CENTS;
   }, [listingPrice]);
 
+  async function prepareListingArtworkFormData(
+    fd: FormData,
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
+    const art = fd.get("listingArtwork");
+    if (!(art instanceof File) || art.size === 0) {
+      return { ok: false, error: "Upload a print-ready artwork file." };
+    }
+    if (art.size <= LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_BYTES) {
+      return { ok: true };
+    }
+    const prep = await createListingArtworkStagingUpload(art.type, art.size);
+    if (!prep.ok) return prep;
+    let putRes: Response;
+    try {
+      putRes = await fetch(prep.uploadUrl, {
+        method: "PUT",
+        body: art,
+        headers: { "Content-Type": art.type || "application/octet-stream" },
+      });
+    } catch {
+      return {
+        ok: false,
+        error:
+          "Direct artwork upload failed (network or CORS). Ask the operator to allow browser PUT on the R2 bucket from this site.",
+      };
+    }
+    if (!putRes.ok) {
+      return {
+        ok: false,
+        error: `Direct artwork upload failed (${putRes.status}). Try again.`,
+      };
+    }
+    fd.delete("listingArtwork");
+    fd.set("listingArtworkStagingKey", prep.stagingKey);
+    return { ok: true };
+  }
+
   async function handleListingSubmit(fd: FormData) {
     setMessage(null);
     setListingItemNameModerationBlurError(null);
     setListingBlurbModerationBlurError(null);
     setListingKeywordsModerationBlurError(null);
     startListingTransition(async () => {
+      const artworkPrep = await prepareListingArtworkFormData(fd);
+      if (!artworkPrep.ok) {
+        setMessage({ tone: "err", text: artworkPrep.error });
+        return;
+      }
       let r: ShopSetupActionResult;
       try {
         r = await submitFirstListingSetup(fd);
@@ -334,7 +381,7 @@ export function ShopFirstListingRequestPanel(props: {
         setMessage({
           tone: "err",
           text: bodyTooLarge
-            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${listingArtworkUploadMaxMb} MB (or redeploy if the limit was recently raised).`
+            ? `Upload hit a server request limit. Files over ~3.5 MB should upload directly to storage first — refresh and try again, or use a file up to ${listingArtworkUploadMaxMb} MB.`
             : msg || "Could not submit your listing. Try again or contact support.",
         });
         return;
@@ -633,8 +680,8 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB upload — crop uses full resolution;
-            stored for admin review up to {listingArtworkStoredMaxMb} MB at print pixel size)
+            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — large files upload directly to
+            storage; saved for admin review up to {listingArtworkStoredMaxMb} MB at print pixel size)
             <input
               ref={listingFileRef}
               type="file"

@@ -15,11 +15,7 @@ const nextConfig: NextConfig = {
    */
   experimental: {
     lockDistDir: false,
-    /** Listing request uploads artwork via Server Action (up to 30 MB for special catalog items). Default is 1 MB. */
-    serverActions: {
-      bodySizeLimit: "32mb",
-    },
-    /** Next 16 proxy buffers bodies for middleware; default 10 MB truncates large listing artwork. */
+    /** Listing artwork > ~3.5 MB uses direct R2 upload; this covers smaller server-action submits. */
     proxyClientMaxBodySize: "32mb",
   },
   /**

@@ -9,11 +9,15 @@ import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums";
 import {
+  createPresignedR2PutUrl,
   deleteR2ObjectsByKeys,
   deleteLegacyShopProfileAvatarKeys,
+  getR2ObjectBuffer,
+  isListingArtworkStagingKeyForShop,
   isR2UploadConfigured,
   publicUrlToR2ObjectKey,
   putPublicR2Object,
+  shopListingArtworkStagingObjectKey,
   shopProfileAvatarObjectKey,
 } from "@/lib/r2-upload";
 import {
@@ -289,6 +293,52 @@ export async function uploadShopProfileImageSetup(
   return { ok: true };
 }
 
+export type ListingArtworkStagingUploadResult =
+  | { ok: true; uploadUrl: string; stagingKey: string }
+  | { ok: false; error: string };
+
+function listingArtworkExtensionForContentType(contentType: string): string | null {
+  const ct = contentType.toLowerCase().split(";")[0].trim();
+  if (ct === "image/png") return "png";
+  if (ct === "image/jpeg" || ct === "image/jpg") return "jpeg";
+  if (ct === "image/webp") return "webp";
+  return null;
+}
+
+/** Browser PUT to R2 for artwork over the server-action body cap (Vercel ~4.5 MB). */
+export async function createListingArtworkStagingUpload(
+  contentType: string,
+  byteSize: number,
+): Promise<ListingArtworkStagingUploadResult> {
+  const user = await requireShopOwner();
+  if (!isR2UploadConfigured()) {
+    return { ok: false, error: "Artwork upload is not configured on this server." };
+  }
+  const uploadMax = listingRequestArtworkUploadMaxBytes();
+  const uploadMaxMb = listingRequestArtworkUploadMaxMb();
+  if (!Number.isFinite(byteSize) || byteSize <= 0) {
+    return { ok: false, error: "Choose an artwork file to upload." };
+  }
+  if (byteSize > uploadMax) {
+    return { ok: false, error: `Artwork file is too large (max ${uploadMaxMb} MB upload).` };
+  }
+  const ext = listingArtworkExtensionForContentType(contentType);
+  if (!ext) {
+    return { ok: false, error: "Use a PNG, JPEG, or WebP artwork file." };
+  }
+  const stagingKey = shopListingArtworkStagingObjectKey(user.shop.id, ext);
+  try {
+    const uploadUrl = await createPresignedR2PutUrl({
+      key: stagingKey,
+      contentType: contentType.split(";")[0].trim(),
+    });
+    return { ok: true, uploadUrl, stagingKey };
+  } catch (e) {
+    console.error("[createListingArtworkStagingUpload]", e);
+    return { ok: false, error: "Could not start direct artwork upload. Try again." };
+  }
+}
+
 export async function submitFirstListingSetup(
   formData: FormData,
 ): Promise<ShopSetupActionResult> {
@@ -456,18 +506,42 @@ export async function submitFirstListingSetup(
   const artworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
   const artworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
 
-  const file = formData.get("listingArtwork");
-  if (!file || !(file instanceof Blob) || file.size === 0) {
-    return { ok: false, error: "Upload a print-ready artwork file." };
-  }
-  if (file.size > artworkUploadMaxBytes) {
-    return {
-      ok: false,
-      error: `Artwork file is too large (max ${artworkUploadMaxMb} MB upload).`,
-    };
-  }
+  const stagingKeyRaw = String(formData.get("listingArtworkStagingKey") ?? "").trim();
+  let stagingKeyToDelete: string | null = null;
+  let rawBuf: Buffer;
 
-  const rawBuf = Buffer.from(await file.arrayBuffer());
+  if (stagingKeyRaw) {
+    if (!isListingArtworkStagingKeyForShop(stagingKeyRaw, shop.id)) {
+      return { ok: false, error: "Invalid artwork upload reference. Try uploading again." };
+    }
+    const staged = await getR2ObjectBuffer(stagingKeyRaw);
+    if (!staged || staged.length === 0) {
+      return {
+        ok: false,
+        error: "Uploaded artwork was not found. Try uploading again before you submit.",
+      };
+    }
+    if (staged.length > artworkUploadMaxBytes) {
+      return {
+        ok: false,
+        error: `Artwork file is too large (max ${artworkUploadMaxMb} MB upload).`,
+      };
+    }
+    rawBuf = staged;
+    stagingKeyToDelete = stagingKeyRaw;
+  } else {
+    const file = formData.get("listingArtwork");
+    if (!file || !(file instanceof Blob) || file.size === 0) {
+      return { ok: false, error: "Upload a print-ready artwork file." };
+    }
+    if (file.size > artworkUploadMaxBytes) {
+      return {
+        ok: false,
+        error: `Artwork file is too large (max ${artworkUploadMaxMb} MB upload).`,
+      };
+    }
+    rawBuf = Buffer.from(await file.arrayBuffer());
+  }
 
   if (printAreaW != null && printAreaH != null) {
     const dims = await widthHeightPxFromImageBuffer(rawBuf);
@@ -513,6 +587,10 @@ export async function submitFirstListingSetup(
     body: artwork.body,
     contentType: artwork.contentType,
   });
+
+  if (stagingKeyToDelete) {
+    await deleteR2ObjectsByKeys([stagingKeyToDelete]);
+  }
 
   const existing = await prisma.shopListing.findUnique({
     where: { shopId_productId: { shopId: shop.id, productId } },

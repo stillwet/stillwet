@@ -53,6 +53,15 @@ export function listingRequestArtworkStoredMaxMb(): number {
   return LISTING_REQUEST_ARTWORK_STORED_MAX_MB;
 }
 
+/**
+ * Artwork larger than this must use direct-to-R2 upload (Vercel serverless body ~4.5 MB).
+ * Leave headroom for FormData fields beside the file in the server action.
+ */
+export const LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_BYTES = 3.5 * 1024 * 1024;
+
+export const LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_MB =
+  LISTING_REQUEST_ARTWORK_SERVER_ACTION_MAX_BYTES / (1024 * 1024);
+
 /** @deprecated Per-item flag removed — upload is always {@link LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES}. */
 export function listingRequestArtworkMaxBytes(_largeListingArtwork?: boolean): number {
   return LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES;
