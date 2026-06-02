@@ -17,12 +17,13 @@ import {
   shopProfileAvatarObjectKey,
 } from "@/lib/r2-upload";
 import {
-  listingRequestArtworkMaxBytes,
-  listingRequestArtworkMaxMb,
+  listingRequestArtworkStoredMaxMb,
+  listingRequestArtworkUploadMaxBytes,
+  listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 import { loadAdminCatalogItemArtworkPolicy } from "@/lib/admin-baseline-catalog-rows";
 import {
-  prepareListingRequestArtworkUpload,
+  prepareListingRequestArtworkForStorage,
   compressShopProfileImageWebp,
 } from "@/lib/shop-setup-image";
 import {
@@ -436,14 +437,12 @@ export async function submitFirstListingSetup(
     };
   }
 
-  let largeListingArtwork = false;
   let printAreaW: number | null = null;
   let printAreaH: number | null = null;
   let catalogImageRequirementLabel: string | null = null;
 
   if (baselinePick) {
     const adminItem = await loadAdminCatalogItemArtworkPolicy(baselinePick.itemId);
-    largeListingArtwork = adminItem?.itemLargeListingArtwork ?? false;
     catalogImageRequirementLabel = adminItem?.itemImageRequirementLabel?.trim() || null;
     const pw = adminItem?.itemPrintAreaWidthPx ?? null;
     const ph = adminItem?.itemPrintAreaHeightPx ?? null;
@@ -453,17 +452,18 @@ export async function submitFirstListingSetup(
     }
   }
 
-  const artworkMaxBytes = listingRequestArtworkMaxBytes(largeListingArtwork);
-  const artworkMaxMb = listingRequestArtworkMaxMb(largeListingArtwork);
+  const artworkUploadMaxBytes = listingRequestArtworkUploadMaxBytes();
+  const artworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
+  const artworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
 
   const file = formData.get("listingArtwork");
   if (!file || !(file instanceof Blob) || file.size === 0) {
     return { ok: false, error: "Upload a print-ready artwork file." };
   }
-  if (file.size > artworkMaxBytes) {
+  if (file.size > artworkUploadMaxBytes) {
     return {
       ok: false,
-      error: `Artwork file is too large (max ${artworkMaxMb} MB for this item).`,
+      error: `Artwork file is too large (max ${artworkUploadMaxMb} MB upload).`,
     };
   }
 
@@ -487,11 +487,13 @@ export async function submitFirstListingSetup(
     }
   }
 
-  const artwork = await prepareListingRequestArtworkUpload(rawBuf, artworkMaxBytes);
+  const artwork = await prepareListingRequestArtworkForStorage(rawBuf, undefined, printAreaW, printAreaH);
   if (!artwork) {
     return {
       ok: false,
-      error: `Could not use that artwork file. Upload a PNG or JPEG (or WebP) up to ${artworkMaxMb} MB. For print-area items, use the exact pixel size required.`,
+      error: printAreaW != null && printAreaH != null
+        ? `Could not store artwork at ${printAreaW}×${printAreaH}px within ${artworkStoredMaxMb} MB. Try a simpler export or less noisy art — we do not shrink print dimensions to fit.`
+        : `Could not use that artwork file. Upload a PNG or JPEG (or WebP) up to ${artworkUploadMaxMb} MB.`,
     };
   }
 
@@ -500,7 +502,7 @@ export async function submitFirstListingSetup(
     if (!outDims || !exportedImageMeetsPrintDimensions(outDims.w, outDims.h, printAreaW, printAreaH)) {
       return {
         ok: false,
-        error: `Artwork must match the exact print pixel size for this item. Re-export as PNG or JPEG at that size (up to ${artworkMaxMb} MB) and try again.`,
+        error: `Artwork must match the exact print pixel size for this item. Re-export as PNG or JPEG at that size and try again.`,
       };
     }
   }

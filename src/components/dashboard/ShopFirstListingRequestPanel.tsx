@@ -11,8 +11,9 @@ import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
-  listingRequestArtworkMaxBytes,
-  listingRequestArtworkMaxMb,
+  listingRequestArtworkStoredMaxMb,
+  listingRequestArtworkUploadMaxBytes,
+  listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
@@ -238,9 +239,9 @@ export function ShopFirstListingRequestPanel(props: {
     return null;
   }, [catalogGroups, listingProductId]);
 
-  const largeListingArtwork = selectedCatalogGroup?.option.largeListingArtwork ?? false;
-  const listingArtworkMaxMb = listingRequestArtworkMaxMb(largeListingArtwork);
-  const listingArtworkMaxBytes = listingRequestArtworkMaxBytes(largeListingArtwork);
+  const listingArtworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
+  const listingArtworkUploadMaxBytes = listingRequestArtworkUploadMaxBytes();
+  const listingArtworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
 
   useEffect(() => {
     setListingSubmitArtworkFile(null);
@@ -333,7 +334,7 @@ export function ShopFirstListingRequestPanel(props: {
         setMessage({
           tone: "err",
           text: bodyTooLarge
-            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${listingArtworkMaxMb} MB for this item (or redeploy if the limit was recently raised).`
+            ? `Upload failed before your artwork could be saved (server request limit). Use a PNG or JPEG up to ${listingArtworkUploadMaxMb} MB (or redeploy if the limit was recently raised).`
             : msg || "Could not submit your listing. Try again or contact support.",
         });
         return;
@@ -411,8 +412,8 @@ export function ShopFirstListingRequestPanel(props: {
   const minArtworkDpi = selectedCatalogGroup?.option.minArtworkDpi ?? null;
   const listingArtworkFileSizeError = (() => {
     const f = listingSubmitArtworkFile;
-    if (f && f.size > listingArtworkMaxBytes) {
-      return `File is too large (max ${listingArtworkMaxMb} MB for this item).`;
+    if (f && f.size > listingArtworkUploadMaxBytes) {
+      return `File is too large (max ${listingArtworkUploadMaxMb} MB upload).`;
     }
     return null;
   })();
@@ -632,8 +633,8 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkMaxMb} MB for this item — stored at full quality for
-            print review; shop profile and storefront photos are compressed separately)
+            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB upload — crop uses full resolution;
+            stored for admin review up to {listingArtworkStoredMaxMb} MB at print pixel size)
             <input
               ref={listingFileRef}
               type="file"
@@ -649,11 +650,11 @@ export function ShopFirstListingRequestPanel(props: {
                   setListingArtworkPreviewUrl(null);
                   return;
                 }
-                if (file.size > listingArtworkMaxBytes) {
+                if (file.size > listingArtworkUploadMaxBytes) {
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
                   setListingArtworkMeasureError(
-                    `File is too large (max ${listingArtworkMaxMb} MB for this item).`,
+                    `File is too large (max ${listingArtworkUploadMaxMb} MB upload).`,
                   );
                   return;
                 }

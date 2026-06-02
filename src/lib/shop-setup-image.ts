@@ -1,5 +1,9 @@
 import sharp from "sharp";
-import { LISTING_REQUEST_ARTWORK_PLATFORM_MAX_BYTES } from "@/lib/listing-request-artwork-limits";
+import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
+import {
+  LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES,
+} from "@/lib/listing-request-artwork-limits";
 
 /**
  * Site image compression tiers:
@@ -14,7 +18,7 @@ const PROFILE_MAX_BYTES = 100 * 1024;
 const LISTING_SUPPLEMENT_MAX_BYTES = 100 * 1024;
 const LISTING_SUPPLEMENT_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
 
-const LISTING_PLATFORM_MAX_BYTES = LISTING_REQUEST_ARTWORK_PLATFORM_MAX_BYTES;
+const LISTING_UPLOAD_MAX_BYTES = LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES;
 
 /** Avatar for shop profile: WebP, must fit under 100 KiB. */
 export async function compressShopProfileImageWebp(
@@ -99,31 +103,124 @@ export type ListingRequestArtworkUpload = {
   fileExtension: "webp" | "png" | "jpeg";
 };
 
-/**
- * Listing request artwork for admin / print review — **not** compressed to ~100 KiB like storefront images.
- * Stores the uploaded PNG, JPEG, or WebP bytes as-is when within `maxBytes` (per catalog item).
- */
-export async function prepareListingRequestArtworkUpload(
+function listingArtworkUploadFromBuffer(
+  body: Buffer,
+  format: string | undefined,
+): ListingRequestArtworkUpload | null {
+  if (format === "png") {
+    return { body, contentType: "image/png", fileExtension: "png" };
+  }
+  if (format === "jpeg" || format === "jpg") {
+    return { body, contentType: "image/jpeg", fileExtension: "jpeg" };
+  }
+  if (format === "webp") {
+    return { body, contentType: "image/webp", fileExtension: "webp" };
+  }
+  return null;
+}
+
+async function readListingArtworkDimensions(
   input: Buffer,
-  maxBytes: number = LISTING_PLATFORM_MAX_BYTES,
-): Promise<ListingRequestArtworkUpload | null> {
-  if (input.length > maxBytes) return null;
+): Promise<{ w: number; h: number; format: string | undefined } | null> {
   try {
     const meta = await sharp(input, { failOn: "none" }).metadata();
+    const w = meta.width;
+    const h = meta.height;
+    if (w == null || h == null || w < 1 || h < 1) return null;
     if (meta.format === "svg" || meta.format === "gif") return null;
-    if (input.length > maxBytes) return null;
-
-    if (meta.format === "png") {
-      return { body: input, contentType: "image/png", fileExtension: "png" };
-    }
-    if (meta.format === "jpeg" || meta.format === "jpg") {
-      return { body: input, contentType: "image/jpeg", fileExtension: "jpeg" };
-    }
-    if (meta.format === "webp") {
-      return { body: input, contentType: "image/webp", fileExtension: "webp" };
-    }
-    return null;
+    return { w, h, format: meta.format };
   } catch {
     return null;
   }
+}
+
+function dimensionsPreserved(
+  w: number,
+  h: number,
+  printW: number | null | undefined,
+  printH: number | null | undefined,
+): boolean {
+  if (printW != null && printH != null && printW > 0 && printH > 0) {
+    return exportedImageMeetsPrintDimensions(w, h, printW, printH);
+  }
+  return true;
+}
+
+/**
+ * Encode listing artwork for R2: pass-through when under `storedMaxBytes`, otherwise compress
+ * without changing pixel dimensions (DPI/crop was validated earlier on the source).
+ */
+export async function prepareListingRequestArtworkForStorage(
+  input: Buffer,
+  storedMaxBytes: number = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  printW?: number | null,
+  printH?: number | null,
+): Promise<ListingRequestArtworkUpload | null> {
+  if (input.length > LISTING_UPLOAD_MAX_BYTES) return null;
+
+  const source = await readListingArtworkDimensions(input);
+  if (!source) return null;
+  if (!dimensionsPreserved(source.w, source.h, printW, printH)) return null;
+
+  if (input.length <= storedMaxBytes) {
+    return listingArtworkUploadFromBuffer(input, source.format);
+  }
+
+  const oriented = () => sharp(input, { failOn: "none" }).rotate();
+
+  type Attempt = () => Promise<ListingRequestArtworkUpload | null>;
+
+  const attempts: Attempt[] = [];
+
+  if (source.format === "png") {
+    attempts.push(async () => {
+      const body = await oriented().png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer();
+      const dims = await readListingArtworkDimensions(body);
+      if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
+      if (body.length > storedMaxBytes) return null;
+      return { body, contentType: "image/png", fileExtension: "png" };
+    });
+  }
+
+  for (let q = 92; q >= 58; q -= 6) {
+    const quality = q;
+    attempts.push(async () => {
+      const body = await oriented().webp({ quality, effort: 4, alphaQuality: quality }).toBuffer();
+      const dims = await readListingArtworkDimensions(body);
+      if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
+      if (body.length > storedMaxBytes) return null;
+      return { body, contentType: "image/webp", fileExtension: "webp" };
+    });
+  }
+
+  for (let q = 90; q >= 62; q -= 7) {
+    const quality = q;
+    attempts.push(async () => {
+      const body = await oriented()
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .jpeg({ quality, mozjpeg: true })
+        .toBuffer();
+      const dims = await readListingArtworkDimensions(body);
+      if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
+      if (body.length > storedMaxBytes) return null;
+      return { body, contentType: "image/jpeg", fileExtension: "jpeg" };
+    });
+  }
+
+  for (const attempt of attempts) {
+    const result = await attempt();
+    if (result) return result;
+  }
+
+  return null;
+}
+
+/**
+ * @deprecated Use {@link prepareListingRequestArtworkForStorage}.
+ */
+export async function prepareListingRequestArtworkUpload(
+  input: Buffer,
+  maxBytes: number = LISTING_UPLOAD_MAX_BYTES,
+): Promise<ListingRequestArtworkUpload | null> {
+  return prepareListingRequestArtworkForStorage(input, maxBytes, null, null);
 }
