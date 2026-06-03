@@ -13,7 +13,7 @@ export async function ensureListingFeeStripeConnectNotice(shopId: string): Promi
       shopId,
       kind: KIND,
       body:
-        "Finish Stripe Connect on the Onboarding tab (charges and payouts enabled) before you can add listings with a publication fee or pay one from the Listings tab.",
+        "Stripe Connect is not finished yet (charges and payouts). Connect on the Onboarding tab when you are ready for marketplace payouts — listing requests and shop upgrades do not require it.",
     },
   });
 }

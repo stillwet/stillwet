@@ -106,7 +106,7 @@ export function useDashboardTabFetch(options: {
       const existing = inflightRef.current[tab];
       if (existing) {
         await existing;
-        return;
+        if (!options?.force) return;
       }
 
       const run = (async () => {

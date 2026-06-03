@@ -1,33 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { UnpaidPublicationFeeListingRow } from "@/lib/listing-fee-unpaid-rows";
-import {
-  CREATOR_FREE_LISTINGS_MESSAGE_COUNT,
-  type FreeListingRequestSlotsSummary,
-} from "@/lib/marketplace-constants";
+import type { FreeListingRequestSlotsSummary } from "@/lib/marketplace-constants";
 import { LISTING_CREDIT_PACKS, type ListingCreditPack } from "@/lib/listing-credit-packs";
 import { ListingCreditPackPay } from "@/components/dashboard/ListingCreditPackPay";
 
 const btnPurchaseListing =
-  "inline-block rounded-lg border border-zinc-700/80 bg-zinc-900/50 px-4 py-2 text-sm font-medium text-zinc-500 hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-300 disabled:cursor-not-allowed disabled:opacity-50";
+  "block w-full rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-center text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50";
 
 const btnPurchaseListingSelected =
-  "inline-block rounded-lg border border-zinc-500/80 bg-zinc-800/70 px-4 py-2 text-sm font-medium text-zinc-200";
+  "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-center text-[11px] font-medium text-zinc-100";
+
+function packLabelParts(label: string): { creditsLine: string; priceLine: string } {
+  const sep = label.indexOf(" — ");
+  if (sep === -1) return { creditsLine: label, priceLine: "" };
+  return { creditsLine: label.slice(0, sep), priceLine: label.slice(sep + 3) };
+}
 
 function FreeListingSlotsHint(props: { slots: FreeListingRequestSlotsSummary }) {
   const { slots } = props;
   if (slots.founderUnlimited) {
     return (
-      <p className="mt-4 text-xs text-zinc-500">Listing publication fees are waived for your shop.</p>
+      <p className="mt-2 text-xs text-zinc-500">Listing publication fees are waived for your shop.</p>
     );
   }
   const available = slots.listingCreditsAvailable;
   return (
-    <p className="mt-4 text-xs text-zinc-500">
-      First {CREATOR_FREE_LISTINGS_MESSAGE_COUNT} listings are free. You currently have {available}{" "}
-      {available === 1 ? "listing credit" : "listing credits"} available. Additional listings are
-      available for purchase.
+    <p className="mt-2 text-xs text-zinc-500">
+      You currently have {available} {available === 1 ? "listing credit" : "listing credits"} available.
     </p>
   );
 }
@@ -41,26 +42,71 @@ export function ListingCreditPackSection(props: {
   const { unpaidListings, freeListingSlots, stripePublishableKey, mockListingFeeCheckout } = props;
 
   const [payPanelPack, setPayPanelPack] = useState<ListingCreditPack | null>(null);
+  const packsContainerRef = useRef<HTMLDivElement>(null);
+  const packsMeasureRef = useRef<HTMLUListElement>(null);
+  const [packsCompact, setPacksCompact] = useState(false);
   const hasUnpaid = unpaidListings.length > 0;
+
+  useEffect(() => {
+    const container = packsContainerRef.current;
+    const measure = packsMeasureRef.current;
+    if (!container || !measure) return;
+
+    const updateLayout = () => {
+      const available = container.clientWidth;
+      const needed = measure.scrollWidth;
+      setPacksCompact(needed > Math.max(0, available - 8));
+    };
+
+    updateLayout();
+    const ro = new ResizeObserver(updateLayout);
+    ro.observe(container);
+    ro.observe(measure);
+    return () => ro.disconnect();
+  }, [payPanelPack?.id]);
+
+  const renderPackButtons = (compact: boolean, forMeasure = false) =>
+    LISTING_CREDIT_PACKS.map((pack) => {
+      const selected = payPanelPack?.id === pack.id;
+      const { creditsLine, priceLine } = packLabelParts(pack.label);
+      const btnClass = compact
+        ? selected
+          ? "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-100"
+          : "block w-full rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100"
+        : selected
+          ? btnPurchaseListingSelected
+          : btnPurchaseListing;
+      return (
+        <li key={pack.id} className={forMeasure ? "shrink-0" : "min-w-0 flex-1"}>
+          <button type="button" className={btnClass} onClick={() => setPayPanelPack(pack)}>
+            {compact ? (
+              <>
+                <span className="block whitespace-nowrap">{creditsLine}</span>
+                {priceLine ? <span className="block whitespace-nowrap">{priceLine}</span> : null}
+              </>
+            ) : (
+              pack.label
+            )}
+          </button>
+        </li>
+      );
+    });
 
   return (
     <div className="space-y-4">
       <div>
-        <ul className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          {LISTING_CREDIT_PACKS.map((pack) => (
-            <li key={pack.id}>
-              <button
-                type="button"
-                className={
-                  payPanelPack?.id === pack.id ? btnPurchaseListingSelected : btnPurchaseListing
-                }
-                onClick={() => setPayPanelPack(pack)}
-              >
-                {pack.label}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div ref={packsContainerRef} className="relative w-full min-w-0">
+          <ul
+            ref={packsMeasureRef}
+            className="pointer-events-none invisible absolute left-0 top-0 flex h-0 w-max list-none flex-nowrap gap-1.5 overflow-hidden p-0"
+            aria-hidden
+          >
+            {renderPackButtons(false, true)}
+          </ul>
+          <ul className="flex w-full min-w-0 list-none flex-nowrap items-stretch gap-1.5 p-0">
+            {renderPackButtons(packsCompact)}
+          </ul>
+        </div>
         <FreeListingSlotsHint slots={freeListingSlots} />
       </div>
 
@@ -76,28 +122,62 @@ export function ListingCreditPackSection(props: {
       {payPanelPack ? (
         <div
           id="request-listing-credit-pack-panel"
-          className="rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-4"
+          className="rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-3"
         >
-          <p className="text-sm font-medium text-zinc-200">{payPanelPack.label}</p>
           {mockListingFeeCheckout || stripePublishableKey?.trim() ? (
-            <ListingCreditPackPay
-              pack={payPanelPack}
-              stripePublishableKey={stripePublishableKey ?? ""}
-              mockListingFeeCheckout={mockListingFeeCheckout}
-              onPaid={() => setPayPanelPack(null)}
-            />
+            mockListingFeeCheckout ? (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <p className="text-xs font-medium text-zinc-200">{payPanelPack.label}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <ListingCreditPackPay
+                    pack={payPanelPack}
+                    stripePublishableKey={stripePublishableKey ?? ""}
+                    mockListingFeeCheckout={mockListingFeeCheckout}
+                    inline
+                    onPaid={() => setPayPanelPack(null)}
+                  />
+                  <button
+                    type="button"
+                    className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+                    onClick={() => setPayPanelPack(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs font-medium text-zinc-200">{payPanelPack.label}</p>
+                <ListingCreditPackPay
+                  pack={payPanelPack}
+                  stripePublishableKey={stripePublishableKey ?? ""}
+                  mockListingFeeCheckout={mockListingFeeCheckout}
+                  onPaid={() => setPayPanelPack(null)}
+                />
+                <button
+                  type="button"
+                  className="mt-1.5 text-xs text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+                  onClick={() => setPayPanelPack(null)}
+                >
+                  Cancel
+                </button>
+              </>
+            )
           ) : (
-            <p className="mt-3 rounded-lg border border-amber-900/45 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
-              Stripe is not configured for card payments.
-            </p>
+            <>
+              <p className="text-xs font-medium text-zinc-200">{payPanelPack.label}</p>
+              <p className="mt-2 rounded-lg border border-amber-900/45 bg-amber-950/25 px-3 py-1.5 text-xs text-amber-200/90">
+                Stripe is not configured for card payments.
+              </p>
+              <button
+                type="button"
+                className="mt-1.5 text-xs text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+                onClick={() => setPayPanelPack(null)}
+              >
+                Cancel
+              </button>
+            </>
           )}
-          <button
-            type="button"
-            className="mt-3 text-xs text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
-            onClick={() => setPayPanelPack(null)}
-          >
-            Cancel
-          </button>
         </div>
       ) : null}
     </div>

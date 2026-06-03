@@ -43,7 +43,7 @@ enum PromotionPurchaseStatus {
   failed
 }
 
-/** Dashboard listing credit pack checkout (10 / 25 / 50 credits). */
+/** Dashboard listing credit pack checkout (5 / 15 / 25 credits). */
 enum ListingCreditPackPurchaseStatus {
   pending
   paid
@@ -793,7 +793,7 @@ model ListingCreditPackPurchase {
   shop                  Shop                          @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopUserId            String
   shopUser              ShopUser                      @relation(fields: [shopUserId], references: [id], onDelete: Cascade)
-  /** `pack_10` | `pack_25` | `pack_50` — see `LISTING_CREDIT_PACKS` in app code. */
+  /** `pack_5` | `pack_15` | `pack_25` — see `LISTING_CREDIT_PACKS` in app code. */
   packId                String
   creditsGranted        Int
   amountCents           Int

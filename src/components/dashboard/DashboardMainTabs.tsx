@@ -5,7 +5,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
 import nextDynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
 import { dashQueryParamForTabId } from "@/lib/dashboard-dash-query";
@@ -38,12 +38,13 @@ import {
   DashboardSubmitListingRequestForm,
   ListingEmbeddedSupplementCatalogPair,
   ListingStorefrontCatalogImagesForms,
+  PaidOrderShopProfitHelp,
 } from "@/components/dashboard/DashboardListingForms";
 import type { ShopSetupShopPayload, ShopSetupSteps } from "@/components/dashboard/ShopSetupTabs";
+import type { DashboardShopAccountPayload } from "@/components/dashboard/DashboardShopAccountPanel";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import type { ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
-import { dashboardMarkOwnerNoticeRead } from "@/actions/shop-dashboard-notices";
-import { DashboardNoticeMarkReadButton } from "@/components/dashboard/DashboardNoticeMarkReadButton";
+import { DashboardNoticeMarkReadForm } from "@/components/dashboard/DashboardNoticeMarkReadForm";
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
 import { dashboardListingMinPriceHintCents } from "@/lib/listing-cart-price";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
@@ -115,7 +116,7 @@ export type DashboardSetupPanelProps = {
   listingPickerDiagnostics?: { adminCatalogItemCount: number };
   /** When the next listing request needs a listing credit from the bonus pool. */
   needsListingCreditForNextRequest: boolean;
-  /** When buying listing credits, Connect must be ready. */
+  /** Legacy — listing credits and upgrades are not gated on Connect readiness. */
   stripeConnectReadyForPaidListings: boolean;
   /** Listings that owe a paid publication fee (shown on Request listing tab). */
   unpaidPublicationFeeListings: UnpaidPublicationFeeListingRow[];
@@ -226,12 +227,21 @@ function paidOrderDateTimeAttr(iso: string) {
   }
 }
 
-/** Sum of (sale − goods/services − platform fee) per line — matches the line breakdown above. */
+function paidOrderMerchandiseTotals(o: DashboardPaidOrderRow) {
+  return o.lines.reduce(
+    (acc, l) => ({
+      saleCents: acc.saleCents + l.unitPriceCents * l.quantity,
+      goodsServicesCostCents: acc.goodsServicesCostCents + l.goodsServicesCostCents,
+      platformCutCents: acc.platformCutCents + l.platformCutCents,
+    }),
+    { saleCents: 0, goodsServicesCostCents: 0, platformCutCents: 0 },
+  );
+}
+
+/** Sum of (sale − goods/services − platform fee) per line. */
 function paidOrderShopProfitCents(o: DashboardPaidOrderRow) {
-  return o.lines.reduce((sum, l) => {
-    const sale = l.unitPriceCents * l.quantity;
-    return sum + (sale - l.goodsServicesCostCents - l.platformCutCents);
-  }, 0);
+  const t = paidOrderMerchandiseTotals(o);
+  return t.saleCents - t.goodsServicesCostCents - t.platformCutCents;
 }
 
 function formatMoney(cents: number) {
@@ -741,6 +751,7 @@ function ListingCard({
         : `Free listing (${listing.listingOrdinal} of ${freeSlotCap}).`
       : null;
   const statusLine = requestStatusDescription(listing);
+  const shopPitch = listing.storefrontItemBlurb?.trim() || null;
   const compactTitle = (listing.requestItemName?.trim() || listing.product.name).trim() || "Listing";
   const heroUrl =
     productPrimaryImageForShopListing(listing.product, {
@@ -808,22 +819,41 @@ function ListingCard({
   return (
     <li className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-3 text-sm">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
-            {heroUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                alt=""
-                src={heroThumbSrcWithCacheBust(heroUrl, listing.updatedAtIso)}
-                className="h-full w-full object-cover"
-              />
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          {!awaitingAdminReview ? (
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
+              {heroUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt=""
+                  src={heroThumbSrcWithCacheBust(heroUrl, listing.updatedAtIso)}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full" />
+              )}
+            </div>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            {awaitingAdminReview ? (
+              <div className="flex min-w-0 items-baseline gap-3">
+                <p className="shrink-0 truncate text-sm font-medium text-zinc-100">{compactTitle}</p>
+                {shopPitch ? (
+                  <p className="min-w-0 flex-1 truncate text-[11px] leading-snug text-zinc-500">
+                    {shopPitch}
+                  </p>
+                ) : null}
+              </div>
             ) : (
-              <div className="h-full w-full" />
+              <>
+                <p className="truncate text-sm font-medium text-zinc-100">{compactTitle}</p>
+                {lockedSubline ? (
+                  <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-zinc-500">
+                    {lockedSubline}
+                  </p>
+                ) : null}
+              </>
             )}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-zinc-100">{compactTitle}</p>
-            {lockedSubline ? <p className="mt-0.5 text-[11px] text-zinc-500">{lockedSubline}</p> : null}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -1119,10 +1149,10 @@ export function DashboardMainTabs(props: {
   shopStripeConnectReadyForCharges: boolean;
   /** Stripe.js publishable key for embedded listing fee card pay. */
   stripePublishableKey: string | null;
-  /** When true, show demo paid-order control on Orders tab (local `next dev` + `SHOP_DEMO_PURCHASE_BUTTON=1` only). */
+  /** When true, show demo paid-order control on Orders tab (local dev + env flag + admin session). */
   showDemoPurchaseButton?: boolean;
   /** Creator sign-in email + verification state for the Account info tab. */
-  shopAccount?: { email: string; emailVerified: boolean; twoFactorEmailEnabled: boolean } | null;
+  shopAccount?: DashboardShopAccountPayload | null;
   /** Phrases for client-side moderation blur checks (same bank as server actions). */
   moderationKeywordPhrases?: readonly string[];
   /** When true, tab bodies load via `/api/dashboard/*` on first open (saves Vercel CPU). */
@@ -1191,6 +1221,26 @@ export function DashboardMainTabs(props: {
     ? tabFetch.moderationKeywordPhrases
     : initialModerationPhrases;
 
+  const handleNoticeMarkedRead = useCallback(
+    async (noticeId: string) => {
+      if (clientTabFetch) {
+        await tabFetch.loadTab("notifications", { force: true });
+        return;
+      }
+      setNotifications((prev) => {
+        if (!prev) return prev;
+        const row = prev.rows.find((r) => r.id === noticeId);
+        if (!row || row.readAt != null) return prev;
+        const readAt = new Date().toISOString();
+        return {
+          rows: prev.rows.map((r) => (r.id === noticeId ? { ...r, readAt } : r)),
+          unreadCount: Math.max(0, prev.unreadCount - 1),
+        };
+      });
+    },
+    [clientTabFetch, tabFetch],
+  );
+
   /** RSC can send new props without remounting (e.g. `router.refresh`); re-seed client tab cache. */
   useEffect(() => {
     if (clientTabFetch) return;
@@ -1230,6 +1280,9 @@ export function DashboardMainTabs(props: {
   const [activeTab, setActiveTab] = useState<TabId>(() =>
     normalizeDashboardMainTab(initialTabProp, tabOpts),
   );
+  const shopDashboardTabsContainerRef = useRef<HTMLDivElement>(null);
+  const shopDashboardTabsMeasureRef = useRef<HTMLDivElement>(null);
+  const [shopDashboardTabsStacked, setShopDashboardTabsStacked] = useState(false);
 
   useEffect(() => {
     setActiveTab(normalizeDashboardMainTab(initialTabProp, tabOpts));
@@ -1344,7 +1397,7 @@ export function DashboardMainTabs(props: {
     effectiveGroupedListingSections;
 
   const tabBtnClass = (active: boolean) =>
-    `inline-block shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition ${
+    `inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition ${
       active
         ? "bg-zinc-800 text-zinc-100 ring-1 ring-zinc-600"
         : "text-zinc-500 hover:bg-zinc-900/80 hover:text-zinc-300"
@@ -1390,7 +1443,7 @@ export function DashboardMainTabs(props: {
       href={DASHBOARD_PROMOTIONS_PATH}
       prefetch={false}
       scroll={false}
-      className="inline-block shrink-0 whitespace-nowrap rounded-md border border-violet-800/55 bg-violet-950/35 px-4 py-2 text-sm font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50"
+      className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-violet-800/55 bg-violet-950/35 px-3 py-2 text-sm font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50"
     >
       {DASHBOARD_SHOP_UPGRADES_LABEL}
     </Link>
@@ -1418,6 +1471,104 @@ export function DashboardMainTabs(props: {
     };
   }, [effectiveNotifications?.rows, notificationsPage]);
 
+  type ShopDashboardTabEntry = { id: string; node: ReactNode };
+  const shopDashboardTabItems: ShopDashboardTabEntry[] = [];
+  if (hasNotifications) {
+    shopDashboardTabItems.push({
+      id: "notifications",
+      node: tabBtn(
+        "notifications",
+        <span className="inline-flex items-center gap-2">
+          Notifications
+          {unreadN > 0 ? <span className={navTabCountBadgeCircleClass}>{unreadN}</span> : null}
+        </span>,
+        notificationsTabId,
+        notificationsPanelId,
+      ),
+    });
+  }
+  if (hasSetup && setup) {
+    shopDashboardTabItems.push(
+      {
+        id: "shopProfile",
+        node: tabBtn("shopProfile", "Shop profile", shopProfileTabId, shopProfilePanelId),
+      },
+      {
+        id: "requestListing",
+        node: tabBtn("requestListing", "Request listing", requestListingTabId, requestListingPanelId),
+      },
+    );
+  }
+  shopDashboardTabItems.push(
+    {
+      id: "listings",
+      node: tabBtn("listings", "Listings", listingsTabId, listingsPanelId),
+    },
+    {
+      id: "orders",
+      node: tabBtn("orders", "Sales", ordersTabId, ordersPanelId),
+    },
+  );
+  if (canSupport) {
+    shopDashboardTabItems.push({
+      id: "support",
+      node: tabBtn(
+        "support",
+        <span className="inline-flex items-center gap-2">
+          Support
+          {supportStaffBadgeCount > 0 ? (
+            <span className="rounded-full bg-violet-900/70 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-violet-100">
+              {supportStaffBadgeCount}
+            </span>
+          ) : null}
+        </span>,
+        supportTabId,
+        supportPanelId,
+      ),
+    });
+  }
+  if (!isPlatform && shopAccount) {
+    shopDashboardTabItems.push({
+      id: "accountInfo",
+      node: tabBtn("accountInfo", "Account info", accountInfoTabId, accountInfoPanelId),
+    });
+  }
+  if (!isPlatform) {
+    shopDashboardTabItems.push({ id: "shop-upgrades", node: promotionsPageBtn() });
+  }
+
+  const renderShopDashboardTabs = (entries: ShopDashboardTabEntry[]) =>
+    entries.map(({ id, node }) => <Fragment key={id}>{node}</Fragment>);
+
+  useEffect(() => {
+    const container = shopDashboardTabsContainerRef.current;
+    const measure = shopDashboardTabsMeasureRef.current;
+    if (!container || !measure) return;
+
+    const updateLayout = () => {
+      const available = container.clientWidth;
+      const needed = measure.scrollWidth;
+      const comfortPx = 16;
+      setShopDashboardTabsStacked(needed > Math.max(0, available - comfortPx));
+    };
+
+    updateLayout();
+    const ro = new ResizeObserver(updateLayout);
+    ro.observe(container);
+    ro.observe(measure);
+    return () => ro.disconnect();
+  }, [
+    shopDashboardTabItems.length,
+    unreadN,
+    supportStaffBadgeCount,
+    activeTab,
+    hasNotifications,
+    hasSetup,
+    canSupport,
+    isPlatform,
+    shopAccount != null,
+  ]);
+
   return (
     <section className="mt-8">
       {clientTabFetch && tabFetch.tabLoadError ? (
@@ -1432,57 +1583,58 @@ export function DashboardMainTabs(props: {
             role="tablist"
             aria-label="Shop onboarding"
           >
-            {tabBtn("setup", "Onboarding", setupTabId, setupPanelId)}
-            {!guidelinesAcknowledged
-              ? tabBtn("itemGuidelines", "Shop regulations", itemGuidelinesTabId, itemGuidelinesPanelId)
-              : null}
+            <Fragment key="setup">{tabBtn("setup", "Onboarding", setupTabId, setupPanelId)}</Fragment>
+            {!guidelinesAcknowledged ? (
+              <Fragment key="itemGuidelines">
+                {tabBtn("itemGuidelines", "Shop regulations", itemGuidelinesTabId, itemGuidelinesPanelId)}
+              </Fragment>
+            ) : null}
           </div>
         ) : null}
         <div
-          className="flex w-full min-w-0 flex-wrap items-center justify-start gap-1 rounded-xl border border-zinc-800 bg-zinc-950/40 p-1"
+          ref={shopDashboardTabsContainerRef}
+          className={`relative w-full min-w-0 rounded-xl border border-zinc-800 bg-zinc-950/40 ${
+            shopDashboardTabsStacked ? "p-0.5" : "p-1"
+          }`}
           role="tablist"
           aria-label="Shop dashboard"
         >
-          {hasNotifications
-            ? tabBtn(
-                "notifications",
-                <span className="inline-flex items-center gap-2">
-                  Notifications
-                  {unreadN > 0 ? (
-                    <span className={navTabCountBadgeCircleClass}>{unreadN}</span>
-                  ) : null}
-                </span>,
-                notificationsTabId,
-                notificationsPanelId,
-              )
-            : null}
-          {hasSetup && setup
-            ? tabBtn("shopProfile", "Shop profile", shopProfileTabId, shopProfilePanelId)
-            : null}
-          {hasSetup && setup
-            ? tabBtn("requestListing", "Request listing", requestListingTabId, requestListingPanelId)
-            : null}
-          {tabBtn("listings", "Listings", listingsTabId, listingsPanelId)}
-          {tabBtn("orders", "Sales", ordersTabId, ordersPanelId)}
-          {canSupport
-            ? tabBtn(
-                "support",
-                <span className="inline-flex items-center gap-2">
-                  Support
-                  {supportStaffBadgeCount > 0 ? (
-                    <span className="rounded-full bg-violet-900/70 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-violet-100">
-                      {supportStaffBadgeCount}
-                    </span>
-                  ) : null}
-                </span>,
-                supportTabId,
-                supportPanelId,
-              )
-            : null}
-          {!isPlatform && shopAccount
-            ? tabBtn("accountInfo", "Account info", accountInfoTabId, accountInfoPanelId)
-            : null}
-          {!isPlatform ? promotionsPageBtn() : null}
+          <div
+            ref={shopDashboardTabsMeasureRef}
+            className="pointer-events-none invisible absolute left-0 top-0 h-0 overflow-hidden"
+            aria-hidden
+          >
+            <div className="inline-flex flex-nowrap items-center">
+              {renderShopDashboardTabs(shopDashboardTabItems)}
+            </div>
+          </div>
+          {shopDashboardTabsStacked ? (
+            <div className="flex flex-col [&_a]:px-2 [&_a]:py-1 [&_a]:text-xs [&_button]:px-2 [&_button]:py-1 [&_button]:text-xs">
+              <div className="grid grid-cols-4 pb-0.5">
+                {shopDashboardTabItems.slice(0, 4).map(({ id, node }) => (
+                  <div key={id} className="flex min-w-0 items-center justify-center">
+                    {node}
+                  </div>
+                ))}
+              </div>
+              {shopDashboardTabItems.length > 4 ? (
+                <>
+                  <div className="border-t border-zinc-800/80" aria-hidden />
+                  <div className="grid grid-cols-4 pt-0.5">
+                    {shopDashboardTabItems.slice(4).map(({ id, node }) => (
+                      <div key={id} className="flex min-w-0 items-center justify-center">
+                        {node}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : (
+            <div className="flex w-full min-w-0 flex-nowrap items-center justify-between">
+              {renderShopDashboardTabs(shopDashboardTabItems)}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1611,6 +1763,10 @@ export function DashboardMainTabs(props: {
               initialEmail={shopAccount.email}
               emailVerified={shopAccount.emailVerified}
               twoFactorEmailEnabled={shopAccount.twoFactorEmailEnabled}
+              accountDeletionRequestedAt={shopAccount.accountDeletionRequestedAt}
+              accountDeletionEmailConfirmedAt={shopAccount.accountDeletionEmailConfirmedAt}
+              stripeConnectAccountId={shopAccount.stripeConnectAccountId}
+              stripeConnectBalance={shopAccount.stripeConnectBalance}
             />
           ) : null}
         </div>
@@ -1783,10 +1939,10 @@ export function DashboardMainTabs(props: {
                           className="min-w-0 flex-1 leading-snug"
                         />
                         {isUnread ? (
-                          <form action={dashboardMarkOwnerNoticeRead} className="shrink-0">
-                            <input type="hidden" name="noticeId" value={n.id} />
-                            <DashboardNoticeMarkReadButton />
-                          </form>
+                          <DashboardNoticeMarkReadForm
+                            noticeId={n.id}
+                            onMarkedRead={() => handleNoticeMarkedRead(n.id)}
+                          />
                         ) : null}
                       </div>
                       <div className="mt-2 text-[11px] text-zinc-600">
@@ -1868,12 +2024,6 @@ export function DashboardMainTabs(props: {
         hidden={activeTab !== "orders"}
         className="pt-6"
       >
-        <p className="text-xs leading-relaxed text-zinc-600">
-          You&apos;ll get a <span className="text-zinc-400">notification</span> when you have a new sale. This tab
-          refreshes at most once per calendar day (Pacific) after you first open it; line-item detail may take up to 24
-          hours to appear. Newest first (up to 20). Each line is merchandise only. Shop Profit is the sum of each
-          line&apos;s sale minus goods/services cost and platform fee. Shipping and tips are not included here.
-        </p>
         {!effectiveLoadedFlags.orders ? (
           <div className="flex items-center gap-2 py-8 text-sm text-zinc-500">
             <span
@@ -1885,48 +2035,56 @@ export function DashboardMainTabs(props: {
         ) : (
             <>
         {activeTab === "orders" && showDemoPurchaseButton ? <DemoShopPurchaseButtonLazy /> : null}
-        <ul className="mt-4 space-y-3">
-          {effectivePaidOrders.map((o) => (
-            <li key={o.id} className="rounded-lg border border-zinc-800 p-3 text-xs text-zinc-400">
-              <time
-                dateTime={paidOrderDateTimeAttr(o.createdAt)}
-                className="block tabular-nums text-zinc-300"
-              >
-                {formatPaidOrderDate(o.createdAt)}
-              </time>
-              <div className="mt-2 flex items-start justify-between gap-4">
-                <ul className="min-w-0 flex-1 space-y-2 text-zinc-400">
-                  {o.lines.map((l, i) => (
-                    <li key={i} className="leading-snug">
-                      <div className="text-zinc-300">
-                        {l.lineDisplayLabel} × {l.quantity}
-                      </div>
-                      <div className="mt-1.5 flex flex-wrap items-baseline gap-x-6 gap-y-1.5 text-[11px] text-zinc-500 tabular-nums">
-                        <span className="shrink-0">Sale {formatMoney(l.unitPriceCents * l.quantity)}</span>
-                        <span className="shrink-0">
-                          Goods/services cost {formatMoney(l.goodsServicesCostCents)}
-                        </span>
-                        <span className="shrink-0">Platform fee {formatMoney(l.platformCutCents)}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div
-                  className="flex shrink-0 flex-col items-end gap-1 text-right leading-snug text-zinc-300"
-                  title="Merchandise only: for each line, sale − goods/services − platform fee; Shop Profit is the sum. Excludes shipping and tips."
-                >
-                  <span className="text-blue-400">Shop Profit</span>
-                  <span className="text-[11px] tabular-nums text-zinc-300">
-                    {formatMoney(paidOrderShopProfitCents(o))}
-                  </span>
-                </div>
+        {effectivePaidOrders.length > 0 ? (
+          <>
+            <div
+              className="mt-4 flex items-baseline justify-between gap-4 border-b border-zinc-800/80 pb-2 text-[11px] uppercase tracking-wide text-zinc-500"
+              aria-hidden
+            >
+              <div className="flex min-w-0 flex-1 items-baseline gap-3">
+                <span className="w-14 shrink-0 text-center">Date</span>
+                <span className="min-w-0 flex-1 pl-4 text-left">Item</span>
               </div>
-            </li>
-          ))}
-        </ul>
-        {effectivePaidOrders.length === 0 ? (
+              <span className="min-w-[5.5rem] shrink-0 text-center text-blue-400">Shop profit</span>
+            </div>
+            <ul className="mt-2 space-y-3">
+              {effectivePaidOrders.map((o) => (
+                <li key={o.id} className="rounded-lg border border-zinc-800 p-3 text-xs text-zinc-400">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                      <time
+                        dateTime={paidOrderDateTimeAttr(o.createdAt)}
+                        className="w-14 shrink-0 font-normal tabular-nums text-zinc-300"
+                      >
+                        {formatPaidOrderDate(o.createdAt)}
+                      </time>
+                      <ul className="min-w-0 flex-1 space-y-2 text-zinc-400">
+                        {o.lines.map((l, i) => (
+                          <li key={i} className="leading-snug text-zinc-300">
+                            {l.lineDisplayLabel} × {l.quantity}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    {(() => {
+                      const merch = paidOrderMerchandiseTotals(o);
+                      return (
+                        <PaidOrderShopProfitHelp
+                          shopProfitCents={paidOrderShopProfitCents(o)}
+                          saleCents={merch.saleCents}
+                          goodsServicesCostCents={merch.goodsServicesCostCents}
+                          platformCutCents={merch.platformCutCents}
+                        />
+                      );
+                    })()}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
           <p className="mt-4 text-sm text-zinc-600">No paid orders for this shop yet.</p>
-        ) : null}
+        )}
           </>
         )}
       </div>

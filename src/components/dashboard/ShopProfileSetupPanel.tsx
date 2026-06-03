@@ -19,7 +19,6 @@ import {
   type ShopSocialLinksRecord,
 } from "@/lib/shop-social-links";
 import type { ShopSetupShopPayload } from "@/components/dashboard/ShopSetupTabs";
-import { ShopDangerZonePanel } from "@/components/dashboard/ShopDangerZonePanel";
 import {
   shopProfileModerationMatchesByField,
   moderationTriggerErrorMessage,
@@ -627,15 +626,6 @@ export function ShopProfileSetupPanel(props: {
             ) : null}
           </div>
         </form>
-      </div>
-
-      <div className="mt-10 border-t border-zinc-800 pt-8">
-        <ShopDangerZonePanel
-          accountDeletionRequestedAt={shop.accountDeletionRequestedAt}
-          accountDeletionEmailConfirmedAt={shop.accountDeletionEmailConfirmedAt}
-          stripeConnectAccountId={shop.stripeConnectAccountId}
-          stripeConnectBalance={shop.stripeConnectBalance}
-        />
       </div>
     </section>
   );

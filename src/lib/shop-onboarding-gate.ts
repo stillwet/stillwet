@@ -47,6 +47,7 @@ export function computeShopOnboardingSteps(input: {
   return { profile, guidelines, emailVerified, listing, stripe };
 }
 
+/** All checklist steps — Onboarding tab stays visible until this is zero (does not block listings/upgrades). */
 export function countIncompleteOnboardingSteps(steps: ShopOnboardingSteps): number {
   let n = 0;
   if (!steps.profile) n++;
@@ -57,9 +58,9 @@ export function countIncompleteOnboardingSteps(steps: ShopOnboardingSteps): numb
   return n;
 }
 
-/** Stripe Connect is allowed only after the non-Stripe checklist is done. */
+/** Stripe Connect is allowed after profile, guidelines, and listing — not gated on email verification. */
 export function canStartStripeConnect(
-  steps: Pick<ShopOnboardingSteps, "profile" | "guidelines" | "emailVerified" | "listing">,
+  steps: Pick<ShopOnboardingSteps, "profile" | "guidelines" | "listing">,
 ): boolean {
-  return steps.profile && steps.guidelines && steps.emailVerified && steps.listing;
+  return steps.profile && steps.guidelines && steps.listing;
 }

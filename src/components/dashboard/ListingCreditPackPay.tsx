@@ -15,8 +15,10 @@ export function ListingCreditPackPay(props: {
   stripePublishableKey: string;
   mockListingFeeCheckout: boolean;
   onPaid?: () => void;
+  /** Single-row layout for mock checkout (no outer top margin). */
+  inline?: boolean;
 }) {
-  const { pack, stripePublishableKey, mockListingFeeCheckout, onPaid } = props;
+  const { pack, stripePublishableKey, mockListingFeeCheckout, onPaid, inline = false } = props;
   const router = useRouter();
   const mountRef = useRef<HTMLDivElement | null>(null);
   const stripeRef = useRef<Stripe | null>(null);
@@ -133,27 +135,27 @@ export function ListingCreditPackPay(props: {
 
   if (mockListingFeeCheckout) {
     return (
-      <div className="mt-3">
+      <div className={inline ? undefined : "mt-2"}>
         <button
           type="button"
           disabled={busy}
-          className="rounded border border-blue-900/60 bg-blue-950/30 px-3 py-1.5 text-xs text-blue-200 hover:border-blue-700/60 disabled:opacity-50"
+          className="rounded border border-blue-900/60 bg-blue-950/30 px-2.5 py-1 text-xs text-blue-200 hover:border-blue-700/60 disabled:opacity-50"
           onClick={onMockPay}
         >
           {busy ? "Processing…" : "Buy (mock checkout)"}
         </button>
-        {error ? <p className="mt-2 text-xs text-red-300/90">{error}</p> : null}
+        {error ? <p className={`text-xs text-red-300/90 ${inline ? "mt-1" : "mt-1.5"}`}>{error}</p> : null}
       </div>
     );
   }
 
   return (
-    <div className="mt-3 space-y-2">
-      <div ref={mountRef} className="rounded border border-zinc-700 bg-zinc-900/40 px-3 py-2.5" />
+    <div className="mt-2 space-y-1.5">
+      <div ref={mountRef} className="rounded border border-zinc-700 bg-zinc-900/40 px-2 py-1.5" />
       <button
         type="button"
         disabled={!ready || busy}
-        className="rounded border border-zinc-500 bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded border border-zinc-500 bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
         onClick={onPay}
       >
         {busy ? "Processing…" : "Buy"}

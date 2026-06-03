@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { FulfillmentType, OrderStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import { getShopOwnerSession } from "@/lib/session";
+import { getAdminSessionReadonly, getShopOwnerSession } from "@/lib/session";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
 import { listingStripeProductName } from "@/lib/listing-cart-stripe-name";
 import { baselineGoodsServicesUnitCents } from "@/lib/baseline-goods-services-unit-cents";
@@ -30,6 +30,11 @@ export async function simulateShopDemoPurchase(): Promise<SimulateShopDemoPurcha
         error:
           "Demo purchase is only available in local development (`next dev`) with SHOP_DEMO_PURCHASE_BUTTON=1.",
       };
+    }
+
+    const admin = await getAdminSessionReadonly();
+    if (!admin.isAdmin) {
+      return { ok: false, error: "Sign in at /admin to use demo purchases." };
     }
 
     const session = await getShopOwnerSession();

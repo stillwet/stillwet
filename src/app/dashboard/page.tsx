@@ -2,7 +2,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getShopOwnerSession, getShopOwnerSessionReadonly } from "@/lib/session";
+import {
+  getAdminSessionReadonly,
+  getShopOwnerSession,
+  getShopOwnerSessionReadonly,
+} from "@/lib/session";
 import { ListingRequestStatus } from "@/generated/prisma/enums";
 import {
   PLATFORM_SHOP_SLUG,
@@ -17,6 +21,7 @@ import {
   DashboardDeferredTabsIsland,
   type CreatorDashboardSetupPayload,
 } from "@/components/dashboard/DashboardDeferredTabsIsland";
+import { ListingSubmittedFlashBanner } from "@/components/dashboard/ListingSubmittedFlashBanner";
 import { DashboardTabsSuspenseFallback } from "./DashboardPageSuspenseFallback";
 import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 import { scopesForInitialTab } from "@/lib/dashboard-scoped-data";
@@ -82,7 +87,10 @@ function dashboardSearchParamsWithoutConnectQuery(
 }
 
 export default async function DashboardPage({ searchParams }: PageProps) {
-  const owner = await getShopOwnerSessionReadonly();
+  const [owner, adminSession] = await Promise.all([
+    getShopOwnerSessionReadonly(),
+    getAdminSessionReadonly(),
+  ]);
   if (!owner.shopUserId) redirect("/dashboard/login");
 
   const sp = await searchParams;
@@ -90,7 +98,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const connectReason =
     typeof sp.reason === "string" ? sp.reason : Array.isArray(sp.reason) ? sp.reason[0] : undefined;
   const fee = typeof sp.fee === "string" ? sp.fee : undefined;
-  const listingSubmitted = sp.listingSubmitted === "1";
   const promo = typeof sp.promo === "string" ? sp.promo : undefined;
   const promoErr =
     typeof sp.promoErr === "string"
@@ -457,12 +464,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {listingSubmitted ? (
-        <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90">
-          Listing submitted for review. Admin approval usually takes 1–3 days. Check the{" "}
-          <strong className="font-medium text-emerald-100/95">Listings</strong> tab for status.
-        </p>
-      ) : null}
+      <Suspense fallback={null}>
+        <ListingSubmittedFlashBanner />
+      </Suspense>
       {fee === "ok" ? (
         <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90">
           Listing fee payment received (or mock checkout). You can continue with your listing workflow.
@@ -507,7 +511,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       ) : null}
       {!isPlatform && !setupSteps.stripe && connect === "err" && connectReason === "onboarding_incomplete" ? (
         <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-amber-200/90">
-          Complete onboarding (shop profile, shop regulations, verify email, and a listing request) before connecting
+          Complete onboarding (shop profile, shop regulations, and a listing request) before connecting
           Stripe.
         </p>
       ) : null}
@@ -532,6 +536,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           shopId={shop.id}
           shopSlug={shop.slug}
           isPlatform={isPlatform}
+          adminLoggedIn={adminSession.isAdmin}
           scopes={scopes}
           dashTab={dashTab}
           dashboardQueryPreserve={dashboardQueryPreserve}
@@ -545,6 +550,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   email: user.email,
                   emailVerified: user.emailVerifiedAt != null,
                   twoFactorEmailEnabled: user.twoFactorEmailEnabled,
+                  accountDeletionRequestedAt: shop.accountDeletionRequestedAt?.toISOString() ?? null,
+                  accountDeletionEmailConfirmedAt:
+                    shop.accountDeletionEmailConfirmedAt?.toISOString() ?? null,
+                  stripeConnectAccountId: shop.stripeConnectAccountId,
+                  stripeConnectBalance,
                 }
               : null
           }

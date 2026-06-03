@@ -11,7 +11,7 @@ import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { isR2UploadConfigured } from "@/lib/r2-upload";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
 import type { ShopSetupSteps, ShopSetupShopPayload } from "@/components/dashboard/ShopSetupTabs";
-import type { ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
+import type { DashboardShopAccountPayload } from "@/components/dashboard/DashboardShopAccountPanel";
 
 /** Creator onboarding props merged with catalog chunks inside {@link DashboardDeferredTabsIsland}. */
 export type CreatorDashboardSetupPayload = {
@@ -29,6 +29,8 @@ export type DashboardDeferredTabsIslandProps = {
   shopId: string;
   shopSlug: string;
   isPlatform: boolean;
+  /** `/admin` session active in this browser (separate from shop owner login). */
+  adminLoggedIn: boolean;
   scopes: DashboardScope[];
   dashTab: DashboardMainTabId;
   dashboardQueryPreserve: string;
@@ -36,7 +38,7 @@ export type DashboardDeferredTabsIslandProps = {
   stripePublishableKey: string | null;
   shopStripeConnectReadyForCharges: boolean;
   creatorSetup: CreatorDashboardSetupPayload | null;
-  shopAccount: { email: string; emailVerified: boolean; twoFactorEmailEnabled: boolean } | null;
+  shopAccount: DashboardShopAccountPayload | null;
 };
 
 const emptyGroupedSections = { live: [], request: [], removed: [] };
@@ -49,6 +51,7 @@ function buildDashboardMainTabsProps(
   const {
     shopSlug,
     isPlatform,
+    adminLoggedIn,
     scopes,
     dashTab,
     dashboardQueryPreserve,
@@ -67,7 +70,8 @@ function buildDashboardMainTabsProps(
   const catalogGroups: ShopSetupCatalogGroup[] = [];
   const draftListingRequestPrefill = null;
 
-  const showDemoPurchaseButton = !isPlatform && shopDemoPurchaseFeatureEnabled();
+  const showDemoPurchaseButton =
+    !isPlatform && shopDemoPurchaseFeatureEnabled() && adminLoggedIn;
   const mockListingFeeCheckout = !isPlatform && isMockCheckoutEnabled();
 
   return {

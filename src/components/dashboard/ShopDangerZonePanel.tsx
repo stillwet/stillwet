@@ -66,7 +66,7 @@ export function ShopDangerZonePanel(props: {
 
   return (
     <section
-      className="scroll-mt-4 rounded-lg border border-red-900/40 bg-red-950/15 p-4 sm:p-5"
+      className="scroll-mt-4 rounded-lg border border-red-900/40 bg-red-950/15 p-3"
       aria-labelledby="shop-danger-heading"
     >
       <h3 id="shop-danger-heading" className="text-xs font-semibold uppercase tracking-wide text-red-300/90">
@@ -83,20 +83,20 @@ export function ShopDangerZonePanel(props: {
       ) : null}
 
       {deletionPending ? (
-        <p className={`text-xs text-amber-200/85 ${msg ? "mt-3" : "mt-4"}`}>
+        <p className="mt-2 text-xs text-amber-200/85">
           {emailConfirmed
-            ? "Your confirmation link was used: listing images and profile photos are cleared from our storage, and listings are taken down. When your Stripe balance is zero, opening the dashboard again removes the account automatically."
-            : "Your shop is hidden from browse. Open the link in your confirmation email — that step removes your stored photos and listing media, then you can close the account when payouts are settled."}
+            ? "Email confirmed. Listings and photos are cleared. At $0 Stripe balance, the next dashboard visit removes your account."
+            : "Shop hidden. Open the confirmation email link to clear media, then close the account when payouts settle."}
         </p>
       ) : null}
 
-      <div className={msg || deletionPending ? "mt-6" : "mt-4"}>
+      <div className={msg || deletionPending ? "mt-3" : "mt-2"}>
         {!deletionPending ? (
           <>
-            <p className="mt-2 text-xs text-zinc-500">
-              After verifying via the email link and having a zero Stripe balance, your account will be deleted. This cannot be undone!
+            <p className="text-xs text-zinc-500">
+              Email verification and $0 Stripe balance required. Permanent.
             </p>
-            <div className="mt-2">
+            <div className="mt-1.5">
               <button
                 type="button"
                 disabled={busy}
@@ -111,8 +111,8 @@ export function ShopDangerZonePanel(props: {
           <div className="mt-2 space-y-3">
             <p className="text-xs text-zinc-500">
               {emailConfirmed
-                ? "Email confirmed. Withdraw or wait until Stripe shows $0.00 available and pending; the next dashboard load then signs you out and removes the shop."
-                : "Check your inbox for the confirmation link (expires in 24 hours)."}
+                ? "Withdraw or wait for $0 Stripe balance; next dashboard load removes the shop."
+                : "Check your inbox for the confirmation link (24 hours)."}
             </p>
 
             {deletionPending && !emailConfirmed ? (

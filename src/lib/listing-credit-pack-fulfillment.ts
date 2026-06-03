@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { ListingCreditPackPurchaseStatus } from "@/generated/prisma/enums";
+import { revalidateShopUpgradesDashboardPaths } from "@/lib/dashboard-revalidate-shop-upgrades";
 import { syncFreeListingFeeWaivers } from "@/lib/listing-fee";
 import { prisma } from "@/lib/prisma";
 
@@ -77,5 +78,6 @@ export async function fulfillListingCreditPackPurchaseIfPending(
   });
 
   revalidatePath("/dashboard");
+  revalidateShopUpgradesDashboardPaths();
   return true;
 }

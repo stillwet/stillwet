@@ -942,7 +942,7 @@ export type $ListingCreditPackPurchasePayload<ExtArgs extends runtime.Types.Exte
     shopId: string
     shopUserId: string
     /**
-     * * `pack_10` | `pack_25` | `pack_50` — see `LISTING_CREDIT_PACKS` in app code.
+     * * `pack_5` | `pack_15` | `pack_25` — see `LISTING_CREDIT_PACKS` in app code.
      */
     packId: string
     creditsGranted: number

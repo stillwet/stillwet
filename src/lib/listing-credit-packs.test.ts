@@ -12,17 +12,21 @@ import {
 
 describe("listing credit packs", () => {
   it("parses valid pack ids", () => {
-    assert.equal(parseListingCreditPackId("pack_10"), "pack_10");
-    assert.equal(parseListingCreditPackId(" pack_25 "), "pack_25");
+    assert.equal(parseListingCreditPackId("pack_5"), "pack_5");
+    assert.equal(parseListingCreditPackId(" pack_15 "), "pack_15");
     assert.equal(parseListingCreditPackId("pack_99"), null);
-    assert.equal(listingCreditPackById("pack_50")?.credits, 50);
+    assert.equal(listingCreditPackById("pack_25")?.credits, 25);
   });
 
   it("exposes three packs with expected prices", () => {
     assert.equal(LISTING_CREDIT_PACKS.length, 3);
     assert.deepEqual(
-      LISTING_CREDIT_PACKS.map((p) => p.priceCents),
-      [500, 1000, 1500],
+      LISTING_CREDIT_PACKS.map((p) => ({ credits: p.credits, priceCents: p.priceCents })),
+      [
+        { credits: 5, priceCents: 500 },
+        { credits: 15, priceCents: 1000 },
+        { credits: 25, priceCents: 1500 },
+      ],
     );
   });
 });

@@ -6,13 +6,17 @@ import { prisma } from "@/lib/prisma";
 
 import { getShopOwnerSessionReadonly } from "@/lib/session";
 
-import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
+import { ListingRequestStatus, PromotionKind } from "@/generated/prisma/enums";
 
 import { isMockCheckoutEnabled, promotionUiUsesMockCheckout } from "@/lib/checkout-mock";
+import { loadUnpaidPublicationFeeListings } from "@/lib/listing-fee-unpaid-rows";
+import {
+  freeListingRequestSlotsSummary,
+  PLATFORM_SHOP_SLUG,
+} from "@/lib/marketplace-constants";
 import { loadShopFlairDashboardPayload } from "@/lib/shop-flair-dashboard-payload";
 import { loadShopGoogleShoppingDashboardPayload } from "@/lib/shop-google-shopping-dashboard-payload";
 import { getPromotionCreditBalancesForShop } from "@/lib/promotion-credit-balance";
-import { PromotionKind } from "@/generated/prisma/enums";
 
 import { PromotionsCheckoutShell } from "@/components/dashboard/PromotionsCheckoutShell";
 
@@ -25,6 +29,7 @@ import { PromotionsHistoryExpanded } from "@/components/dashboard/promotions/Pro
 import { PromotionsPagePeriodPrefetch } from "@/components/dashboard/promotions/PromotionsPagePeriodPrefetch";
 import { ShopFlairSection } from "@/components/dashboard/ShopFlairSection";
 import { ShopGoogleShoppingSection } from "@/components/dashboard/ShopGoogleShoppingSection";
+import { ShopListingCreditsSection } from "@/components/dashboard/ShopListingCreditsSection";
 
 import { parsePlacementCheckoutBuyKind } from "@/lib/promotion-kind-load-order";
 
@@ -159,6 +164,8 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
 
             displayName: true,
 
+            listingFeeBonusFreeSlots: true,
+
             inactivityDeactivatedAt: true,
 
           },
@@ -189,12 +196,22 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
 
 
 
-    const [flair, googleShopping, mockPromotionCheckout, promotionCreditBalances] = await Promise.all([
+    const [flair, googleShopping, mockPromotionCheckout, promotionCreditBalances, unpaidPublicationFeeListings, nonDraftListingCount] =
+      await Promise.all([
       loadShopFlairDashboardPayload(shop.id),
       loadShopGoogleShoppingDashboardPayload(shop.id),
       Promise.resolve(promotionUiUsesMockCheckout(shop.slug)),
       getPromotionCreditBalancesForShop(shop.id),
+      loadUnpaidPublicationFeeListings(prisma, shop.id),
+      prisma.shopListing.count({
+        where: { shopId: shop.id, requestStatus: { not: ListingRequestStatus.draft } },
+      }),
     ]);
+    const freeListingSlots = freeListingRequestSlotsSummary(
+      shop.slug,
+      shop.listingFeeBonusFreeSlots,
+      nonDraftListingCount,
+    );
     const mockListingFeeCheckout = isMockCheckoutEnabled();
     const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() || null;
 
@@ -274,6 +291,14 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
             className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950/50 p-2 sm:p-3"
           />
         ) : null}
+
+        <ShopListingCreditsSection
+          unpaidListings={unpaidPublicationFeeListings}
+          freeListingSlots={freeListingSlots}
+          stripePublishableKey={stripePublishableKey}
+          mockListingFeeCheckout={mockListingFeeCheckout}
+          className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950/50 p-2 sm:p-3"
+        />
 
         <ShopGoogleShoppingSection
           googleShopping={googleShopping}

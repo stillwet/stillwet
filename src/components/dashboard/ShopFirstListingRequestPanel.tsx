@@ -31,6 +31,7 @@ import {
   moderationTriggerErrorMessage,
 } from "@/lib/moderation-keyword-scan";
 import { ListingCreditPackSection } from "@/components/dashboard/ListingCreditPackSection";
+import { ListingEstProfitBreakdownHelp } from "@/components/dashboard/DashboardListingForms";
 import type { UnpaidPublicationFeeListingRow } from "@/lib/listing-fee-unpaid-rows";
 import type { FreeListingRequestSlotsSummary } from "@/lib/marketplace-constants";
 
@@ -462,8 +463,7 @@ export function ShopFirstListingRequestPanel(props: {
         setMessage({
           tone: "ok",
           text:
-            r.message ??
-            "Listing submitted for review. Admin approval usually occurs in 1–3 days.",
+            r.message ?? "Listing submitted.",
         });
         setListingSavedFlash(true);
         window.setTimeout(() => setListingSavedFlash(false), 2500);
@@ -565,7 +565,6 @@ export function ShopFirstListingRequestPanel(props: {
     artworkUploadProgress && artworkUploadProgress.total > 0
       ? Math.round((artworkUploadProgress.current / artworkUploadProgress.total) * 100)
       : 0;
-  /** Form fields complete and Stripe ready when a publication fee would apply. */
   const listingFormReady = listingCanSubmit;
   const listingSubmitSubmittedFlash =
     listingSavedFlash && !listingCanSubmit && !isListingPending;
@@ -720,33 +719,40 @@ export function ShopFirstListingRequestPanel(props: {
                 htmlFor={`listing-price-${selectedCatalogGroup.itemId}`}
               >
                 Your list price (USD)
+                <div className="mt-1 flex w-full min-w-0 max-w-md items-stretch rounded border border-zinc-700 bg-zinc-900">
+                  <input
+                    id={`listing-price-${selectedCatalogGroup.itemId}`}
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    value={listingPrice}
+                    disabled={freezeListingRequestFields}
+                    onChange={(e) => setListingPrice(e.target.value)}
+                    onBlur={() => {
+                      const minC = selectedCatalogGroup.option.minPriceCents;
+                      const parsed = parseFloat(listingPrice.replace(/[^0-9.]/g, ""));
+                      let cents = Number.isFinite(parsed) ? Math.round(parsed * 100) : minC;
+                      if (cents < minC) cents = minC;
+                      if (cents > SHOP_LISTING_MAX_PRICE_CENTS) cents = SHOP_LISTING_MAX_PRICE_CENTS;
+                      setListingPrice((cents / 100).toFixed(2));
+                    }}
+                    className="min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-sm leading-snug text-zinc-100 outline-none focus:ring-0 disabled:cursor-not-allowed"
+                  />
+                  <ListingEstProfitBreakdownHelp
+                    layout="field"
+                    profitLabel={
+                      listingProfitHint(
+                        listingPrice,
+                        selectedCatalogGroup.option.minPriceCents,
+                        selectedCatalogGroup.option.goodsServicesCostCents,
+                      ) ?? "Est. profit: —"
+                    }
+                    priceDollarsStr={listingPrice}
+                    minPriceCents={selectedCatalogGroup.option.minPriceCents}
+                    goodsServicesUnitCents={selectedCatalogGroup.option.goodsServicesCostCents}
+                  />
+                </div>
               </label>
-              <input
-                id={`listing-price-${selectedCatalogGroup.itemId}`}
-                type="text"
-                inputMode="decimal"
-                autoComplete="off"
-                value={listingPrice}
-                disabled={freezeListingRequestFields}
-                onChange={(e) => setListingPrice(e.target.value)}
-                onBlur={() => {
-                  const minC = selectedCatalogGroup.option.minPriceCents;
-                  const parsed = parseFloat(listingPrice.replace(/[^0-9.]/g, ""));
-                  let cents = Number.isFinite(parsed) ? Math.round(parsed * 100) : minC;
-                  if (cents < minC) cents = minC;
-                  if (cents > SHOP_LISTING_MAX_PRICE_CENTS) cents = SHOP_LISTING_MAX_PRICE_CENTS;
-                  setListingPrice((cents / 100).toFixed(2));
-                }}
-                className="mt-1 block w-full max-w-xs rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-sm text-zinc-100 disabled:cursor-not-allowed"
-              />
-              {(() => {
-                const h = listingProfitHint(
-                  listingPrice,
-                  selectedCatalogGroup.option.minPriceCents,
-                  selectedCatalogGroup.option.goodsServicesCostCents,
-                );
-                return h ? <p className="mt-1.5 text-xs text-blue-400/90">{h}</p> : null;
-              })()}
               {listingPriceOverMax ? (
                 <p className="mt-1.5 text-xs text-amber-200/90" role="status">
                   Maximum list price is {shopListingMaxPriceUsdLabel()} per item — lower the price to continue.
@@ -855,7 +861,7 @@ export function ShopFirstListingRequestPanel(props: {
           <div className="space-y-4 border-t border-zinc-800 pt-4">
             <div className="space-y-1">
               <label htmlFor={storefrontPitchFieldId} className="block text-xs text-zinc-500">
-                Item Pitch (Optional)
+                One Liner (Optional)
               </label>
               <textarea
                 id={storefrontPitchFieldId}
@@ -864,11 +870,11 @@ export function ShopFirstListingRequestPanel(props: {
                 onBlur={runRequestListingTextModerationBlur}
                 onFocus={runRequestListingTextModerationBlur}
                 maxLength={STOREFRONT_ITEM_BLURB_MAX}
-                rows={2}
+                rows={1}
                 autoComplete="off"
                 disabled={freezeListingRequestFields}
                 placeholder="Optional short line for your product page…"
-                className="mt-1 block w-full min-w-0 resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600 disabled:cursor-not-allowed"
+                className="mt-1 block w-full min-w-0 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 disabled:cursor-not-allowed"
               />
               {listingBlurbModerationBlurError ? (
                 <p className="mt-1 text-xs leading-snug text-red-300/90" role="alert">

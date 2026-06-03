@@ -50,7 +50,10 @@ import {
   LISTING_FIELD_SAVE_ROW_CENTER,
   LISTING_SUPPLEMENT_PREVIEW_PLACEHOLDER,
 } from "@/components/dashboard/dashboard-listing-field-grid";
-import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
+import {
+  expectedShopProfitMerchandiseUnitCents,
+  splitMerchandiseLineForCheckoutCents,
+} from "@/lib/marketplace-fee";
 import { catalogImageUrlKey } from "@/lib/product-media";
 import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
 import {
@@ -579,20 +582,248 @@ function formatUsdFromCents(cents: number): string {
   }).format(Math.max(0, cents) / 100);
 }
 
+function listingSalePriceCents(
+  priceDollarsStr: string,
+  minPriceCents: number,
+): number | null {
+  const parsed = parseFloat(priceDollarsStr.replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  const cents = Math.round(parsed * 100);
+  if (cents < minPriceCents) return null;
+  return cents;
+}
+
 function listingEstProfitLine(
   priceDollarsStr: string,
   minPriceCents: number,
   goodsServicesUnitCents: number,
 ): string | null {
-  const parsed = parseFloat(priceDollarsStr.replace(/[^0-9.]/g, ""));
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
-  const cents = Math.round(parsed * 100);
-  if (cents < minPriceCents) return null;
+  const cents = listingSalePriceCents(priceDollarsStr, minPriceCents);
+  if (cents == null) return null;
   const profit = expectedShopProfitMerchandiseUnitCents({
     listPriceCents: cents,
     goodsServicesUnitCents,
   });
   return `Est. profit: ${formatUsdFromCents(profit)}`;
+}
+
+function ListingMerchandiseBreakdownRow({
+  priceDollarsStr,
+  minPriceCents,
+  goodsServicesUnitCents,
+  className = "mt-1.5",
+}: {
+  priceDollarsStr: string;
+  minPriceCents: number;
+  goodsServicesUnitCents: number;
+  className?: string;
+}) {
+  const saleCents = listingSalePriceCents(priceDollarsStr, minPriceCents);
+  if (saleCents == null) return null;
+  const { goodsServicesCostCents, platformCutCents } = splitMerchandiseLineForCheckoutCents({
+    lineMerchandiseCents: saleCents,
+    goodsServicesLineCents: goodsServicesUnitCents,
+  });
+  return (
+    <div
+      className={`flex flex-wrap items-baseline gap-x-6 gap-y-1.5 text-[11px] text-zinc-500 tabular-nums ${className}`}
+    >
+      <span className="shrink-0">Sale {formatUsdFromCents(saleCents)}</span>
+      <span className="shrink-0">Goods/services cost {formatUsdFromCents(goodsServicesCostCents)}</span>
+      <span className="shrink-0">Platform fee {formatUsdFromCents(platformCutCents)}</span>
+    </div>
+  );
+}
+
+export function ListingEstProfitBreakdownHelp({
+  profitLabel,
+  priceDollarsStr,
+  minPriceCents,
+  goodsServicesUnitCents,
+  layout = "field",
+}: {
+  profitLabel: string;
+  priceDollarsStr: string;
+  minPriceCents: number;
+  goodsServicesUnitCents: number;
+  /** `field` = inside bordered sale price row; `standalone` = below a plain price input */
+  layout?: "field" | "standalone";
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const hasBreakdown = listingSalePriceCents(priceDollarsStr, minPriceCents) != null;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const profitText = (
+    <p
+      className={
+        layout === "field"
+          ? "m-0 text-right text-[11px] leading-snug text-blue-400/90"
+          : "m-0 text-blue-400/90"
+      }
+    >
+      {profitLabel}
+    </p>
+  );
+
+  const helpButton = hasBreakdown ? (
+    <button
+      type="button"
+      aria-label="Show sale breakdown"
+      aria-expanded={open}
+      onClick={() => setOpen((v) => !v)}
+      className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/80 text-[10px] font-semibold leading-none text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+    >
+      ?
+    </button>
+  ) : null;
+
+  const popup =
+    open && hasBreakdown ? (
+      <div
+        role="tooltip"
+        className={`absolute z-30 w-max max-w-[min(16rem,calc(100vw-2rem))] rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 shadow-lg ${
+          layout === "field"
+            ? "right-0 top-full mt-1.5 text-right"
+            : "left-full top-1/2 ml-1.5 -translate-y-1/2 text-left"
+        }`}
+      >
+        <ListingMerchandiseBreakdownRow
+          priceDollarsStr={priceDollarsStr}
+          minPriceCents={minPriceCents}
+          goodsServicesUnitCents={goodsServicesUnitCents}
+          className={layout === "field" ? "flex-col items-end gap-1" : "flex-col items-start gap-1"}
+        />
+      </div>
+    ) : null;
+
+  if (layout === "standalone") {
+    return (
+      <div ref={rootRef} className="inline-flex items-center">
+        {profitText}
+        {helpButton ? (
+          <div className="relative ml-1.5 inline-block shrink-0">
+            {helpButton}
+            {popup}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      className="relative flex min-w-0 shrink-0 items-center border-l border-zinc-800/90 px-2.5 py-1.5"
+    >
+      {profitText}
+      {helpButton ? <span className="ml-1.5 shrink-0">{helpButton}</span> : null}
+      {popup}
+    </div>
+  );
+}
+
+function MerchandiseBreakdownCentsRow({
+  saleCents,
+  goodsServicesCostCents,
+  platformCutCents,
+  className = "flex-col items-end gap-1",
+}: {
+  saleCents: number;
+  goodsServicesCostCents: number;
+  platformCutCents: number;
+  className?: string;
+}) {
+  return (
+    <div className={`flex text-[11px] text-zinc-500 tabular-nums ${className}`}>
+      <span className="shrink-0">Sale {formatUsdFromCents(saleCents)}</span>
+      <span className="shrink-0">Goods/services cost {formatUsdFromCents(goodsServicesCostCents)}</span>
+      <span className="shrink-0">Platform fee {formatUsdFromCents(platformCutCents)}</span>
+    </div>
+  );
+}
+
+/** Orders tab: one-line shop profit with ? popup (order-level merchandise totals). */
+export function PaidOrderShopProfitHelp({
+  shopProfitCents,
+  saleCents,
+  goodsServicesCostCents,
+  platformCutCents,
+}: {
+  shopProfitCents: number;
+  saleCents: number;
+  goodsServicesCostCents: number;
+  platformCutCents: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const showHelp = saleCents > 0;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative inline-flex shrink-0 items-center leading-snug">
+      <span className="text-[11px] tabular-nums leading-snug text-zinc-100">
+        {formatUsdFromCents(shopProfitCents)}
+      </span>
+      {showHelp ? (
+        <div className="relative ml-1.5 inline-block shrink-0">
+          <button
+            type="button"
+            aria-label="Show order merchandise breakdown"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/80 text-[10px] font-semibold leading-none text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+          >
+            ?
+          </button>
+          {open ? (
+            <div
+              role="tooltip"
+              className="absolute right-0 top-full z-30 mt-1.5 w-max max-w-[min(16rem,calc(100vw-2rem))] rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-right shadow-lg"
+            >
+              <MerchandiseBreakdownCentsRow
+                saleCents={saleCents}
+                goodsServicesCostCents={goodsServicesCostCents}
+                platformCutCents={platformCutCents}
+              />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function initialVariantDollarsById(
@@ -742,6 +973,11 @@ export function DashboardListingPriceForm({
                 <span className="text-zinc-500">{v.title}: </span>
                 <span className="font-mono">{(cents / 100).toFixed(2)}</span>
               </p>
+              <ListingMerchandiseBreakdownRow
+                priceDollarsStr={(cents / 100).toFixed(2)}
+                minPriceCents={floor}
+                goodsServicesUnitCents={gs}
+              />
               <p className="text-[11px] text-blue-400/90">{profitLine ?? "Est. profit: —"}</p>
             </div>
           );
@@ -779,6 +1015,11 @@ export function DashboardListingPriceForm({
                     className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm leading-snug text-zinc-200"
                   />
                 </label>
+                <ListingMerchandiseBreakdownRow
+                  priceDollarsStr={variantDollars[v.id] ?? ""}
+                  minPriceCents={floor}
+                  goodsServicesUnitCents={gs}
+                />
                 <p className="text-[11px] text-blue-400/90">{profitLine ?? "Est. profit: —"}</p>
               </li>
             );
@@ -832,9 +1073,12 @@ export function DashboardListingPriceForm({
               }}
               className="min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-sm leading-snug text-zinc-100 outline-none focus:ring-0"
             />
-            <p className="m-0 flex min-w-0 shrink-0 items-center border-l border-zinc-800/90 px-2.5 py-1.5 text-right text-[11px] leading-snug text-blue-400/90">
-              {singleProfitLine ?? "Est. profit: —"}
-            </p>
+            <ListingEstProfitBreakdownHelp
+              profitLabel={singleProfitLine ?? "Est. profit: —"}
+              priceDollarsStr={price}
+              minPriceCents={singleFloorCents}
+              goodsServicesUnitCents={singleGoodsServicesCents}
+            />
           </div>
         </label>
         <div className={LISTING_FIELD_SAVE_ACTION}>

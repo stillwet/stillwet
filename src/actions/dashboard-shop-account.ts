@@ -49,7 +49,7 @@ export async function updateShopOwnerEmail(
   const newEmail = String(formData.get("newEmail") ?? "").trim().toLowerCase();
 
   if (!currentPassword) {
-    return { error: "Enter your current password to change email." };
+    return { error: "Enter your current password to verify this email change." };
   }
   if (!newEmail || !newEmail.includes("@")) {
     return { error: "Enter a valid new email address." };
@@ -102,17 +102,17 @@ export async function updateShopOwnerEmail(
 
   const verifySend = await issueShopEmailVerificationTokenAndSend(user.id, newEmail);
   if (!verifySend.ok) {
+    console.error("[dashboard-shop-account] verification email failed:", verifySend.error);
     return {
       error:
-        "Email was updated but we could not send the verification message. Use “Resend verification” on the Onboarding tab, or contact support.",
+        "Email was updated but we could not send the verification email. Use “Resend verification” on the Onboarding tab, or contact support.",
     };
   }
 
   revalidatePath("/dashboard");
   return {
     ok: true,
-    message:
-      "Sign-in email updated. We sent a verification link to the new address — confirm it to restore the verified badge on onboarding.",
+    message: `Sign-in email updated. We sent a verification link to ${newEmail} — open it to confirm your new address.`,
   };
 }
 

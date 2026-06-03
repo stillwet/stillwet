@@ -1,6 +1,6 @@
 /**
  * Dashboard “simulate demo purchase” (fake paid order). Allowed only under `next dev`
- * with `SHOP_DEMO_PURCHASE_BUTTON=1` — never in production builds (`next build` / Vercel).
+ * with `SHOP_DEMO_PURCHASE_BUTTON=1` and an active `/admin` session — never in production.
  */
 export function shopDemoPurchaseFeatureEnabled(): boolean {
   return (

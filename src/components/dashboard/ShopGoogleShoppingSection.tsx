@@ -21,7 +21,7 @@ const btnPack =
 const btnPackSelected =
   "inline-block rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-[11px] font-medium text-zinc-100";
 const btnChooseListings =
-  "inline-block rounded-md border border-emerald-800/70 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-emerald-400/95 transition-colors hover:border-emerald-600/70 hover:bg-zinc-800/60 hover:text-emerald-300/95";
+  "inline-block rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100";
 
 function GoogleShoppingListingPickerDialog(props: {
   titleId: string;
@@ -92,7 +92,7 @@ function GoogleShoppingListingPickerDialog(props: {
                     <label
                       className={`flex cursor-pointer items-center gap-2 rounded border px-2 py-1.5 text-xs ${
                         checked
-                          ? "border-emerald-900/50 bg-emerald-950/20 text-zinc-200"
+                          ? "border-zinc-500/50 bg-zinc-800/40 text-zinc-200"
                           : "border-zinc-800 bg-zinc-950/40 text-zinc-400"
                       } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
                     >
@@ -310,8 +310,8 @@ export function ShopGoogleShoppingSection(props: {
 
   return (
     <section className={className}>
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-emerald-400/95">
-        Off site searchability
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-300">
+        Google searchability
       </h2>
       <p className="mt-0.5 text-[11px] leading-snug text-zinc-600">
         Get your listings onto Google Shop to boost your traffic.
@@ -323,7 +323,7 @@ export function ShopGoogleShoppingSection(props: {
         </p>
       ) : null}
       {result && result.ok ? (
-        <p className="mt-2 rounded border border-emerald-900/40 bg-emerald-950/20 px-2.5 py-1.5 text-xs text-emerald-200/90">
+        <p className="mt-2 rounded border border-zinc-700/40 bg-zinc-900/35 px-2.5 py-1.5 text-xs text-zinc-200/90">
           {result.enrolledCount != null
             ? `${result.enrolledCount} listing${result.enrolledCount === 1 ? "" : "s"} submitted to Google Shopping.`
             : "Credits added. Choose listings below to use them."}

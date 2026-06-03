@@ -107,7 +107,7 @@ export function ShopFlairSection(props: {
 
   return (
     <section className={className}>
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-400/95">Shop flair</h2>
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-100">Shop flair</h2>
       <p className="mt-0.5 text-[11px] leading-snug text-zinc-600">
         Optional badge on your storefront and the{" "}
         <Link

@@ -40,10 +40,8 @@ export type ShopSetupSteps = {
   stripe: boolean;
 };
 
-const btnPrimary =
-  "rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed";
-const btnPrimarySaving =
-  "cursor-wait rounded-lg bg-zinc-100/70 px-4 py-2 text-sm font-medium text-zinc-700 ring-1 ring-zinc-300/60";
+const btnChecklistAction =
+  "rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:border-zinc-500 disabled:opacity-50";
 
 function StepIcon({ done }: { done: boolean }) {
   if (done) {
@@ -69,7 +67,6 @@ function incompleteStripePrerequisitesSummary(steps: ShopSetupSteps): string {
   const missing: string[] = [];
   if (!steps.profile) missing.push("shop profile (display name)");
   if (!steps.guidelines) missing.push("shop regulations");
-  if (!steps.emailVerified) missing.push("email verification");
   if (!steps.listing) missing.push("a listing request");
   if (missing.length === 0) {
     return "Finish the remaining onboarding checklist items before starting Stripe Connect.";
@@ -98,9 +95,9 @@ function StripeConnectSubmitButton({
     <button
       type="submit"
       disabled={disabled}
-      className={pending ? btnPrimarySaving : btnPrimary}
+      className={pending ? `${btnChecklistAction} cursor-wait` : btnChecklistAction}
     >
-      {pending ? "Saving..." : defaultLabel}
+      {pending ? "Opening Stripe…" : defaultLabel}
     </button>
   );
 }
@@ -110,17 +107,13 @@ function ShopEmailVerificationCallout({ verified }: { verified: boolean }) {
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
 
   if (verified) {
-    return (
-      <p className="text-xs text-emerald-300/90">
-        Email verified — you&apos;re all set for this step.
-      </p>
-    );
+    return null;
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-zinc-500">
-        We sent a verification link to your inbox when you created the shop. Didn&apos;t get it?
+      <p className="text-xs italic text-zinc-500">
+        Check your inbox. Don&apos;t see it? Check spam or resend link.
       </p>
       <button
         type="button"
@@ -133,9 +126,9 @@ function ShopEmailVerificationCallout({ verified }: { verified: boolean }) {
             else setMsg({ tone: "err", text: r.error });
           });
         }}
-        className="rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:border-zinc-500 disabled:opacity-50"
+        className={btnChecklistAction}
       >
-        {pending ? "Sending…" : "Resend verification email"}
+        {pending ? "Sending…" : "Resend"}
       </button>
       {msg ? (
         <p
@@ -162,9 +155,7 @@ export function ShopSetupTabs(props: {
 }) {
   const { shop, steps, stripeConnectUnlocked, embedded = false } = props;
 
-  const stripeLabel = shop.stripeConnectAccountId
-    ? "Continue Stripe onboarding"
-    : "Start Stripe onboarding";
+  const stripeLabel = "Stripe Connect";
 
   return (
     <section
@@ -184,119 +175,80 @@ export function ShopSetupTabs(props: {
             <StepIcon done={steps.profile} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-zinc-200">Shop profile</p>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Set your <strong className="text-zinc-400">shop display name</strong> (store name). Username, welcome
-                message, profile photo, and social links are optional.
-              </p>
-              <a
-                href="/dashboard?dash=shopProfile"
-                className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
-              >
-                {steps.profile ? "Review / edit" : "Open Shop profile tab →"}
-              </a>
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.guidelines} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-zinc-200">Read shop regulations</p>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Rights to photos, content rules, fees for rejected or removed listings, and liability.
-              </p>
-              <a
-                href="/dashboard?dash=itemGuidelines"
-                className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
-              >
-                {steps.guidelines
-                  ? "Review Shop regulations tab →"
-                  : "Open Shop regulations (next to Onboarding) →"}
-              </a>
+              {!steps.guidelines ? (
+                <a
+                  href="/dashboard?dash=itemGuidelines"
+                  className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
+                >
+                  Open Shop regulations (next to Onboarding) →
+                </a>
+              ) : null}
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.emailVerified} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-zinc-200">Verify email</p>
-              <p className="mt-0.5 text-xs text-zinc-500">Click the link in the email we sent to your shop account.</p>
-              <div className="mt-2">
-                <ShopEmailVerificationCallout verified={steps.emailVerified} />
-              </div>
+              {!steps.emailVerified ? (
+                <div className="mt-2">
+                  <ShopEmailVerificationCallout verified={steps.emailVerified} />
+                </div>
+              ) : null}
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.listing} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-zinc-200">Request listing</p>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Submit at least one listing request from the Request listing tab.
-              </p>
-              <a
-                href="/dashboard?dash=requestListing"
-                className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
-              >
-                Open Request listing tab →
-              </a>
+              {!steps.listing ? (
+                <>
+                  <p className="mt-0.5 text-xs text-zinc-500">
+                    Submit at least one listing request from the Request listing tab.
+                  </p>
+                  <a
+                    href="/dashboard?dash=requestListing"
+                    className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
+                  >
+                    Open Request listing tab →
+                  </a>
+                </>
+              ) : null}
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.stripe} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-zinc-200">Stripe Connect</p>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Last step: connect payouts when marketplace Connect checkout is enabled.
-              </p>
-              <a
-                href="#shop-setup-stripe"
-                className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
-              >
-                Form below ↓
-              </a>
+              {!steps.stripe ? (
+                <>
+                  <p className="mt-0.5 text-xs italic text-zinc-500">
+                    Last step: Complete Stripe Connect so you can get paid when you sell items.
+                  </p>
+                  {!stripeConnectUnlocked ? (
+                    <p className="mt-2 rounded-lg border border-amber-900/40 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
+                      {incompleteStripePrerequisitesSummary(steps)}
+                    </p>
+                  ) : null}
+                  {shop.stripeConnectPendingHint ? (
+                    <p className="mt-2 rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200/90">
+                      {shop.stripeConnectPendingHint}
+                    </p>
+                  ) : null}
+                  <form action={dashboardStartStripeConnect} className="mt-2">
+                    <StripeConnectSubmitButton defaultLabel={stripeLabel} formDisabled={!stripeConnectUnlocked} />
+                  </form>
+                </>
+              ) : null}
             </div>
           </li>
         </ol>
       </nav>
-
-      <div className="mt-8 space-y-10">
-        <section
-          id="shop-setup-stripe"
-          className="scroll-mt-4"
-          aria-labelledby="shop-setup-stripe-heading"
-        >
-          <h3
-            id="shop-setup-stripe-heading"
-            className="text-sm font-semibold tracking-wide text-zinc-200"
-          >
-            Stripe Connect
-          </h3>
-          <div className="mt-4 space-y-4 text-sm text-zinc-300">
-            {!stripeConnectUnlocked ? (
-              <p className="rounded-lg border border-amber-900/40 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
-                {incompleteStripePrerequisitesSummary(steps)}
-              </p>
-            ) : null}
-            <p>
-              Connect Stripe so payouts can reach your bank when{" "}
-              <code className="text-zinc-500">MARKETPLACE_STRIPE_CONNECT=1</code> is enabled for
-              checkout.
-            </p>
-            <ul className="list-inside list-disc text-xs text-zinc-500">
-              <li>Charges enabled: {shop.connectChargesEnabled ? "yes" : "no"}</li>
-              <li>Payouts enabled: {shop.payoutsEnabled ? "yes" : "no"}</li>
-              <li className="truncate">
-                Account: {shop.stripeConnectAccountId ?? "not created yet"}
-              </li>
-            </ul>
-            {shop.stripeConnectPendingHint ? (
-              <p className="rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200/90">
-                {shop.stripeConnectPendingHint}
-              </p>
-            ) : null}
-            <form action={dashboardStartStripeConnect}>
-              <StripeConnectSubmitButton defaultLabel={stripeLabel} formDisabled={!stripeConnectUnlocked} />
-            </form>
-          </div>
-        </section>
-      </div>
     </section>
   );
 }
