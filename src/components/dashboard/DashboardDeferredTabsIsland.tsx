@@ -10,6 +10,7 @@ import { shopDemoPurchaseFeatureEnabled } from "@/lib/shop-demo-purchase-feature
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { isR2UploadConfigured } from "@/lib/r2-upload";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
+import type { ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { ShopSetupSteps, ShopSetupShopPayload } from "@/components/dashboard/ShopSetupTabs";
 import type { DashboardShopAccountPayload } from "@/components/dashboard/DashboardShopAccountPanel";
 

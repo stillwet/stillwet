@@ -244,7 +244,7 @@ export async function loadAdminNexusPlanningSnapshotCached(
     };
   }
 
-  revalidateTag(NEXUS_PLANNING_CACHE_TAG);
+  revalidateTag(NEXUS_PLANNING_CACHE_TAG, { expire: 0 });
   const fresh = await getStoredNexusPlanning();
   return {
     snapshot: finalizeNexusPlanningSnapshot(fresh.snapshot),
