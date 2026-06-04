@@ -11,7 +11,6 @@ import {
   replaceActionUrlInHtmlTemplate,
   wrapEmailHtmlFragmentForPreview,
 } from "@/lib/email-template-placeholders";
-import { defaultGiftRedemptionEmailVars } from "@/lib/gift-redemption-code-email-html";
 import type { AdminSummaryEmailSettingsDTO } from "@/lib/admin-summary-email-settings-dto";
 import type {
   AdminEmailFormatEntry,
@@ -361,19 +360,7 @@ export function AdminEmailFormatTab(props: {
     if (!entry) return "";
     const html =
       entry.key === "gift_creator_redemption_codes"
-        ? replaceGiftCodePlaceholders(
-            body,
-            defaultGiftRedemptionEmailVars({
-              setupCode: "SETU-PABC-1234-DEMO",
-              listingCode: "LIST-PXYZ-9876-DEMO",
-              listingCredits: "10",
-              promotionCode: "PROM-PDEM-0001-O123",
-              promotionKindLabel: "Hot item",
-              promotionCredits: "1",
-              googleShoppingCode: "GMC-PGMC-0005-DEMO",
-              googleShoppingCredits: "5",
-            }),
-          )
+        ? replaceGiftCodePlaceholders(body, { setupCode: "SETU-PABC-1234-DEMO" })
         : replaceActionUrlInHtmlTemplate(
             body,
             entry.sampleActionUrl ?? "https://example.com/preview",
@@ -449,9 +436,7 @@ export function AdminEmailFormatTab(props: {
         <p className="mt-1 max-w-2xl text-xs text-zinc-600">
           Edit subjects and bodies stored in the database. Action templates must keep{" "}
           <code className="font-mono text-zinc-400">{"{{ACTION_URL}}"}</code> where the signed link should go.
-          Gift code templates use <code className="font-mono text-zinc-400">{"{{SETUP_CODE}}"}</code>,{" "}
-          <code className="font-mono text-zinc-400">{"{{LISTING_CODE}}"}</code>, and{" "}
-          <code className="font-mono text-zinc-400">{"{{LISTING_CREDITS}}"}</code>.
+          Gift code templates use <code className="font-mono text-zinc-400">{"{{SETUP_CODE}}"}</code> only.
           The editor preview includes <strong className="font-normal text-zinc-400">unsaved</strong> changes; only
           after Save does Resend use the same HTML as &quot;Saved template (sends now)&quot;. Templates are read from
           the database this admin host uses (local vs production can differ). Use the Template menu to open the{" "}

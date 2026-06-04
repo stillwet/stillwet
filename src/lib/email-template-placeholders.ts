@@ -20,13 +20,6 @@ export const GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER = "{{GOOGLE_SHOPPING_CREDI
 
 export type GiftRedemptionEmailVars = {
   setupCode: string;
-  listingCode: string;
-  listingCredits: string;
-  promotionCode: string;
-  promotionKindLabel: string;
-  promotionCredits: string;
-  googleShoppingCode: string;
-  googleShoppingCredits: string;
 };
 
 function escapeHtmlText(value: string): string {
@@ -41,23 +34,7 @@ export function replaceGiftCodePlaceholders(
   template: string,
   vars: GiftRedemptionEmailVars,
 ): string {
-  return template
-    .split(GIFT_SETUP_CODE_PLACEHOLDER)
-    .join(escapeHtmlText(vars.setupCode))
-    .split(GIFT_LISTING_CODE_PLACEHOLDER)
-    .join(escapeHtmlText(vars.listingCode))
-    .split(GIFT_LISTING_CREDITS_PLACEHOLDER)
-    .join(escapeHtmlText(vars.listingCredits))
-    .split(GIFT_PROMOTION_CODE_PLACEHOLDER)
-    .join(escapeHtmlText(vars.promotionCode))
-    .split(GIFT_PROMOTION_KIND_LABEL_PLACEHOLDER)
-    .join(escapeHtmlText(vars.promotionKindLabel))
-    .split(GIFT_PROMOTION_CREDITS_PLACEHOLDER)
-    .join(escapeHtmlText(vars.promotionCredits))
-    .split(GIFT_GOOGLE_SHOPPING_CODE_PLACEHOLDER)
-    .join(escapeHtmlText(vars.googleShoppingCode))
-    .split(GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER)
-    .join(escapeHtmlText(vars.googleShoppingCredits));
+  return template.split(GIFT_SETUP_CODE_PLACEHOLDER).join(escapeHtmlText(vars.setupCode));
 }
 
 export const CONTACT_QUOTE_NAME_PLACEHOLDER = "{{CONTACT_NAME}}";

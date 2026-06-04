@@ -30,7 +30,7 @@ export async function sendGiftRedemptionCodeEmail(
   if (!apiKey) {
     if (process.env.NODE_ENV === "development") {
       console.info(
-        `[gift-code-email] (no RESEND_API_KEY) codes for ${args.toEmail}: setup=${args.setupCode} listing=${args.listingCode} promo=${args.promotionCode} gmc=${args.googleShoppingCode}`,
+        `[gift-code-email] (no RESEND_API_KEY) setup code for ${args.toEmail}: ${args.setupCode}`,
       );
       return { ok: true };
     }
@@ -42,13 +42,6 @@ export async function sendGiftRedemptionCodeEmail(
 
   const { subject, html } = await resolveGiftRedemptionCodeEmail({
     setupCode: args.setupCode,
-    listingCode: args.listingCode,
-    listingCredits: args.listingCredits,
-    promotionCode: args.promotionCode,
-    promotionKindLabel: args.promotionKindLabel,
-    promotionCredits: args.promotionCredits,
-    googleShoppingCode: args.googleShoppingCode,
-    googleShoppingCredits: args.googleShoppingCredits,
   });
 
   const res = await fetch("https://api.resend.com/emails", {

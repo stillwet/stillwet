@@ -5,12 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
 import { isSiteEmailTemplateKey } from "@/lib/site-email-template-keys";
-import {
-  GIFT_LISTING_CODE_PLACEHOLDER,
-  GIFT_LISTING_CREDITS_PLACEHOLDER,
-  GIFT_SETUP_CODE_PLACEHOLDER,
-  SITE_EMAIL_ACTION_URL_PLACEHOLDER,
-} from "@/lib/email-template-placeholders";
+import { GIFT_SETUP_CODE_PLACEHOLDER, SITE_EMAIL_ACTION_URL_PLACEHOLDER } from "@/lib/email-template-placeholders";
 
 const SUBJECT_MAX = 500;
 const HTML_MAX = 200_000;
@@ -59,14 +54,11 @@ export async function adminSaveSiteEmailTemplate(
   }
   if (
     keyRaw === "gift_creator_redemption_codes" &&
-    (!body.includes(GIFT_SETUP_CODE_PLACEHOLDER) ||
-      !body.includes(GIFT_LISTING_CODE_PLACEHOLDER) ||
-      !body.includes(GIFT_LISTING_CREDITS_PLACEHOLDER))
+    !body.includes(GIFT_SETUP_CODE_PLACEHOLDER)
   ) {
     return {
       ok: false,
-      error:
-        "Gift code email HTML must include {{SETUP_CODE}}, {{LISTING_CODE}}, and {{LISTING_CREDITS}}.",
+      error: "Gift code email HTML must include {{SETUP_CODE}}.",
     };
   }
   await prisma.siteEmailTemplate.upsert({

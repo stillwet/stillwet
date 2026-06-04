@@ -15,11 +15,6 @@ export async function issueShopAccountDeletionTokenAndSend(
   const tokenHash = hashPasswordResetToken(raw);
   const expiresAt = new Date(Date.now() + DELETION_TOKEN_TTL_MS);
 
-  const sent = await sendShopAccountDeletionConfirmEmail(email, raw);
-  if (!sent.ok) {
-    return { ok: false, error: sent.error };
-  }
-
   try {
     await prisma.$transaction(async (tx) => {
       await tx.shopAccountDeletionToken.deleteMany({
@@ -30,12 +25,18 @@ export async function issueShopAccountDeletionTokenAndSend(
       });
     });
   } catch (e) {
-    console.error("[issueShopAccountDeletionTokenAndSend] token persist failed after Resend accepted", e);
+    console.error("[issueShopAccountDeletionTokenAndSend] token persist failed before send", e);
     return {
       ok: false,
       error:
-        "We could not save the confirmation token after sending mail. Use “Resend confirmation email” on the dashboard, or wait a moment and request deletion again.",
+        "We could not prepare the confirmation link. Wait a moment and try again, or contact support.",
     };
+  }
+
+  const sent = await sendShopAccountDeletionConfirmEmail(email, raw);
+  if (!sent.ok) {
+    await prisma.shopAccountDeletionToken.deleteMany({ where: { shopUserId, tokenHash } }).catch(() => {});
+    return { ok: false, error: sent.error };
   }
 
   return { ok: true };
@@ -43,7 +44,10 @@ export async function issueShopAccountDeletionTokenAndSend(
 
 export async function confirmShopAccountDeletionFromRawToken(
   rawToken: string | null | undefined,
-): Promise<{ ok: true; shopUserId: string; shopId: string } | { ok: false; reason: string }> {
+): Promise<
+  | { ok: true; shopUserId: string; shopId: string; alreadyConfirmed: boolean }
+  | { ok: false; reason: string }
+> {
   const raw = (rawToken ?? "").trim();
   if (!raw) {
     return { ok: false, reason: "missing" };
@@ -55,9 +59,26 @@ export async function confirmShopAccountDeletionFromRawToken(
     include: { shopUser: { select: { id: true, shopId: true } } },
   });
 
-  if (!row || row.usedAt) {
+  if (!row) {
     return { ok: false, reason: "invalid" };
   }
+
+  if (row.usedAt) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: row.shopUser.shopId },
+      select: { accountDeletionEmailConfirmedAt: true },
+    });
+    if (shop?.accountDeletionEmailConfirmedAt) {
+      return {
+        ok: true,
+        shopUserId: row.shopUserId,
+        shopId: row.shopUser.shopId,
+        alreadyConfirmed: true,
+      };
+    }
+    return { ok: false, reason: "invalid" };
+  }
+
   if (row.expiresAt.getTime() < Date.now()) {
     return { ok: false, reason: "expired" };
   }
@@ -76,5 +97,10 @@ export async function confirmShopAccountDeletionFromRawToken(
     }),
   ]);
 
-  return { ok: true, shopUserId: row.shopUserId, shopId: row.shopUser.shopId };
+  return {
+    ok: true,
+    shopUserId: row.shopUserId,
+    shopId: row.shopUser.shopId,
+    alreadyConfirmed: false,
+  };
 }

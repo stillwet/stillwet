@@ -82,8 +82,8 @@ export function ShopDangerZonePanel(props: {
       {deletionPending && (!msg || msg.tone !== "ok" || emailConfirmed) ? (
         <p className="mt-2 whitespace-pre-line text-xs text-zinc-50">
           {emailConfirmed
-            ? "Email confirmed. Listings and photos are cleared. At $0 Stripe balance, the next dashboard visit removes your account."
-            : "Check your inbox for the confirmation link (expires in 24 hours).\nYour shop is hidden from browse in the meantime."}
+            ? "Email confirmed. Listings and photos are cleared. At $0 Stripe balance, sign in once more — the account removes itself automatically."
+            : "Step 1: open the confirmation link in your email (expires in 24 hours). Use the newest email if you tapped Resend.\nYour shop is hidden from browse until deletion finishes or you cancel."}
         </p>
       ) : null}
 
@@ -115,7 +115,7 @@ export function ShopDangerZonePanel(props: {
                 className="rounded-lg border border-zinc-700/80 bg-zinc-900/50 px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800/60 disabled:opacity-50"
                 aria-label="Resend account deletion confirmation email"
               >
-                {busy ? "…" : "Resend email"}
+                {busy ? "…" : "Resend confirmation email"}
               </button>
             ) : null}
 

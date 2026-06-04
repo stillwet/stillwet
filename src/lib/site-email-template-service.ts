@@ -123,9 +123,9 @@ export function buildAdminEmailFormatEntries(
     },
     {
       key: "gift_creator_redemption_codes",
-      label: "Gift a creator — redemption codes",
+      label: "Gift a creator — shop setup code",
       description:
-        "Sent to the purchaser after a Gift a creator checkout. Full HTML document; use {{SETUP_CODE}}, {{LISTING_CODE}}, {{LISTING_CREDITS}}, {{PROMOTION_CODE}}, {{PROMOTION_KIND_LABEL}}, {{PROMOTION_CREDITS}}, {{GOOGLE_SHOPPING_CODE}}, and {{GOOGLE_SHOPPING_CREDITS}}.",
+        "Sent after a shop setup fee gift checkout. Full HTML document; use {{SETUP_CODE}} for the redemption code.",
       defaultSubject: GIFT_REDEMPTION_CODE_EMAIL_SUBJECT,
       defaultBody: GIFT_REDEMPTION_CODE_HTML_TEMPLATE,
       subject: giftCodes?.subject?.trim() || GIFT_REDEMPTION_CODE_EMAIL_SUBJECT,
@@ -163,13 +163,6 @@ export async function loadSiteEmailSendPreviewsForAdmin(
     resolveShopTwoFactorConfirmDeviceEmail(samples.shop_dashboard_two_factor_confirm_device),
     resolveGiftRedemptionCodeEmail({
       setupCode: "SETU-PABC-1234-DEMO",
-      listingCode: "LIST-PXYZ-9876-DEMO",
-      listingCredits: "10",
-      promotionCode: "PROM-PDEM-0001-O123",
-      promotionKindLabel: "Hot item",
-      promotionCredits: "1",
-      googleShoppingCode: "GMC-PGMC-0005-DEMO",
-      googleShoppingCredits: "5",
     }),
     resolveShopInactivityWarningEmail(samples.shop_inactivity_deactivation_warning),
   ]);

@@ -7,10 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { issueShopAccountDeletionTokenAndSend } from "@/lib/shop-account-deletion";
-import {
-  connectBalanceBlocksDeletion,
-  getStripeConnectBalanceUsdCents,
-} from "@/lib/stripe-connect-balance";
+import { completeVerifiedShopAccountDeletion } from "@/lib/complete-verified-shop-account-deletion";
 import {
   applyVerifiedAccountDeletionListingAndMediaCleanup,
   hideShopForPendingAccountDeletion,
@@ -211,49 +208,33 @@ export async function dashboardTryCompleteAccountDeletion(): Promise<AccountDang
     return { ok: false, error: "Confirm the deletion link in your email first." };
   }
 
-  const balance = await getStripeConnectBalanceUsdCents(user.shop.stripeConnectAccountId);
-  if (connectBalanceBlocksDeletion(balance)) {
-    const a = balance?.availableCents ?? 0;
-    const p = balance?.pendingCents ?? 0;
-    if (balance == null) {
+  const completion = await completeVerifiedShopAccountDeletion(user.shopId);
+  if (!completion.ok) {
+    return { ok: false, error: completion.error };
+  }
+  if (!completion.deleted) {
+    if (completion.reason === "stripe_balance") {
+      const balance = completion.stripeConnectBalance;
+      if (balance == null) {
+        return {
+          ok: false,
+          error:
+            "Could not read your Stripe Connect balance. Try again, or wait until payouts finish and retry.",
+        };
+      }
+      const a = balance.availableCents;
+      const p = balance.pendingCents;
       return {
         ok: false,
-        error:
-          "Could not read your Stripe Connect balance. Try again, or wait until payouts finish and retry.",
+        error: `Stripe still shows funds (available $${(a / 100).toFixed(2)}, pending $${(p / 100).toFixed(
+          2,
+        )}). Wait for payouts to finish, then try again.`,
       };
     }
-    return {
-      ok: false,
-      error: `Stripe still shows funds (available $${(a / 100).toFixed(2)}, pending $${(p / 100).toFixed(
-        2,
-      )}). Wait for payouts to finish, then try again.`,
-    };
-  }
-
-  const shopId = user.shopId;
-  const shopSlug = user.shop.slug;
-
-  const listings = await prisma.shopListing.findMany({
-    where: { shopId },
-    select: { productId: true },
-  });
-  const productIds = [...new Set(listings.map((l) => l.productId))];
-
-  await prisma.$transaction(async (tx) => {
-    await tx.shop.update({
-      where: { id: shopId },
-      data: { homeFeaturedListingId: null },
-    });
-    await tx.shop.delete({ where: { id: shopId } });
-  });
-
-  for (const pid of productIds) {
-    const used = await prisma.orderLine.count({ where: { productId: pid } });
-    if (used > 0) continue;
-    await prisma.product.delete({ where: { id: pid } }).catch(() => {});
+    return { ok: false, error: "Account deletion is not ready to finish yet." };
   }
 
   revalidatePath("/shops");
-  revalidatePath(`/s/${shopSlug}`);
+  revalidatePath(`/s/${completion.shopSlug}`);
   return { ok: true };
 }

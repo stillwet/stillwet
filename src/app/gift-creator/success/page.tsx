@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GiftCreatorSuccessHeader } from "@/components/GiftCreatorSuccessHeader";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -21,9 +22,7 @@ export default async function GiftCreatorSuccessPage(props: {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col px-4 py-16">
-      <h1 className="text-2xl font-semibold text-zinc-50">
-        {mode === "direct" ? "Gift sent" : "Gift received"}
-      </h1>
+      <GiftCreatorSuccessHeader mode={mode} />
 
       {mode === "direct" ? (
         <>

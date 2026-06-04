@@ -18,7 +18,6 @@ import {
 import { defaultGiftRedemptionEmailVars } from "@/lib/gift-redemption-code-email-html";
 import { syncFreeListingFeeWaivers } from "@/lib/listing-fee";
 import { prisma } from "@/lib/prisma";
-import { promotionKindLabel } from "@/lib/promotions";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import { revalidateShopUpgradesDashboardPaths } from "@/lib/dashboard-revalidate-shop-upgrades";
 import { sendGiftRedemptionCodeEmail } from "@/lib/send-gift-redemption-code-email";
@@ -389,27 +388,12 @@ export async function fulfillCreatorGiftCheckoutSession(
 
     const setupCode =
       codes.find((c) => c.type === CreatorGiftCodeType.shop_setup)?.code ?? "Not included";
-    const listingCode =
-      codes.find((c) => c.type === CreatorGiftCodeType.listing_credits)?.code ?? "Not included";
-    const promotionRow = codes.find((c) => c.type === CreatorGiftCodeType.promotion_credit);
-    const googleRow = codes.find((c) => c.type === CreatorGiftCodeType.google_shopping_credits);
 
     return {
       purchaseId: purchase.id,
       purchaserEmail,
       emailedAt: purchase.emailedAt,
-      emailVars: defaultGiftRedemptionEmailVars({
-        setupCode,
-        listingCode,
-        listingCredits: String(purchase.listingCreditsGranted || 0),
-        promotionCode: promotionRow?.code ?? "Not included",
-        promotionKindLabel: purchase.promotionKind
-          ? promotionKindLabel(purchase.promotionKind)
-          : "—",
-        promotionCredits: String(purchase.promotionCreditsGranted || 0),
-        googleShoppingCode: googleRow?.code ?? "Not included",
-        googleShoppingCredits: String(purchase.googleShoppingCreditsGranted || 0),
-      }),
+      emailVars: defaultGiftRedemptionEmailVars({ setupCode }),
     };
   });
 

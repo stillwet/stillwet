@@ -241,6 +241,24 @@ h6 {
   }
 }
 
+@keyframes gift-confetti-fall {
+  0% {
+    transform: translateY(-12px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(150px) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gift-confetti-piece {
+    animation: gift-confetti-fall ease-in forwards;
+    animation-iteration-count: infinite;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .featured-spotlight-shimmer::after {
     animation: none !important;
@@ -248,6 +266,11 @@ h6 {
   }
   .animate-store-panel-in {
     animation: none !important;
+  }
+  .gift-confetti-piece {
+    animation: none !important;
+    top: 50%;
+    opacity: 0.75;
   }
 }
 
