@@ -2,7 +2,7 @@ import {
   SITE_EMAIL_ACTION_URL_PLACEHOLDER,
   replaceActionUrlInHtmlTemplate,
 } from "@/lib/email-template-placeholders";
-import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-html";
+import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-constants";
 
 export const SHOP_INACTIVITY_WARNING_EMAIL_SUBJECT = "Warning: your shop may be deactivated";
 

@@ -2,7 +2,7 @@ import {
   SITE_EMAIL_ACTION_URL_PLACEHOLDER,
   replaceActionUrlInHtmlTemplate,
 } from "@/lib/email-template-placeholders";
-import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-html";
+import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-constants";
 
 /** Matches Resend payload `subject`. */
 export const SHOP_PASSWORD_RESET_EMAIL_SUBJECT = "Reset your shop dashboard password";

@@ -5,7 +5,7 @@ import {
 } from "@/lib/email-template-placeholders";
 
 import { BRAND_MERCH_NAME } from "@/lib/site-brand";
-import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-html";
+import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-constants";
 
 export const GIFT_REDEMPTION_CODE_EMAIL_SUBJECT = `Your ${BRAND_MERCH_NAME} shop setup gift code`;
 

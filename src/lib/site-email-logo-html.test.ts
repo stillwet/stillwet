@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { BRAND_LOGO_MARK } from "@/lib/site-brand";
+import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-constants";
 import {
-  SITE_EMAIL_LOGO_PLACEHOLDER,
   applySiteEmailLogoToHtml,
   normalizeEmailLogoForAdminPreview,
   siteEmailLogoAbsoluteUrl,

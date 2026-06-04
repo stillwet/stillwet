@@ -2,17 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { emailLinkOrigin } from "@/lib/public-app-url";
 import { BRAND_LOGO_MARK, BRAND_MERCH_NAME } from "@/lib/site-brand";
-
-/** Optional in admin HTML; omitted templates still get a logo at send time. */
-export const SITE_EMAIL_LOGO_PLACEHOLDER = "{{EMAIL_LOGO}}";
-
-/** PNG for broad email-client support (SVG is often blocked in inbox clients). */
-export const SITE_EMAIL_LOGO_PUBLIC_PATH = "/still-wet-logo-2048.png";
+import {
+  SITE_EMAIL_BRAND_HEADER_MARKER,
+  SITE_EMAIL_LOGO_PLACEHOLDER,
+  SITE_EMAIL_LOGO_PUBLIC_PATH,
+} from "@/lib/site-email-logo-constants";
 
 const SITE_EMAIL_LOGO_FILENAME = "still-wet-logo-2048.png";
-
-/** Marks the injected logo + wordmark header (home-page brand row). */
-export const SITE_EMAIL_BRAND_HEADER_MARKER = 'data-stillwet-email-brand="1"';
 
 /** Home hero wordmark: uppercase, wide tracking, blue-400/80, Source Sans (regular weight). */
 const SITE_EMAIL_WORDMARK_STYLE =
