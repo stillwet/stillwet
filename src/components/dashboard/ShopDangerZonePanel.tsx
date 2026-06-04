@@ -92,12 +92,8 @@ export function ShopDangerZonePanel(props: {
 
       <div className={msg || deletionPending ? "mt-3" : "mt-2"}>
         {!deletionPending ? (
-          <>
-            <p className="text-xs text-zinc-500">
-              Email verification and $0 Stripe balance required. Permanent.
-            </p>
-            <div className="mt-1.5">
-              <button
+          <div className="mt-1.5">
+            <button
                 type="button"
                 disabled={busy}
                 onClick={() => run(dashboardRequestAccountDeletion)}
@@ -106,7 +102,6 @@ export function ShopDangerZonePanel(props: {
                 {busy ? "…" : "Goodbye"}
               </button>
             </div>
-          </>
         ) : (
           <div className="mt-2 space-y-3">
             <p className="text-xs text-zinc-500">

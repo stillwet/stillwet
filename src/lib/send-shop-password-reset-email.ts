@@ -1,5 +1,5 @@
 import { emailLinkOrigin } from "@/lib/public-app-url";
-import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { postResendTransactionalEmail, resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
 import { resolveShopPasswordResetEmail } from "@/lib/site-email-template-service";
 
 type SendResult = { ok: true } | { ok: false; error: string };
@@ -58,39 +58,33 @@ export async function sendShopPasswordResetEmail(
 
   const { subject, html } = await resolveShopPasswordResetEmail(url);
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [toEmail],
-      subject,
-      html,
-    }),
+  const sent = await postResendTransactionalEmail({
+    apiKey,
+    from,
+    to: [toEmail],
+    subject,
+    html,
+    logTag: "shop-password-reset",
   });
 
-  const text = await res.text().catch(() => "");
-
-  if (!res.ok) {
+  if (!sent.ok) {
     console.error("[shop-password-reset] Resend HTTP error", {
-      status: res.status,
-      body: text.slice(0, 2000),
+      status: sent.status,
+      from: sent.fromUsed,
+      body: sent.body.slice(0, 2000),
     });
-    return { ok: false, error: resendUserFacingError(res.status, text) };
+    return { ok: false, error: resendUserFacingError(sent.status, sent.body) };
   }
 
   let emailId = "";
   try {
-    const j = JSON.parse(text) as { id?: string };
+    const j = JSON.parse(sent.body) as { id?: string };
     if (typeof j?.id === "string") emailId = j.id;
   } catch {
     /* ignore */
   }
   console.info(
-    `[shop-password-reset] Resend accepted email${emailId ? ` id=${emailId}` : ""} (track delivery in Resend → Emails / Logs)`,
+    `[shop-password-reset] Resend accepted email${emailId ? ` id=${emailId}` : ""} from=${JSON.stringify(sent.fromUsed)} (track delivery in Resend → Emails / Logs)`,
   );
 
   return { ok: true };

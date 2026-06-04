@@ -1,5 +1,5 @@
 import { emailLinkOrigin } from "@/lib/public-app-url";
-import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { postResendTransactionalEmail, resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
 import { resolveShopAccountDeletionConfirmEmail } from "@/lib/site-email-template-service";
 
 type SendResult = { ok: true } | { ok: false; error: string };
@@ -55,38 +55,33 @@ export async function sendShopAccountDeletionConfirmEmail(
     `[shop-account-deletion] Resend POST from=${JSON.stringify(from)} origin=${JSON.stringify(origin)} toDomain=${JSON.stringify(toEmail.includes("@") ? toEmail.split("@")[1] : "?")}`,
   );
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [toEmail],
-      subject,
-      html,
-    }),
+  const sent = await postResendTransactionalEmail({
+    apiKey,
+    from,
+    to: [toEmail],
+    subject,
+    html,
+    logTag: "shop-account-deletion",
   });
 
-  const body = await res.text();
-  if (!res.ok) {
+  if (!sent.ok) {
     console.error("[shop-account-deletion] Resend HTTP error", {
-      status: res.status,
-      body: body.slice(0, 2000),
+      status: sent.status,
+      from: sent.fromUsed,
+      body: sent.body.slice(0, 2000),
     });
-    return { ok: false, error: resendUserFacingError(res.status, body) };
+    return { ok: false, error: resendUserFacingError(sent.status, sent.body) };
   }
 
   let emailId = "";
   try {
-    const j = JSON.parse(body) as { id?: string };
+    const j = JSON.parse(sent.body) as { id?: string };
     if (typeof j?.id === "string") emailId = j.id;
   } catch {
     /* ignore */
   }
   console.info(
-    `[shop-account-deletion] Resend accepted email${emailId ? ` id=${emailId}` : ""} (track delivery in Resend → Emails / Logs)`,
+    `[shop-account-deletion] Resend accepted email${emailId ? ` id=${emailId}` : ""} from=${JSON.stringify(sent.fromUsed)} (track delivery in Resend → Emails / Logs)`,
   );
 
   return { ok: true };
