@@ -97,6 +97,7 @@ export const ModelName = {
   PlatformFeaturedShopsSnapshot: 'PlatformFeaturedShopsSnapshot',
   PlatformPopularListingOrderSnapshot: 'PlatformPopularListingOrderSnapshot',
   PlatformStoreTagsSnapshot: 'PlatformStoreTagsSnapshot',
+  AdminNexusRegistrationDates: 'AdminNexusRegistrationDates',
   StorefrontViewEvent: 'StorefrontViewEvent',
   Comment: 'Comment'
 } as const
@@ -849,6 +850,15 @@ export const PlatformStoreTagsSnapshotScalarFieldEnum = {
 } as const
 
 export type PlatformStoreTagsSnapshotScalarFieldEnum = (typeof PlatformStoreTagsSnapshotScalarFieldEnum)[keyof typeof PlatformStoreTagsSnapshotScalarFieldEnum]
+
+
+export const AdminNexusRegistrationDatesScalarFieldEnum = {
+  id: 'id',
+  datesByCode: 'datesByCode',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminNexusRegistrationDatesScalarFieldEnum = (typeof AdminNexusRegistrationDatesScalarFieldEnum)[keyof typeof AdminNexusRegistrationDatesScalarFieldEnum]
 
 
 export const StorefrontViewEventScalarFieldEnum = {

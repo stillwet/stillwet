@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { getAdminSessionReadonly } from "@/lib/session";
-import { loadAdminBackendNavCounts } from "@/lib/admin-backend-nav-badges";
 import {
   loadAdminBadgePlatformSales,
   loadAdminBadgePromotionLists,
@@ -28,12 +27,6 @@ export async function fetchAdminMainShellData() {
     loadAdminHasProducts(),
   ]);
   return { ...badges, hasProducts };
-}
-
-/** Backend admin nav counts — one batched cached read after paint. */
-export async function fetchAdminBackendNavCounts() {
-  await requireAdmin();
-  return loadAdminBackendNavCounts();
 }
 
 /**

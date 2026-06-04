@@ -13,7 +13,6 @@ import {
 } from "@/lib/nav-tab-count-badge";
 import type { AdminMainNavBadgeCounts } from "@/lib/admin-nav-badges";
 import { fetchAdminMainShellData } from "@/actions/admin-nav-badges-actions";
-import { AdminBackendNavCountsProvider } from "@/components/admin/AdminBackendNavCountsClient";
 
 type AdminMainShellState = AdminMainNavBadgeCounts & { hasProducts: boolean };
 
@@ -117,5 +116,5 @@ export function AdminShellCountsProvider(props: {
   if (props.adminSection === "main") {
     return <AdminMainShellProvider>{props.children}</AdminMainShellProvider>;
   }
-  return <AdminBackendNavCountsProvider>{props.children}</AdminBackendNavCountsProvider>;
+  return props.children;
 }

@@ -234,7 +234,7 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
         <PromotionsPagePeriodPrefetch enabled={buyKind != null} />
 
         <Link href="/dashboard" prefetch={false} className="text-sm text-zinc-500 hover:text-zinc-300">
-          ← Shop dashboard
+          ← Shop Dashboard
         </Link>
 
         <div className="mt-3">

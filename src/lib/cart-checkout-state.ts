@@ -4,7 +4,10 @@ import {
   estimatedTaxCents,
   parseEstimatedSalesTaxRate,
 } from "@/lib/checkout-estimates";
-import { cartHasTipEligibleProduct } from "@/lib/tip-eligibility";
+import {
+  buyerStripeTaxServiceFeeCents,
+  isStripeTaxBuyerFeePassThroughEnabled,
+} from "@/lib/stripe-tax-buyer-fee";
 import { cartRowProductHref, loadActiveCartRows } from "@/lib/cart-rows-active";
 
 export type CartCheckoutLine = {
@@ -28,7 +31,8 @@ export type CartCheckoutState = {
   taxCents: number | null;
   estimatedTotalCents: number | null;
   estimatedSalesTaxRate: number | null;
-  tipAllowed: boolean;
+  /** When true, cart shows a 0.5% sales tax processing line (Stripe Tax pass-through). */
+  stripeTaxBuyerFeeEnabled: boolean;
   /** When true, cart UI disables payment; {@link startCheckout} rejects on the server. */
   buyerCheckoutDisabled: boolean;
 };
@@ -38,10 +42,16 @@ export async function loadCartCheckoutState(): Promise<CartCheckoutState> {
   const shippingCents = getShippingFlatCents();
   const rate = parseEstimatedSalesTaxRate();
   const taxCents = estimatedTaxCents(subtotal, rate);
+  const stripeTaxBuyerFeeEnabled = isStripeTaxBuyerFeePassThroughEnabled();
+  const stripeTaxServiceFeeCents = buyerStripeTaxServiceFeeCents({
+    subtotalCents: subtotal,
+    shippingCents,
+    tipCents: 0,
+  });
   const estimatedTotalCents =
-    taxCents != null ? subtotal + shippingCents + taxCents : null;
-  const tipAllowed = cartHasTipEligibleProduct(rows.map((r) => r.product));
-
+    taxCents != null
+      ? subtotal + shippingCents + taxCents + stripeTaxServiceFeeCents
+      : null;
   return {
     lines: rows.map((r) => ({
       listingId: r.listingId,
@@ -61,7 +71,7 @@ export async function loadCartCheckoutState(): Promise<CartCheckoutState> {
     taxCents,
     estimatedTotalCents,
     estimatedSalesTaxRate: rate,
-    tipAllowed,
+    stripeTaxBuyerFeeEnabled,
     buyerCheckoutDisabled: isStorefrontBuyerCheckoutDisabled(),
   };
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { adminPruneOrphanListingImagesR2, updateProductDetails } from "@/actions/admin";
 import type { Product, Tag } from "@/generated/prisma/client";
 import { FulfillmentType } from "@/generated/prisma/enums";
@@ -22,6 +23,7 @@ import { SaveListingForm } from "@/components/admin/SaveListingForm";
 import { PrintifyCatalogSyncButtons } from "@/components/admin/PrintifyCatalogSyncButtons";
 import { PrintifyCatalogSortableTable } from "@/components/admin/PrintifyCatalogSortableTable";
 import { ADMIN_BACKEND_BASE_PATH } from "@/lib/admin-dashboard-urls";
+import { reconcilePrintifyPublishingForAllLiveListings } from "@/lib/shop-listing-printify-publish";
 
 export type PrintifyInventoryTabProps = {
   products: (Product & {
@@ -41,14 +43,6 @@ export type PrintifyInventoryTabProps = {
   /** `listing` query — which product form is shown (one at a time). */
   openListingId?: string;
   listingSavedId?: string;
-  publishNotice?:
-    | { variant: "ok"; kind: "succeeded" | "failed"; productId?: string }
-    | {
-        variant: "err";
-        reason?: string;
-        productId?: string;
-        detail?: string;
-      };
   r2PruneNotice?:
     | { variant: "preview"; listed: number; referenced: number; orphans: number }
     | {
@@ -128,10 +122,18 @@ export async function PrintifyInventoryTab({
   syncReason,
   openListingId,
   listingSavedId,
-  publishNotice,
   r2PruneNotice,
 }: PrintifyInventoryTabProps) {
   const readyForFulfillment = isPrintifyConfigured();
+  if (readyForFulfillment) {
+    after(async () => {
+      try {
+        await reconcilePrintifyPublishingForAllLiveListings();
+      } catch (e) {
+        console.error("[printify-publish] live listing reconcile failed", e);
+      }
+    });
+  }
   const shopIdEnv = process.env.PRINTIFY_SHOP_ID?.trim() ?? "";
   const tokenSet = hasPrintifyApiToken();
 
@@ -215,56 +217,10 @@ export async function PrintifyInventoryTab({
             Printify API
           </Link>
           ), sync, then use <strong className="font-medium text-zinc-500">Edit</strong> in the catalog to change a
-          storefront listing. Orders go to Printify via the Stripe webhook.
+          storefront listing. Live listings are published to Printify automatically. Orders go to Printify via the
+          Stripe webhook.
         </p>
       </div>
-
-      {publishNotice?.variant === "ok" ? (
-        <p
-          role="status"
-          className="rounded-lg border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200/90"
-        >
-          {publishNotice.kind === "succeeded" ? (
-            <>
-              Printify product marked as <span className="font-medium text-emerald-100/95">published</span>
-              {publishNotice.productId ? (
-                <>
-                  {" "}
-                  (<code className="text-emerald-300/90">{publishNotice.productId}</code>).
-                </>
-              ) : (
-                "."
-              )}
-            </>
-          ) : (
-            <>
-              Stuck publishing cleared via <code className="text-emerald-300/90">publishing_failed</code>
-              {publishNotice.productId ? (
-                <>
-                  {" "}
-                  (<code className="text-emerald-300/90">{publishNotice.productId}</code>).
-                </>
-              ) : (
-                "."
-              )}
-            </>
-          )}
-        </p>
-      ) : null}
-      {publishNotice?.variant === "err" ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-blue-900/60 bg-blue-950/40 px-4 py-3 text-sm text-blue-200/90"
-        >
-          {publishNotice.reason === "no_shop"
-            ? "Set PRINTIFY_SHOP_ID in the environment."
-            : publishNotice.reason === "no_product"
-              ? "Missing Printify product id."
-              : publishNotice.reason === "api"
-                ? `Printify API error${publishNotice.productId ? ` (${publishNotice.productId})` : ""}: ${publishNotice.detail ?? "Unknown error."}`
-                : publishNotice.detail ?? "Could not update publish status."}
-        </p>
-      ) : null}
 
       {sync === "ok" && (
         <p className="rounded-lg border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200/90">

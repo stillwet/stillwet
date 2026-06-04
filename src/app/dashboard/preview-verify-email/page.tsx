@@ -60,7 +60,7 @@ export default async function PreviewVerifyEmailPage() {
 
       <p className="mt-8 text-center text-sm text-zinc-500">
         <Link href="/dashboard" className="text-blue-400 hover:underline">
-          ← Shop dashboard
+          ← Shop Dashboard
         </Link>
       </p>
     </main>

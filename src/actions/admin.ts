@@ -13,8 +13,6 @@ import { Audience, FulfillmentType } from "@/generated/prisma/enums";
 import {
   fetchPrintifyCatalogEnriched,
   fetchPrintifyProductDetail,
-  setPrintifyProductPublishingFailed,
-  setPrintifyProductPublishingSucceeded,
   type PrintifyCatalogProduct,
 } from "@/lib/printify";
 import { pickImageForVariant } from "@/lib/printify-catalog";
@@ -685,60 +683,6 @@ export async function adminPruneOrphanListingImagesR2(formData: FormData): Promi
       `${ADMIN_BACKEND_BASE_PATH}?tab=printify&r2Prune=err&r2PruneReason=${encodeURIComponent(msg.replace(/\s+/g, " ").slice(0, 240))}`,
     );
   }
-}
-
-export async function notifyPrintifyPublishingSucceeded(formData: FormData): Promise<void> {
-  const admin = await getAdminSessionReadonly();
-  if (!admin.isAdmin) {
-    redirect("/admin/login");
-  }
-
-  const printifyProductId = String(formData.get("printifyProductId") ?? "").trim();
-  const shopId = process.env.PRINTIFY_SHOP_ID?.trim();
-  if (!shopId) {
-    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=err&pubReason=no_shop`);
-  }
-  if (!printifyProductId) {
-    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=err&pubReason=no_product`);
-  }
-
-  const r = await setPrintifyProductPublishingSucceeded(shopId, printifyProductId);
-  if (!r.ok) {
-    redirect(
-      `${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=err&pubReason=api&pubPid=${encodeURIComponent(printifyProductId)}&pubDetail=${encodeURIComponent(r.body.replace(/\s+/g, " ").slice(0, 280))}`,
-    );
-  }
-
-  redirect(
-    `${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=ok&pubKind=succeeded&pubPid=${encodeURIComponent(printifyProductId)}`,
-  );
-}
-
-export async function notifyPrintifyPublishingFailed(formData: FormData): Promise<void> {
-  const admin = await getAdminSessionReadonly();
-  if (!admin.isAdmin) {
-    redirect("/admin/login");
-  }
-
-  const printifyProductId = String(formData.get("printifyProductId") ?? "").trim();
-  const shopId = process.env.PRINTIFY_SHOP_ID?.trim();
-  if (!shopId) {
-    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=err&pubReason=no_shop`);
-  }
-  if (!printifyProductId) {
-    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=err&pubReason=no_product`);
-  }
-
-  const r = await setPrintifyProductPublishingFailed(shopId, printifyProductId);
-  if (!r.ok) {
-    redirect(
-      `${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=err&pubReason=api&pubPid=${encodeURIComponent(printifyProductId)}&pubDetail=${encodeURIComponent(r.body.replace(/\s+/g, " ").slice(0, 280))}`,
-    );
-  }
-
-  redirect(
-    `${ADMIN_BACKEND_BASE_PATH}?tab=printify&pub=ok&pubKind=failed&pubPid=${encodeURIComponent(printifyProductId)}`,
-  );
 }
 
 const MAX_LISTING_UPLOAD_BYTES = 8 * 1024 * 1024;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type {
+  AdminPlatformSalesBuyer,
   AdminPlatformSalesMergedLine,
   PlatformSalesPeriodTotals,
   PlatformSalesYtdTotals,
@@ -104,6 +105,22 @@ function buildSalesTabHref(parts: {
   return `/admin?${q}`;
 }
 
+function formatBuyerCell(l: AdminPlatformSalesMergedLine, field: keyof AdminPlatformSalesBuyer): string {
+  if (l.kind !== "merchandise") return "—";
+  const v = l.buyer[field]?.trim();
+  return v || "—";
+}
+
+/** US → state code; otherwise country code. */
+function formatBuyerShipTo(l: AdminPlatformSalesMergedLine): string {
+  if (l.kind !== "merchandise") return "—";
+  const country = l.buyer.shippingCountry?.trim().toUpperCase() ?? "";
+  const state = l.buyer.shippingState?.trim().toUpperCase() ?? "";
+  const isUs = country === "US" || country === "USA" || (!country && state.length > 0);
+  if (isUs) return state || "—";
+  return country || "—";
+}
+
 export function AdminPlatformSalesTab(props: {
   lines: AdminPlatformSalesMergedLine[];
   salesFromValue: string;
@@ -132,6 +149,9 @@ export function AdminPlatformSalesTab(props: {
           : l.unitPriceCents * l.quantity;
       const shopName = l.shop?.displayName ?? "";
       const shopSlug = l.shop?.slug ?? "";
+      const buyerEmail = l.kind === "merchandise" ? l.buyer.email ?? "" : "";
+      const buyerShipTo = l.kind === "merchandise" ? formatBuyerShipTo(l) : "";
+      const buyerShipToCsv = buyerShipTo === "—" ? "" : buyerShipTo;
       return [
         l.order.createdAt.toISOString(),
         l.order.id,
@@ -143,13 +163,15 @@ export function AdminPlatformSalesTab(props: {
         String(l.shopCutCents),
         shopName,
         shopSlug,
+        buyerEmail,
+        buyerShipToCsv,
       ]
         .map((c) => escapeCsvCell(c))
         .join(",");
     })
     .join("\n");
   const csv =
-    "date,order_id,item,qty,merchandise_cents,goods_services_cents,platform_fee_cents,shop_cut_cents,shop_name,shop_slug\n" +
+    "date,order_id,item,qty,merchandise_cents,goods_services_cents,platform_fee_cents,shop_cut_cents,shop_name,shop_slug,buyer_email,buyer_ship_to\n" +
     csvBody;
   const csvHref = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
 
@@ -257,18 +279,21 @@ export function AdminPlatformSalesTab(props: {
         </Link>
       </form>
 
+      <p className="mt-3 text-[11px] text-zinc-600">
+        Item sales include buyer email and ship-to (US state or non-US country) from Stripe checkout. Other sale types show —.
+      </p>
+
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[860px] border-collapse text-left text-xs">
+        <table className="w-full min-w-[760px] border-collapse text-left text-xs">
           <thead>
             <tr className="border-b border-zinc-800 text-zinc-500">
               <th className="py-2 pr-2 font-medium">Date</th>
               <th className="py-2 pr-2 font-medium">Item</th>
               <th className="py-2 pr-2 font-medium">Qty</th>
               <th className="py-2 pr-2 font-medium">Merch</th>
-              <th className="py-2 pr-2 font-medium">G/S cost</th>
               <th className="py-2 pr-2 font-medium">Platform</th>
-              <th className="py-2 pr-2 font-medium">Shop</th>
-              <th className="py-2 font-medium">Shop name</th>
+              <th className="py-2 pr-2 font-medium">Buyer email</th>
+              <th className="py-2 font-medium">Ship-to</th>
             </tr>
           </thead>
           <tbody>
@@ -283,15 +308,29 @@ export function AdminPlatformSalesTab(props: {
                   <td className="py-2 pr-2 font-mono text-[10px] text-zinc-500">
                     {formatDateMMDDYY(l.order.createdAt)}
                   </td>
-                  <td className="py-2 pr-2">{l.productName}</td>
+                  <td className="py-2 pr-2">
+                    {l.itemHref ? (
+                      <Link
+                        href={l.itemHref}
+                        className="text-zinc-300 hover:text-blue-300 hover:underline"
+                      >
+                        {l.productName}
+                      </Link>
+                    ) : (
+                      l.productName
+                    )}
+                  </td>
                   <td className="py-2 pr-2 tabular-nums">{l.quantity}</td>
                   <td className="py-2 pr-2 tabular-nums">
                     {isPubFee ? "—" : formatPrice(merch)}
                   </td>
-                  <td className="py-2 pr-2 tabular-nums">{formatPrice(l.goodsServicesCostCents)}</td>
                   <td className="py-2 pr-2 tabular-nums">{formatPrice(l.platformCutCents)}</td>
-                  <td className="py-2 pr-2 tabular-nums">{formatPrice(l.shopCutCents)}</td>
-                  <td className="py-2 text-zinc-400">{l.shop?.displayName ?? "—"}</td>
+                  <td className="max-w-[10rem] truncate py-2 pr-2 text-zinc-400" title={formatBuyerCell(l, "email")}>
+                    {formatBuyerCell(l, "email")}
+                  </td>
+                  <td className="py-2 font-mono text-[11px] text-zinc-400">
+                    {formatBuyerShipTo(l)}
+                  </td>
                 </tr>
               );
             })}

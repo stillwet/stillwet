@@ -136,13 +136,13 @@ export function CartAndCheckoutClient({
                   {formatPrice(l.unitCents)} each
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleQtySubmit(new FormData(e.currentTarget));
                   }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-3"
                 >
                   <input type="hidden" name="listingId" value={l.listingId} />
                   <input type="hidden" name="productId" value={l.productId} />
@@ -160,7 +160,7 @@ export function CartAndCheckoutClient({
                   <button
                     type="submit"
                     disabled={pending}
-                    className="store-kicker rounded-lg bg-zinc-800/90 px-3 py-1.5 text-zinc-300 hover:bg-zinc-700 disabled:opacity-50"
+                    className="store-kicker rounded-lg border border-transparent bg-zinc-800/90 px-3 py-1.5 text-zinc-300 hover:bg-zinc-700 disabled:opacity-50"
                   >
                     Update
                   </button>
@@ -170,6 +170,7 @@ export function CartAndCheckoutClient({
                     e.preventDefault();
                     handleRemoveSubmit(new FormData(e.currentTarget));
                   }}
+                  className="flex items-center"
                 >
                   <input type="hidden" name="listingId" value={l.listingId} />
                   <input type="hidden" name="productId" value={l.productId} />
@@ -190,10 +191,10 @@ export function CartAndCheckoutClient({
 
       <div className="mx-auto mt-8 w-full max-w-md">
         <CheckoutForm
-          tipAllowed={state.tipAllowed}
           subtotalCents={subtotal}
           shippingCents={shippingCents}
           estimatedSalesTaxRate={state.estimatedSalesTaxRate}
+          stripeTaxBuyerFeeEnabled={state.stripeTaxBuyerFeeEnabled}
           buyerCheckoutDisabled={state.buyerCheckoutDisabled}
         />
       </div>

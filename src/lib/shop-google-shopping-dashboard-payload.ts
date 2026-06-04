@@ -23,7 +23,10 @@ export async function loadShopGoogleShoppingDashboardPayload(
       select: { googleShoppingCredits: true },
     }),
     prisma.shopListingGoogleShoppingEnrollment.findMany({
-      where: { shopId },
+      where: {
+        shopId,
+        gmcRemovedFromMerchantAt: null,
+      },
       orderBy: { enrolledAt: "desc" },
       take: ENROLLED_PREVIEW_LIMIT,
       select: {

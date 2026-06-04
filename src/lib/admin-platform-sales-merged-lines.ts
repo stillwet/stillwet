@@ -9,14 +9,29 @@ import {
   PromotionPurchaseStatus,
 } from "@/generated/prisma/enums";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
-import { listingFeeCentsForOrdinal } from "@/lib/marketplace-constants";
+import { listingFeeCentsForOrdinal, productHref } from "@/lib/marketplace-constants";
 import { promotionKindLabel } from "@/lib/promotions";
 
 const orderLineInclude = {
-  order: { select: { id: true, createdAt: true } },
+  order: {
+    select: {
+      id: true,
+      createdAt: true,
+      email: true,
+      shippingState: true,
+      shippingCountry: true,
+    },
+  },
   shop: { select: { displayName: true, slug: true } },
   shopListing: { select: { requestItemName: true } },
+  product: { select: { slug: true } },
 } as const;
+
+export type AdminPlatformSalesBuyer = {
+  email: string | null;
+  shippingState: string | null;
+  shippingCountry: string | null;
+};
 
 function orderLineDisplayName(l: AdminPlatformSalesOrderLineRow): string {
   const item = l.shopListing?.requestItemName?.trim();
@@ -44,6 +59,8 @@ export type AdminPlatformSalesMergedLine =
       shopCutCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
+      buyer: AdminPlatformSalesBuyer;
+      itemHref: string | null;
     }
   | {
       kind: "listing_publication_fee";
@@ -57,6 +74,7 @@ export type AdminPlatformSalesMergedLine =
       shopCutCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
+      itemHref: string | null;
     }
   | {
       kind: "listing_credit_pack_purchase";
@@ -70,6 +88,7 @@ export type AdminPlatformSalesMergedLine =
       shopCutCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
+      itemHref: string | null;
     }
   | {
       kind: "support_tip";
@@ -83,6 +102,7 @@ export type AdminPlatformSalesMergedLine =
       shopCutCents: number;
       order: { id: string; createdAt: Date };
       shop: null;
+      itemHref: string | null;
     }
   | {
       kind: "promotion_purchase";
@@ -96,6 +116,7 @@ export type AdminPlatformSalesMergedLine =
       shopCutCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
+      itemHref: string | null;
     };
 
 type ListingFeeRow = {
@@ -332,6 +353,7 @@ export async function loadMergedPlatformSalesLines(
         listingFeePaidAt: true,
         listingPublicationFeePaidCents: true,
         requestItemName: true,
+        product: { select: { slug: true } },
         shop: {
           select: {
             displayName: true,
@@ -361,7 +383,12 @@ export async function loadMergedPlatformSalesLines(
         amountCents: true,
         paidAt: true,
         shop: { select: { displayName: true, slug: true } },
-        shopListing: { select: { requestItemName: true } },
+        shopListing: {
+          select: {
+            requestItemName: true,
+            product: { select: { slug: true } },
+          },
+        },
       },
     }),
     prisma.listingCreditPackPurchase.findMany({
@@ -435,6 +462,9 @@ export async function loadMergedPlatformSalesLines(
         displayName: row.shop.displayName,
         slug: row.shop.slug,
       },
+      itemHref: row.product?.slug
+        ? productHref(row.shop.slug, row.product.slug)
+        : null,
     });
   }
 
@@ -450,6 +480,13 @@ export async function loadMergedPlatformSalesLines(
     shopCutCents: l.shopCutCents,
     order: { id: l.order.id, createdAt: l.order.createdAt },
     shop: l.shop,
+    buyer: {
+      email: l.order.email,
+      shippingState: l.order.shippingState,
+      shippingCountry: l.order.shippingCountry,
+    },
+    itemHref:
+      l.shop && l.product.slug ? productHref(l.shop.slug, l.product.slug) : null,
   }));
 
   const supportLines: AdminPlatformSalesMergedLine[] = supportTips.map((t) => ({
@@ -464,6 +501,7 @@ export async function loadMergedPlatformSalesLines(
     shopCutCents: 0,
     order: { id: `support_tip:${t.id}`, createdAt: t.createdAt },
     shop: null,
+    itemHref: null,
   }));
 
   const promotionLines: AdminPlatformSalesMergedLine[] = promotionRows
@@ -489,6 +527,10 @@ export async function loadMergedPlatformSalesLines(
         displayName: row.shop.displayName,
         slug: row.shop.slug,
       },
+      itemHref:
+        row.shopListing?.product.slug != null
+          ? productHref(row.shop.slug, row.shopListing.product.slug)
+          : null,
     }));
 
   const listingCreditPackLines: AdminPlatformSalesMergedLine[] = listingCreditPackRows
@@ -511,6 +553,7 @@ export async function loadMergedPlatformSalesLines(
         displayName: row.shop.displayName,
         slug: row.shop.slug,
       },
+      itemHref: null,
     }));
 
   const merged = [

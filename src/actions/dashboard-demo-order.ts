@@ -18,6 +18,13 @@ import { getShippingFlatCents } from "@/lib/shipping";
 
 export type SimulateShopDemoPurchaseResult = { ok: true } | { ok: false; error: string };
 
+/** Client + SSR gate: dev feature flag and active `/admin` session on this browser. */
+export async function shopDemoPurchaseButtonVisible(): Promise<boolean> {
+  if (!shopDemoPurchaseFeatureEnabled()) return false;
+  const admin = await getAdminSessionReadonly();
+  return admin.isAdmin;
+}
+
 /**
  * Inserts a **paid** order for the signed-in shop (one line, qty 1) so the dashboard **Orders**
  * workflow can be tested without Stripe. Only under `next dev` with `SHOP_DEMO_PURCHASE_BUTTON=1`.

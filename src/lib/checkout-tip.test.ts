@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  CHECKOUT_TIP_STRIPE_TAX_CODE,
   MAX_CHECKOUT_TIP_CENTS,
   PLATFORM_TIP_FEE_CENTS,
+  checkoutApplicationFeeCents,
+  checkoutTipApplicationFeeCents,
   clampCheckoutTipCents,
   splitCheckoutTipCents,
   validateCheckoutTipCents,
@@ -32,22 +35,22 @@ describe("splitCheckoutTipCents", () => {
 });
 
 describe("validateCheckoutTipCents", () => {
-  it("allows zero", () => {
-    assert.equal(validateCheckoutTipCents(0, true), null);
+  it("allows zero without further checks", () => {
+    assert.equal(validateCheckoutTipCents(0), null);
   });
 
   it("rejects over max", () => {
-    assert.match(validateCheckoutTipCents(MAX_CHECKOUT_TIP_CENTS + 1, true)!, /Maximum/);
+    assert.match(validateCheckoutTipCents(MAX_CHECKOUT_TIP_CENTS + 1)!, /Maximum/);
   });
 
-  it("rejects when not eligible", () => {
-    assert.match(validateCheckoutTipCents(200, false)!, /sub catalog/);
+  it("rejects below minimum when tip is positive", () => {
+    assert.match(validateCheckoutTipCents(25)!, /Minimum/);
   });
 });
 
 describe("clampCheckoutTipCents", () => {
   it("clamps to max", () => {
-    assert.equal(clampCheckoutTipCents(999), MAX_CHECKOUT_TIP_CENTS);
+    assert.equal(clampCheckoutTipCents(1500), MAX_CHECKOUT_TIP_CENTS);
   });
 
   it("bumps sub-minimum positive values to min", () => {
@@ -55,8 +58,39 @@ describe("clampCheckoutTipCents", () => {
   });
 });
 
+describe("checkoutApplicationFeeCents", () => {
+  it("adds 25 cent platform tip fee to merchandise application fee", () => {
+    assert.equal(
+      checkoutApplicationFeeCents({ merchandiseApplicationFeeCents: 400, tipCents: 200 }),
+      425,
+    );
+  });
+
+  it("adds no tip fee when tip is zero", () => {
+    assert.equal(
+      checkoutApplicationFeeCents({ merchandiseApplicationFeeCents: 400, tipCents: 0 }),
+      400,
+    );
+  });
+});
+
+describe("checkoutTipApplicationFeeCents", () => {
+  it("returns platform tip fee constant for paid tips", () => {
+    assert.equal(checkoutTipApplicationFeeCents(50), PLATFORM_TIP_FEE_CENTS);
+    assert.equal(checkoutTipApplicationFeeCents(1000), PLATFORM_TIP_FEE_CENTS);
+  });
+
+  it("returns zero when there is no tip", () => {
+    assert.equal(checkoutTipApplicationFeeCents(0), 0);
+  });
+});
+
 describe("constants", () => {
   it("uses twenty-five cent platform tip fee", () => {
     assert.equal(PLATFORM_TIP_FEE_CENTS, 25);
+  });
+
+  it("uses Stripe gratuity tax code for checkout tips", () => {
+    assert.equal(CHECKOUT_TIP_STRIPE_TAX_CODE, "txcd_92010001");
   });
 });

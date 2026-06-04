@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { startCheckout } from "@/actions/checkout";
 import { StripeEmbeddedCheckoutOverlay } from "@/components/StripeEmbeddedCheckoutOverlay";
 import {
   MAX_CHECKOUT_TIP_CENTS,
   clampCheckoutTipCents,
 } from "@/lib/checkout-tip";
+import { buyerStripeTaxServiceFeeCents } from "@/lib/stripe-tax-buyer-fee";
 import { STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE } from "@/lib/storefront-buyer-checkout";
 
-const PRESETS = [200, 500];
-
 type Props = {
-  tipAllowed: boolean;
   subtotalCents: number;
   shippingCents: number;
   estimatedSalesTaxRate: number | null;
+  stripeTaxBuyerFeeEnabled?: boolean;
   buyerCheckoutDisabled?: boolean;
 };
 
@@ -27,14 +26,15 @@ function formatPrice(cents: number) {
 }
 
 export function CheckoutForm({
-  tipAllowed,
   subtotalCents,
   shippingCents,
   estimatedSalesTaxRate,
+  stripeTaxBuyerFeeEnabled = false,
   buyerCheckoutDisabled = false,
 }: Props) {
+  const [tipInput, setTipInput] = useState("0.00");
   const [tipCents, setTipCents] = useState(0);
-  const [customTip, setCustomTip] = useState("");
+  const [tipMaxNotice, setTipMaxNotice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [embeddedClientSecret, setEmbeddedClientSecret] = useState<string | null>(null);
@@ -42,197 +42,225 @@ export function CheckoutForm({
   const stripePublishableKey =
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() || "";
 
-  const taxableCents = subtotalCents + (tipAllowed ? tipCents : 0);
+  const taxableCents = subtotalCents;
   const taxCents =
     estimatedSalesTaxRate != null && taxableCents > 0
       ? Math.round(taxableCents * estimatedSalesTaxRate)
       : estimatedSalesTaxRate != null
         ? 0
         : null;
+  const stripeTaxServiceFeeCents = buyerStripeTaxServiceFeeCents({
+    enabled: stripeTaxBuyerFeeEnabled,
+    subtotalCents,
+    shippingCents,
+    tipCents,
+  });
   const grandTotalCents =
-    subtotalCents +
-    (tipAllowed ? tipCents : 0) +
-    shippingCents +
-    (taxCents ?? 0);
+    subtotalCents + tipCents + shippingCents + stripeTaxServiceFeeCents + (taxCents ?? 0);
+
+  useEffect(() => {
+    if (!tipMaxNotice) return;
+    const timer = window.setTimeout(() => setTipMaxNotice(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [tipMaxNotice]);
+
+  function showTipMaxNotice() {
+    setTipMaxNotice(true);
+  }
+
+  function applyTipCents(cents: number) {
+    if (cents > MAX_CHECKOUT_TIP_CENTS) {
+      showTipMaxNotice();
+      setTipCents(MAX_CHECKOUT_TIP_CENTS);
+      setTipInput((MAX_CHECKOUT_TIP_CENTS / 100).toFixed(2));
+      return;
+    }
+    setTipCents(cents);
+  }
+
+  function sanitizeTipInput(raw: string): string {
+    const cleaned = raw.replace(/[^\d.]/g, "");
+    const dot = cleaned.indexOf(".");
+    if (dot === -1) return cleaned;
+    return `${cleaned.slice(0, dot)}.${cleaned.slice(dot + 1).replace(/\./g, "").slice(0, 2)}`;
+  }
+
+  function syncTipFromInput(raw: string) {
+    const sanitized = sanitizeTipInput(raw);
+    if (sanitized === "" || sanitized === ".") {
+      setTipInput(sanitized);
+      setTipCents(0);
+      return;
+    }
+    const n = parseFloat(sanitized);
+    if (!Number.isFinite(n) || n < 0) {
+      setTipInput(sanitized);
+      return;
+    }
+    const cents = Math.round(n * 100);
+    if (cents > MAX_CHECKOUT_TIP_CENTS) {
+      applyTipCents(cents);
+      return;
+    }
+    setTipInput(sanitized);
+    setTipCents(cents);
+  }
+
+  function formatTipOnBlur() {
+    const trimmed = tipInput.trim();
+    if (trimmed === "" || trimmed === ".") {
+      setTipInput("0.00");
+      setTipCents(0);
+      return;
+    }
+    const n = parseFloat(trimmed);
+    if (!Number.isFinite(n) || n <= 0) {
+      setTipInput("0.00");
+      setTipCents(0);
+      return;
+    }
+    const cents = Math.round(n * 100);
+    if (cents > MAX_CHECKOUT_TIP_CENTS) {
+      showTipMaxNotice();
+    }
+    const clamped = clampCheckoutTipCents(cents);
+    setTipCents(clamped);
+    setTipInput((clamped / 100).toFixed(2));
+  }
 
   return (
     <>
-    <form
-      className="w-full space-y-8 text-center"
-      action={async (formData) => {
-        setError(null);
-        setPending(true);
-        formData.set("tipCents", String(tipCents));
-        try {
-          const r = await startCheckout(formData);
-          if (r.ok) {
-            if (r.mode === "redirect") {
-              window.location.href = r.url;
+      <form
+        className="w-full space-y-8 text-center"
+        action={async (formData) => {
+          setError(null);
+          setPending(true);
+          formData.set("tipCents", String(tipCents));
+          try {
+            const r = await startCheckout(formData);
+            if (r.ok) {
+              if (r.mode === "redirect") {
+                window.location.href = r.url;
+                return;
+              }
+              if (!stripePublishableKey) {
+                setError("Stripe publishable key is not configured.");
+                return;
+              }
+              setEmbeddedClientSecret(r.clientSecret);
               return;
             }
-            if (!stripePublishableKey) {
-              setError("Stripe publishable key is not configured.");
-              return;
-            }
-            setEmbeddedClientSecret(r.clientSecret);
-            return;
+            setError(r.error);
+          } finally {
+            setPending(false);
           }
-          setError(r.error);
-        } finally {
-          setPending(false);
-        }
-      }}
-    >
-      {tipAllowed && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-          <h2 className="text-sm font-medium text-zinc-200">Add a tip (optional)</h2>
-          <p className="mt-1 text-xs text-zinc-500">
-            Optional, up to {formatPrice(MAX_CHECKOUT_TIP_CENTS)}. Most of your tip goes to the shop;
-            the platform keeps $0.25 per tip.
-          </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <button
-              key="none"
-              type="button"
-              onClick={() => {
-                setTipCents(0);
-                setCustomTip("");
-              }}
-              className={`rounded-lg px-3 py-1.5 text-sm ${
-                tipCents === 0
-                  ? "bg-blue-900/50 text-blue-100"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
-              }`}
-            >
-              No tip
-            </button>
-            {PRESETS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => {
-                  setTipCents(c);
-                  setCustomTip("");
-                }}
-                className={`rounded-lg px-3 py-1.5 text-sm ${
-                  tipCents === c
-                    ? "bg-blue-900/50 text-blue-100"
-                    : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
-                }`}
-              >
-                {formatPrice(c)}
-              </button>
-            ))}
+        }}
+      >
+        <div className="store-dimension-panel border-zinc-800/60 p-5 text-left text-sm text-zinc-400 shadow-none">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span className="text-zinc-200">{formatPrice(subtotalCents)}</span>
           </div>
-          <div className="mt-4 flex justify-center">
-            <label className="flex w-full max-w-[12rem] flex-col gap-1 text-left text-xs text-zinc-500">
-              Custom (USD)
-              <input
-                type="number"
-                min={0}
-                max={MAX_CHECKOUT_TIP_CENTS / 100}
-                step="0.01"
-                value={customTip}
-                onChange={(e) => {
-                  setCustomTip(e.target.value);
-                  const n = parseFloat(e.target.value);
-                  if (Number.isFinite(n) && n >= 0) {
-                    setTipCents(clampCheckoutTipCents(Math.round(n * 100)));
-                  } else if (e.target.value === "") {
-                    setTipCents(0);
-                  }
-                }}
-                onBlur={() => {
-                  if (tipCents > 0) {
-                    const clamped = clampCheckoutTipCents(tipCents);
-                    setTipCents(clamped);
-                    setCustomTip((clamped / 100).toFixed(2));
-                  }
-                }}
-                className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100"
-                placeholder="0.00"
-              />
+          <div className="mt-2 flex justify-between">
+            <span>Shipping</span>
+            <span className="text-zinc-200">
+              {shippingCents === 0 ? "Free shipping" : formatPrice(shippingCents)}
+            </span>
+          </div>
+          <div className="mt-2 flex justify-between">
+            <span>Sales tax</span>
+            {taxCents != null ? (
+              <span className="text-zinc-200">{formatPrice(taxCents)}</span>
+            ) : (
+              <span className="text-right text-xs text-zinc-500 italic">Calculated at checkout</span>
+            )}
+          </div>
+          {stripeTaxServiceFeeCents > 0 ? (
+            <div className="mt-2 flex justify-between">
+              <span>Sales tax processing</span>
+              <span className="text-zinc-200">{formatPrice(stripeTaxServiceFeeCents)}</span>
+            </div>
+          ) : null}
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <label htmlFor="checkout-tip" className="shrink-0">
+              Tip
             </label>
+            <div className="relative shrink-0">
+              {tipMaxNotice ? (
+                <div
+                  role="status"
+                  className="pointer-events-none absolute bottom-full right-0 z-10 mb-1 whitespace-nowrap rounded border border-zinc-700 bg-zinc-950 px-1.5 py-0.5 text-[10px] leading-none text-amber-200/90 shadow-md"
+                >
+                  ${MAX_CHECKOUT_TIP_CENTS / 100} max tip
+                </div>
+              ) : null}
+              <input
+                id="checkout-tip"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                aria-label="Tip amount in dollars"
+                value={tipInput}
+                onChange={(e) => syncTipFromInput(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                onBlur={formatTipOnBlur}
+                className="w-[3rem] shrink-0 rounded-md border border-zinc-700 bg-zinc-950 px-1 py-0.5 text-right text-xs tabular-nums text-zinc-400 focus:border-zinc-500 focus:text-zinc-200 focus:outline-none"
+              />
+            </div>
           </div>
+          <p className="mt-0.5 text-[10px] italic leading-tight text-zinc-600">
+            (Optional) 25 cent platform fee; the rest goes to the creator.
+          </p>
+          <div className="mt-3 flex justify-between border-t border-zinc-800/80 pt-3 font-medium text-zinc-100">
+            <span>Estimated total</span>
+            <span>
+              {estimatedSalesTaxRate != null
+                ? formatPrice(grandTotalCents)
+                : `${formatPrice(subtotalCents + tipCents + shippingCents + stripeTaxServiceFeeCents)} + tax`}
+            </span>
+          </div>
+          {!buyerCheckoutDisabled ? (
+            <p className="mt-3 text-center text-xs leading-relaxed text-zinc-600">
+              Tax is finalized at payment from your shipping address.
+            </p>
+          ) : null}
         </div>
-      )}
 
-      <div className="store-dimension-panel border-zinc-800/60 p-5 text-left text-sm text-zinc-400 shadow-none">
-        <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span className="text-zinc-200">{formatPrice(subtotalCents)}</span>
-        </div>
-        {tipAllowed && tipCents > 0 && (
-          <div className="mt-2 flex justify-between text-blue-200/80">
-            <span>Tip</span>
-            <span>{formatPrice(tipCents)}</span>
-          </div>
-        )}
-        <div className="mt-2 flex justify-between">
-          <span>Shipping</span>
-          <span className="text-zinc-200">
-            {shippingCents === 0 ? "Free shipping" : formatPrice(shippingCents)}
-          </span>
-        </div>
-        <div className="mt-2 flex justify-between">
-          <span>Estimated sales tax</span>
-          {taxCents != null ? (
-            <span className="text-zinc-200">{formatPrice(taxCents)}</span>
-          ) : (
-            <span className="text-right text-zinc-500">At checkout</span>
-          )}
-        </div>
-        <div className="mt-3 flex justify-between border-t border-zinc-800/80 pt-3 font-medium text-zinc-100">
-          <span>Estimated total</span>
-          <span>
-            {estimatedSalesTaxRate != null
-              ? formatPrice(grandTotalCents)
-              : `${formatPrice(subtotalCents + (tipAllowed ? tipCents : 0) + shippingCents)} + tax`}
-          </span>
-        </div>
-        {!buyerCheckoutDisabled ? (
-          <p className="mt-3 text-center text-xs leading-relaxed text-zinc-600">
-            Tax is finalized at payment from your shipping address. Pay with card or Cash App Pay (US) in
-            the secure checkout window on this page.
+        {buyerCheckoutDisabled ? (
+          <p
+            className="rounded-lg border border-blue-900/40 bg-blue-950/25 px-3 py-2 text-center text-sm leading-relaxed text-blue-200/90"
+            role="status"
+          >
+            {STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE}
           </p>
         ) : null}
-      </div>
 
-      {buyerCheckoutDisabled ? (
-        <p
-          className="rounded-lg border border-blue-900/40 bg-blue-950/25 px-3 py-2 text-center text-sm leading-relaxed text-blue-200/90"
-          role="status"
+        {error ? (
+          <p className="rounded-lg bg-amber-950/50 px-3 py-2 text-center text-sm text-amber-200">
+            {error}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={pending || buyerCheckoutDisabled}
+          className="w-full rounded-xl bg-blue-900 py-3 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE}
-        </p>
+          {buyerCheckoutDisabled
+            ? "Checkout unavailable"
+            : pending
+              ? "Loading checkout…"
+              : "Continue to payment"}
+        </button>
+      </form>
+      {embeddedClientSecret && stripePublishableKey ? (
+        <StripeEmbeddedCheckoutOverlay
+          open
+          clientSecret={embeddedClientSecret}
+          stripePublishableKey={stripePublishableKey}
+          onClose={() => setEmbeddedClientSecret(null)}
+        />
       ) : null}
-
-      {error && (
-        <p className="rounded-lg bg-amber-950/50 px-3 py-2 text-center text-sm text-amber-200">
-          {error}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={pending || buyerCheckoutDisabled}
-        className="w-full rounded-xl bg-blue-900 py-3 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {buyerCheckoutDisabled
-          ? "Checkout unavailable"
-          : pending
-            ? "Loading checkout…"
-            : "Continue to payment"}
-      </button>
-    </form>
-    {embeddedClientSecret && stripePublishableKey ? (
-      <StripeEmbeddedCheckoutOverlay
-        open
-        clientSecret={embeddedClientSecret}
-        stripePublishableKey={stripePublishableKey}
-        onClose={() => setEmbeddedClientSecret(null)}
-      />
-    ) : null}
     </>
   );
 }

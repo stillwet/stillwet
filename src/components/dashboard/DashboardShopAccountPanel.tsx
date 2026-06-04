@@ -143,7 +143,7 @@ export function DashboardShopAccountPanel({
               <button
                 type="button"
                 disabled={verifyResendPending}
-                className={btnAccountAction}
+                className="rounded-lg border border-blue-900/60 bg-blue-950/30 px-3 py-1 text-xs font-medium text-blue-200 hover:border-blue-700/60 hover:bg-blue-950/50 disabled:opacity-50"
                 onClick={() => {
                   setVerifyResendResult(null);
                   setVerifyResendPending(true);
@@ -341,7 +341,7 @@ export function DashboardShopAccountPanel({
         </form>
       </div>
 
-      <div className="border-t border-zinc-800 pt-4">
+      <div className="max-w-md border-t border-zinc-800 pt-4">
         <ShopDangerZonePanel
           accountDeletionRequestedAt={accountDeletionRequestedAt}
           accountDeletionEmailConfirmedAt={accountDeletionEmailConfirmedAt}

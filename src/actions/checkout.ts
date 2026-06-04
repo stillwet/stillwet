@@ -8,10 +8,20 @@ import {
 } from "@/lib/checkout-mock";
 import { getCartSessionReadonly } from "@/lib/session";
 import {
+  CHECKOUT_TIP_STRIPE_TAX_CODE,
+  checkoutApplicationFeeCents,
   splitCheckoutTipCents,
   validateCheckoutTipCents,
 } from "@/lib/checkout-tip";
-import { cartHasTipEligibleProduct } from "@/lib/tip-eligibility";
+import {
+  CHECKOUT_MERCHANDISE_STRIPE_TAX_CODE,
+  isStripeCheckoutAutomaticTaxEnabled,
+  stripeCheckoutAutomaticTax,
+} from "@/lib/stripe-checkout-tax";
+import {
+  buyerStripeTaxServiceFeeCents,
+  stripeCheckoutTaxServiceFeeLineItem,
+} from "@/lib/stripe-tax-buyer-fee";
 import { FulfillmentType, OrderProceedsRouting, OrderStatus } from "@/generated/prisma/enums";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
@@ -87,15 +97,12 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
   const shopId = [...shopIds][0]!;
   const shopIsDeactivatedForInactivity = shopIsInactivityDeactivated(listings[0]!.shop);
 
-  const products = listings.map((l) => l.product);
-  const tipAllowed = cartHasTipEligibleProduct(products);
-
   const tipRaw = formData.get("tipCents");
   let tipCents = 0;
   if (tipRaw !== null && tipRaw !== "") {
     tipCents = parseInt(String(tipRaw), 10);
   }
-  const tipError = validateCheckoutTipCents(tipCents, tipAllowed);
+  const tipError = validateCheckoutTipCents(tipCents);
   if (tipError) {
     return { ok: false, error: tipError };
   }
@@ -199,16 +206,24 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
   );
 
   const ship = platformFlatShippingCents();
-  const totalCents = subtotalCents + tipCents + ship;
+  const automaticTaxEnabled = isStripeCheckoutAutomaticTaxEnabled();
+  const stripeTaxServiceFeeCents = buyerStripeTaxServiceFeeCents({
+    subtotalCents,
+    shippingCents: ship,
+    tipCents,
+  });
+  const totalCents = subtotalCents + tipCents + ship + stripeTaxServiceFeeCents;
 
   const stripeLineItems: Array<{
     quantity: number;
     price_data: {
       currency: "usd";
       unit_amount: number;
+      tax_behavior: "exclusive";
       product_data: {
         name: string;
         description?: string;
+        tax_code?: string;
         metadata?: Record<string, string>;
       };
     };
@@ -221,9 +236,11 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
       price_data: {
         currency: "usd",
         unit_amount: row.unitPriceCents,
+        tax_behavior: "exclusive",
         product_data: {
           name: row.stripeProductName,
           description: stripeDescriptionByListingId.get(row.listing.id) || undefined,
+          tax_code: CHECKOUT_MERCHANDISE_STRIPE_TAX_CODE,
           metadata: { productId: p.id, shopListingId: row.listing.id },
         },
       },
@@ -236,12 +253,24 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
       price_data: {
         currency: "usd",
         unit_amount: tipCents,
+        tax_behavior: "exclusive",
         product_data: {
           name: "Tip (thank you)",
+          tax_code: CHECKOUT_TIP_STRIPE_TAX_CODE,
           metadata: { kind: "checkout_tip" },
         },
       },
     });
+  }
+
+  const taxServiceFeeLine = stripeCheckoutTaxServiceFeeLineItem({
+    subtotalCents,
+    shippingCents: ship,
+    tipCents,
+    automaticTaxEnabled,
+  });
+  if (taxServiceFeeLine) {
+    stripeLineItems.push(taxServiceFeeLine);
   }
 
   const order = await prisma.$transaction(async (tx) => {
@@ -329,7 +358,12 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
     0,
   );
   const { platformTipFeeCents } = splitCheckoutTipCents(tipCents);
-  const applicationFeeCents = merchandiseApplicationFeeCents + platformTipFeeCents;
+  const applicationFeeCents =
+    checkoutApplicationFeeCents({
+      merchandiseApplicationFeeCents,
+      tipCents,
+    }) + (useStripeConnect ? stripeTaxServiceFeeCents : 0);
+  const connectAccountId = useStripeConnect ? shopRecord!.stripeConnectAccountId! : null;
 
   let checkoutSession;
   try {
@@ -339,6 +373,9 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
       payment_method_types,
       line_items: stripeLineItems,
       branding_settings: storefrontStripeCheckoutBranding,
+      ...(automaticTaxEnabled
+        ? { automatic_tax: stripeCheckoutAutomaticTax(connectAccountId) }
+        : {}),
       shipping_address_collection: {
         allowed_countries: [...PLATFORM_CHECKOUT_SHIPPING_COUNTRIES],
       },
@@ -348,6 +385,7 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
             type: "fixed_amount",
             fixed_amount: { amount: ship, currency: "usd" },
             display_name: ship === 0 ? "Free shipping" : "Standard shipping",
+            ...(automaticTaxEnabled ? { tax_behavior: "exclusive" as const } : {}),
           },
         },
       ],
@@ -358,6 +396,12 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
         ? {
             payment_intent_data: {
               application_fee_amount: applicationFeeCents,
+              metadata: {
+                orderId: order.id,
+                tipCents: String(tipCents),
+                platformTipFeeCents: String(platformTipFeeCents),
+                stripeTaxServiceFeeCents: String(stripeTaxServiceFeeCents),
+              },
               transfer_data: {
                 destination: shopRecord.stripeConnectAccountId!,
               },

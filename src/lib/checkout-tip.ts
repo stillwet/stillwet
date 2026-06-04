@@ -1,11 +1,14 @@
 /** Maximum optional cart tip (USD cents). */
-export const MAX_CHECKOUT_TIP_CENTS = 500;
+export const MAX_CHECKOUT_TIP_CENTS = 1000;
 
 /** Platform keeps this much of each cart tip; remainder goes to the shop (Connect transfer). */
 export const PLATFORM_TIP_FEE_CENTS = 25;
 
 /** Stripe USD minimum for a paid line item when tip > 0. */
 export const MIN_CHECKOUT_TIP_CENTS = 50;
+
+/** Stripe Tax product tax code: gratuity / tip (not taxed like merchandise). */
+export const CHECKOUT_TIP_STRIPE_TAX_CODE = "txcd_92010001";
 
 export function splitCheckoutTipCents(tipCents: number): {
   platformTipFeeCents: number;
@@ -19,18 +22,24 @@ export function splitCheckoutTipCents(tipCents: number): {
   return { platformTipFeeCents, shopTipCents: tip - platformTipFeeCents };
 }
 
-export function validateCheckoutTipCents(
-  tipCents: number,
-  tipAllowed: boolean,
-): string | null {
+/** Platform Connect application fee attributable to cart tip (25¢ when tip > 0). */
+export function checkoutTipApplicationFeeCents(tipCents: number): number {
+  return splitCheckoutTipCents(tipCents).platformTipFeeCents;
+}
+
+export function checkoutApplicationFeeCents(params: {
+  merchandiseApplicationFeeCents: number;
+  tipCents: number;
+}): number {
+  return params.merchandiseApplicationFeeCents + checkoutTipApplicationFeeCents(params.tipCents);
+}
+
+export function validateCheckoutTipCents(tipCents: number): string | null {
   if (!Number.isFinite(tipCents) || tipCents < 0) {
     return "Invalid tip amount.";
   }
   if (tipCents === 0) {
     return null;
-  }
-  if (!tipAllowed) {
-    return "Tips apply only when your cart includes sub catalog items.";
   }
   if (tipCents < MIN_CHECKOUT_TIP_CENTS) {
     return `Minimum tip is $${(MIN_CHECKOUT_TIP_CENTS / 100).toFixed(2)}.`;

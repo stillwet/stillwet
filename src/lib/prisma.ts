@@ -9,6 +9,8 @@ export type PrismaModerationKeywordDelegate = PrismaClient["moderationKeyword"];
 export type PrismaShopPromotionCreditBalanceDelegate =
   PrismaClient["shopPromotionCreditBalance"];
 export type PrismaShopAdminAwardGrantDelegate = PrismaClient["shopAdminAwardGrant"];
+export type PrismaAdminNexusRegistrationDatesDelegate =
+  PrismaClient["adminNexusRegistrationDates"];
 
 /**
  * Bump when the Prisma schema (or generated client shape) changes so the cached `globalThis` client
@@ -17,7 +19,7 @@ export type PrismaShopAdminAwardGrantDelegate = PrismaClient["shopAdminAwardGran
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v75-admin-catalog-large-listing-artwork";
+  "postgres-adapter-v77-admin-nexus-registration-dates-delegate";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -190,4 +192,17 @@ export function adminAwardPromotionsDelegatesReady(): boolean {
   return (
     prismaShopPromotionCreditBalanceOrNull() != null && prismaShopAdminAwardGrantOrNull() != null
   );
+}
+
+/**
+ * Optional delegate — Nexus planning registered dates (migration `20260603130000_admin_nexus_registration_dates`).
+ */
+export function prismaAdminNexusRegistrationDatesOrNull(): PrismaAdminNexusRegistrationDatesDelegate | null {
+  const client = reconcilePrismaAndSyncExport();
+  const delegate = (
+    client as PrismaClient & {
+      adminNexusRegistrationDates?: PrismaAdminNexusRegistrationDatesDelegate;
+    }
+  ).adminNexusRegistrationDates;
+  return typeof delegate?.findUnique === "function" ? delegate : null;
 }

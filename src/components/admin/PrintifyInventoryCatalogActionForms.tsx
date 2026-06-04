@@ -1,6 +1,6 @@
 "use client";
 
-import { notifyPrintifyPublishingSucceeded, resyncPrintifyCatalogProduct } from "@/actions/admin";
+import { resyncPrintifyCatalogProduct } from "@/actions/admin";
 
 function CatalogResyncIcon() {
   return (
@@ -23,14 +23,6 @@ function CatalogResyncIcon() {
   );
 }
 
-function CatalogPublishGlyph() {
-  return (
-    <span className="font-mono text-[12px] font-semibold leading-none tracking-tight" aria-hidden>
-      {"<>"}
-    </span>
-  );
-}
-
 export function PrintifyCatalogResyncForm({ printifyProductId }: { printifyProductId: string }) {
   return (
     <form className="inline-block" action={resyncPrintifyCatalogProduct}>
@@ -42,22 +34,6 @@ export function PrintifyCatalogResyncForm({ printifyProductId }: { printifyProdu
         className="inline-flex h-8 w-8 items-center justify-center rounded border border-emerald-900/60 bg-emerald-950/35 text-emerald-200/90 hover:bg-emerald-950/55"
       >
         <CatalogResyncIcon />
-      </button>
-    </form>
-  );
-}
-
-export function PrintifyCatalogPublishToggleForm({ printifyProductId }: { printifyProductId: string }) {
-  return (
-    <form className="inline-block" action={notifyPrintifyPublishingSucceeded}>
-      <input type="hidden" name="printifyProductId" value={printifyProductId} />
-      <button
-        type="submit"
-        aria-label="Toggle published"
-        title="Toggle published"
-        className="inline-flex h-8 w-8 items-center justify-center rounded border border-zinc-600 bg-zinc-800/60 text-zinc-200 hover:bg-zinc-700/60"
-      >
-        <CatalogPublishGlyph />
       </button>
     </form>
   );

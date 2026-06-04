@@ -144,24 +144,6 @@ export function ShopFlairSection(props: {
 
       {!flair.purchasedAt ? (
         <>
-          {flair.catalog.types.length > 0 ? (
-            <div className="mt-3">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">
-                Available flair types
-              </p>
-              <ul className="mt-1.5 flex flex-col gap-1 sm:flex-row sm:flex-wrap">
-                {flair.catalog.types.map((t) => (
-                  <li
-                    key={t.id}
-                    className="rounded-md border border-zinc-800/80 bg-zinc-950/40 px-2 py-1 text-[11px] text-zinc-400"
-                  >
-                    {t.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
           <div className="mt-3">
             <ul className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
               <li>
@@ -178,6 +160,24 @@ export function ShopFlairSection(props: {
               </li>
             </ul>
           </div>
+
+          {flair.catalog.types.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">
+                Available flair types
+              </p>
+              <ul className="mt-1.5 flex flex-row flex-wrap gap-1">
+                {flair.catalog.types.map((t) => (
+                  <li
+                    key={t.id}
+                    className="rounded-md border border-zinc-800/80 bg-zinc-950/40 px-2 py-1 text-[11px] text-zinc-400"
+                  >
+                    {t.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           {flairPayOpen ? (
             <div className="mt-2 rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-3">

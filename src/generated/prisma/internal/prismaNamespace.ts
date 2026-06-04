@@ -430,6 +430,7 @@ export const ModelName = {
   PlatformFeaturedShopsSnapshot: 'PlatformFeaturedShopsSnapshot',
   PlatformPopularListingOrderSnapshot: 'PlatformPopularListingOrderSnapshot',
   PlatformStoreTagsSnapshot: 'PlatformStoreTagsSnapshot',
+  AdminNexusRegistrationDates: 'AdminNexusRegistrationDates',
   StorefrontViewEvent: 'StorefrontViewEvent',
   Comment: 'Comment'
 } as const
@@ -447,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "storefrontViewEvent" | "comment"
+    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3855,6 +3856,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminNexusRegistrationDates: {
+      payload: Prisma.$AdminNexusRegistrationDatesPayload<ExtArgs>
+      fields: Prisma.AdminNexusRegistrationDatesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminNexusRegistrationDatesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminNexusRegistrationDatesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminNexusRegistrationDatesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminNexusRegistrationDatesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>
+        }
+        findMany: {
+          args: Prisma.AdminNexusRegistrationDatesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>[]
+        }
+        create: {
+          args: Prisma.AdminNexusRegistrationDatesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>
+        }
+        createMany: {
+          args: Prisma.AdminNexusRegistrationDatesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminNexusRegistrationDatesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminNexusRegistrationDatesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>
+        }
+        update: {
+          args: Prisma.AdminNexusRegistrationDatesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminNexusRegistrationDatesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminNexusRegistrationDatesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminNexusRegistrationDatesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminNexusRegistrationDatesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNexusRegistrationDatesPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminNexusRegistrationDatesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminNexusRegistrationDates>
+        }
+        groupBy: {
+          args: Prisma.AdminNexusRegistrationDatesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminNexusRegistrationDatesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminNexusRegistrationDatesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminNexusRegistrationDatesCountAggregateOutputType> | number
+        }
+      }
+    }
     StorefrontViewEvent: {
       payload: Prisma.$StorefrontViewEventPayload<ExtArgs>
       fields: Prisma.StorefrontViewEventFieldRefs
@@ -4776,6 +4851,15 @@ export const PlatformStoreTagsSnapshotScalarFieldEnum = {
 export type PlatformStoreTagsSnapshotScalarFieldEnum = (typeof PlatformStoreTagsSnapshotScalarFieldEnum)[keyof typeof PlatformStoreTagsSnapshotScalarFieldEnum]
 
 
+export const AdminNexusRegistrationDatesScalarFieldEnum = {
+  id: 'id',
+  datesByCode: 'datesByCode',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminNexusRegistrationDatesScalarFieldEnum = (typeof AdminNexusRegistrationDatesScalarFieldEnum)[keyof typeof AdminNexusRegistrationDatesScalarFieldEnum]
+
+
 export const StorefrontViewEventScalarFieldEnum = {
   id: 'id',
   kind: 'kind',
@@ -5374,6 +5458,7 @@ export type GlobalOmitConfig = {
   platformFeaturedShopsSnapshot?: Prisma.PlatformFeaturedShopsSnapshotOmit
   platformPopularListingOrderSnapshot?: Prisma.PlatformPopularListingOrderSnapshotOmit
   platformStoreTagsSnapshot?: Prisma.PlatformStoreTagsSnapshotOmit
+  adminNexusRegistrationDates?: Prisma.AdminNexusRegistrationDatesOmit
   storefrontViewEvent?: Prisma.StorefrontViewEventOmit
   comment?: Prisma.CommentOmit
 }

@@ -1195,6 +1195,18 @@ model PlatformStoreTagsSnapshot {
   computedAt DateTime
 }
 
+/**
+ * Singleton (`id` = `default`): admin-entered sales-tax registration dates for Nexus planning.
+ * `datesByCode` JSON maps jurisdiction code → ISO date `YYYY-MM-DD`.
+ */
+model AdminNexusRegistrationDates {
+  id String @id @default("default")
+
+  datesByCode Json @default("{}")
+
+  updatedAt DateTime @updatedAt
+}
+
 enum StorefrontViewTargetKind {
   product
   shop

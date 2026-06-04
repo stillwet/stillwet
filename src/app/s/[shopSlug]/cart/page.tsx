@@ -18,7 +18,7 @@ export default async function ShopTenantCartPage({ params }: Props) {
     <StoreDocumentPanel
       backHref={back}
       backLabel="Continue shopping"
-      title="Cart & checkout"
+      title="Cart & Checkout"
     >
       {state.lines.length === 0 ? (
         <p className="text-sm text-zinc-500">

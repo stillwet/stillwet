@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CopyablePrintifyId } from "@/components/admin/CopyablePrintifyId";
-import {
-  PrintifyCatalogPublishToggleForm,
-  PrintifyCatalogResyncForm,
-} from "@/components/admin/PrintifyInventoryCatalogActionForms";
+import { PrintifyCatalogResyncForm } from "@/components/admin/PrintifyInventoryCatalogActionForms";
 import { ADMIN_BACKEND_BASE_PATH } from "@/lib/admin-dashboard-urls";
 
 export type PrintifyCatalogTableRow = {
@@ -115,7 +112,6 @@ export function PrintifyCatalogSortableTable({ rows }: { rows: PrintifyCatalogTa
               align="center"
             />
             <th className="p-2 text-center font-medium whitespace-nowrap">Resync</th>
-            <th className="p-2 text-center font-medium whitespace-nowrap">Toggle published</th>
           </tr>
         </thead>
         <tbody className="text-zinc-400">
@@ -174,9 +170,6 @@ export function PrintifyCatalogSortableTable({ rows }: { rows: PrintifyCatalogTa
                 <td className="p-2 text-center align-middle">{updatedCell}</td>
                 <td className="p-2 text-center align-middle whitespace-nowrap">
                   <PrintifyCatalogResyncForm printifyProductId={p.printifyId} />
-                </td>
-                <td className="p-2 text-center align-middle whitespace-nowrap">
-                  <PrintifyCatalogPublishToggleForm printifyProductId={p.printifyId} />
                 </td>
               </tr>
             );

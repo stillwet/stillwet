@@ -70,8 +70,7 @@ function buildDashboardMainTabsProps(
   const catalogGroups: ShopSetupCatalogGroup[] = [];
   const draftListingRequestPrefill = null;
 
-  const showDemoPurchaseButton =
-    !isPlatform && shopDemoPurchaseFeatureEnabled() && adminLoggedIn;
+  const showDemoPurchaseButton = !isPlatform && shopDemoPurchaseFeatureEnabled() && adminLoggedIn;
   const mockListingFeeCheckout = !isPlatform && isMockCheckoutEnabled();
 
   return {

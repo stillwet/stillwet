@@ -1,13 +1,29 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { simulateShopDemoPurchase } from "@/actions/dashboard-demo-order";
+import { useEffect, useState } from "react";
+import {
+  shopDemoPurchaseButtonVisible,
+  simulateShopDemoPurchase,
+} from "@/actions/dashboard-demo-order";
 
 export function DemoShopPurchaseButton() {
   const router = useRouter();
+  const [allowed, setAllowed] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void shopDemoPurchaseButtonVisible().then((visible) => {
+      if (!cancelled) setAllowed(visible);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (allowed !== true) return null;
 
   return (
     <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/40 px-3 py-2">

@@ -1,4 +1,10 @@
+"use client";
+
+import { useActionState, useEffect, useRef } from "react";
 import { dashboardSupportSendMessage } from "@/actions/dashboard-support";
+import {
+  dashboardSupportSendInitialState,
+} from "@/actions/dashboard-support-state";
 import { SupportThreadResolvedMarkerRow } from "@/components/SupportThreadResolvedMarkerRow";
 import { formatSupportMessageWhen } from "@/lib/format-support-message-when";
 import { mergeSupportChatTimeline } from "@/lib/support-chat-timeline";
@@ -14,9 +20,21 @@ export function DashboardSupportChatPanel(props: {
   messages: DashboardSupportMessageRow[];
   /** When set, a subtle “Inquiry marked resolved” line is merged into the timeline (same as admin view). */
   resolvedAtIso?: string | null;
+  onMessageSent?: () => void;
 }) {
-  const { messages, resolvedAtIso = null } = props;
+  const { messages, resolvedAtIso = null, onMessageSent } = props;
   const timeline = mergeSupportChatTimeline(messages, resolvedAtIso);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, pending] = useActionState(
+    dashboardSupportSendMessage,
+    dashboardSupportSendInitialState,
+  );
+
+  useEffect(() => {
+    if (state.sentAt == null) return;
+    formRef.current?.reset();
+    onMessageSent?.();
+  }, [state.sentAt, onMessageSent]);
 
   return (
     <div className="space-y-4">
@@ -58,7 +76,7 @@ export function DashboardSupportChatPanel(props: {
           </ul>
         )}
       </div>
-      <form action={dashboardSupportSendMessage} className="space-y-2">
+      <form ref={formRef} action={formAction} className="space-y-2">
         <label className="block text-xs font-medium text-zinc-500" htmlFor="support-body-dashboard">
           Your message
         </label>
@@ -69,14 +87,21 @@ export function DashboardSupportChatPanel(props: {
           minLength={1}
           maxLength={10000}
           rows={4}
+          disabled={pending}
           placeholder="Describe what you need help with…"
-          className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+          className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 disabled:opacity-60"
         />
+        {state.error ? (
+          <p role="alert" className="text-sm text-amber-200/90">
+            {state.error}
+          </p>
+        ) : null}
         <button
           type="submit"
-          className="rounded-lg border border-zinc-600 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800"
+          disabled={pending}
+          className="rounded-lg border border-zinc-600 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800 disabled:opacity-60"
         >
-          Send message
+          {pending ? "Sending…" : "Send message"}
         </button>
       </form>
     </div>

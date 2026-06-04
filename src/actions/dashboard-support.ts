@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { revalidateAdminViews } from "@/lib/revalidate-admin-views";
 import { redirect } from "next/navigation";
+import type { DashboardSupportSendState } from "@/actions/dashboard-support-state";
 import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 import { SupportMessageAuthor } from "@/generated/prisma/enums";
@@ -15,7 +16,10 @@ function normalizeBody(raw: unknown): string | null {
   return s;
 }
 
-export async function dashboardSupportSendMessage(formData: FormData) {
+export async function dashboardSupportSendMessage(
+  _prev: DashboardSupportSendState,
+  formData: FormData,
+): Promise<DashboardSupportSendState> {
   const session = await getShopOwnerSession();
   if (!session.shopUserId) redirect("/dashboard/login");
 
@@ -26,7 +30,9 @@ export async function dashboardSupportSendMessage(formData: FormData) {
   if (!user) redirect("/dashboard/login");
 
   const body = normalizeBody(formData.get("body"));
-  if (!body) return;
+  if (!body) {
+    return { ok: false, error: "Enter a message.", sentAt: null };
+  }
 
   const thread = await prisma.supportThread.upsert({
     where: { shopId: user.shopId },
@@ -48,4 +54,5 @@ export async function dashboardSupportSendMessage(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidateAdminViews();
+  return { ok: true, error: null, sentAt: Date.now() };
 }

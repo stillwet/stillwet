@@ -11,7 +11,7 @@ const DRAWER_SEED: CartCheckoutState = {
   taxCents: null,
   estimatedTotalCents: null,
   estimatedSalesTaxRate: null,
-  tipAllowed: false,
+  stripeTaxBuyerFeeEnabled: false,
   buyerCheckoutDisabled: false,
 };
 
@@ -63,7 +63,7 @@ export function CartDrawer({
             id="cart-drawer-title"
             className="text-lg font-semibold tracking-tight text-zinc-50"
           >
-            Cart &amp; checkout
+            Cart &amp; Checkout
           </h2>
           <button
             type="button"

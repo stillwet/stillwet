@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
 import nextDynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
@@ -21,7 +21,6 @@ import {
   dashboardPayListingFee,
 } from "@/actions/dashboard-marketplace";
 import {
-  CREATOR_FREE_LISTINGS_MESSAGE_COUNT,
   isFounderUnlimitedFreeListingsShop,
   listingFeeCentsForOrdinal,
   listingFeeFreeSlotCap,
@@ -1185,7 +1184,16 @@ export function DashboardMainTabs(props: {
   } = props;
 
   const tabFetch = useDashboardTabFetch({ enabled: clientTabFetch, isPlatform });
+  const router = useRouter();
   const searchParams = useSearchParams();
+
+  const refreshSupportChat = useCallback(() => {
+    if (clientTabFetch) {
+      void tabFetch.loadTab("support", { force: true });
+      return;
+    }
+    router.refresh();
+  }, [clientTabFetch, tabFetch, router]);
 
   const afterListingSubmitted = useCallback(() => {
     const p = new URLSearchParams(dashboardQueryPreserve);
@@ -1804,17 +1812,6 @@ export function DashboardMainTabs(props: {
             title="In review & listing setup"
             titleClassName="text-zinc-500"
             badgeCount={groupedRequest.length}
-            blurb={
-              !isPlatform ? (
-                isFounderUnlimitedFreeListingsShop(shopSlug) ? (
-                  <>All your listings publish free.</>
-                ) : (
-                  <>Your first {CREATOR_FREE_LISTINGS_MESSAGE_COUNT} listings are free.</>
-                )
-              ) : (
-                <>Drafts, publication fees, and requests awaiting admin.</>
-              )
-            }
           >
             <ul className="mt-3 space-y-3">
               {groupedRequest.map((g) => (
@@ -2012,6 +2009,7 @@ export function DashboardMainTabs(props: {
             <DashboardSupportChatPanelLazy
               messages={effectiveSupportChat?.messages ?? []}
               resolvedAtIso={effectiveSupportChat?.resolvedAtIso ?? null}
+              onMessageSent={refreshSupportChat}
             />
           ) : null}
         </div>

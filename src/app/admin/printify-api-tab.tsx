@@ -67,12 +67,9 @@ export async function PrintifyApiTab({ hookBanner }: PrintifyApiTabProps = {}) {
         </p>
         <p className="mt-2 text-xs leading-relaxed text-amber-600/90">
           <strong className="font-medium text-amber-500/95">API / custom storefront:</strong> Do not use Printify’s
-          &quot;Publish&quot; button — it queues products forever. When a product is live here, use{" "}
-          <strong className="font-medium text-amber-500/95">Toggle published</strong> on the{" "}
-          <Link href={`${ADMIN_BACKEND_BASE_PATH}?tab=printify`} className="text-blue-400/90 underline-offset-2 hover:underline">
-            Printify items
-          </Link>{" "}
-          catalog. To unstick a stuck queue, disconnect a channel in Printify’s help:{" "}
+          &quot;Publish&quot; button — it queues products forever. When a listing goes live on StillWet, we call
+          Printify’s <code className="text-amber-400/90">publishing_succeeded</code> API automatically. To unstick a
+          stuck queue, disconnect a channel in Printify’s help:{" "}
           <a
             href="https://help.printify.com/hc/en-us/articles/4652212823697-How-can-I-disconnect-my-store-from-Printify"
             className="text-blue-400/90 underline-offset-2 hover:underline"

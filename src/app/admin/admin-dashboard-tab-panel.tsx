@@ -400,11 +400,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
   const pfyHook = typeof sp.pfyHook === "string" ? sp.pfyHook : undefined;
   const pfyHookReason = typeof sp.pfyHookReason === "string" ? sp.pfyHookReason : undefined;
   const pfyHookDetail = typeof sp.pfyHookDetail === "string" ? sp.pfyHookDetail : undefined;
-  const pub = typeof sp.pub === "string" ? sp.pub : undefined;
-  const pubKind = typeof sp.pubKind === "string" ? sp.pubKind : undefined;
-  const pubPid = typeof sp.pubPid === "string" ? sp.pubPid : undefined;
-  const pubReason = typeof sp.pubReason === "string" ? sp.pubReason : undefined;
-  const pubDetail = typeof sp.pubDetail === "string" ? sp.pubDetail : undefined;
   const r2Prune = typeof sp.r2Prune === "string" ? sp.r2Prune : undefined;
   const r2PruneReason =
     typeof sp.r2PruneReason === "string" ? sp.r2PruneReason : undefined;
@@ -439,30 +434,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                           return pfyHookReason ?? "Something went wrong.";
                         }
                       })(),
-          }
-        : undefined;
-
-  const printifyPublishNotice =
-    pub === "ok"
-      ? {
-          variant: "ok" as const,
-          kind: pubKind === "failed" ? ("failed" as const) : ("succeeded" as const),
-          productId: pubPid,
-        }
-      : pub === "err"
-        ? {
-            variant: "err" as const,
-            reason: pubReason,
-            productId: pubPid,
-            detail: pubDetail
-              ? (() => {
-                  try {
-                    return decodeURIComponent(pubDetail);
-                  } catch {
-                    return pubDetail;
-                  }
-                })()
-              : undefined,
           }
         : undefined;
 
@@ -881,7 +852,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
               listingSavedId={
                 saved === "product" ? listingQueryId : undefined
               }
-              publishNotice={printifyPublishNotice}
               r2PruneNotice={
                 r2Prune === "preview" && r2Listed !== undefined
                   ? {

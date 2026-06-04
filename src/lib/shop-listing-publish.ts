@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { revalidatePublicStorefront } from "@/lib/revalidate-public-storefront";
+import { ensurePrintifyPublishingSucceededWhenListingGoesLive } from "@/lib/shop-listing-printify-publish";
 import { syncListingProductWithPrintifyCatalog } from "@/lib/shop-listing-printify-product-sync";
 
 /**
@@ -29,6 +30,9 @@ export async function activateProductWhenShopListingGoesLive(
     where: { id: productId },
     data: { active: true },
   });
+
+  await ensurePrintifyPublishingSucceededWhenListingGoesLive(productId);
+
   revalidatePath(`/s/${shopSlug}`);
   revalidatePublicStorefront();
 }

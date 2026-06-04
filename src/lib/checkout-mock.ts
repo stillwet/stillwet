@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { OrderStatus } from "@/generated/prisma/enums";
+import { OrderStatus, OrderProceedsRouting } from "@/generated/prisma/enums";
 import { isStripeSecretConfigured } from "@/lib/stripe";
+import { splitCheckoutTipCents } from "@/lib/checkout-tip";
 
 /** Prefix for fake Stripe session ids when MOCK_CHECKOUT=1. */
 export const MOCK_SESSION_PREFIX = "mock_" as const;
@@ -105,6 +106,22 @@ export async function completeMockPaidOrder(
     });
     if ((updated?.count ?? 0) === 0) return;
     transitioned = true;
+
+    const merchandiseCents = order.lines.reduce(
+      (s, l) => s + l.unitPriceCents * l.quantity,
+      0,
+    );
+    const { shopTipCents } = splitCheckoutTipCents(order.tipCents);
+    const shopSalesIncrementCents =
+      order.proceedsRouting === OrderProceedsRouting.platform_inactivity_deactivated
+        ? 0
+        : merchandiseCents + shopTipCents;
+    if (order.shopId && shopSalesIncrementCents > 0) {
+      await tx.shop.update({
+        where: { id: order.shopId },
+        data: { totalSalesCents: { increment: shopSalesIncrementCents } },
+      });
+    }
   });
 
   if (transitioned) {

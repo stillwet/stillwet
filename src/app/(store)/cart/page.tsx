@@ -13,7 +13,7 @@ export default async function CartPage() {
     <StoreDocumentPanel
       backHref={SHOP_ALL_ROUTE}
       backLabel="Continue shopping"
-      title="Cart & checkout"
+      title="Cart & Checkout"
     >
       {state.lines.length === 0 ? (
         <p className="text-sm text-zinc-500">

@@ -269,6 +269,13 @@ export type PlatformPopularListingOrderSnapshot = Prisma.PlatformPopularListingO
  */
 export type PlatformStoreTagsSnapshot = Prisma.PlatformStoreTagsSnapshotModel
 /**
+ * Model AdminNexusRegistrationDates
+ * *
+ *  * Singleton (`id` = `default`): admin-entered sales-tax registration dates for Nexus planning.
+ *  * `datesByCode` JSON maps jurisdiction code → ISO date `YYYY-MM-DD`.
+ */
+export type AdminNexusRegistrationDates = Prisma.AdminNexusRegistrationDatesModel
+/**
  * Model StorefrontViewEvent
  * * Append-only PDP/shop views; rolled up into `Product`/`Shop` counters by daily maintenance.
  */

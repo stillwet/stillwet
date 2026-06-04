@@ -429,7 +429,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     <main className={DASHBOARD_MAIN_SHELL_CLASS}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-50">Shop dashboard</h1>
+          <h1 className="text-2xl font-semibold text-zinc-50">Shop Dashboard</h1>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
             <p className="text-sm text-zinc-500">{shop.displayName}</p>
             <form
@@ -438,7 +438,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             >
               <button
                 type="submit"
-                className="text-xs text-zinc-500 transition hover:text-zinc-300"
+                className="text-sm text-zinc-500 transition hover:text-zinc-300"
               >
                 Sign out
               </button>

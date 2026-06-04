@@ -21,11 +21,9 @@ import { AdminGoogleShoppingTabLoader } from "@/components/admin/AdminGoogleShop
 import { AdminShopWatchTabLoader } from "@/components/admin/AdminShopWatchTabLoader";
 import { AdminPromotionListsTabLoader } from "@/components/admin/AdminPromotionListsTabLoader";
 import { AdminPlatformSalesTabLoader } from "@/components/admin/AdminPlatformSalesTabLoader";
+import { AdminNexusPlanningTabLoader } from "@/components/admin/AdminNexusPlanningTabLoader";
 import { printifyHookBannerFromSearchParams } from "@/lib/admin-printify-hook-banner";
 import { PrintifyApiTab } from "./printify-api-tab";
-import {
-  AdminBackendNavCount,
-} from "@/components/admin/AdminBackendNavCountsClient";
 import {
   AdminMainEmptyDbBanner,
   AdminMainNavCount,
@@ -107,6 +105,7 @@ async function AdminDashboardPageBody({
     "promotion-lists",
     "shop-leaderboard",
     "sales",
+    "nexus-planning",
   ] as const;
   const backendTabLiterals = [
     "announcements",
@@ -301,13 +300,13 @@ async function AdminDashboardPageBody({
           {adminSection === "main" ? (
             <div className="space-y-2 pb-2 pl-0 pr-2 pt-2">
               <div>
-                <div className="flex flex-wrap items-center justify-start gap-1">
+                <div className="grid w-full grid-cols-6 gap-1">
                   <Link
                     href={`${basePath}?tab=requests`}
                     role="tab"
                     title="Count matches the Requests list (excludes approved listings that are already paid or in a free slot)."
                     aria-selected={inventoryTab === "requests"}
-                    className={`inline-flex min-h-10 shrink-0 items-center rounded-t-lg px-4 py-3 text-sm font-medium leading-none transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "requests"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -320,7 +319,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=custom-images`}
                     role="tab"
                     aria-selected={inventoryTab === "custom-images"}
-                    className={`inline-flex min-h-10 shrink-0 items-center rounded-t-lg px-4 py-3 text-sm font-medium leading-none transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "custom-images"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -333,7 +332,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=support`}
                     role="tab"
                     aria-selected={inventoryTab === "support"}
-                    className={`inline-flex min-h-10 shrink-0 items-center rounded-t-lg px-4 py-3 text-sm font-medium leading-none transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "support"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -346,7 +345,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=admin-inbox`}
                     role="tab"
                     aria-selected={inventoryTab === "admin-inbox"}
-                    className={`inline-flex min-h-10 shrink-0 items-center rounded-t-lg px-4 py-3 text-sm font-medium leading-none transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "admin-inbox"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -359,7 +358,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=bug-feedback`}
                     role="tab"
                     aria-selected={inventoryTab === "bug-feedback"}
-                    className={`inline-flex min-h-10 shrink-0 items-center rounded-t-lg px-4 py-3 text-sm font-medium leading-none transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "bug-feedback"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -368,15 +367,27 @@ async function AdminDashboardPageBody({
                     Bug/Feedback
                     <AdminMainNavCount field="bugFeedbackOpen" />
                   </Link>
+                  <Link
+                    href={`${basePath}?tab=nexus-planning`}
+                    role="tab"
+                    aria-selected={inventoryTab === "nexus-planning"}
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
+                      inventoryTab === "nexus-planning"
+                        ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                        : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+                    }`}
+                  >
+                    Nexus Planning
+                  </Link>
                 </div>
               </div>
               <div className="border-t border-zinc-800/80 pt-2">
-                <div className="flex flex-wrap gap-1">
+                <div className="grid w-full grid-cols-6 gap-1">
                   <Link
                     href={`${basePath}?tab=shop-watch`}
                     role="tab"
                     aria-selected={inventoryTab === "shop-watch"}
-                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "shop-watch"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -389,7 +400,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=beta-testers`}
                     role="tab"
                     aria-selected={inventoryTab === "beta-testers"}
-                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "beta-testers"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -401,7 +412,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=waived-shop-fees`}
                     role="tab"
                     aria-selected={inventoryTab === "waived-shop-fees"}
-                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "waived-shop-fees"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -414,7 +425,7 @@ async function AdminDashboardPageBody({
                     role="tab"
                     title="Count is paid merchant placements currently in their active window (Hot item, Featured shop home, Popular item, Front page)."
                     aria-selected={inventoryTab === "promotion-lists"}
-                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "promotion-lists"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -427,7 +438,7 @@ async function AdminDashboardPageBody({
                     href={`${basePath}?tab=shop-leaderboard`}
                     role="tab"
                     aria-selected={inventoryTab === "shop-leaderboard"}
-                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "shop-leaderboard"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -441,7 +452,7 @@ async function AdminDashboardPageBody({
                     role="tab"
                     title="Badge count is new platform sales in the last 24 hours: paid orders, publication fees, and paid promotions. The sales tab can filter by date separately."
                     aria-selected={inventoryTab === "sales"}
-                    className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "sales"
                         ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
                         : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
@@ -491,7 +502,6 @@ async function AdminDashboardPageBody({
             }`}
           >
             Admin list
-            <AdminBackendNavCount field="adminListCount" />
           </Link>
           <Link
             href={`${basePath}?tab=printify`}
@@ -504,7 +514,6 @@ async function AdminDashboardPageBody({
             }`}
           >
             Printify items
-            <AdminBackendNavCount field="printifyNavBadgeCount" />
           </Link>
           <Link
             href={`${basePath}?tab=flairs`}
@@ -544,7 +553,6 @@ async function AdminDashboardPageBody({
             }`}
           >
             Removed items
-            <AdminBackendNavCount field="removedListingCount" />
           </Link>
           <Link
             href={`${basePath}?tab=email-format`}
@@ -593,7 +601,6 @@ async function AdminDashboardPageBody({
             }`}
           >
             Tags
-            <AdminBackendNavCount field="tagsNavCount" />
           </Link>
           <Link
             href={`${basePath}?tab=printify-api`}
@@ -655,6 +662,10 @@ async function AdminDashboardPageBody({
           ) : adminSection === "main" && inventoryTab === "sales" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <AdminPlatformSalesTabLoader sp={sp} />
+            </Suspense>
+          ) : adminSection === "main" && inventoryTab === "nexus-planning" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminNexusPlanningTabLoader />
             </Suspense>
           ) : (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

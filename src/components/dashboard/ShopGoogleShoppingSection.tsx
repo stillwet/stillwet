@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   assignGoogleShoppingListings,
@@ -17,11 +17,17 @@ import { shopGoogleShoppingPackPurchaseLabel } from "@/lib/shop-google-shopping"
 import type { GoogleShoppingListingPicklistEntry } from "@/lib/shop-google-shopping-enrollment";
 
 const btnPack =
-  "inline-block rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100";
+  "block w-full rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-center text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100";
 const btnPackSelected =
-  "inline-block rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-[11px] font-medium text-zinc-100";
+  "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-center text-[11px] font-medium text-zinc-100";
 const btnChooseListings =
-  "inline-block rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100";
+  "inline-block rounded-md border border-blue-900/60 bg-blue-950/30 px-2.5 py-1 text-[11px] font-medium text-blue-200 transition-colors hover:border-blue-700/60 hover:bg-blue-950/50";
+
+function packLabelParts(label: string): { creditsLine: string; priceLine: string } {
+  const sep = label.indexOf(" — ");
+  if (sep === -1) return { creditsLine: label, priceLine: "" };
+  return { creditsLine: label.slice(0, sep), priceLine: label.slice(sep + 3) };
+}
 
 function GoogleShoppingListingPickerDialog(props: {
   titleId: string;
@@ -222,6 +228,9 @@ export function ShopGoogleShoppingSection(props: {
   const [result, setResult] = useState<DashboardGoogleShoppingActionResult | null>(null);
   const [payPanelPack, setPayPanelPack] = useState<GoogleShoppingCreditPack | null>(null);
   const [payPanelVisible, setPayPanelVisible] = useState(false);
+  const packsContainerRef = useRef<HTMLDivElement>(null);
+  const packsMeasureRef = useRef<HTMLUListElement>(null);
+  const [packsCompact, setPacksCompact] = useState(false);
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [picklistLoading, setPicklistLoading] = useState(false);
@@ -232,10 +241,31 @@ export function ShopGoogleShoppingSection(props: {
   const [assignBusy, setAssignBusy] = useState(false);
 
   const credits = googleShopping.creditsAvailable;
+  const hasCreditsAvailable = credits > 0;
+  const enrolledListings = googleShopping.enrolled;
+  const hasEnrolledListings = enrolledListings.length > 0;
 
   useEffect(() => {
     setPayPanelVisible(payPanelPack !== null);
   }, [payPanelPack]);
+
+  useEffect(() => {
+    const container = packsContainerRef.current;
+    const measure = packsMeasureRef.current;
+    if (!container || !measure) return;
+
+    const updateLayout = () => {
+      const available = container.clientWidth;
+      const needed = measure.scrollWidth;
+      setPacksCompact(needed > Math.max(0, available - 8));
+    };
+
+    updateLayout();
+    const ro = new ResizeObserver(updateLayout);
+    ro.observe(container);
+    ro.observe(measure);
+    return () => ro.disconnect();
+  }, [payPanelPack?.id]);
 
   // Close payment panel when credits refresh after purchase — do not reset listing picker.
   useEffect(() => {
@@ -308,6 +338,41 @@ export function ShopGoogleShoppingSection(props: {
     }
   }
 
+  const renderPackButtons = (compact: boolean, forMeasure = false) =>
+    GOOGLE_SHOPPING_CREDIT_PACKS.map((pack) => {
+      const selected = payPanelPack?.id === pack.id;
+      const { creditsLine, priceLine } = packLabelParts(pack.label);
+      const btnClass = compact
+        ? selected
+          ? "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-100"
+          : "block w-full rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100"
+        : selected
+          ? btnPackSelected
+          : btnPack;
+      return (
+        <li key={pack.id} className={forMeasure ? "shrink-0" : "min-w-0 flex-1"}>
+          <button
+            type="button"
+            className={btnClass}
+            onClick={() => {
+              setResult(null);
+              setPayPanelPack(pack);
+              setPayPanelVisible(true);
+            }}
+          >
+            {compact ? (
+              <>
+                <span className="block whitespace-nowrap">{creditsLine}</span>
+                {priceLine ? <span className="block whitespace-nowrap">{priceLine}</span> : null}
+              </>
+            ) : (
+              pack.label
+            )}
+          </button>
+        </li>
+      );
+    });
+
   return (
     <section className={className}>
       <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-300">
@@ -332,23 +397,18 @@ export function ShopGoogleShoppingSection(props: {
 
       <div className="mt-3">
         <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Credit packs</p>
-        <ul className="mt-1.5 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
-          {GOOGLE_SHOPPING_CREDIT_PACKS.map((pack) => (
-            <li key={pack.id}>
-              <button
-                type="button"
-                className={payPanelPack?.id === pack.id ? btnPackSelected : btnPack}
-                onClick={() => {
-                  setResult(null);
-                  setPayPanelPack(pack);
-                  setPayPanelVisible(true);
-                }}
-              >
-                {pack.label}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div ref={packsContainerRef} className="relative mt-1.5 w-full min-w-0">
+          <ul
+            ref={packsMeasureRef}
+            className="pointer-events-none invisible absolute left-0 top-0 flex h-0 w-max list-none flex-nowrap gap-1.5 overflow-hidden p-0"
+            aria-hidden
+          >
+            {renderPackButtons(false, true)}
+          </ul>
+          <ul className="flex w-full min-w-0 list-none flex-nowrap items-stretch gap-1.5 p-0">
+            {renderPackButtons(packsCompact)}
+          </ul>
+        </div>
       </div>
 
       {payPanelVisible && payPanelPack ? (
@@ -386,7 +446,7 @@ export function ShopGoogleShoppingSection(props: {
         </div>
       ) : null}
 
-      {credits > 0 ? (
+      {hasCreditsAvailable ? (
         <div className="mt-3">
           <button
             type="button"
@@ -403,13 +463,13 @@ export function ShopGoogleShoppingSection(props: {
         </div>
       ) : null}
 
-      {googleShopping.enrolled.length > 0 ? (
+      {hasEnrolledListings ? (
         <details className="group mt-4 rounded-xl border border-zinc-800 bg-zinc-950/25">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-[10px] font-medium uppercase tracking-wide text-zinc-500 hover:text-zinc-400 [&::-webkit-details-marker]:hidden">
             <span>
               Enrolled in Google Shopping
               <span className="ml-1.5 font-normal normal-case tabular-nums text-zinc-600">
-                ({googleShopping.enrolled.length})
+                ({enrolledListings.length})
               </span>
             </span>
             <span className="text-[10px] font-normal normal-case text-zinc-600 group-open:hidden">
@@ -418,7 +478,7 @@ export function ShopGoogleShoppingSection(props: {
           </summary>
           <div className="border-t border-zinc-800/80 px-3 pb-3 pt-2">
             <ul className="space-y-1">
-              {googleShopping.enrolled.map((row) => (
+              {enrolledListings.map((row) => (
                 <li
                   key={row.id}
                   className="flex items-center justify-between gap-2 rounded-md border border-zinc-800/80 bg-zinc-950/40 px-2 py-1.5 text-[11px]"
