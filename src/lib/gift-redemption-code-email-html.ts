@@ -5,6 +5,7 @@ import {
 } from "@/lib/email-template-placeholders";
 
 import { BRAND_MERCH_NAME } from "@/lib/site-brand";
+import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-html";
 
 export const GIFT_REDEMPTION_CODE_EMAIL_SUBJECT = `Your ${BRAND_MERCH_NAME} shop setup gift code`;
 
@@ -16,6 +17,7 @@ export const GIFT_REDEMPTION_CODE_HTML_TEMPLATE = `<!DOCTYPE html>
       <tr><td align="center">
         <table role="presentation" width="100%" style="max-width:560px;background:#18181b;border:1px solid #27272a;border-radius:12px;padding:24px 20px;">
           <tr><td>
+            ${SITE_EMAIL_LOGO_PLACEHOLDER}
             <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#fafafa;">Shop setup gift code</p>
             <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#a1a1aa;">
               Thanks for gifting a creator on ${BRAND_MERCH_NAME}. Send this one-time code to the creator off-platform.

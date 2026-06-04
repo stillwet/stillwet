@@ -2,6 +2,7 @@ import {
   SITE_EMAIL_ACTION_URL_PLACEHOLDER,
   replaceActionUrlInHtmlTemplate,
 } from "@/lib/email-template-placeholders";
+import { SITE_EMAIL_LOGO_PLACEHOLDER } from "@/lib/site-email-logo-html";
 
 /** Matches Resend payload `subject`. */
 export const SHOP_PASSWORD_RESET_EMAIL_SUBJECT = "Reset your shop dashboard password";
@@ -21,6 +22,7 @@ export const SHOP_PASSWORD_RESET_HTML_TEMPLATE = `<!DOCTYPE html>
       <tr><td align="center">
         <table role="presentation" width="100%" style="max-width:520px;background:#18181b;border:1px solid #27272a;border-radius:12px;padding:24px 20px;">
           <tr><td>
+            ${SITE_EMAIL_LOGO_PLACEHOLDER}
             <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#fafafa;">Reset your password</p>
             <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#a1a1aa;">
               You asked to reset your shop dashboard password. Click the button below to choose a new one.

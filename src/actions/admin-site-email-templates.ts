@@ -6,6 +6,31 @@ import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
 import { isSiteEmailTemplateKey } from "@/lib/site-email-template-keys";
 import { GIFT_SETUP_CODE_PLACEHOLDER, SITE_EMAIL_ACTION_URL_PLACEHOLDER } from "@/lib/email-template-placeholders";
+import {
+  getSiteEmailTemplatesProdSyncAvailability,
+  syncSiteEmailTemplatesToProduction,
+  type SiteEmailTemplatesProdSyncAvailability,
+  type SiteEmailTemplatesProdSyncResult,
+} from "@/lib/site-email-templates-prod-sync";
+
+export type { SiteEmailTemplatesProdSyncAvailability, SiteEmailTemplatesProdSyncResult };
+
+export async function adminGetSiteEmailTemplatesProdSyncAvailability(): Promise<SiteEmailTemplatesProdSyncAvailability> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) redirect("/admin/login");
+  return getSiteEmailTemplatesProdSyncAvailability();
+}
+
+export async function adminSyncSiteEmailTemplatesToProduction(): Promise<SiteEmailTemplatesProdSyncResult> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) redirect("/admin/login");
+
+  const result = await syncSiteEmailTemplatesToProduction();
+  if (result.ok) {
+    revalidateAdminViews();
+  }
+  return result;
+}
 
 const SUBJECT_MAX = 500;
 const HTML_MAX = 200_000;

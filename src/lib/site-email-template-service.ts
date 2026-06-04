@@ -31,6 +31,7 @@ import {
   renderShopInactivityWarningHtml,
 } from "@/lib/shop-inactivity-warning-email-html";
 import type { SiteEmailTemplateKey } from "@/lib/site-email-template-keys";
+import { applySiteEmailLogoToHtml, normalizeEmailLogoForAdminPreview } from "@/lib/site-email-logo-html";
 
 export type AdminEmailFormatEntry = {
   key: SiteEmailTemplateKey;
@@ -167,12 +168,30 @@ export async function loadSiteEmailSendPreviewsForAdmin(
     resolveShopInactivityWarningEmail(samples.shop_inactivity_deactivation_warning),
   ]);
   return {
-    shop_dashboard_email_verification: verification,
-    shop_dashboard_password_reset: password,
-    shop_dashboard_account_deletion_confirm: deletion,
-    shop_dashboard_two_factor_confirm_device: twoFactor,
-    gift_creator_redemption_codes: giftCodes,
-    shop_inactivity_deactivation_warning: inactivityWarning,
+    shop_dashboard_email_verification: {
+      ...verification,
+      html: normalizeEmailLogoForAdminPreview(verification.html),
+    },
+    shop_dashboard_password_reset: {
+      ...password,
+      html: normalizeEmailLogoForAdminPreview(password.html),
+    },
+    shop_dashboard_account_deletion_confirm: {
+      ...deletion,
+      html: normalizeEmailLogoForAdminPreview(deletion.html),
+    },
+    shop_dashboard_two_factor_confirm_device: {
+      ...twoFactor,
+      html: normalizeEmailLogoForAdminPreview(twoFactor.html),
+    },
+    gift_creator_redemption_codes: {
+      ...giftCodes,
+      html: normalizeEmailLogoForAdminPreview(giftCodes.html),
+    },
+    shop_inactivity_deactivation_warning: {
+      ...inactivityWarning,
+      html: normalizeEmailLogoForAdminPreview(inactivityWarning.html),
+    },
   };
 }
 
@@ -187,7 +206,7 @@ export async function resolveShopEmailVerificationEmail(verifyUrl: string): Prom
   const subject = row?.subject?.trim() ? row.subject : SHOP_EMAIL_VERIFICATION_SUBJECT;
   return {
     subject,
-    html: renderShopEmailVerificationHtml(htmlTpl, verifyUrl),
+    html: applySiteEmailLogoToHtml(renderShopEmailVerificationHtml(htmlTpl, verifyUrl)),
   };
 }
 
@@ -202,7 +221,7 @@ export async function resolveShopPasswordResetEmail(resetUrl: string): Promise<{
   const subject = row?.subject?.trim() ? row.subject : SHOP_PASSWORD_RESET_EMAIL_SUBJECT;
   return {
     subject,
-    html: renderShopPasswordResetEmailHtml(htmlTpl, resetUrl),
+    html: applySiteEmailLogoToHtml(renderShopPasswordResetEmailHtml(htmlTpl, resetUrl)),
   };
 }
 
@@ -217,7 +236,7 @@ export async function resolveShopAccountDeletionConfirmEmail(confirmUrl: string)
   const subject = row?.subject?.trim() ? row.subject : SHOP_ACCOUNT_DELETION_SUBJECT;
   return {
     subject,
-    html: renderShopAccountDeletionConfirmHtml(htmlTpl, confirmUrl),
+    html: applySiteEmailLogoToHtml(renderShopAccountDeletionConfirmHtml(htmlTpl, confirmUrl)),
   };
 }
 
@@ -236,7 +255,7 @@ export async function resolveShopTwoFactorConfirmDeviceEmail(confirmUrl: string)
     : SHOP_TWO_FACTOR_CONFIRM_DEVICE_SUBJECT;
   return {
     subject,
-    html: renderShopTwoFactorConfirmDeviceHtml(htmlTpl, confirmUrl),
+    html: applySiteEmailLogoToHtml(renderShopTwoFactorConfirmDeviceHtml(htmlTpl, confirmUrl)),
   };
 }
 
@@ -250,7 +269,7 @@ export async function resolveGiftRedemptionCodeEmail(
   const subject = row?.subject?.trim() ? row.subject : GIFT_REDEMPTION_CODE_EMAIL_SUBJECT;
   return {
     subject,
-    html: renderGiftRedemptionCodeEmailHtml(htmlTpl, vars),
+    html: applySiteEmailLogoToHtml(renderGiftRedemptionCodeEmailHtml(htmlTpl, vars)),
   };
 }
 
@@ -265,7 +284,7 @@ export async function resolveShopInactivityWarningEmail(loginUrl: string): Promi
   const subject = row?.subject?.trim() ? row.subject : SHOP_INACTIVITY_WARNING_EMAIL_SUBJECT;
   return {
     subject,
-    html: renderShopInactivityWarningHtml(htmlTpl, loginUrl),
+    html: applySiteEmailLogoToHtml(renderShopInactivityWarningHtml(htmlTpl, loginUrl)),
   };
 }
 

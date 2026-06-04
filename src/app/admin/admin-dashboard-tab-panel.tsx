@@ -9,6 +9,7 @@ import {
   buildAdminEmailFormatEntries,
   loadSiteEmailSendPreviewsForAdmin,
 } from "@/lib/site-email-template-service";
+import { getSiteEmailTemplatesProdSyncAvailability } from "@/lib/site-email-templates-prod-sync";
 import { PrintifyApiTab } from "./printify-api-tab";
 import { PrintifyInventoryTab } from "./printify-inventory-tab";
 import { loadAdminShopLeaderboardRows } from "@/lib/admin-shop-leaderboard-load";
@@ -242,6 +243,11 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
   const emailFormatSendPreviews =
     adminSection === "backend" && inventoryTab === "email-format"
       ? await loadSiteEmailSendPreviewsForAdmin(emailLinkOrigin())
+      : null;
+
+  const emailFormatProdSyncAvailability =
+    adminSection === "backend" && inventoryTab === "email-format"
+      ? getSiteEmailTemplatesProdSyncAvailability()
       : null;
 
   const summaryEmailSettingsDto =
@@ -885,6 +891,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
               entries={emailFormatTabEntries}
               sendPreviewsByKey={emailFormatSendPreviews}
               summaryEmail={summaryEmailSettingsDto}
+              prodSyncAvailability={emailFormatProdSyncAvailability}
             >
               <Suspense fallback={<AdminDigestEmailPreviewSkeleton />}>
                 <AdminDigestEmailPreviewLoader frequency={summaryEmailSettingsDto.frequency} />

@@ -4,13 +4,11 @@ import { useActionState, useEffect, useMemo, useRef, useState, type ReactNode, t
 import {
   adminResetSiteEmailTemplate,
   adminSaveSiteEmailTemplate,
+  adminSyncSiteEmailTemplatesToProduction,
   type AdminSaveSiteEmailTemplateResult,
+  type SiteEmailTemplatesProdSyncAvailability,
+  type SiteEmailTemplatesProdSyncResult,
 } from "@/actions/admin-site-email-templates";
-import {
-  replaceGiftCodePlaceholders,
-  replaceActionUrlInHtmlTemplate,
-  wrapEmailHtmlFragmentForPreview,
-} from "@/lib/email-template-placeholders";
 import type { AdminSummaryEmailSettingsDTO } from "@/lib/admin-summary-email-settings-dto";
 import type {
   AdminEmailFormatEntry,
@@ -27,13 +25,6 @@ type EmailFormatTemplateChoice = SiteEmailTemplateKey | typeof ADMIN_DIGEST_TEMP
 
 function isTemplateChoiceDigest(c: EmailFormatTemplateChoice): boolean {
   return c === ADMIN_DIGEST_TEMPLATE_CHOICE;
-}
-
-function previewHtmlDocument(renderedBody: string): string {
-  if (/^\s*<!doctype/i.test(renderedBody)) {
-    return renderedBody;
-  }
-  return wrapEmailHtmlFragmentForPreview(renderedBody);
 }
 
 function escapeHtmlAttribute(value: string): string {
@@ -310,11 +301,74 @@ function EmailHtmlFormatToolbar(props: {
   );
 }
 
+function useEmailTemplatesProdSync(availability: SiteEmailTemplatesProdSyncAvailability | null) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [result, setResult] = useState<SiteEmailTemplatesProdSyncResult | null>(null);
+
+  const syncButton =
+    availability === null ? null : (
+      <button
+        type="button"
+        disabled={!availability.canSync || pending}
+        title={!availability.canSync ? availability.message : undefined}
+        className="rounded-lg border border-amber-800/80 bg-amber-950/40 px-4 py-2 text-sm font-medium text-amber-100/95 hover:bg-amber-900/50 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={async () => {
+          if (!availability.canSync) return;
+          const targetLabel = availability.targetHost ?? "production";
+          if (
+            !window.confirm(
+              `Copy all saved email templates from this admin database to production (${targetLabel})? Existing production rows for the same keys will be overwritten.`,
+            )
+          ) {
+            return;
+          }
+          setPending(true);
+          setResult(null);
+          const syncResult = await adminSyncSiteEmailTemplatesToProduction();
+          setPending(false);
+          setResult(syncResult);
+          if (syncResult.ok) {
+            void router.refresh();
+          }
+        }}
+      >
+        {pending ? "Syncing…" : "Resync templates to production"}
+      </button>
+    );
+
+  const syncFeedback =
+    availability === null ? null : (
+      <>
+        {!availability.canSync && !result ? (
+          <p className="text-xs text-zinc-500">{availability.message}</p>
+        ) : null}
+        {result && !result.ok ? (
+          <p role="alert" className="text-sm text-rose-200/90">
+            {result.error}
+          </p>
+        ) : null}
+        {result?.ok ? (
+          <p className="text-sm text-emerald-200/90">
+            Synced {result.upserted} template{result.upserted === 1 ? "" : "s"} to {result.targetHost}:{" "}
+            {result.keys.join(", ")}
+            {result.missing.length > 0
+              ? `. Not on source (unchanged on prod): ${result.missing.join(", ")}`
+              : ""}
+          </p>
+        ) : null}
+      </>
+    );
+
+  return { syncButton, syncFeedback };
+}
+
 export function AdminEmailFormatTab(props: {
   entries: AdminEmailFormatEntry[];
   /** Saved DB template rendered through the same resolver as Resend (not the textarea). */
   sendPreviewsByKey: Record<SiteEmailTemplateKey, SiteEmailSendPreview> | null;
   summaryEmail: AdminSummaryEmailSettingsDTO;
+  prodSyncAvailability: SiteEmailTemplatesProdSyncAvailability | null;
   children?: ReactNode;
 }) {
   const router = useRouter();
@@ -356,19 +410,8 @@ export function AdminEmailFormatTab(props: {
     }
   }, [savePending, saveState, router]);
 
-  const editorPreviewHtml = useMemo(() => {
-    if (!entry) return "";
-    const html =
-      entry.key === "gift_creator_redemption_codes"
-        ? replaceGiftCodePlaceholders(body, { setupCode: "SETU-PABC-1234-DEMO" })
-        : replaceActionUrlInHtmlTemplate(
-            body,
-            entry.sampleActionUrl ?? "https://example.com/preview",
-          );
-    return previewHtmlDocument(html);
-  }, [body, entry]);
-
   const savedSendPreview = entry && props.sendPreviewsByKey ? props.sendPreviewsByKey[entry.key] : null;
+  const { syncButton, syncFeedback } = useEmailTemplatesProdSync(props.prodSyncAvailability);
 
   if (props.entries.length === 0) {
     return (
@@ -433,15 +476,6 @@ export function AdminEmailFormatTab(props: {
       <div className="space-y-6">
       <div>
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Shop email templates</h2>
-        <p className="mt-1 max-w-2xl text-xs text-zinc-600">
-          Edit subjects and bodies stored in the database. Action templates must keep{" "}
-          <code className="font-mono text-zinc-400">{"{{ACTION_URL}}"}</code> where the signed link should go.
-          Gift code templates use <code className="font-mono text-zinc-400">{"{{SETUP_CODE}}"}</code> only.
-          The editor preview includes <strong className="font-normal text-zinc-400">unsaved</strong> changes; only
-          after Save does Resend use the same HTML as &quot;Saved template (sends now)&quot;. Templates are read from
-          the database this admin host uses (local vs production can differ). Use the Template menu to open the{" "}
-          <span className="text-zinc-500">admin digest</span> preview.
-        </p>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
@@ -461,8 +495,6 @@ export function AdminEmailFormatTab(props: {
           </select>
         </label>
       </div>
-
-      <p className="text-xs text-zinc-500">{entry.description}</p>
 
       {saveState && !saveState.ok ? (
         <p
@@ -500,7 +532,7 @@ export function AdminEmailFormatTab(props: {
             className="mt-1 block w-full max-w-[996px] rounded border border-zinc-700 bg-zinc-900 px-2 py-2 font-mono text-[13px] leading-relaxed text-zinc-100"
           />
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="submit"
             disabled={savePending}
@@ -519,7 +551,9 @@ export function AdminEmailFormatTab(props: {
           >
             Reset fields to site default (not saved)
           </button>
+          {syncButton}
         </div>
+        {syncFeedback ? <div className="space-y-1">{syncFeedback}</div> : null}
       </form>
 
       <div className="border-t border-zinc-800 pt-4">
@@ -544,37 +578,23 @@ export function AdminEmailFormatTab(props: {
         </button>
       </div>
 
-      <div className="space-y-6 border-t border-zinc-800 pt-6">
-        {savedSendPreview ? (
-          <div>
-            <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-              Saved template (sends now)
-            </h3>
-            <p className="mt-1 text-[11px] text-zinc-600">
-              Same resolver as Resend. Subject:{" "}
-              <span className="text-zinc-400">{savedSendPreview.subject}</span>
-            </p>
-            <iframe
-              title="Saved email template preview (send path)"
-              sandbox=""
-              className="mt-3 h-[min(50vh,420px)] w-full max-w-[996px] rounded-lg border border-zinc-700 bg-[#0a0a0a] shadow-lg"
-              srcDoc={savedSendPreview.html}
-            />
-          </div>
-        ) : null}
-        <div>
-          <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Editor preview</h3>
+      {savedSendPreview ? (
+        <div className="border-t border-zinc-800 pt-6">
+          <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Saved template (sends now)
+          </h3>
           <p className="mt-1 text-[11px] text-zinc-600">
-            Live textarea (may differ until you save). Fragments get a light wrapper; full HTML documents render as-is.
+            Same resolver as Resend. Subject:{" "}
+            <span className="text-zinc-400">{savedSendPreview.subject}</span>
           </p>
           <iframe
-            title="Email HTML editor preview"
-            sandbox=""
+            title="Saved email template preview (send path)"
+            sandbox="allow-same-origin"
             className="mt-3 h-[min(50vh,420px)] w-full max-w-[996px] rounded-lg border border-zinc-700 bg-[#0a0a0a] shadow-lg"
-            srcDoc={editorPreviewHtml}
+            srcDoc={savedSendPreview.html}
           />
         </div>
-      </div>
+      ) : null}
       </div>
     </section>
   );
