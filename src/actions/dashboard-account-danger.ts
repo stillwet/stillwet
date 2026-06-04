@@ -14,6 +14,7 @@ import {
   purgeShopUploadedMediaFromR2,
   restoreListingsAfterAccountDeletionRequestCancel,
 } from "@/lib/shop-account-deletion-request-effects";
+import { accountDeletionPendingInboxMessageForDev } from "@/lib/shop-account-deletion-copy";
 
 async function requireShopOwnerRow() {
   const session = await getShopOwnerSession();
@@ -92,14 +93,7 @@ export async function dashboardRequestAccountDeletion(): Promise<AccountDangerRe
   revalidatePath(`/s/${user.shop.slug}`);
   revalidatePath("/shops");
 
-  let message =
-    "Check your inbox for the confirmation link (expires in 24 hours).\nYour shop is hidden from browse in the meantime.";
-  if (process.env.NODE_ENV === "development" && !process.env.RESEND_API_KEY?.trim()) {
-    message +=
-      " Local dev: RESEND_API_KEY is not set, so no email was sent. In the terminal running `next dev`, find the line starting with `[shop-account-deletion]` for the confirmation URL, or use “Dev: confirm deletion email” in this panel.";
-  }
-
-  return { ok: true, message };
+  return { ok: true, message: accountDeletionPendingInboxMessageForDev() };
 }
 
 /** Send a fresh account-deletion confirmation email while a request is pending and email is not yet confirmed. */
@@ -120,11 +114,7 @@ export async function dashboardResendAccountDeletionConfirmationEmail(): Promise
   }
 
   revalidatePath("/dashboard");
-  return {
-    ok: true,
-    message:
-      "Another confirmation email was sent. If nothing arrives in a few minutes, check spam and Resend → Emails / Logs. If errors mention the wrong domain, remove a stale SHOP_ACCOUNT_DELETION_EMAIL_FROM from Vercel or set it to the same verified address as SHOP_PASSWORD_RESET_EMAIL_FROM.",
-  };
+  return { ok: true, message: accountDeletionPendingInboxMessageForDev() };
 }
 
 /**
