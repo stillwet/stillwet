@@ -22,7 +22,7 @@ export type SimulateShopDemoPurchaseResult = { ok: true } | { ok: false; error: 
 export async function shopDemoPurchaseButtonVisible(): Promise<boolean> {
   if (!shopDemoPurchaseFeatureEnabled()) return false;
   const admin = await getAdminSessionReadonly();
-  return admin.isAdmin;
+  return admin.isAdmin === true;
 }
 
 /**

@@ -536,7 +536,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           shopId={shop.id}
           shopSlug={shop.slug}
           isPlatform={isPlatform}
-          adminLoggedIn={adminSession.isAdmin}
+          adminLoggedIn={adminSession.isAdmin === true}
           scopes={scopes}
           dashTab={dashTab}
           dashboardQueryPreserve={dashboardQueryPreserve}
