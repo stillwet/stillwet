@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
 import { isSiteEmailTemplateKey } from "@/lib/site-email-template-keys";
-import { GIFT_SETUP_CODE_PLACEHOLDER, SITE_EMAIL_ACTION_URL_PLACEHOLDER } from "@/lib/email-template-placeholders";
+import {
+  GIFT_SETUP_CODE_PLACEHOLDER,
+  SITE_EMAIL_ACTION_URL_PLACEHOLDER,
+  SITE_EMAIL_CHANGED_AT_UTC_PLACEHOLDER,
+  SITE_EMAIL_SECURITY_ALERT_MAILTO_BLOCK_PLACEHOLDER,
+} from "@/lib/email-template-placeholders";
 import {
   getSiteEmailTemplatesProdSyncAvailability,
   syncSiteEmailTemplatesToProduction,
@@ -75,6 +80,25 @@ export async function adminSaveSiteEmailTemplate(
       ok: false,
       error:
         "HTML must include {{ACTION_URL}} wherever the signed action link should appear when sending.",
+    };
+  }
+  if (
+    keyRaw === "shop_dashboard_password_changed" &&
+    !body.includes(SITE_EMAIL_CHANGED_AT_UTC_PLACEHOLDER)
+  ) {
+    return {
+      ok: false,
+      error: "Password-changed email HTML must include {{CHANGED_AT_UTC}}.",
+    };
+  }
+  if (
+    keyRaw === "shop_dashboard_password_changed" &&
+    !body.includes(SITE_EMAIL_SECURITY_ALERT_MAILTO_BLOCK_PLACEHOLDER)
+  ) {
+    return {
+      ok: false,
+      error:
+        "Password-changed email HTML must include {{SECURITY_ALERT_MAILTO_BLOCK}} (replaced at send time with optional alert mailto).",
     };
   }
   if (

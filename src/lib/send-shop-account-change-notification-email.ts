@@ -1,6 +1,8 @@
 import { emailLinkOrigin } from "@/lib/public-app-url";
 import { dashQueryParamForTabId } from "@/lib/dashboard-dash-query";
-import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { postResendTransactionalEmail, resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { resolveShopPasswordChangedNotificationEmail } from "@/lib/site-email-template-service";
+import { shopDashboardSupportUrl } from "@/lib/shop-password-changed-email-html";
 
 type SendResult = { ok: true } | { ok: false; error: string };
 
@@ -77,19 +79,55 @@ function wrapEmail(innerTitle: string, innerBody: string): string {
 export async function sendShopPasswordChangedNotificationEmail(
   toEmail: string,
 ): Promise<SendResult> {
-  const when = new Date().toUTCString();
-  const body = `
-            <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#a1a1aa;">
-              The password for your shop dashboard account was just changed (${when} UTC).
-            </p>
-            ${securityFooterHtml()}`;
-  const html = wrapEmail("Your dashboard password was changed", body);
-  return sendTransactionalShopEmail({
-    toEmail,
-    subject: "Your shop dashboard password was changed",
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const fromResult = resolveShopTransactionalEmailFrom([
+    process.env.SHOP_PASSWORD_CHANGED_EMAIL_FROM,
+    process.env.SHOP_PASSWORD_RESET_EMAIL_FROM,
+  ]);
+  if (!fromResult.ok) {
+    return { ok: false, error: fromResult.error };
+  }
+
+  const changedAtUtc = `${new Date().toUTCString()} UTC`;
+  const supportUrl = shopDashboardSupportUrl();
+
+  if (!apiKey) {
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        `[shop-password-changed-notify] (no RESEND_API_KEY) would send to ${toEmail} support=${supportUrl}`,
+      );
+      return { ok: true };
+    }
+    console.error(`[shop-password-changed-notify] RESEND_API_KEY missing; notification not sent to ${toEmail}`);
+    return {
+      ok: false,
+      error: "Transactional email is not configured (RESEND_API_KEY).",
+    };
+  }
+
+  const { subject, html } = await resolveShopPasswordChangedNotificationEmail({
+    changedAtUtc,
+    supportUrl,
+  });
+
+  const sent = await postResendTransactionalEmail({
+    apiKey,
+    from: fromResult.from,
+    to: [toEmail],
+    subject,
     html,
     logTag: "shop-password-changed-notify",
   });
+
+  if (!sent.ok) {
+    console.error("[shop-password-changed-notify] Resend HTTP error", {
+      status: sent.status,
+      body: sent.body.slice(0, 2000),
+    });
+    return { ok: false, error: resendUserFacingError(sent.status, sent.body) };
+  }
+
+  return { ok: true };
 }
 
 /**

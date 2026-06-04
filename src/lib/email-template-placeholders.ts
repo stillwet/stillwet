@@ -1,12 +1,37 @@
 /** Placeholder for the signed action URL in HTML shop emails (admin-editable templates). */
 export const SITE_EMAIL_ACTION_URL_PLACEHOLDER = "{{ACTION_URL}}";
 
+/** UTC timestamp line in security notification emails (e.g. password changed). */
+export const SITE_EMAIL_CHANGED_AT_UTC_PLACEHOLDER = "{{CHANGED_AT_UTC}}";
+
+/** Replaced at send time with optional mailto / fallback support copy (password & email change notices). */
+export const SITE_EMAIL_SECURITY_ALERT_MAILTO_BLOCK_PLACEHOLDER = "{{SECURITY_ALERT_MAILTO_BLOCK}}";
+
 export function replaceActionUrlInHtmlTemplate(template: string, actionUrl: string): string {
   const escaped = actionUrl
     .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;");
   return template.split(SITE_EMAIL_ACTION_URL_PLACEHOLDER).join(escaped);
+}
+
+function escapeHtmlText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function replaceChangedAtUtcInHtmlTemplate(template: string, changedAtUtc: string): string {
+  return template.split(SITE_EMAIL_CHANGED_AT_UTC_PLACEHOLDER).join(escapeHtmlText(changedAtUtc));
+}
+
+export function replaceSecurityAlertMailtoBlockInHtmlTemplate(
+  template: string,
+  blockHtml: string,
+): string {
+  return template.split(SITE_EMAIL_SECURITY_ALERT_MAILTO_BLOCK_PLACEHOLDER).join(blockHtml);
 }
 
 export const GIFT_SETUP_CODE_PLACEHOLDER = "{{SETUP_CODE}}";
@@ -21,14 +46,6 @@ export const GIFT_GOOGLE_SHOPPING_CREDITS_PLACEHOLDER = "{{GOOGLE_SHOPPING_CREDI
 export type GiftRedemptionEmailVars = {
   setupCode: string;
 };
-
-function escapeHtmlText(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 export function replaceGiftCodePlaceholders(
   template: string,
