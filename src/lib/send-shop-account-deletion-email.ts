@@ -4,7 +4,7 @@ import { resolveShopAccountDeletionConfirmEmail } from "@/lib/site-email-templat
 
 type SendResult = { ok: true } | { ok: false; error: string };
 
-function resendUserFacingError(status: number, body: string): string {
+function resendUserFacingError(status: number, body: string, from: string): string {
   let msg = "";
   try {
     const j = JSON.parse(body) as { message?: string };
@@ -14,10 +14,14 @@ function resendUserFacingError(status: number, body: string): string {
   } catch {
     if (body.trim()) msg = body.trim().slice(0, 280);
   }
+  const fromDomain = from.match(/@([^>\s]+)/)?.[1];
+  const fromHint = fromDomain
+    ? ` (From: ${fromDomain} — set SHOP_PASSWORD_RESET_EMAIL_FROM to a verified Resend domain, e.g. noreply@auto.stillwet.com)`
+    : "";
   if (msg) {
-    return `Email could not be sent (${status}): ${msg}`;
+    return `Email could not be sent (${status}): ${msg}${fromHint}`;
   }
-  return `Email could not be sent (HTTP ${status}). Check Vercel logs for [shop-account-deletion].`;
+  return `Email could not be sent (HTTP ${status}). Check Vercel logs for [shop-account-deletion].${fromHint}`;
 }
 
 export async function sendShopAccountDeletionConfirmEmail(
@@ -29,8 +33,8 @@ export async function sendShopAccountDeletionConfirmEmail(
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const fromResult = resolveShopTransactionalEmailFrom([
-    process.env.SHOP_ACCOUNT_DELETION_EMAIL_FROM,
     process.env.SHOP_PASSWORD_RESET_EMAIL_FROM,
+    process.env.SHOP_ACCOUNT_DELETION_EMAIL_FROM,
   ]);
   if (!fromResult.ok) {
     return { ok: false, error: fromResult.error };
@@ -70,7 +74,7 @@ export async function sendShopAccountDeletionConfirmEmail(
       from: sent.fromUsed,
       body: sent.body.slice(0, 2000),
     });
-    return { ok: false, error: resendUserFacingError(sent.status, sent.body) };
+    return { ok: false, error: resendUserFacingError(sent.status, sent.body, sent.fromUsed) };
   }
 
   let emailId = "";

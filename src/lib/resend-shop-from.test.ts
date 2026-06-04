@@ -3,9 +3,7 @@ import { describe, it } from "node:test";
 import { BRAND_MERCH_NAME, brandMerchEmailFrom } from "@/lib/site-brand";
 import {
   RESEND_DEV_FALLBACK_FROM,
-  isResendDomainNotVerifiedResponse,
   resolveShopTransactionalEmailFrom,
-  shopFromApexFallback,
 } from "@/lib/resend-shop-from";
 
 function withNodeEnv<T>(nodeEnv: "development" | "production" | "test", fn: () => T): T {
@@ -51,32 +49,5 @@ describe("resolveShopTransactionalEmailFrom", () => {
     if (r.ok) {
       assert.equal(r.from, verified);
     }
-  });
-});
-
-describe("shopFromApexFallback", () => {
-  it("maps auto.stillwet.com to stillwet.com", () => {
-    const from = `${BRAND_MERCH_NAME} <noreply@auto.stillwet.com>`;
-    assert.equal(
-      shopFromApexFallback(from),
-      `${BRAND_MERCH_NAME} <noreply@stillwet.com>`,
-    );
-  });
-
-  it("returns null for apex domains", () => {
-    assert.equal(shopFromApexFallback(`${BRAND_MERCH_NAME} <noreply@stillwet.com>`), null);
-  });
-});
-
-describe("isResendDomainNotVerifiedResponse", () => {
-  it("matches Resend 403 domain errors", () => {
-    assert.equal(
-      isResendDomainNotVerifiedResponse(
-        403,
-        '{"message":"The auto.stillwet.com domain is not verified."}',
-      ),
-      true,
-    );
-    assert.equal(isResendDomainNotVerifiedResponse(500, "domain is not verified"), false);
   });
 });

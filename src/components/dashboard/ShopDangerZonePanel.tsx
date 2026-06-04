@@ -74,19 +74,16 @@ export function ShopDangerZonePanel(props: {
       </h3>
 
       {msg ? (
-        <p
-          className={`mt-3 text-xs ${msg.tone === "ok" ? "text-amber-200/90" : "text-amber-300/90"}`}
-          role="status"
-        >
+        <p className="mt-3 whitespace-pre-line text-xs text-zinc-50" role="status">
           {msg.text}
         </p>
       ) : null}
 
-      {deletionPending ? (
-        <p className="mt-2 text-xs text-amber-200/85">
+      {deletionPending && (!msg || msg.tone !== "ok" || emailConfirmed) ? (
+        <p className="mt-2 whitespace-pre-line text-xs text-zinc-50">
           {emailConfirmed
             ? "Email confirmed. Listings and photos are cleared. At $0 Stripe balance, the next dashboard visit removes your account."
-            : "Shop hidden. Open the confirmation email link to clear media, then close the account when payouts settle."}
+            : "Check your inbox for the confirmation link (expires in 24 hours).\nYour shop is hidden from browse in the meantime."}
         </p>
       ) : null}
 
@@ -104,11 +101,11 @@ export function ShopDangerZonePanel(props: {
             </div>
         ) : (
           <div className="mt-2 space-y-3">
-            <p className="text-xs text-zinc-500">
-              {emailConfirmed
-                ? "Withdraw or wait for $0 Stripe balance; next dashboard load removes the shop."
-                : "Check your inbox for the confirmation link (24 hours)."}
-            </p>
+            {emailConfirmed ? (
+              <p className="text-xs text-zinc-50">
+                Withdraw or wait for $0 Stripe balance; next dashboard load removes the shop.
+              </p>
+            ) : null}
 
             {deletionPending && !emailConfirmed ? (
               <button
@@ -124,13 +121,13 @@ export function ShopDangerZonePanel(props: {
 
             {process.env.NODE_ENV === "development" && deletionPending && !emailConfirmed ? (
               <div className="rounded-lg border border-amber-800/50 bg-amber-950/20 p-3">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-amber-200/90">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-50">
                   Local dev only
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Without <code className="text-zinc-400">RESEND_API_KEY</code>, local <code className="text-zinc-400">next dev</code> does not send
+                <p className="mt-1 text-xs text-zinc-50">
+                  Without <code className="text-zinc-200">RESEND_API_KEY</code>, local <code className="text-zinc-200">next dev</code> does not send
                   mail — the confirmation URL is logged in that terminal as{" "}
-                  <code className="text-zinc-400">[shop-account-deletion]</code>. You can also use the button below to run the same DB + storage
+                  <code className="text-zinc-200">[shop-account-deletion]</code>. You can also use the button below to run the same DB + storage
                   cleanup as opening the real link.
                 </p>
                 <button
@@ -146,30 +143,30 @@ export function ShopDangerZonePanel(props: {
 
             {emailConfirmed ? (
               <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Stripe balance (USD)</p>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-50">Stripe balance (USD)</p>
                 {stripeConnectAccountId ? (
                   stripeConnectBalance == null ? (
-                    <p className="mt-1 text-xs text-amber-200/85">
+                    <p className="mt-1 text-xs text-zinc-50">
                       Could not load balance from Stripe. Reload the dashboard later; we need a successful balance read
                       before the account can close.
                     </p>
                   ) : (
-                    <ul className="mt-1 list-inside list-disc text-xs text-zinc-400">
+                    <ul className="mt-1 list-inside list-disc text-xs text-zinc-50">
                       <li>Available: {formatUsd(stripeConnectBalance.availableCents)}</li>
                       <li>Pending: {formatUsd(stripeConnectBalance.pendingCents)}</li>
                     </ul>
                   )
                 ) : (
-                  <p className="mt-1 text-xs text-zinc-500">No Stripe Connect account — nothing to settle.</p>
+                  <p className="mt-1 text-xs text-zinc-50">No Stripe Connect account — nothing to settle.</p>
                 )}
 
                 {balanceBlocks ? (
-                  <p className="mt-2 text-xs text-amber-200/90">
+                  <p className="mt-2 text-xs text-zinc-50">
                     Withdraw or wait for payouts until both available and pending are $0.00. The next dashboard visit
                     after that removes the account.
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-zinc-400">
+                  <p className="mt-2 text-xs text-zinc-50">
                     Balance is clear. If this page does not redirect and sign you out within a moment, reload once.
                   </p>
                 )}

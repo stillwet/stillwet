@@ -12,8 +12,8 @@ export const BRAND_CMY = {
 export const SITE_CONTACT_EMAIL = "info@stillwet.com";
 /** Console / server log prefix, e.g. `[stillwet] …` */
 export const SITE_LOG_PREFIX = "stillwet";
-/** Example Resend sending domain (verify apex or a subdomain in Resend before production). */
-export const SITE_EMAIL_SUBDOMAIN_EXAMPLE = "stillwet.com";
+/** Example Resend sending subdomain (verify in Resend before production). */
+export const SITE_EMAIL_SUBDOMAIN_EXAMPLE = "auto.stillwet.com";
 
 export function brandMerchEmailFrom(localPart = "noreply", domain = SITE_EMAIL_SUBDOMAIN_EXAMPLE): string {
   return `${BRAND_MERCH_NAME} <${localPart}@${domain}>`;

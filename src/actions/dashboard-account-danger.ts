@@ -96,7 +96,7 @@ export async function dashboardRequestAccountDeletion(): Promise<AccountDangerRe
   revalidatePath("/shops");
 
   let message =
-    "Your shop is hidden from browse and we emailed you a confirmation link. After you open that link, your listing data and stored photos will be removed; once your Stripe balance is zero, opening the dashboard again removes the account automatically.";
+    "Check your inbox for the confirmation link (expires in 24 hours).\nYour shop is hidden from browse in the meantime.";
   if (process.env.NODE_ENV === "development" && !process.env.RESEND_API_KEY?.trim()) {
     message +=
       " Local dev: RESEND_API_KEY is not set, so no email was sent. In the terminal running `next dev`, find the line starting with `[shop-account-deletion]` for the confirmation URL, or use “Dev: confirm deletion email” in this panel.";
@@ -126,7 +126,7 @@ export async function dashboardResendAccountDeletionConfirmationEmail(): Promise
   return {
     ok: true,
     message:
-      "Another confirmation email was sent. If nothing arrives in a few minutes, check spam, confirm Resend → Emails / Logs, and verify `SHOP_PASSWORD_RESET_EMAIL_FROM` or `SHOP_ACCOUNT_DELETION_EMAIL_FROM` uses a domain you verified in Resend.",
+      "Another confirmation email was sent. If nothing arrives in a few minutes, check spam and Resend → Emails / Logs. If errors mention the wrong domain, remove a stale SHOP_ACCOUNT_DELETION_EMAIL_FROM from Vercel or set it to the same verified address as SHOP_PASSWORD_RESET_EMAIL_FROM.",
   };
 }
 

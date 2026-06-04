@@ -4,8 +4,14 @@ import {
   runtimeDatabaseUrlSourceKey,
 } from "@/lib/env-postgres-url";
 import { emailLinkOrigin, publicAppBaseUrl } from "@/lib/public-app-url";
+import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
 
 export const runtime = "nodejs";
+
+function emailFromDomain(from: string): string | null {
+  const match = from.match(/@([^>\s]+)/);
+  return match?.[1]?.toLowerCase() ?? null;
+}
 
 /**
  * Liveness + quick config hints (no secrets). Use after deploy to confirm DB + env wiring.
@@ -61,6 +67,18 @@ export async function GET() {
     )
     .sort();
 
+  const passwordResetFrom = resolveShopTransactionalEmailFrom([
+    process.env.SHOP_PASSWORD_RESET_EMAIL_FROM,
+  ]);
+  const accountDeletionFrom = resolveShopTransactionalEmailFrom([
+    process.env.SHOP_PASSWORD_RESET_EMAIL_FROM,
+    process.env.SHOP_ACCOUNT_DELETION_EMAIL_FROM,
+  ]);
+  const passwordResetFromDomain =
+    passwordResetFrom.ok ? emailFromDomain(passwordResetFrom.from) : null;
+  const accountDeletionFromDomain =
+    accountDeletionFrom.ok ? emailFromDomain(accountDeletionFrom.from) : null;
+
   return Response.json(
     {
       ok: dbOk,
@@ -89,12 +107,14 @@ export async function GET() {
       passwordReset: {
         hasResendApiKey,
         hasShopPasswordResetFrom,
+        resolvedFromDomain: passwordResetFromDomain,
         linkOrigin: passwordResetLinkOrigin,
       },
       accountDeletionEmail: {
         hasResendApiKey,
         hasShopAccountDeletionFrom,
         hasVerifiedTransactionalFrom,
+        resolvedFromDomain: accountDeletionFromDomain,
         linkOrigin: passwordResetLinkOrigin,
       },
     },

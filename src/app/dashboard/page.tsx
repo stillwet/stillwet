@@ -489,19 +489,19 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </p>
       ) : null}
       {!isPlatform && delConfirm === "ok" ? (
-        <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90">
+        <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-zinc-50">
           Account deletion email confirmed. Your stored photos and listing media for this step have been removed. When
           your Stripe Connect balance is zero, opening the shop dashboard again removes the account automatically.
         </p>
       ) : null}
       {!isPlatform && delConfirm === "purgeFailed" ? (
-        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-amber-200/90">
+        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-zinc-50">
           Your deletion email was confirmed, but we could not finish clearing your stored images from our servers. Try the
           link again from email, reload this page later, or contact support.
         </p>
       ) : null}
       {!isPlatform && delConfirm && delConfirm !== "ok" && delConfirm !== "purgeFailed" ? (
-        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-amber-200/90">
+        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-zinc-50">
           {delConfirm === "expired"
             ? "That account deletion link has expired. Request deletion again from the Shop profile tab to receive a new email."
             : delConfirm === "missing"
