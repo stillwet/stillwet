@@ -22,6 +22,11 @@ describe("us sales tax registration costs", () => {
 
   it("returns known fee and renewal labels", () => {
     assert.equal(usSalesTaxRegistrationCostLabel("SC"), "$50");
+    assert.equal(usSalesTaxRegistrationCostLabel("CT"), "$100");
+    assert.equal(usSalesTaxRegistrationCostLabel("CO"), "$16/site + $50 deposit");
+    assert.equal(usSalesTaxRegistrationCostLabel("WA"), "$50 + $5/DBA");
+    assert.equal(usSalesTaxRegistrationCostLabel("WV"), "$30");
+    assert.equal(usSalesTaxRegistrationCostLabel("AZ"), "$12 + $1–50/local");
     assert.equal(usSalesTaxRegistrationRenewalLabel("OK"), "Every 3 yr");
     assert.equal(usSalesTaxRegistrationRenewalLabel("TX"), "No expiry");
     assert.ok(isSubduedRegistrationRenewalLabel("No expiry"));
