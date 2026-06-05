@@ -43,8 +43,8 @@ import {
 } from "@/lib/marketplace-constants";
 import {
   findShopIdConflictingDisplayName,
-  SHOP_DISPLAY_NAME_TAKEN_ERROR,
-} from "@/lib/shop-display-name-uniqueness";
+} from "@/lib/shop-display-name-uniqueness.server";
+import { SHOP_DISPLAY_NAME_TAKEN_ERROR } from "@/lib/shop-display-name-uniqueness";
 import { allocateUniqueShopSlug } from "@/lib/shop-slug";
 import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 import {

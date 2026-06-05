@@ -17,10 +17,8 @@ import { prisma } from "@/lib/prisma";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { getShopOwnerSession } from "@/lib/session";
 import { hashShopPassword, verifyShopPassword } from "@/lib/shop-password";
-import {
-  findShopIdConflictingDisplayName,
-  SHOP_DISPLAY_NAME_TAKEN_ERROR,
-} from "@/lib/shop-display-name-uniqueness";
+import { findShopIdConflictingDisplayName } from "@/lib/shop-display-name-uniqueness.server";
+import { SHOP_DISPLAY_NAME_TAKEN_ERROR } from "@/lib/shop-display-name-uniqueness";
 import { allocateSignupShopSlug } from "@/lib/shop-slug";
 import { BETA_TESTER_SIGNUP_LISTING_CREDITS } from "@/lib/beta-tester-codes";
 import { applyBetaTesterSignupPerksInTransaction } from "@/lib/beta-tester-signup-perks";
