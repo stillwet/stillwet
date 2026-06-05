@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { completeVerifiedShopAccountDeletion } from "@/lib/complete-verified-shop-account-deletion";
@@ -35,6 +36,20 @@ function confirmShell(title: string, body: ReactNode, homeHref = "/", homeLabel 
       </Link>
     </main>
   );
+}
+
+function scheduleAccountDeletionCacheRevalidation(shopSlug: string | undefined) {
+  after(() => {
+    try {
+      revalidatePath("/dashboard");
+      revalidatePath("/shops");
+      if (shopSlug?.trim()) {
+        revalidatePath(`/s/${shopSlug.trim()}`);
+      }
+    } catch (e) {
+      console.error("[account-deletion/confirm] revalidatePath failed", e);
+    }
+  });
 }
 
 export default async function AccountDeletionConfirmPage({ searchParams }: PageProps) {
@@ -88,16 +103,11 @@ export default async function AccountDeletionConfirmPage({ searchParams }: PageP
     }
 
     const shopSlug = shopBeforeCleanup?.slug;
-    revalidatePath("/dashboard");
-    revalidatePath("/shops");
-    if (shopSlug) {
-      revalidatePath(`/s/${shopSlug}`);
-    }
+    scheduleAccountDeletionCacheRevalidation(shopSlug);
 
     const completion = await completeVerifiedShopAccountDeletion(result.shopId);
     if (completion.ok && completion.deleted) {
-      revalidatePath("/shops");
-      revalidatePath(`/s/${completion.shopSlug}`);
+      scheduleAccountDeletionCacheRevalidation(completion.shopSlug);
       return confirmShell(
         "Account deleted",
         <p>Your shop account has been removed. Thanks for being part of Still Wet.</p>,
