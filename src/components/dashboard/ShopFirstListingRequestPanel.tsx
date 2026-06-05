@@ -451,11 +451,14 @@ export function ShopFirstListingRequestPanel(props: {
         const bodyTooLarge =
           /body exceeded|1\s*mb limit|413|payload too large/i.test(msg) ||
           /unexpected response was received from the server/i.test(msg);
+        const rscRenderFailure = /error occurred in the Server Components render/i.test(msg);
         setMessage({
           tone: "err",
           text: bodyTooLarge
             ? "Upload hit a server request limit. Refresh the page and try again — artwork should upload in the background before submit."
-            : msg || "Could not submit your listing. Try again or contact support.",
+            : rscRenderFailure
+              ? "Submit may have succeeded but the dashboard could not refresh. Open the Listings tab to confirm, or reload the page."
+              : msg || "Could not submit your listing. Try again or contact support.",
         });
         return;
       }

@@ -84,7 +84,7 @@ export function ShopDangerZonePanel(props: {
       {deletionPending && (!msg || msg.tone !== "ok" || emailConfirmed) ? (
         <p className="mt-2 whitespace-pre-line text-xs text-zinc-50">
           {emailConfirmed
-            ? "Email confirmed. Listings and photos are cleared. At $0 Stripe balance, sign in once more — the account removes itself automatically."
+            ? "Email confirmed. Your login email has been removed — you can sign up again with the same address. Any remaining shop record clears automatically once Stripe balance is $0.00."
             : ACCOUNT_DELETION_PENDING_INBOX_MESSAGE}
         </p>
       ) : null}
@@ -105,7 +105,7 @@ export function ShopDangerZonePanel(props: {
           <div className="mt-2 space-y-3">
             {emailConfirmed ? (
               <p className="text-xs text-zinc-50">
-                Withdraw or wait for $0 Stripe balance; next dashboard load removes the shop.
+                Withdraw or wait for $0 Stripe balance; daily cleanup removes the remaining shop record.
               </p>
             ) : null}
 

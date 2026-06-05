@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { revalidateAdminViews } from "@/lib/revalidate-admin-views";
 import { redirect } from "next/navigation";
@@ -88,7 +89,7 @@ function parseRequestItemNameFromForm(
 }
 
 export type ShopSetupActionResult =
-  | { ok: true; message?: string }
+  | { ok: true; message?: string; profileImageUrl?: string }
   | { ok: false; error: string };
 
 async function requireShopOwner() {
@@ -291,7 +292,7 @@ export async function uploadShopProfileImageSetup(
   revalidatePath(`/s/${shop.slug}`);
   revalidatePath("/shops");
   revalidatePublicStorefront();
-  return { ok: true };
+  return { ok: true, profileImageUrl: url };
 }
 
 export type ListingArtworkStagingUploadResult =
@@ -648,9 +649,16 @@ export async function submitFirstListingSetup(
     shop.slug,
     saved.id,
   );
-  revalidatePath("/dashboard");
-  revalidatePath(`/s/${shop.slug}`);
-  revalidateAdminViews();
+  const shopSlug = shop.slug;
+  after(() => {
+    try {
+      revalidatePath("/dashboard");
+      revalidatePath(`/s/${shopSlug}`);
+      revalidateAdminViews();
+    } catch (e) {
+      console.error("[submitFirstListingSetup] revalidatePath failed", e);
+    }
+  });
   if (gate.downgraded && gate.message) {
     return { ok: true, message: gate.message };
   }

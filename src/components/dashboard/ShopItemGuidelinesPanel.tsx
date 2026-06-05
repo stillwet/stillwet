@@ -14,10 +14,12 @@ const btnAcknowledged =
 
 export function ShopItemGuidelinesPanel(props: {
   acknowledged: boolean;
+  /** Sync onboarding checklist without waiting for a full dashboard refresh. */
+  onAcknowledged?: () => void;
   /** When true, used inside dashboard tab panel (no top margin). */
   embedded?: boolean;
 }) {
-  const { acknowledged: acknowledgedProp, embedded = false } = props;
+  const { acknowledged: acknowledgedProp, onAcknowledged, embedded = false } = props;
   const router = useRouter();
   const [acknowledged, setAcknowledged] = useState(acknowledgedProp);
   const [pending, startTransition] = useTransition();
@@ -30,6 +32,7 @@ export function ShopItemGuidelinesPanel(props: {
     startTransition(async () => {
       await acknowledgeShopItemGuidelines();
       setAcknowledged(true);
+      onAcknowledged?.();
       router.refresh();
     });
   }

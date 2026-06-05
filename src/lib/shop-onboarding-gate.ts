@@ -59,9 +59,34 @@ export function countIncompleteOnboardingSteps(steps: ShopOnboardingSteps): numb
   return n;
 }
 
-/** Stripe Connect is allowed after profile, guidelines, and listing — not gated on email verification. */
-export function canStartStripeConnect(
-  steps: Pick<ShopOnboardingSteps, "profile" | "guidelines" | "listing">,
-): boolean {
-  return steps.profile && steps.guidelines && steps.listing;
+/** Client + server: recompute onboarding counters after shop regulations are acknowledged. */
+export function onboardingSetupAfterGuidelinesAcknowledged(steps: ShopOnboardingSteps): {
+  steps: ShopOnboardingSteps;
+  incompleteSetupCount: number;
+} {
+  const nextSteps = steps.guidelines ? steps : { ...steps, guidelines: true };
+  return {
+    steps: nextSteps,
+    incompleteSetupCount: countIncompleteOnboardingSteps(nextSteps),
+  };
+}
+
+/** Client: recompute onboarding counters after a listing request is submitted. */
+export function onboardingSetupAfterListingSubmitted(steps: ShopOnboardingSteps): {
+  steps: ShopOnboardingSteps;
+  incompleteSetupCount: number;
+} {
+  const nextSteps = steps.listing ? steps : { ...steps, listing: true };
+  return {
+    steps: nextSteps,
+    incompleteSetupCount: countIncompleteOnboardingSteps(nextSteps),
+  };
+}
+
+/** Matches dashboard `setupTabsKey` in `src/app/dashboard/page.tsx`. */
+export function dashboardSetupTabsKey(
+  steps: ShopOnboardingSteps,
+  itemGuidelinesAcknowledged: boolean,
+): string {
+  return `setup-${steps.stripe}-${steps.profile}-${steps.guidelines}-${steps.emailVerified}-${steps.listing}-${itemGuidelinesAcknowledged}-${steps.emailVerified}`;
 }

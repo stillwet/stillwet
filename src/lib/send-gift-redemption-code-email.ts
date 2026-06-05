@@ -1,4 +1,4 @@
-import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { resolveShopTransactionalEmailFrom, postResendTransactionalEmail } from "@/lib/resend-shop-from";
 import type { GiftRedemptionEmailVars } from "@/lib/email-template-placeholders";
 import { resolveGiftRedemptionCodeEmail } from "@/lib/site-email-template-service";
 
@@ -44,27 +44,26 @@ export async function sendGiftRedemptionCodeEmail(
     setupCode: args.setupCode,
   });
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: fromResult.from,
-      to: [args.toEmail],
-      subject,
-      html,
-    }),
+  console.info(
+    `[gift-code-email] Resend POST to=${JSON.stringify(args.toEmail)} setupCodePresent=${Boolean(args.setupCode?.trim())}`,
+  );
+
+  const sent = await postResendTransactionalEmail({
+    apiKey,
+    from: fromResult.from,
+    to: [args.toEmail],
+    subject,
+    html,
+    logTag: "gift-code-email",
   });
 
-  const text = await res.text().catch(() => "");
-  if (!res.ok) {
+  if (!sent.ok) {
     console.error("[gift-code-email] Resend HTTP error", {
-      status: res.status,
-      body: text.slice(0, 2000),
+      status: sent.status,
+      body: sent.body.slice(0, 2000),
     });
-    return { ok: false, error: resendUserFacingError(res.status, text) };
+    return { ok: false, error: resendUserFacingError(sent.status, sent.body) };
   }
+
   return { ok: true };
 }

@@ -34,7 +34,6 @@ import { platformStripeConnectAccountCountryCode } from "@/lib/platform-checkout
 import { shopStripeConnectReadyForListingCharges } from "@/lib/shop-stripe-connect-gate";
 import { printifyVariantShopFloorCents } from "@/lib/listing-cart-price";
 import { listingCatalogUrlsForPersist } from "@/lib/product-media";
-import { canStartStripeConnect, computeShopOnboardingSteps } from "@/lib/shop-onboarding-gate";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 import {
   resolveStripeConnectWebsiteOrigin,
@@ -655,34 +654,6 @@ export async function dashboardStartStripeConnect() {
   const user = await requireShopOwner();
   const shop = user.shop;
   if (shop.slug === PLATFORM_SHOP_SLUG) return;
-
-  const row = await prisma.shopUser.findUnique({
-    where: { id: user.id },
-    select: {
-      emailVerifiedAt: true,
-      shop: {
-        select: {
-          displayName: true,
-          itemGuidelinesAcknowledgedAt: true,
-          connectChargesEnabled: true,
-          payoutsEnabled: true,
-          listings: { select: { requestStatus: true, active: true } },
-        },
-      },
-    },
-  });
-  if (!row?.shop) return;
-  const steps = computeShopOnboardingSteps({
-    displayName: row.shop.displayName,
-    itemGuidelinesAcknowledgedAt: row.shop.itemGuidelinesAcknowledgedAt,
-    emailVerifiedAt: row.emailVerifiedAt,
-    listings: row.shop.listings,
-    connectChargesEnabled: row.shop.connectChargesEnabled,
-    payoutsEnabled: row.shop.payoutsEnabled,
-  });
-  if (!canStartStripeConnect(steps)) {
-    redirect("/dashboard?dash=setup&connect=err&reason=onboarding_incomplete");
-  }
 
   const base = publicAppBaseUrl();
   if (!base) redirect("/dashboard?connect=err&reason=no_app_url");

@@ -21,6 +21,7 @@ import { prisma } from "@/lib/prisma";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import { revalidateShopUpgradesDashboardPaths } from "@/lib/dashboard-revalidate-shop-upgrades";
 import { sendGiftRedemptionCodeEmail } from "@/lib/send-gift-redemption-code-email";
+import { getStripe } from "@/lib/stripe";
 
 function paymentIntentIdFromCheckoutSession(session: Stripe.Checkout.Session): string | null {
   const pi = session.payment_intent;
@@ -412,4 +413,83 @@ export async function fulfillCreatorGiftCheckoutSession(
     }
   }
   return true;
+}
+
+export type FinalizeCreatorGiftCheckoutResult =
+  | {
+      ok: true;
+      fulfillmentMode: CreatorGiftFulfillmentMode;
+      purchaserEmail: string | null;
+      setupCode: string | null;
+      emailSent: boolean;
+      emailPending: boolean;
+      emailError: string | null;
+      shopSlug: string | null;
+    }
+  | { ok: false; error: string };
+
+/**
+ * Success-page fallback when Stripe redirects before the webhook runs (or webhook delivery fails).
+ * Idempotent with {@link fulfillCreatorGiftCheckoutSession}.
+ */
+export async function finalizeCreatorGiftCheckoutSessionId(
+  sessionId: string,
+): Promise<FinalizeCreatorGiftCheckoutResult> {
+  const session = await getStripe().checkout.sessions.retrieve(sessionId);
+  if (session.metadata?.kind !== "creator_gift") {
+    return { ok: false, error: "This checkout is not a creator gift purchase." };
+  }
+  if (session.payment_status !== "paid") {
+    return {
+      ok: false,
+      error: "Payment is not complete yet. Wait a moment and refresh, or contact support.",
+    };
+  }
+
+  await fulfillCreatorGiftCheckoutSession(session);
+
+  const purchaseId = session.metadata.purchaseId;
+  if (!purchaseId || typeof purchaseId !== "string") {
+    return { ok: false, error: "Gift checkout is missing purchase metadata." };
+  }
+
+  const purchase = await prisma.creatorGiftPurchase.findUnique({
+    where: { id: purchaseId },
+    include: {
+      codes: {
+        where: { type: CreatorGiftCodeType.shop_setup },
+        select: { code: true },
+        take: 1,
+      },
+      recipientShop: { select: { slug: true } },
+    },
+  });
+  if (!purchase) {
+    return { ok: false, error: "Gift purchase record not found." };
+  }
+
+  const setupCode = purchase.codes[0]?.code ?? null;
+  const emailSent = purchase.emailedAt != null;
+  const emailPending =
+    purchase.fulfillmentMode === CreatorGiftFulfillmentMode.email_codes &&
+    purchase.status === CreatorGiftPurchaseStatus.paid &&
+    !emailSent;
+
+  const shopSlugFromMeta =
+    typeof session.metadata.recipientShopSlug === "string"
+      ? session.metadata.recipientShopSlug.trim()
+      : "";
+
+  return {
+    ok: true,
+    fulfillmentMode: purchase.fulfillmentMode,
+    purchaserEmail: purchase.purchaserEmail,
+    setupCode,
+    emailSent,
+    emailPending,
+    emailError: emailPending
+      ? "We could not send the gift code email. Check spam or contact support with your Stripe receipt."
+      : null,
+    shopSlug: purchase.recipientShop?.slug ?? (shopSlugFromMeta || null),
+  };
 }

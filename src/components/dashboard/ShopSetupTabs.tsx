@@ -63,26 +63,6 @@ function StepIcon({ done }: { done: boolean }) {
   );
 }
 
-/** Stripe Connect stays locked until these are all true — list only what is still missing (clearer than a generic wall of text). */
-function incompleteStripePrerequisitesSummary(steps: ShopSetupSteps): string {
-  const missing: string[] = [];
-  if (!steps.profile) missing.push("shop profile (display name)");
-  if (!steps.guidelines) missing.push("shop regulations");
-  if (!steps.listing) missing.push("a listing request");
-  if (missing.length === 0) {
-    return "Finish the remaining onboarding checklist items before starting Stripe Connect.";
-  }
-  if (missing.length === 1) {
-    return `Complete ${missing[0]} before starting Stripe Connect.`;
-  }
-  if (missing.length === 2) {
-    return `Complete ${missing[0]} and ${missing[1]} before starting Stripe Connect.`;
-  }
-  const last = missing[missing.length - 1]!;
-  const rest = missing.slice(0, -1).join(", ");
-  return `Complete ${rest}, and ${last} before starting Stripe Connect.`;
-}
-
 function StripeConnectSubmitButton({
   defaultLabel,
   formDisabled,
@@ -165,11 +145,10 @@ function ShopEmailVerificationCallout({ verified }: { verified: boolean }) {
 export function ShopSetupTabs(props: {
   shop: ShopSetupShopPayload;
   steps: ShopSetupSteps;
-  stripeConnectUnlocked: boolean;
   /** When true, used inside dashboard tab panel (no top margin). */
   embedded?: boolean;
 }) {
-  const { shop, steps, stripeConnectUnlocked, embedded = false } = props;
+  const { shop, steps, embedded = false } = props;
 
   const stripeLabel = "Stripe Connect";
 
@@ -244,20 +223,15 @@ export function ShopSetupTabs(props: {
               {!steps.stripe ? (
                 <>
                   <p className="mt-0.5 text-xs italic text-zinc-500">
-                    Last step: Complete Stripe Connect so you can get paid when you sell items.
+                    Connect Stripe so you can get paid when you sell items.
                   </p>
-                  {!stripeConnectUnlocked ? (
-                    <p className="mt-2 rounded-lg border border-amber-900/40 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
-                      {incompleteStripePrerequisitesSummary(steps)}
-                    </p>
-                  ) : null}
                   {shop.stripeConnectPendingHint ? (
                     <p className="mt-2 rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200/90">
                       {shop.stripeConnectPendingHint}
                     </p>
                   ) : null}
                   <form action={dashboardStartStripeConnect} className="mt-2">
-                    <StripeConnectSubmitButton defaultLabel={stripeLabel} formDisabled={!stripeConnectUnlocked} />
+                    <StripeConnectSubmitButton defaultLabel={stripeLabel} formDisabled={false} />
                   </form>
                 </>
               ) : null}

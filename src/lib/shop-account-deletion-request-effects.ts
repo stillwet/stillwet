@@ -123,3 +123,26 @@ export async function restoreListingsAfterAccountDeletionRequestCancel(shopId: s
     },
   });
 }
+
+/**
+ * Deletes shop owner login rows after deletion email is confirmed so `ShopUser.email` @unique
+ * is free for a future signup. Orphan shop rows may remain until Stripe Connect balance is $0.
+ */
+export async function releaseShopUsersForVerifiedAccountDeletion(shopId: string): Promise<number> {
+  const users = await prisma.shopUser.findMany({
+    where: { shopId },
+    select: { email: true },
+  });
+  if (users.length === 0) return 0;
+
+  const emails = users.map((u) => u.email.trim().toLowerCase()).filter(Boolean);
+  const deleted = await prisma.shopUser.deleteMany({ where: { shopId } });
+
+  if (emails.length > 0) {
+    await prisma.pendingShopSignup.deleteMany({
+      where: { email: { in: emails } },
+    });
+  }
+
+  return deleted.count;
+}

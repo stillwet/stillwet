@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { processPendingVerifiedShopAccountDeletions } from "@/lib/complete-verified-shop-account-deletion";
 import { syncBetaTesterOnboardingStatuses } from "@/lib/beta-tester-onboarding-sync";
 import { rebuildPlatformBrowseDailySnapshots } from "@/lib/platform-browse-daily-snapshots";
 import { rollupStorefrontViewEvents } from "@/lib/storefront-view-events";
@@ -9,10 +10,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
 
-  const [platformSnapshots, viewRollup, betaTesterOnboarding] = await Promise.all([
+  const [platformSnapshots, viewRollup, betaTesterOnboarding, accountDeletionCleanup] = await Promise.all([
     rebuildPlatformBrowseDailySnapshots(),
     rollupStorefrontViewEvents(),
     syncBetaTesterOnboardingStatuses(),
+    processPendingVerifiedShopAccountDeletions(),
   ]);
 
   if (!platformSnapshots.ok) {
@@ -40,5 +42,6 @@ export async function GET(req: Request) {
     storefrontViewRollup: viewRollup,
     adminSummaryEmail: { skipped: "disabled" },
     betaTesterOnboarding,
+    accountDeletionCleanup,
   });
 }

@@ -1,4 +1,3 @@
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
   hashPasswordResetToken,
@@ -66,8 +65,6 @@ export async function verifyShopEmailFromRawToken(
       where: { shopUserId: row.shopUserId, usedAt: null, id: { not: row.id } },
     }),
   ]);
-
-  revalidatePath("/dashboard");
 
   return { ok: true };
 }

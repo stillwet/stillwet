@@ -43,6 +43,11 @@ import type { ShopSetupShopPayload, ShopSetupSteps } from "@/components/dashboar
 import type { DashboardShopAccountPayload } from "@/components/dashboard/DashboardShopAccountPanel";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import type { ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
+import {
+  dashboardSetupTabsKey,
+  onboardingSetupAfterGuidelinesAcknowledged,
+  onboardingSetupAfterListingSubmitted,
+} from "@/lib/shop-onboarding-gate";
 import { DashboardNoticeMarkReadForm } from "@/components/dashboard/DashboardNoticeMarkReadForm";
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
 import { dashboardListingMinPriceHintCents } from "@/lib/listing-cart-price";
@@ -109,7 +114,6 @@ export type DashboardSetupPanelProps = {
   itemGuidelinesAcknowledged: boolean;
   catalogGroups: ShopSetupCatalogGroup[];
   steps: ShopSetupSteps;
-  stripeConnectUnlocked: boolean;
   incompleteSetupCount: number;
   r2Configured: boolean;
   listingPickerDiagnostics?: { adminCatalogItemCount: number };
@@ -1190,15 +1194,7 @@ export function DashboardMainTabs(props: {
     router.refresh();
   }, [clientTabFetch, tabFetch, router]);
 
-  const afterListingSubmitted = useCallback(() => {
-    const p = new URLSearchParams(dashboardQueryPreserve);
-    p.set("dash", dashQueryParamForTabId("listings"));
-    p.set("listingSubmitted", "1");
-    const q = p.toString();
-    const href = q ? `/dashboard?${q}` : "/dashboard?dash=listings&listingSubmitted=1";
-    // Full navigation after a large server action avoids RSC "unexpected response" races from push+refresh.
-    window.location.assign(href);
-  }, [dashboardQueryPreserve]);
+  const [listingSubmittedFlash, setListingSubmittedFlash] = useState(false);
 
   const [loadedFlags, setLoadedFlags] = useState(initialTabDataLoaded);
   const [listings, setListings] = useState(initialListings);
@@ -1208,6 +1204,20 @@ export function DashboardMainTabs(props: {
   const [notificationsPage, setNotificationsPage] = useState(1);
   const [supportChat, setSupportChat] = useState(initialSupportChat);
   const [setup, setSetup] = useState(initialSetup);
+
+  const handleGuidelinesAcknowledged = useCallback(() => {
+    setSetup((current) => {
+      if (!current || current.itemGuidelinesAcknowledged) return current;
+      const patched = onboardingSetupAfterGuidelinesAcknowledged(current.steps);
+      return {
+        ...current,
+        itemGuidelinesAcknowledged: true,
+        steps: patched.steps,
+        incompleteSetupCount: patched.incompleteSetupCount,
+        setupTabsKey: dashboardSetupTabsKey(patched.steps, true),
+      };
+    });
+  }, []);
   const [draftListingRequestPrefill, setDraftListingRequestPrefill] = useState(initialDraftPrefill);
 
   const effectiveLoadedFlags: DashboardTabLoadedFlags = clientTabFetch
@@ -1343,6 +1353,25 @@ export function DashboardMainTabs(props: {
     },
     [clientTabFetch, tabFetch, tabFetchIdForTab, syncDashboardTabUrl, tabOpts],
   );
+
+  const afterListingSubmitted = useCallback(() => {
+    setSetup((current) => {
+      if (!current) return current;
+      const patched = onboardingSetupAfterListingSubmitted(current.steps);
+      return {
+        ...current,
+        steps: patched.steps,
+        incompleteSetupCount: patched.incompleteSetupCount,
+        setupTabsKey: dashboardSetupTabsKey(patched.steps, current.itemGuidelinesAcknowledged),
+      };
+    });
+    setListingSubmittedFlash(true);
+    window.setTimeout(() => setListingSubmittedFlash(false), 8000);
+    selectTab("listings");
+    if (clientTabFetch) {
+      void tabFetch.loadTab("listings", { force: true });
+    }
+  }, [clientTabFetch, selectTab, tabFetch]);
 
   useEffect(() => {
     if (!clientTabFetch) return;
@@ -1574,6 +1603,11 @@ export function DashboardMainTabs(props: {
 
   return (
     <section className="mt-8">
+      {listingSubmittedFlash ? (
+        <p className="mb-3 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200/90">
+          Listing submitted.
+        </p>
+      ) : null}
       {clientTabFetch && tabFetch.tabLoadError ? (
         <p className="mb-3 rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-sm text-amber-200/90">
           {tabFetch.tabLoadError}
@@ -1654,7 +1688,6 @@ export function DashboardMainTabs(props: {
               key={setup.setupTabsKey}
               shop={setup.shop}
               steps={setup.steps}
-              stripeConnectUnlocked={setup.stripeConnectUnlocked}
               embedded
             />
           ) : null}
@@ -1695,6 +1728,7 @@ export function DashboardMainTabs(props: {
             <ShopItemGuidelinesPanelLazy
               key={setup.setupTabsKey}
               acknowledged={setup.itemGuidelinesAcknowledged}
+              onAcknowledged={handleGuidelinesAcknowledged}
               embedded
             />
           ) : null}

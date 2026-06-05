@@ -27,7 +27,6 @@ import { DashboardTabsSuspenseFallback } from "./DashboardPageSuspenseFallback";
 import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 import { scopesForInitialTab } from "@/lib/dashboard-scoped-data";
 import {
-  canStartStripeConnect,
   computeShopOnboardingSteps,
   countIncompleteOnboardingSteps,
 } from "@/lib/shop-onboarding-gate";
@@ -297,8 +296,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     connect &&
     (connect === "return" ||
       connect === "refresh" ||
-      (connect === "err" &&
-        (connectReason === "stripe_link" || connectReason === "onboarding_incomplete")))
+      (connect === "err" && connectReason === "stripe_link"))
   ) {
     const qs = dashboardSearchParamsWithoutConnectQuery(sp);
     redirect(qs ? `/dashboard?${qs}` : "/dashboard");
@@ -386,8 +384,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     submittedRequestCount,
   );
 
-  const stripeConnectUnlocked = !isPlatform && canStartStripeConnect(setupSteps);
-
   const setupTabsKey = `setup-${setupSteps.stripe}-${setupSteps.profile}-${setupSteps.guidelines}-${setupSteps.emailVerified}-${setupSteps.listing}-${Boolean(shop.itemGuidelinesAcknowledgedAt)}-${Boolean(user.emailVerifiedAt)}`;
 
   const flairPayload =
@@ -397,7 +393,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     ? {
         setupTabsKey,
         incompleteSetupCount,
-        stripeConnectUnlocked,
         steps: setupSteps,
         shopPanel: {
           shopSlug: shop.slug,
@@ -497,8 +492,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       ) : null}
       {!isPlatform && delConfirm === "ok" ? (
         <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-zinc-50">
-          Account deletion email confirmed. Your stored photos and listing media for this step have been removed. When
-          your Stripe Connect balance is zero, opening the shop dashboard again removes the account automatically.
+          Account deletion email confirmed. Your login email has been removed so you can sign up fresh. Any remaining
+          shop record is removed automatically once Stripe Connect balance is zero.
         </p>
       ) : null}
       {!isPlatform && delConfirm === "purgeFailed" ? (
@@ -514,12 +509,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             : delConfirm === "missing"
               ? "That account deletion link was missing a token. Open the full link from your latest email, or request deletion again."
               : "That account deletion link is invalid. Request a new one from the Shop profile tab if you still want to delete your account."}
-        </p>
-      ) : null}
-      {!isPlatform && !setupSteps.stripe && connect === "err" && connectReason === "onboarding_incomplete" ? (
-        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-amber-200/90">
-          Complete onboarding (shop profile, shop regulations, and a listing request) before connecting
-          Stripe.
         </p>
       ) : null}
       {!isPlatform && !setupSteps.stripe && connect === "err" && connectReason === "stripe_link" ? (

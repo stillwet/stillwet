@@ -18,7 +18,6 @@ import type { DashboardShopAccountPayload } from "@/components/dashboard/Dashboa
 export type CreatorDashboardSetupPayload = {
   setupTabsKey: string;
   incompleteSetupCount: number;
-  stripeConnectUnlocked: boolean;
   steps: ShopSetupSteps;
   shopPanel: ShopSetupShopPayload;
   itemGuidelinesAcknowledged: boolean;
@@ -91,7 +90,6 @@ function buildDashboardMainTabsProps(
             itemGuidelinesAcknowledged: creatorSetup.itemGuidelinesAcknowledged,
             catalogGroups,
             steps: creatorSetup.steps,
-            stripeConnectUnlocked: creatorSetup.stripeConnectUnlocked,
             incompleteSetupCount: creatorSetup.incompleteSetupCount,
             r2Configured: isR2UploadConfigured(),
             listingPickerDiagnostics: {

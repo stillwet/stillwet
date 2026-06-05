@@ -12,6 +12,7 @@ import {
   applyVerifiedAccountDeletionListingAndMediaCleanup,
   purgeShopUploadedMediaFromR2,
 } from "@/lib/shop-account-deletion-request-effects";
+import { completeVerifiedShopAccountDeletion } from "@/lib/complete-verified-shop-account-deletion";
 
 export type ShopInactivityLifecycleResult = {
   warningsSent: number;
@@ -127,6 +128,7 @@ export async function processShopInactivityLifecycle(
     });
     await purgeShopUploadedMediaFromR2(shop.id);
     await applyVerifiedAccountDeletionListingAndMediaCleanup(shop.id, now);
+    await completeVerifiedShopAccountDeletion(shop.id);
     result.deletionTriggered++;
   }
 

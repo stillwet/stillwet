@@ -150,7 +150,10 @@ export function ShopProfileSetupPanel(props: {
 
   const [avatarHasFile, setAvatarHasFile] = useState(false);
   const [avatarSavedFlash, setAvatarSavedFlash] = useState(false);
+  const [profileImageUrlOverride, setProfileImageUrlOverride] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const profileImageUrl = profileImageUrlOverride ?? shop.profileImageUrl;
 
   useEffect(() => {
     setDisplayName(shopDisplayNameForProfileForm(shop.displayName));
@@ -161,6 +164,7 @@ export function ShopProfileSetupPanel(props: {
   }, [shop.shopSlug, shop.displayName, shop.welcomeMessage, shop.socialLinks, shop.listedOnShopsBrowse]);
 
   useEffect(() => {
+    setProfileImageUrlOverride(null);
     setAvatarHasFile(false);
     setAvatarSavedFlash(false);
     if (avatarInputRef.current) avatarInputRef.current.value = "";
@@ -253,13 +257,30 @@ export function ShopProfileSetupPanel(props: {
   async function handleAvatarSubmit(fd: FormData) {
     setMessage(null);
     startAvatarTransition(async () => {
-      const r: ShopSetupActionResult = await uploadShopProfileImageSetup(fd);
+      let r: ShopSetupActionResult;
+      try {
+        r = await uploadShopProfileImageSetup(fd);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        const actionResponseRace =
+          /body exceeded|1\s*mb limit|413|payload too large/i.test(msg) ||
+          /unexpected response was received from the server/i.test(msg);
+        setMessage({
+          tone: "err",
+          text: actionResponseRace
+            ? "Upload may have succeeded but the dashboard could not refresh. Reload the page to see your photo, or try a smaller image."
+            : msg || "Could not upload that photo. Try again or contact support.",
+        });
+        return;
+      }
       if (r.ok) {
+        if (r.profileImageUrl?.trim()) {
+          setProfileImageUrlOverride(r.profileImageUrl.trim());
+        }
         setAvatarSavedFlash(true);
         window.setTimeout(() => setAvatarSavedFlash(false), 2500);
         if (avatarInputRef.current) avatarInputRef.current.value = "";
         setAvatarHasFile(false);
-        router.refresh();
       } else {
         setMessage({ tone: "err", text: r.error });
       }
@@ -326,10 +347,10 @@ export function ShopProfileSetupPanel(props: {
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Shop profile</h2>
 
       <div className="mt-6 flex flex-wrap items-center gap-4 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-        {shop.profileImageUrl ? (
+        {profileImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- R2 / external shop avatars
           <img
-            src={shop.profileImageUrl}
+            src={profileImageUrl}
             alt=""
             className="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-zinc-700"
           />
@@ -468,15 +489,15 @@ export function ShopProfileSetupPanel(props: {
           </button>
           <div className="border-t border-zinc-800 pt-4">
             <p className="text-xs text-zinc-500">Profile photo</p>
-            {shop.profileImageUrl ? (
+            {profileImageUrl ? (
               <div className="mt-3 space-y-2">
                 {/* eslint-disable-next-line @next/next/no-img-element -- R2 / external shop avatars */}
                 <img
-                  src={shop.profileImageUrl}
+                  src={profileImageUrl}
                   alt="Current profile photo"
                   className="h-24 w-24 rounded-lg object-cover ring-1 ring-zinc-700"
                 />
-                <p className="break-all text-[11px] text-zinc-600">{shop.profileImageUrl}</p>
+                <p className="break-all text-[11px] text-zinc-600">{profileImageUrl}</p>
               </div>
             ) : (
               <p className="mt-1 text-[11px] text-zinc-600">No photo yet.</p>

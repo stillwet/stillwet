@@ -118,27 +118,29 @@ export default async function AccountDeletionConfirmPage({ searchParams }: PageP
       const balance = completion.stripeConnectBalance;
       if (balance == null) {
         return confirmShell(
-          "Email confirmed — one more step",
+          "Email confirmed — account closed for signup",
           <p>
-            Your deletion email is confirmed and your listing media has been cleared. We could not read your Stripe
-            Connect balance from here. Sign in to the shop dashboard once payouts finish; the account removes itself
-            automatically when available and pending balances are both $0.00.
+            Your deletion email is confirmed, your login email has been removed from our system, and your listing
+            media has been cleared. You can create a new shop with the same email anytime. If Stripe Connect still
+            holds funds for the old shop, we will finish removing that shop record automatically once balances are
+            $0.00.
           </p>,
-          "/dashboard/login",
-          "Go to dashboard login",
+          "/create-shop",
+          "Create a new shop",
         );
       }
 
       return confirmShell(
-        "Email confirmed — one more step",
+        "Email confirmed — account closed for signup",
         <p>
-          Your deletion email is confirmed and your listing media has been cleared. Stripe still shows funds (available{" "}
-          {formatUsd(balance.availableCents)}, pending {formatUsd(balance.pendingCents)}). Withdraw or wait for
-          payouts, then sign in to the shop dashboard once both balances are $0.00 — the account removes itself on that
-          visit.
+          Your deletion email is confirmed, your login email has been removed from our system, and your listing media
+          has been cleared. You can create a new shop with the same email anytime. Stripe still shows funds on the
+          closed shop (available {formatUsd(balance.availableCents)}, pending{" "}
+          {formatUsd(balance.pendingCents)}). We will remove the remaining shop record automatically once both
+          balances are $0.00.
         </p>,
-        "/dashboard/login",
-        "Go to dashboard login",
+        "/create-shop",
+        "Create a new shop",
       );
     }
 
@@ -147,21 +149,22 @@ export default async function AccountDeletionConfirmPage({ searchParams }: PageP
         "Email confirmed — finish in dashboard",
         <p>
           Your deletion email is confirmed and your listing media has been cleared, but we could not remove the shop
-          account from this page. Sign in to the shop dashboard to finish, or contact support if this keeps happening.
+          account from this page. Contact support if this keeps happening.
         </p>,
-        "/dashboard/login",
-        "Go to dashboard login",
+        "/create-shop",
+        "Create a new shop",
       );
     }
 
     return confirmShell(
       "Success! Account deletion confirmed",
       <p>
-        Your stored photos and listing media have been removed. Sign in to the shop dashboard when your Stripe Connect
-        balance is $0.00 to finish removing the account.
+        Your stored photos and listing media have been removed, and your login email has been released. You can create
+        a new shop with the same email anytime. We will remove the remaining shop record automatically once Stripe
+        Connect balances are $0.00.
       </p>,
-      "/dashboard/login",
-      "Go to dashboard login",
+      "/create-shop",
+      "Create a new shop",
     );
   } catch (e) {
     console.error("[account-deletion/confirm] unexpected failure", e);
