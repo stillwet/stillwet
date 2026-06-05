@@ -53,7 +53,7 @@ describe("cropListingArtworkBufferOnServer", () => {
       .toBuffer();
 
     const out = await cropListingArtworkBufferOnServer(src, {
-      pixelCrop: { x: 100, y: 50, width: 1200, height: 900 },
+      pixelCrop: { x: 100, y: 50, width: 1414, height: 1000 },
       rotation: 0,
       printWidthPx: 5940,
       printHeightPx: 4200,
@@ -62,5 +62,32 @@ describe("cropListingArtworkBufferOnServer", () => {
     const meta = await sharp(out!).metadata();
     assert.equal(meta.width, 5940);
     assert.equal(meta.height, 4200);
+  });
+
+  it("preserves transparent letterbox corners when zoomed out", async () => {
+    const src = await sharp({
+      create: {
+        width: 300,
+        height: 200,
+        channels: 3,
+        background: { r: 220, g: 40, b: 40 },
+      },
+    })
+      .jpeg()
+      .toBuffer();
+
+    const out = await cropListingArtworkBufferOnServer(src, {
+      pixelCrop: { x: -150, y: -100, width: 600, height: 400 },
+      rotation: 0,
+      printWidthPx: 420,
+      printHeightPx: 297,
+    });
+    assert.ok(out);
+
+    const { data, info } = await sharp(out!).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const alphaAt = (x: number, y: number) => data[(y * info.width + x) * 4 + 3];
+    assert.ok(alphaAt(0, 0) < 255);
+    assert.ok(alphaAt(info.width - 1, info.height - 1) < 255);
+    assert.equal(alphaAt(Math.floor(info.width / 2), Math.floor(info.height / 2)), 255);
   });
 });

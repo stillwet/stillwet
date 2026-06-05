@@ -267,6 +267,24 @@ export async function deleteListingArtworkStaging(stagingKey: string): Promise<v
   if (keys.length > 0) await deleteR2ObjectsByKeys(keys);
 }
 
+/** Prefix for temporary listing artwork uploads before submit (`…/listing-request-staging/`). */
+export function shopListingArtworkStagingPrefix(shopId: string): string {
+  return `shops/${shopId}/${LISTING_ARTWORK_STAGING_SEGMENT}/`;
+}
+
+/**
+ * Remove all staged listing artwork for a shop (abandoned crop uploads, old chunk parts).
+ * Not referenced from the database — safe to run after submit, reject, or approve.
+ */
+export async function deleteAllListingArtworkStagingForShop(shopId: string): Promise<number> {
+  if (!isR2UploadConfigured()) return 0;
+  const prefix = shopListingArtworkStagingPrefix(shopId);
+  const keys = await listR2ObjectKeysWithPrefix(prefix);
+  if (keys.length === 0) return 0;
+  await deleteR2ObjectsByKeys(keys);
+  return keys.length;
+}
+
 /** Presigned PUT URL so large files bypass Vercel server-action body limits. */
 export async function createPresignedR2PutUrl(params: {
   key: string;

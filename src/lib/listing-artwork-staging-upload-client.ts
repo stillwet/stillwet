@@ -1,11 +1,18 @@
 import { createListingArtworkStagingUpload } from "@/actions/dashboard-shop-setup";
 import { listingArtworkStagingChunkCount } from "@/lib/listing-artwork-staging-chunks";
-import { LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES } from "@/lib/listing-request-artwork-limits";
+import {
+  listingArtworkFileWithinUploadCap,
+  listingArtworkUploadCapError,
+  LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES,
+} from "@/lib/listing-request-artwork-limits";
 
 export async function uploadListingArtworkFileToStaging(
   file: File,
   onProgress?: (current: number, total: number) => void,
 ): Promise<{ ok: true; stagingKey: string } | { ok: false; error: string }> {
+  if (!listingArtworkFileWithinUploadCap(file.size)) {
+    return { ok: false, error: listingArtworkUploadCapError() };
+  }
   const prep = await createListingArtworkStagingUpload(file.type, file.size);
   if (!prep.ok) return prep;
 

@@ -11,6 +11,7 @@ import { getShopOwnerSession } from "@/lib/session";
 import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums";
 import {
   deleteLegacyShopProfileAvatarKeys,
+  deleteAllListingArtworkStagingForShop,
   deleteListingArtworkStaging,
   deleteR2ObjectsByKeys,
   isListingArtworkStagingKeyForShop,
@@ -26,6 +27,7 @@ import {
   verifyListingArtworkStagingR2Write,
 } from "@/lib/r2-upload";
 import {
+  listingArtworkUploadCapError,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
@@ -73,6 +75,7 @@ import { plainTextNoUrlsValidationError } from "@/lib/plain-text-no-urls";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 import {
   LISTING_UPLOAD_CRASH_ERROR,
+  listingArtworkServerCropFailedError,
   listingArtworkServerProcessingError,
 } from "@/lib/listing-request-submit-errors";
 import { listingArtworkCropPayloadFromForm } from "@/lib/listing-artwork-crop-payload";
@@ -327,12 +330,11 @@ export async function createListingArtworkStagingUpload(
     return { ok: false, error: "Artwork upload is not configured on this server." };
   }
   const uploadMax = listingRequestArtworkUploadMaxBytes();
-  const uploadMaxMb = listingRequestArtworkUploadMaxMb();
   if (!Number.isFinite(byteSize) || byteSize <= 0) {
     return { ok: false, error: "Choose an artwork file to upload." };
   }
   if (byteSize > uploadMax) {
-    return { ok: false, error: `Artwork file is too large (max ${uploadMaxMb} MB upload).` };
+    return { ok: false, error: listingArtworkUploadCapError() };
   }
   if (!listingArtworkExtensionForContentType(contentType)) {
     return { ok: false, error: "Use a PNG, JPEG, or WebP artwork file." };
@@ -613,7 +615,7 @@ export async function submitFirstListingSetup(
     if (staged.length > artworkUploadMaxBytes) {
       return {
         ok: false,
-        error: `Artwork file is too large (max ${artworkUploadMaxMb} MB upload).`,
+        error: listingArtworkUploadCapError(),
       };
     }
     rawBuf = staged;
@@ -632,7 +634,7 @@ export async function submitFirstListingSetup(
       if (!cropped) {
         return {
           ok: false,
-          error: listingArtworkServerProcessingError(artworkStoredMaxMb),
+          error: listingArtworkServerCropFailedError(),
         };
       }
       rawBuf = cropped;
@@ -693,8 +695,12 @@ export async function submitFirstListingSetup(
   uploadedRequestImageUrl = url;
 
   if (stagingKeyToDelete) {
-    await deleteListingArtworkStaging(stagingKeyToDelete);
     stagingKeyToDelete = null;
+  }
+  try {
+    await deleteAllListingArtworkStagingForShop(shop.id);
+  } catch (e) {
+    console.error("[submitFirstListingSetup] staging cleanup", e);
   }
 
   const existing = await prisma.shopListing.findUnique({

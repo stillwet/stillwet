@@ -14,10 +14,13 @@ import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
+  listingArtworkFileWithinUploadCap,
+  listingArtworkUploadCapError,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
+import { buildListingArtworkCropPreviewObjectUrl } from "@/lib/listing-artwork-crop-preview-client";
 import { uploadListingArtworkFileToStaging } from "@/lib/listing-artwork-staging-upload-client";
 import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
 import { compressListingArtworkFileIfNeeded } from "@/lib/listing-artwork-source-compress";
@@ -193,6 +196,8 @@ export function ShopFirstListingRequestPanel(props: {
   const [keywordDraft, setKeywordDraft] = useState("");
   const [keywordDuplicateHint, setKeywordDuplicateHint] = useState<string | null>(null);
   const listingFileRef = useRef<HTMLInputElement>(null);
+  const listingServerCropRef = useRef(listingServerCrop);
+  listingServerCropRef.current = listingServerCrop;
   const prefillAppliedListingIdRef = useRef<string | null>(null);
   const pendingListingFdRef = useRef<FormData | null>(null);
   const [attestationOpen, setAttestationOpen] = useState(false);
@@ -220,6 +225,16 @@ export function ShopFirstListingRequestPanel(props: {
     [catalogGroups],
   );
 
+  const selectedCatalogGroup = useMemo(() => {
+    for (const g of catalogGroups) {
+      if (g.option.productId === listingProductId) return g;
+    }
+    return null;
+  }, [catalogGroups, listingProductId]);
+
+  const printAreaW = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
+  const printAreaH = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
+
   useEffect(() => {
     if (!listingArtworkPreviewUrl) {
       setListingArtworkPixels(null);
@@ -227,6 +242,14 @@ export function ShopFirstListingRequestPanel(props: {
       return;
     }
     setListingArtworkMeasureError(null);
+
+    if (listingServerCrop && printAreaW != null && printAreaH != null) {
+      setListingArtworkPixels({ w: printAreaW, h: printAreaH });
+      return () => {
+        URL.revokeObjectURL(listingArtworkPreviewUrl);
+      };
+    }
+
     setListingArtworkPixels(null);
     const img = new Image();
     img.onload = () => {
@@ -244,7 +267,7 @@ export function ShopFirstListingRequestPanel(props: {
       img.onerror = null;
       URL.revokeObjectURL(listingArtworkPreviewUrl);
     };
-  }, [listingArtworkPreviewUrl]);
+  }, [listingArtworkPreviewUrl, listingServerCrop, printAreaW, printAreaH]);
 
   useEffect(() => {
     if (
@@ -268,20 +291,21 @@ export function ShopFirstListingRequestPanel(props: {
     keywordDraft,
   ]);
 
-  const selectedCatalogGroup = useMemo(() => {
-    for (const g of catalogGroups) {
-      if (g.option.productId === listingProductId) return g;
-    }
-    return null;
-  }, [catalogGroups, listingProductId]);
-
   const listingArtworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
   const listingArtworkUploadMaxBytes = listingRequestArtworkUploadMaxBytes();
   const listingArtworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
 
   async function applyListingArtworkPickedFile(file: File) {
     setListingSubmitArtworkFile(null);
+    setListingServerCrop(null);
     setListingArtworkMeasureError(null);
+    if (!listingArtworkFileWithinUploadCap(file.size)) {
+      setListingHasFile(false);
+      setListingArtworkPreviewUrl(null);
+      setListingArtworkMeasureError(listingArtworkUploadCapError());
+      if (listingFileRef.current) listingFileRef.current.value = "";
+      return;
+    }
     const pw = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
     const ph = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
     const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
@@ -321,6 +345,10 @@ export function ShopFirstListingRequestPanel(props: {
   }
 
   useEffect(() => {
+    const staleStagingKey = listingServerCropRef.current?.stagingKey;
+    if (staleStagingKey) {
+      void abandonUnconfirmedListingRequestSubmit(staleStagingKey);
+    }
     setListingSubmitArtworkFile(null);
     setListingServerCrop(null);
     setListingHasFile(false);
@@ -412,11 +440,8 @@ export function ShopFirstListingRequestPanel(props: {
     if (!(art instanceof File) || art.size === 0) {
       return { ok: false, error: "Upload a print-ready artwork file." };
     }
-    if (art.size > listingArtworkUploadMaxBytes) {
-      return {
-        ok: false,
-        error: `Artwork file is too large (max ${listingArtworkUploadMaxMb} MB upload).`,
-      };
+    if (!listingArtworkFileWithinUploadCap(art.size)) {
+      return { ok: false, error: listingArtworkUploadCapError() };
     }
 
     const upload = await uploadListingArtworkFileToStaging(art, (current, total) => {
@@ -551,16 +576,14 @@ export function ShopFirstListingRequestPanel(props: {
   }
 
   const listingRequestItemNameOk = listingRequestItemName.trim().length > 0;
-  const printAreaW = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
-  const printAreaH = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
   const requiresPrintCrop = Boolean(
     printAreaW != null && printAreaH != null && printAreaW > 0 && printAreaH > 0,
   );
   const minArtworkDpi = selectedCatalogGroup?.option.minArtworkDpi ?? null;
   const listingArtworkFileSizeError = (() => {
     const f = listingSubmitArtworkFile;
-    if (f && f.size > listingArtworkUploadMaxBytes) {
-      return `File is too large (max ${listingArtworkUploadMaxMb} MB upload).`;
+    if (f && !listingArtworkFileWithinUploadCap(f.size)) {
+      return listingArtworkUploadCapError();
     }
     return null;
   })();
@@ -811,8 +834,8 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — after crop, compressed to{" "}
-            {listingArtworkStoredMaxMb} MB at print pixel size before upload)
+            Artwork file (PNG or JPEG — uploads capped at {listingArtworkUploadMaxMb} MB; after crop, stored at{" "}
+            {listingArtworkStoredMaxMb} MB max at print pixel size)
             <input
               ref={listingFileRef}
               type="file"
@@ -828,13 +851,12 @@ export function ShopFirstListingRequestPanel(props: {
                   setListingArtworkPreviewUrl(null);
                   return;
                 }
-                if (file.size > listingArtworkUploadMaxBytes) {
+                if (!listingArtworkFileWithinUploadCap(file.size)) {
                   setListingSubmitArtworkFile(null);
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
-                  setListingArtworkMeasureError(
-                    `File is too large (max ${listingArtworkUploadMaxMb} MB upload).`,
-                  );
+                  setListingArtworkMeasureError(listingArtworkUploadCapError());
+                  if (listingFileRef.current) listingFileRef.current.value = "";
                   return;
                 }
                 void applyListingArtworkPickedFile(file);
@@ -1162,18 +1184,35 @@ export function ShopFirstListingRequestPanel(props: {
                   return URL.createObjectURL(result.file);
                 });
               } else {
+                if (!listingArtworkFileWithinUploadCap(result.sourceFile.size)) {
+                  setListingArtworkMeasureError(listingArtworkUploadCapError());
+                  setListingHasFile(false);
+                  setListingServerCrop(null);
+                  return;
+                }
                 setArtworkSourcePreparing(true);
+                const sourceUrl = cropSourceObjectUrl;
+                const previousStagingKey = listingServerCrop?.stagingKey ?? null;
                 try {
+                  let previewUrl: string | null = null;
+                  if (sourceUrl) {
+                    try {
+                      previewUrl = await buildListingArtworkCropPreviewObjectUrl(sourceUrl, result.crop);
+                    } catch {
+                      previewUrl = null;
+                    }
+                  }
                   const upload = await uploadListingArtworkFileToStaging(result.sourceFile, (current, total) => {
                     setArtworkUploadProgress({ current, total });
                   });
                   if (!upload.ok) {
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
                     setListingArtworkMeasureError(upload.error);
                     setListingHasFile(false);
                     setListingServerCrop(null);
                     return;
                   }
-                  const previewUrl = cropSourceObjectUrl;
+                  if (sourceUrl) URL.revokeObjectURL(sourceUrl);
                   setCropSourceObjectUrl(null);
                   setCropSourceFile(null);
                   setListingSubmitArtworkFile(null);
@@ -1181,8 +1220,16 @@ export function ShopFirstListingRequestPanel(props: {
                     stagingKey: upload.stagingKey,
                     cropJson: JSON.stringify(result.crop),
                   });
+                  if (previousStagingKey && previousStagingKey !== upload.stagingKey) {
+                    void abandonUnconfirmedListingRequestSubmit(previousStagingKey);
+                  }
                   setListingHasFile(true);
-                  setListingArtworkPixels({ w: printAreaW, h: printAreaH });
+                  if (!previewUrl) {
+                    setListingArtworkMeasureError("Could not build crop preview. Try cropping again.");
+                    setListingHasFile(false);
+                    setListingServerCrop(null);
+                    return;
+                  }
                   setListingArtworkPreviewUrl((prev) => {
                     if (prev) URL.revokeObjectURL(prev);
                     return previewUrl;

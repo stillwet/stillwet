@@ -44,6 +44,15 @@ export function listingRequestArtworkStoredMaxMb(): number {
   return LISTING_REQUEST_ARTWORK_STORED_MAX_MB;
 }
 
+export function listingArtworkFileWithinUploadCap(bytes: number): boolean {
+  return bytes > 0 && bytes <= LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES;
+}
+
+/** Shown when the user picks or uploads a file over the upload cap. */
+export function listingArtworkUploadCapError(): string {
+  return `Uploads are capped at ${LISTING_REQUEST_ARTWORK_UPLOAD_MAX_MB} MB. Choose a smaller file.`;
+}
+
 /** Per-request chunk for same-origin staging upload (under Vercel ~4.5 MB body cap). */
 export const LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES = 2.5 * 1024 * 1024;
 

@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import type { ListingArtworkCropCompleteResult } from "@/lib/listing-artwork-crop-payload";
+import { renderListingArtworkCropCanvas } from "@/lib/listing-artwork-crop-canvas-client";
 import {
   cropRegionMeetsPrintMinimum,
   effectiveArtworkDpiFromCropAndPrint,
@@ -12,7 +13,11 @@ import {
 } from "@/lib/listing-artwork-print-area";
 import { compressListingArtworkCanvasToFile } from "@/lib/listing-artwork-source-compress";
 import { listingArtworkUseServerSideCrop } from "@/lib/listing-artwork-browser-crop-threshold";
-import { listingRequestArtworkStoredMaxMb } from "@/lib/listing-request-artwork-limits";
+import {
+  listingArtworkFileWithinUploadCap,
+  listingArtworkUploadCapError,
+  listingRequestArtworkStoredMaxMb,
+} from "@/lib/listing-request-artwork-limits";
 
 /** Dark checkerboard so transparent / letterboxed areas read as “empty”, not solid white. */
 export const ARTWORK_TRANSPARENCY_PREVIEW_STYLE: CSSProperties = {
@@ -26,77 +31,6 @@ export const ARTWORK_TRANSPARENCY_PREVIEW_STYLE: CSSProperties = {
 /** Lets the artwork sit smaller than the crop frame (letterbox); export keeps transparency (PNG). */
 const CROP_MIN_ZOOM = 0.2;
 const CROP_MAX_ZOOM = 4;
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.addEventListener("load", () => resolve(img));
-    img.addEventListener("error", () => reject(new Error("Image failed to load")));
-    img.setAttribute("crossOrigin", "anonymous");
-    img.src = src;
-  });
-}
-
-/** Bounding box of a `width`×`height` rectangle rotated by `rotationDeg` (same as react-easy-crop helpers). */
-function rotateSize(width: number, height: number, rotationDeg: number): { width: number; height: number } {
-  const rotRad = (rotationDeg * Math.PI) / 180;
-  return {
-    width: Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
-    height: Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
-  };
-}
-
-/**
- * `pixelCrop` from react-easy-crop is in the rotated image’s bounding-box space when `rotationDeg !== 0`.
- * One rotated buffer, then scale the crop region straight into the print-sized output canvas.
- */
-async function getCroppedCanvas(
-  imageSrc: string,
-  pixelCrop: Area,
-  outW: number,
-  outH: number,
-  rotationDeg: number,
-): Promise<HTMLCanvasElement> {
-  const image = await loadImage(imageSrc);
-  const nw = image.naturalWidth;
-  const nh = image.naturalHeight;
-  const rad = (rotationDeg * Math.PI) / 180;
-  const { width: bboxW, height: bboxH } = rotateSize(nw, nh, rotationDeg);
-
-  const rotated = document.createElement("canvas");
-  rotated.width = Math.round(bboxW);
-  rotated.height = Math.round(bboxH);
-  const rctx = rotated.getContext("2d", { alpha: true });
-  if (!rctx) throw new Error("Canvas unsupported");
-  rctx.clearRect(0, 0, rotated.width, rotated.height);
-  rctx.imageSmoothingEnabled = true;
-  rctx.imageSmoothingQuality = "high";
-  rctx.translate(rotated.width / 2, rotated.height / 2);
-  rctx.rotate(rad);
-  rctx.drawImage(image, -nw / 2, -nh / 2);
-
-  const out = document.createElement("canvas");
-  out.width = outW;
-  out.height = outH;
-  const octx = out.getContext("2d", { alpha: true });
-  if (!octx) throw new Error("Canvas unsupported");
-  octx.clearRect(0, 0, out.width, out.height);
-  octx.imageSmoothingEnabled = true;
-  octx.imageSmoothingQuality = "high";
-  octx.drawImage(
-    rotated,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    outW,
-    outH,
-  );
-
-  return out;
-}
 
 export function ListingArtworkCropDialog({
   open,
@@ -173,6 +107,11 @@ export function ListingArtworkCropDialog({
       );
       return;
     }
+    if (!listingArtworkFileWithinUploadCap(sourceFile.size)) {
+      setApplyError(listingArtworkUploadCapError());
+      return;
+    }
+
     setBusy(true);
     try {
       if (useServerCrop) {
@@ -194,13 +133,17 @@ export function ListingArtworkCropDialog({
         return;
       }
 
-      const canvas = await getCroppedCanvas(
+      const canvas = await renderListingArtworkCropCanvas(
         imageUrl,
         croppedAreaPixels,
         printWidthPx,
         printHeightPx,
         rotation,
       );
+      if (!canvas) {
+        setApplyError("Could not build the cropped image. Try another file.");
+        return;
+      }
       const compressed = await compressListingArtworkCanvasToFile(canvas, "listing-artwork", false);
       if (!compressed.ok) {
         setApplyError(compressed.error);
@@ -221,7 +164,7 @@ export function ListingArtworkCropDialog({
       ? "Saving crop…"
       : `Compressing to ${listingRequestArtworkStoredMaxMb()} MB…`
     : useServerCrop
-      ? "Upload crop for server processing"
+      ? "Upload + Crop"
       : "Use cropped artwork";
 
   return (
@@ -236,12 +179,6 @@ export function ListingArtworkCropDialog({
           <h3 id="listing-artwork-crop-title" className="text-sm font-semibold text-zinc-100">
             Crop artwork to print area
           </h3>
-          {useServerCrop ? (
-            <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
-              Your crop is saved and the final {printWidthPx}×{printHeightPx}px file is built on the server so large
-              artwork files do not crash your browser.
-            </p>
-          ) : null}
         </div>
         <div className="relative h-[min(52vh,400px)] w-full" style={ARTWORK_TRANSPARENCY_PREVIEW_STYLE}>
           <Cropper

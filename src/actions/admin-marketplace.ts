@@ -9,10 +9,19 @@ import { getAdminSessionReadonly } from "@/lib/session";
 import { ListingRequestStatus } from "@/generated/prisma/enums";
 
 const ADMIN_LISTING_REMOVAL_NOTES_MAX = 4000;
+
+async function cleanupShopListingArtworkStaging(shopId: string): Promise<void> {
+  try {
+    await deleteAllListingArtworkStagingForShop(shopId);
+  } catch (e) {
+    console.error("[admin] listing artwork staging cleanup", e);
+  }
+}
 import { PLATFORM_SHOP_SLUG, listingFeeCentsForOrdinal } from "@/lib/marketplace-constants";
 import { getListingOrdinal, syncFreeListingFeeWaivers } from "@/lib/listing-fee";
 import {
   deleteShopListingAdminSecondaryObject,
+  deleteAllListingArtworkStagingForShop,
   deleteShopListingRequestImagesFromR2,
   deleteShopListingSupplementObject,
   deleteShopListingSupplementPendingObject,
@@ -417,6 +426,7 @@ async function tryExecuteAdminApproveListingRequest(
 
   const requestImageUrls = shopListingRequestImageUrlStrings(listing.requestImages);
   await deleteShopListingRequestImagesFromR2(listing.shopId, requestImageUrls);
+  await cleanupShopListingArtworkStaging(listing.shopId);
 
   if (isPlatform) {
     await prisma.shopListing.update({
@@ -654,6 +664,7 @@ async function executeRemoveListingFromRequestsQueueOnce(listingId: string): Pro
 
   const requestImageUrls = shopListingRequestImageUrlStrings(listing.requestImages);
   await deleteShopListingRequestImagesFromR2(listing.shopId, requestImageUrls);
+  await cleanupShopListingArtworkStaging(listing.shopId);
 
   const now = new Date();
   const base = {
@@ -876,6 +887,7 @@ export async function adminDeleteShopListingRecord(formData: FormData) {
 
   const requestImageUrls = shopListingRequestImageUrlStrings(listing.requestImages);
   await deleteShopListingRequestImagesFromR2(listing.shopId, requestImageUrls);
+  await cleanupShopListingArtworkStaging(listing.shopId);
   await deleteShopListingSupplementObject(listing.shopId, listingId);
   await deleteShopListingSupplementPendingObject(listing.shopId, listingId);
   await deleteShopListingAdminSecondaryObject(listing.shopId, listingId);
@@ -930,6 +942,7 @@ async function tryExecuteAdminRejectListingWithoutNotice(
   }
   const requestImageUrls = shopListingRequestImageUrlStrings(listing.requestImages);
   await deleteShopListingRequestImagesFromR2(listing.shopId, requestImageUrls);
+  await cleanupShopListingArtworkStaging(listing.shopId);
   await deleteShopListingAdminSecondaryObject(listing.shopId, listingId);
   await prisma.shopListing.update({
     where: { id: listingId },
