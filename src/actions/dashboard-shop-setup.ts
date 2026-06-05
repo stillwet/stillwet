@@ -15,10 +15,13 @@ import {
   deleteR2ObjectsByKeys,
   isListingArtworkStagingKeyForShop,
   isR2UploadConfigured,
+  listingRequestArtworkUrlToObjectKey,
+  listR2ObjectKeysWithPrefix,
   loadListingArtworkStagingBuffer,
   publicUrlToR2ObjectKey,
   putPublicR2Object,
   shopListingArtworkStagingObjectKey,
+  shopListingRequestImageUrlStrings,
   shopProfileAvatarObjectKey,
   verifyListingArtworkStagingR2Write,
 } from "@/lib/r2-upload";
@@ -67,6 +70,8 @@ import {
 import type { ShopSocialLinksRecord } from "@/lib/shop-social-links";
 import { revalidatePublicStorefront } from "@/lib/revalidate-public-storefront";
 import { plainTextNoUrlsValidationError } from "@/lib/plain-text-no-urls";
+import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
+import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
 
 const WELCOME_MAX = 280;
 const STOREFRONT_ITEM_BLURB_MAX = 280;
@@ -337,6 +342,83 @@ export async function createListingArtworkStagingUpload(
   return { ok: true, stagingKey };
 }
 
+async function listingRequestArtworkKeyStillReferenced(
+  shopId: string,
+  objectKey: string,
+  publicUrl?: string,
+): Promise<boolean> {
+  const listings = await prisma.shopListing.findMany({
+    where: { shopId },
+    select: { requestImages: true },
+  });
+  for (const listing of listings) {
+    for (const url of shopListingRequestImageUrlStrings(listing.requestImages)) {
+      if (publicUrl && url === publicUrl) return true;
+      const key =
+        listingRequestArtworkUrlToObjectKey(url, shopId) ?? publicUrlToR2ObjectKey(url);
+      if (key === objectKey) return true;
+    }
+  }
+  return false;
+}
+
+async function cleanupUnconfirmedListingRequestUpload(params: {
+  shopId: string;
+  stagingKey?: string | null;
+  requestImageKey?: string | null;
+  requestImageUrl?: string | null;
+}): Promise<void> {
+  const stagingKey = params.stagingKey?.trim();
+  if (stagingKey && isListingArtworkStagingKeyForShop(stagingKey, params.shopId)) {
+    try {
+      await deleteListingArtworkStaging(stagingKey);
+    } catch (e) {
+      console.error("[cleanupUnconfirmedListingRequestUpload] staging", e);
+    }
+  }
+
+  const requestImageKey = params.requestImageKey?.trim();
+  if (!requestImageKey?.startsWith(`shops/${params.shopId}/listing-request/`)) {
+    return;
+  }
+  try {
+    if (await listingRequestArtworkKeyStillReferenced(params.shopId, requestImageKey, params.requestImageUrl ?? undefined)) {
+      return;
+    }
+    await deleteR2ObjectsByKeys([requestImageKey]);
+  } catch (e) {
+    console.error("[cleanupUnconfirmedListingRequestUpload] request image", e);
+  }
+}
+
+/** Client recovery: delete staged/orphan artwork when submit success could not be confirmed. */
+export async function abandonUnconfirmedListingRequestSubmit(
+  stagingKey?: string | null,
+): Promise<void> {
+  const user = await requireShopOwner();
+  const shopId = user.shop.id;
+  await cleanupUnconfirmedListingRequestUpload({
+    shopId,
+    stagingKey,
+  });
+
+  try {
+    const prefix = `shops/${shopId}/listing-request/`;
+    const keys = await listR2ObjectKeysWithPrefix(prefix);
+    const orphanKeys: string[] = [];
+    for (const key of keys) {
+      if (!(await listingRequestArtworkKeyStillReferenced(shopId, key))) {
+        orphanKeys.push(key);
+      }
+    }
+    if (orphanKeys.length > 0) {
+      await deleteR2ObjectsByKeys(orphanKeys);
+    }
+  } catch (e) {
+    console.error("[abandonUnconfirmedListingRequestSubmit] orphan listing-request scan", e);
+  }
+}
+
 export async function submitFirstListingSetup(
   formData: FormData,
 ): Promise<ShopSetupActionResult> {
@@ -506,6 +588,10 @@ export async function submitFirstListingSetup(
 
   const stagingKeyRaw = String(formData.get("listingArtworkStagingKey") ?? "").trim();
   let stagingKeyToDelete: string | null = null;
+  let uploadedRequestImageKey: string | null = null;
+  let uploadedRequestImageUrl: string | null = null;
+
+  try {
   let rawBuf: Buffer;
 
   if (stagingKeyRaw) {
@@ -574,14 +660,17 @@ export async function submitFirstListingSetup(
   }
 
   const key = `shops/${shop.id}/listing-request/${randomUUID()}.${artwork.fileExtension}`;
+  uploadedRequestImageKey = key;
   const url = await putPublicR2Object({
     key,
     body: artwork.body,
     contentType: artwork.contentType,
   });
+  uploadedRequestImageUrl = url;
 
   if (stagingKeyToDelete) {
     await deleteListingArtworkStaging(stagingKeyToDelete);
+    stagingKeyToDelete = null;
   }
 
   const existing = await prisma.shopListing.findUnique({
@@ -589,6 +678,13 @@ export async function submitFirstListingSetup(
   });
   if (existing) {
     if (existing.active || existing.requestStatus === ListingRequestStatus.approved) {
+      await cleanupUnconfirmedListingRequestUpload({
+        shopId: shop.id,
+        requestImageKey: uploadedRequestImageKey,
+        requestImageUrl: uploadedRequestImageUrl,
+      });
+      uploadedRequestImageKey = null;
+      uploadedRequestImageUrl = null;
       return { ok: false, error: "That item is already live on your shop." };
     }
     if (
@@ -596,6 +692,13 @@ export async function submitFirstListingSetup(
       existing.requestStatus === ListingRequestStatus.images_ok ||
       existing.requestStatus === ListingRequestStatus.printify_item_created
     ) {
+      await cleanupUnconfirmedListingRequestUpload({
+        shopId: shop.id,
+        requestImageKey: uploadedRequestImageKey,
+        requestImageUrl: uploadedRequestImageUrl,
+      });
+      uploadedRequestImageKey = null;
+      uploadedRequestImageUrl = null;
       return {
         ok: false,
         error: "That item is already waiting for admin review. Pick another product or wait for a decision.",
@@ -649,18 +752,31 @@ export async function submitFirstListingSetup(
     shop.slug,
     saved.id,
   );
-  const shopSlug = shop.slug;
   after(() => {
     try {
-      revalidatePath("/dashboard");
-      revalidatePath(`/s/${shopSlug}`);
       revalidateAdminViews();
     } catch (e) {
-      console.error("[submitFirstListingSetup] revalidatePath failed", e);
+      console.error("[submitFirstListingSetup] revalidateAdminViews failed", e);
     }
   });
   if (gate.downgraded && gate.message) {
     return { ok: true, message: gate.message };
   }
+  uploadedRequestImageKey = null;
+  uploadedRequestImageUrl = null;
   return { ok: true };
+  } catch (e) {
+    rethrowNextNavigationError(e);
+    console.error("[submitFirstListingSetup]", e);
+    await cleanupUnconfirmedListingRequestUpload({
+      shopId: shop.id,
+      stagingKey: stagingKeyToDelete,
+      requestImageKey: uploadedRequestImageKey,
+      requestImageUrl: uploadedRequestImageUrl,
+    });
+    return {
+      ok: false,
+      error: LISTING_UPLOAD_CRASH_ERROR,
+    };
+  }
 }

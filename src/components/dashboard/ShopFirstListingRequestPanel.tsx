@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import {
+  abandonUnconfirmedListingRequestSubmit,
   createListingArtworkStagingUpload,
   submitFirstListingSetup,
   type ShopSetupActionResult,
@@ -21,6 +21,7 @@ import {
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 import { listingArtworkStagingChunkCount } from "@/lib/listing-artwork-staging-chunks";
+import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
 import { compressListingArtworkSourceIfNeeded } from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
@@ -100,6 +101,23 @@ function CatalogExampleLink({ href }: { href: string }) {
   );
 }
 
+async function probeDashboardListingCount(): Promise<number | null> {
+  for (const delayMs of [0, 400, 1200]) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    try {
+      const r = await fetch("/api/dashboard/listings", { credentials: "same-origin" });
+      if (!r.ok) continue;
+      const data = (await r.json()) as { listings?: unknown[] };
+      return data.listings?.length ?? 0;
+    } catch {
+      /* retry */
+    }
+  }
+  return null;
+}
+
 export function ShopFirstListingRequestPanel(props: {
   catalogGroups: ShopSetupCatalogGroup[];
   r2Configured: boolean;
@@ -115,6 +133,8 @@ export function ShopFirstListingRequestPanel(props: {
   moderationPhrases?: readonly string[];
   /** After a successful submit — e.g. switch to Listings tab and refresh server onboarding state. */
   onListingSubmittedSuccess?: () => void;
+  /** Listings already on the shop before submit — used to detect success after transport/RSC errors. */
+  knownListingCount?: number;
 }) {
   const {
     catalogGroups,
@@ -134,9 +154,9 @@ export function ShopFirstListingRequestPanel(props: {
     embedded,
     moderationPhrases = [],
     onListingSubmittedSuccess,
+    knownListingCount = 0,
   } = props;
 
-  const router = useRouter();
   const [isListingPending, startListingTransition] = useTransition();
   const [message, setMessage] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [listingItemNameModerationBlurError, setListingItemNameModerationBlurError] = useState<
@@ -437,39 +457,15 @@ export function ShopFirstListingRequestPanel(props: {
     setListingItemNameModerationBlurError(null);
     setListingBlurbModerationBlurError(null);
     setListingKeywordsModerationBlurError(null);
+    const listingCountBefore = knownListingCount;
     startListingTransition(async () => {
       const artworkPrep = await prepareListingArtworkFormData(fd);
       if (!artworkPrep.ok) {
         setMessage({ tone: "err", text: artworkPrep.error });
         return;
       }
-      let r: ShopSetupActionResult;
-      try {
-        r = await submitFirstListingSetup(fd);
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        const bodyTooLarge =
-          /body exceeded|1\s*mb limit|413|payload too large/i.test(msg) ||
-          /unexpected response was received from the server/i.test(msg);
-        const rscRenderFailure = /error occurred in the Server Components render/i.test(msg);
-        setMessage({
-          tone: "err",
-          text: bodyTooLarge
-            ? "Upload hit a server request limit. Refresh the page and try again — artwork should upload in the background before submit."
-            : rscRenderFailure
-              ? "Submit may have succeeded but the dashboard could not refresh. Open the Listings tab to confirm, or reload the page."
-              : msg || "Could not submit your listing. Try again or contact support.",
-        });
-        return;
-      }
-      if (r.ok) {
-        setMessage({
-          tone: "ok",
-          text:
-            r.message ?? "Listing submitted.",
-        });
-        setListingSavedFlash(true);
-        window.setTimeout(() => setListingSavedFlash(false), 2500);
+
+      function clearListingFormAfterSuccess() {
         setListingProductId("");
         setListingPrice("");
         setListingRequestItemName("");
@@ -481,11 +477,61 @@ export function ShopFirstListingRequestPanel(props: {
         setListingSubmitArtworkFile(null);
         setListingArtworkPreviewUrl(null);
         if (listingFileRef.current) listingFileRef.current.value = "";
+      }
+
+      async function finishListingSubmitSuccess(successText: string) {
+        setMessage({ tone: "ok", text: successText });
+        setListingSavedFlash(true);
+        window.setTimeout(() => setListingSavedFlash(false), 2500);
+        clearListingFormAfterSuccess();
         if (onListingSubmittedSuccess) {
           onListingSubmittedSuccess();
-        } else {
-          router.refresh();
         }
+      }
+
+      async function failUnconfirmedSubmit(stagingKey: string | null) {
+        try {
+          await abandonUnconfirmedListingRequestSubmit(stagingKey);
+        } catch {
+          /* best-effort cleanup */
+        }
+        setMessage({ tone: "err", text: LISTING_UPLOAD_CRASH_ERROR });
+      }
+
+      async function recoverFromSubmitTransportError(stagingKey: string | null): Promise<boolean> {
+        if (onListingSubmittedSuccess) onListingSubmittedSuccess();
+        const countAfter = await probeDashboardListingCount();
+        if (countAfter != null && countAfter > listingCountBefore) {
+          await finishListingSubmitSuccess("Listing submitted. Check the Listings tab for status.");
+          return true;
+        }
+        await failUnconfirmedSubmit(stagingKey);
+        return false;
+      }
+
+      const stagingKey = String(fd.get("listingArtworkStagingKey") ?? "").trim() || null;
+
+      let r: ShopSetupActionResult;
+      try {
+        r = await submitFirstListingSetup(fd);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        const bodyTooLarge =
+          /body exceeded|1\s*mb limit|413|payload too large/i.test(msg) ||
+          /unexpected response was received from the server/i.test(msg);
+        const rscRenderFailure = /error occurred in the Server Components render/i.test(msg);
+        if (rscRenderFailure || bodyTooLarge) {
+          const recovered = await recoverFromSubmitTransportError(stagingKey);
+          if (recovered) return;
+          return;
+        }
+        await failUnconfirmedSubmit(stagingKey);
+        return;
+      }
+      if (r.ok) {
+        await finishListingSubmitSuccess(r.message ?? "Listing submitted.");
+      } else if (r.error === LISTING_UPLOAD_CRASH_ERROR) {
+        await failUnconfirmedSubmit(stagingKey);
       } else {
         setMessage({ tone: "err", text: r.error });
       }

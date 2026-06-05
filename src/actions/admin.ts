@@ -23,6 +23,7 @@ import {
   resolvePrintifyPrimaryImageUrl,
 } from "@/lib/printify-import-image";
 import { pruneOrphanListingImagesFromR2 } from "@/lib/r2-listing-prune";
+import { purgeAllR2ExceptSiteLogo } from "@/lib/r2-purge-all-except-site-logo";
 import {
   deleteListingImagesFromR2,
   isR2UploadConfigured,
@@ -615,6 +616,54 @@ export async function adminPruneOrphanListingImagesR2(formData: FormData): Promi
     redirect(
       `${ADMIN_BACKEND_BASE_PATH}?tab=printify&r2Prune=err&r2PruneReason=${encodeURIComponent(msg.replace(/\s+/g, " ").slice(0, 240))}`,
     );
+  }
+}
+
+export type AdminPurgeR2ExceptSiteLogoResult =
+  | {
+      ok: true;
+      variant: "preview" | "deleted";
+      totalObjectCount: number;
+      keptKeys: string[];
+      targetKeyCount: number;
+      deletedCount: number;
+      targetKeysSample: string[];
+    }
+  | { ok: false; error: string };
+
+export async function adminPurgeR2ExceptSiteLogoAction(
+  _prev: AdminPurgeR2ExceptSiteLogoResult | null,
+  formData: FormData,
+): Promise<AdminPurgeR2ExceptSiteLogoResult> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) {
+    return { ok: false, error: "Unauthorized." };
+  }
+
+  const intent = String(formData.get("intent") ?? "preview").trim();
+  const dryRun = intent !== "delete";
+
+  if (!dryRun && formData.get("confirm") !== "on") {
+    return { ok: false, error: "Check confirm before deleting." };
+  }
+
+  if (!isR2UploadConfigured()) {
+    return { ok: false, error: "R2 is not configured on this server." };
+  }
+
+  try {
+    const r = await purgeAllR2ExceptSiteLogo({ dryRun });
+    return {
+      ok: true,
+      variant: dryRun ? "preview" : "deleted",
+      totalObjectCount: r.totalObjectCount,
+      keptKeys: r.keptKeys,
+      targetKeyCount: r.targetKeyCount,
+      deletedCount: r.deletedCount,
+      targetKeysSample: r.targetKeysSample,
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
 }
 

@@ -1,9 +1,11 @@
 import { emailLinkOrigin } from "@/lib/public-app-url";
 import { readR2Env } from "@/lib/r2-upload";
-import { SITE_EMAIL_LOGO_PUBLIC_PATH } from "@/lib/site-email-logo-constants";
+import {
+  SITE_EMAIL_LOGO_PUBLIC_PATH,
+  SITE_EMAIL_LOGO_R2_OBJECT_KEY,
+} from "@/lib/site-email-logo-constants";
 
-/** Stable R2 object key for the PNG used in transactional email headers. */
-export const SITE_EMAIL_LOGO_R2_OBJECT_KEY = "site/still-wet-logo-2048.png";
+export { SITE_EMAIL_LOGO_R2_OBJECT_KEY };
 
 /** Public HTTPS URL when the logo is on R2 (`R2_PUBLIC_BASE_URL` + key). */
 export function siteEmailLogoR2PublicUrl(): string | undefined {

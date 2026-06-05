@@ -30,6 +30,7 @@ import {
   AdminShellCountsProvider,
 } from "@/components/admin/AdminMainShellClient";
 import { AdminDatabaseConfigPanel } from "@/components/admin/AdminDatabaseConfigPanel";
+import { AdminPurgeListingRequestAvatarsR2Button } from "@/components/admin/AdminPurgeListingRequestAvatarsR2Button";
 import {
   productionLocalhostDatabaseUrlKeys,
   runtimeDatabaseUrlFromEnv,
@@ -279,6 +280,7 @@ async function AdminDashboardPageBody({
           )}
         </div>
         <div className="flex items-center gap-4">
+          <AdminPurgeListingRequestAvatarsR2Button />
           <form action={logoutAdmin}>
             <button
               type="submit"

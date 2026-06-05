@@ -1769,6 +1769,7 @@ export function DashboardMainTabs(props: {
               stripePublishableKey={stripePublishableKey}
               moderationPhrases={effectiveModerationPhrases}
               onListingSubmittedSuccess={afterListingSubmitted}
+              knownListingCount={effectiveListings.length}
               embedded
             />
           ) : null}
