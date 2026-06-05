@@ -13,7 +13,11 @@ import { ListingArtworkCropDialog } from "@/components/dashboard/ListingArtworkC
 import { ListingArtworkComposeDialog } from "@/components/dashboard/ListingArtworkComposeDialog";
 import { listingArtworkLetterboxPreviewStyle } from "@/lib/listing-artwork-letterbox-fill";
 import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
-import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
+import { flattenShopBaselineCatalogGroups, partitionShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
+import {
+  CATALOG_ARTWORK_SOURCE_TIER_GUIDANCE,
+  CATALOG_ARTWORK_SOURCE_TIER_LABELS,
+} from "@/lib/listing-artwork-source-tier";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
@@ -250,6 +254,11 @@ export function ShopFirstListingRequestPanel(props: {
 
   const catalogOptions = useMemo(
     () => flattenShopBaselineCatalogGroups(catalogGroups),
+    [catalogGroups],
+  );
+
+  const catalogGroupsByTier = useMemo(
+    () => partitionShopBaselineCatalogGroups(catalogGroups),
     [catalogGroups],
   );
 
@@ -795,7 +804,7 @@ export function ShopFirstListingRequestPanel(props: {
             <p
               className={`mt-1 text-[11px] leading-relaxed text-zinc-600${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
             >
-              Select a base item your design will be printed on.
+              Select a base item your design will be printed on. Items are grouped by typical phone photo suitability.
             </p>
             <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/40">
               <div
@@ -812,42 +821,87 @@ export function ShopFirstListingRequestPanel(props: {
                 aria-label="Items from admin catalog"
                 aria-disabled={shopAtInReviewListingLimit ? true : undefined}
               >
-                {catalogGroups.map((g) => {
-                  const selected = listingProductId === g.option.productId;
-                  const catalogPickDisabled = listingRequestFieldsDisabled;
-                  return (
-                    <li key={g.itemId}>
-                      <div className="flex items-center gap-x-3 px-3 py-2.5">
-                        <label
-                          className={`flex min-w-0 flex-1 items-center gap-2.5 text-sm text-zinc-200 ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                        >
-                          <input
-                            type="radio"
-                            name="catalogProductPick"
-                            value={g.option.productId}
-                            checked={selected}
-                            disabled={catalogPickDisabled}
-                            onChange={() => setListingProductId(g.option.productId)}
-                            className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
-                          />
-                          <span className="min-w-0 truncate">{g.itemName}</span>
-                        </label>
-                        <span
-                          className={`w-20 shrink-0 text-right text-xs tabular-nums text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                        >
-                          {formatUsdFromCents(g.option.minPriceCents)}
-                        </span>
-                        {g.option.exampleHref ? (
-                          <CatalogExampleLink href={g.option.exampleHref} />
-                        ) : (
-                          <span className="w-14 shrink-0 text-center text-[11px] text-zinc-700">—</span>
-                        )}
+                {(
+                  [
+                    {
+                      key: "phone_pic_safe",
+                      title: CATALOG_ARTWORK_SOURCE_TIER_LABELS.phone_pic_safe,
+                      groups: catalogGroupsByTier.phonePicSafe,
+                    },
+                    {
+                      key: "camera_or_vector_only",
+                      title: `${CATALOG_ARTWORK_SOURCE_TIER_LABELS.camera_or_vector_only} -- requires higher resolution images`,
+                      groups: catalogGroupsByTier.cameraOrVectorOnly,
+                    },
+                  ] as const
+                ).map((section) =>
+                  section.groups.length === 0 ? null : (
+                    <li key={section.key} className="list-none">
+                      <div
+                        className={`sticky top-0 z-[1] border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                        aria-hidden
+                      >
+                        {section.title}
                       </div>
+                      <ul className="divide-y divide-zinc-800/80" role="group" aria-label={section.title}>
+                        {section.groups.map((g) => {
+                          const selected = listingProductId === g.option.productId;
+                          const catalogPickDisabled = listingRequestFieldsDisabled;
+                          return (
+                            <li key={g.itemId}>
+                              <div className="flex items-center gap-x-3 px-3 py-2.5">
+                                <label
+                                  className={`flex min-w-0 flex-1 items-center gap-2.5 text-sm text-zinc-200 ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name="catalogProductPick"
+                                    value={g.option.productId}
+                                    checked={selected}
+                                    disabled={catalogPickDisabled}
+                                    onChange={() => setListingProductId(g.option.productId)}
+                                    className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
+                                  />
+                                  <span className="min-w-0 truncate">{g.itemName}</span>
+                                </label>
+                                <span
+                                  className={`w-20 shrink-0 text-right text-xs tabular-nums text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                                >
+                                  {formatUsdFromCents(g.option.minPriceCents)}
+                                </span>
+                                {g.option.exampleHref ? (
+                                  <CatalogExampleLink href={g.option.exampleHref} />
+                                ) : (
+                                  <span className="w-14 shrink-0 text-center text-[11px] text-zinc-700">—</span>
+                                )}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </li>
-                  );
-                })}
+                  ),
+                )}
               </ul>
             </div>
+            {selectedCatalogGroup ? (
+              <div
+                className={`mt-2 rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-2.5 text-xs leading-relaxed text-zinc-400${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+              >
+                <p className="font-medium text-zinc-300">
+                  {CATALOG_ARTWORK_SOURCE_TIER_LABELS[selectedCatalogGroup.option.artworkSourceTier]}
+                </p>
+                <p className="mt-1">
+                  {CATALOG_ARTWORK_SOURCE_TIER_GUIDANCE[selectedCatalogGroup.option.artworkSourceTier]}
+                </p>
+                {selectedCatalogGroup.option.imageRequirementLabel ? (
+                  <p className="mt-1.5 text-zinc-500">
+                    <span className="text-zinc-600">Note: </span>
+                    {selectedCatalogGroup.option.imageRequirementLabel}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
           <div
             className={shopAtInReviewListingLimit ? "pointer-events-none opacity-45" : undefined}

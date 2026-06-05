@@ -27,6 +27,7 @@ export async function AdminListTab() {
       itemPrintAreaHeightPx: item.itemPrintAreaHeightPx,
       itemMinArtworkDpi: item.itemMinArtworkDpi,
       itemArtworkLetterboxFill: item.itemArtworkLetterboxFill,
+      itemArtworkSourceTierOverride: item.itemArtworkSourceTierOverride,
       tags: item.catalogTags.map((ct) => ({
         id: ct.tag.id,
         name: ct.tag.name,

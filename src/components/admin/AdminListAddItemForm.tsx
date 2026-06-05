@@ -7,7 +7,7 @@ import {
   type AdminCatalogItemSaveResult,
 } from "@/actions/admin-catalog-items";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
-import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
+import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
 import { parseAdminCatalogItemArtworkForm, validateItemLevelWhenNoVariants } from "@/lib/admin-catalog-item";
 
@@ -25,6 +25,8 @@ export function AdminListAddItemForm() {
   const [itemArtworkLetterboxFill, setItemArtworkLetterboxFill] = useState<ListingArtworkLetterboxFill>(
     ListingArtworkLetterboxFill.transparent,
   );
+  const [itemArtworkSourceTierOverride, setItemArtworkSourceTierOverride] =
+    useState<CatalogArtworkSourceTierOverride>(AdminCatalogItemArtworkSourceTierOverride.auto);
   const [clientError, setClientError] = useState<string | null>(null);
 
   const [saveState, saveAction, savePending] = useActionState<
@@ -44,6 +46,7 @@ export function AdminListAddItemForm() {
     setItemPrintAreaHeightPx("");
     setItemMinArtworkDpi("");
     setItemArtworkLetterboxFill(ListingArtworkLetterboxFill.transparent);
+    setItemArtworkSourceTierOverride(AdminCatalogItemArtworkSourceTierOverride.auto);
     setClientError(null);
     router.refresh();
   }, [saveState, router]);
@@ -71,6 +74,7 @@ export function AdminListAddItemForm() {
       itemPrintAreaHeightPx,
       itemMinArtworkDpi,
       itemArtworkLetterboxFill,
+      itemArtworkSourceTierOverride,
     );
     if (!ar.ok) {
       setClientError(ar.error);
@@ -88,6 +92,7 @@ export function AdminListAddItemForm() {
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
     fd.set("itemArtworkLetterboxFill", itemArtworkLetterboxFill);
+    fd.set("itemArtworkSourceTierOverride", itemArtworkSourceTierOverride);
     saveAction(fd);
   }
 
@@ -127,11 +132,13 @@ export function AdminListAddItemForm() {
           printAreaHeightPx={itemPrintAreaHeightPx}
           minArtworkDpi={itemMinArtworkDpi}
           artworkLetterboxFill={itemArtworkLetterboxFill}
+          artworkSourceTierOverride={itemArtworkSourceTierOverride}
           onChangeImageRequirementLabel={setItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setItemMinArtworkDpi}
           onChangeArtworkLetterboxFill={setItemArtworkLetterboxFill}
+          onChangeArtworkSourceTierOverride={setItemArtworkSourceTierOverride}
         />
 
         {displayError ? (

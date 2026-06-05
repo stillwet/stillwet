@@ -12,7 +12,8 @@ import {
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
-import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
+import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
+import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
 import {
   AdminCatalogItemTagsEditor,
@@ -33,6 +34,7 @@ export type AdminListItemSerializable = {
   itemPrintAreaHeightPx: number | null;
   itemMinArtworkDpi: number | null;
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
+  itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
   tags: AdminListItemTag[];
 };
 
@@ -74,6 +76,9 @@ export function AdminListItemEditForm({
   const [editItemArtworkLetterboxFill, setEditItemArtworkLetterboxFill] = useState(
     item.itemArtworkLetterboxFill,
   );
+  const [editItemArtworkSourceTierOverride, setEditItemArtworkSourceTierOverride] = useState(
+    item.itemArtworkSourceTierOverride,
+  );
   const [clientError, setClientError] = useState<string | null>(null);
 
   const [saveState, saveAction, savePending] = useActionState<
@@ -110,6 +115,7 @@ export function AdminListItemEditForm({
       editItemPrintAreaHeightPx,
       editItemMinArtworkDpi,
       editItemArtworkLetterboxFill,
+      editItemArtworkSourceTierOverride,
     );
     if (!ar.ok) {
       setClientError(ar.error);
@@ -128,6 +134,7 @@ export function AdminListItemEditForm({
     fd.set("itemPrintAreaHeightPx", editItemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
     fd.set("itemArtworkLetterboxFill", editItemArtworkLetterboxFill);
+    fd.set("itemArtworkSourceTierOverride", editItemArtworkSourceTierOverride);
     saveAction(fd);
   }
 
@@ -166,11 +173,13 @@ export function AdminListItemEditForm({
           printAreaHeightPx={editItemPrintAreaHeightPx}
           minArtworkDpi={editItemMinArtworkDpi}
           artworkLetterboxFill={editItemArtworkLetterboxFill}
+          artworkSourceTierOverride={editItemArtworkSourceTierOverride}
           onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
           onChangeArtworkLetterboxFill={setEditItemArtworkLetterboxFill}
+          onChangeArtworkSourceTierOverride={setEditItemArtworkSourceTierOverride}
         />
         {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">

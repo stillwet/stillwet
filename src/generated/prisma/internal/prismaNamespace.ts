@@ -4754,6 +4754,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemMinArtworkDpi: 'itemMinArtworkDpi',
   itemLargeListingArtwork: 'itemLargeListingArtwork',
   itemArtworkLetterboxFill: 'itemArtworkLetterboxFill',
+  itemArtworkSourceTierOverride: 'itemArtworkSourceTierOverride',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -5287,6 +5288,20 @@ export type EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel> = FieldRe
  * Reference to a field of type 'ListingArtworkLetterboxFill[]'
  */
 export type ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ListingArtworkLetterboxFill[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AdminCatalogItemArtworkSourceTierOverride'
+ */
+export type EnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminCatalogItemArtworkSourceTierOverride'>
+    
+
+
+/**
+ * Reference to a field of type 'AdminCatalogItemArtworkSourceTierOverride[]'
+ */
+export type ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminCatalogItemArtworkSourceTierOverride[]'>
     
 
 

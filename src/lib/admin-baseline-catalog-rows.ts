@@ -14,6 +14,7 @@ const adminCatalogSelect = {
   itemMinArtworkDpi: true,
   itemArtworkLetterboxFill: true,
   itemLargeListingArtwork: true,
+  itemArtworkSourceTierOverride: true,
 } as const;
 
 /** Admin baseline rows for shop dashboard catalog. */
@@ -63,6 +64,7 @@ const adminListItemSelect = {
   itemPrintAreaHeightPx: true,
   itemMinArtworkDpi: true,
   itemArtworkLetterboxFill: true,
+  itemArtworkSourceTierOverride: true,
   catalogTags: {
     select: {
       tag: { select: { id: true, name: true, slug: true } },

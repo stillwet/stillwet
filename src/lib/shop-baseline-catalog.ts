@@ -2,6 +2,11 @@ import {
   resolveListingArtworkLetterboxFill,
   type ListingArtworkLetterboxFill,
 } from "@/lib/listing-artwork-letterbox-fill";
+import {
+  resolveCatalogArtworkSourceTier,
+  type CatalogArtworkSourceTier,
+  type CatalogArtworkSourceTierOverride,
+} from "@/lib/listing-artwork-source-tier";
 
 /** Picker / form value: opaque token, not a storefront Product id until submit. */
 const PICK_PREFIX = "ab|";
@@ -25,6 +30,8 @@ export type ShopSetupCatalogOption = {
   minArtworkDpi: number | null;
   /** Letterbox margin when artwork is zoomed out (transparent vs white print substrate). */
   artworkLetterboxFill: ListingArtworkLetterboxFill;
+  /** Phone pic safe vs camera/vector guidance for creators. */
+  artworkSourceTier: CatalogArtworkSourceTier;
 };
 
 /** One admin catalog item as a single selectable row. */
@@ -48,6 +55,7 @@ export function flattenShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup[]
     printAreaHeightPx: g.option.printAreaHeightPx,
     minArtworkDpi: g.option.minArtworkDpi,
     artworkLetterboxFill: g.option.artworkLetterboxFill,
+    artworkSourceTier: g.option.artworkSourceTier,
   }));
 }
 
@@ -65,6 +73,7 @@ export type AdminBaselineRow = {
   itemMinArtworkDpi: number | null;
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   itemLargeListingArtwork: boolean;
+  itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
 };
 
 export type ParsedBaselinePick =
@@ -149,8 +158,30 @@ export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopS
           printAreaWidthPx: item.itemPrintAreaWidthPx,
           printAreaHeightPx: item.itemPrintAreaHeightPx,
         }),
+        artworkSourceTier: resolveCatalogArtworkSourceTier({
+          itemArtworkSourceTierOverride: item.itemArtworkSourceTierOverride,
+          printAreaWidthPx: item.itemPrintAreaWidthPx,
+          printAreaHeightPx: item.itemPrintAreaHeightPx,
+        }),
       },
     });
   }
   return out;
+}
+
+/** Catalog groups partitioned for the shop listing picker (phone-safe first). */
+export function partitionShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup[]): {
+  phonePicSafe: ShopSetupCatalogGroup[];
+  cameraOrVectorOnly: ShopSetupCatalogGroup[];
+} {
+  const phonePicSafe: ShopSetupCatalogGroup[] = [];
+  const cameraOrVectorOnly: ShopSetupCatalogGroup[] = [];
+  for (const g of groups) {
+    if (g.option.artworkSourceTier === "phone_pic_safe") {
+      phonePicSafe.push(g);
+    } else {
+      cameraOrVectorOnly.push(g);
+    }
+  }
+  return { phonePicSafe, cameraOrVectorOnly };
 }

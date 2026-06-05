@@ -11,6 +11,7 @@ import {
 } from "@/lib/admin-catalog-item";
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
 import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
+import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -59,6 +60,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemPrintAreaHeightPx: number | null;
       itemMinArtworkDpi: number | null;
       itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
+      itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
     }
   | { ok: false; error: string } {
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
@@ -72,6 +74,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     String(formData.get("itemPrintAreaHeightPx") ?? ""),
     String(formData.get("itemMinArtworkDpi") ?? ""),
     String(formData.get("itemArtworkLetterboxFill") ?? ""),
+    String(formData.get("itemArtworkSourceTierOverride") ?? ""),
   );
   if (!ar.ok) return { ok: false, error: ar.error };
   return {
@@ -84,6 +87,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     itemPrintAreaHeightPx: ar.itemPrintAreaHeightPx,
     itemMinArtworkDpi: ar.itemMinArtworkDpi,
     itemArtworkLetterboxFill: ar.itemArtworkLetterboxFill,
+    itemArtworkSourceTierOverride: ar.itemArtworkSourceTierOverride,
   };
 }
 
@@ -118,6 +122,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
         itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
         itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
         itemArtworkLetterboxFill: itemLevel.itemArtworkLetterboxFill,
+        itemArtworkSourceTierOverride: itemLevel.itemArtworkSourceTierOverride,
       },
     });
   } catch (e) {
@@ -158,6 +163,7 @@ export async function adminUpdateCatalogItem(
         itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
         itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
         itemArtworkLetterboxFill: itemLevel.itemArtworkLetterboxFill,
+        itemArtworkSourceTierOverride: itemLevel.itemArtworkSourceTierOverride,
       },
     });
   } catch (e) {

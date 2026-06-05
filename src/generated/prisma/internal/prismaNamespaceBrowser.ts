@@ -755,6 +755,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemMinArtworkDpi: 'itemMinArtworkDpi',
   itemLargeListingArtwork: 'itemLargeListingArtwork',
   itemArtworkLetterboxFill: 'itemArtworkLetterboxFill',
+  itemArtworkSourceTierOverride: 'itemArtworkSourceTierOverride',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

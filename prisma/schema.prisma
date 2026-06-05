@@ -34,6 +34,13 @@ enum ListingArtworkLetterboxFill {
   white
 }
 
+/** Admin override for shop catalog artwork source tier (auto = computed from print area). */
+enum AdminCatalogItemArtworkSourceTierOverride {
+  auto
+  phone_pic_safe
+  camera_or_vector_only
+}
+
 /** Paid placement products (merchant dashboard); public ranking integration is separate. */
 enum PromotionKind {
   FRONT_PAGE_ITEM
@@ -1075,6 +1082,11 @@ model AdminCatalogItem {
    * Letterbox margin when artwork is zoomed out: transparent (apparel, mugs) or white (canvas, paper).
    */
   itemArtworkLetterboxFill ListingArtworkLetterboxFill @default(transparent)
+  /**
+   * Override auto-computed phone vs camera/vector tier in the shop catalog picker
+   * (see listing-artwork-source-tier).
+   */
+  itemArtworkSourceTierOverride AdminCatalogItemArtworkSourceTierOverride @default(auto)
   catalogTags           AdminCatalogItemTag[]
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

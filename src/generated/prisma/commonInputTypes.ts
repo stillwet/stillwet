@@ -668,6 +668,13 @@ export type EnumListingArtworkLetterboxFillFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel> | $Enums.ListingArtworkLetterboxFill
 }
 
+export type EnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdminCatalogItemArtworkSourceTierOverride | Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  in?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+}
+
 export type EnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ListingArtworkLetterboxFill | Prisma.EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
   in?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
@@ -676,6 +683,16 @@ export type EnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
   _max?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
+}
+
+export type EnumAdminCatalogItemArtworkSourceTierOverrideWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdminCatalogItemArtworkSourceTierOverride | Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  in?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideWithAggregatesFilter<$PrismaModel> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel>
 }
 
 export type EnumAdminSummaryEmailFrequencyFilter<$PrismaModel = never> = {
@@ -1325,6 +1342,13 @@ export type NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel = never> = 
   not?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel> | $Enums.ListingArtworkLetterboxFill
 }
 
+export type NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdminCatalogItemArtworkSourceTierOverride | Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  in?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+}
+
 export type NestedEnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ListingArtworkLetterboxFill | Prisma.EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
   in?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
@@ -1333,6 +1357,16 @@ export type NestedEnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaMod
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
   _max?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
+}
+
+export type NestedEnumAdminCatalogItemArtworkSourceTierOverrideWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdminCatalogItemArtworkSourceTierOverride | Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  in?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdminCatalogItemArtworkSourceTierOverride[] | Prisma.ListEnumAdminCatalogItemArtworkSourceTierOverrideFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideWithAggregatesFilter<$PrismaModel> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAdminCatalogItemArtworkSourceTierOverrideFilter<$PrismaModel>
 }
 
 export type NestedEnumAdminSummaryEmailFrequencyFilter<$PrismaModel = never> = {

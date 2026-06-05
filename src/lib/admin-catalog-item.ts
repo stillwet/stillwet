@@ -3,6 +3,7 @@ import {
   parseAdminCatalogLetterboxFill,
   type ListingArtworkLetterboxFill,
 } from "@/lib/listing-artwork-letterbox-fill";
+import { parseCatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 
 function newRandomUuid(): string {
   return globalThis.crypto.randomUUID();
@@ -163,6 +164,7 @@ export function parseAdminCatalogItemArtworkForm(
   itemPrintAreaHeightPxRaw: string,
   itemMinArtworkDpiRaw: string,
   itemArtworkLetterboxFillRaw = "",
+  itemArtworkSourceTierOverrideRaw = "",
 ):
   | {
       ok: true;
@@ -171,6 +173,7 @@ export function parseAdminCatalogItemArtworkForm(
       itemPrintAreaHeightPx: number | null;
       itemMinArtworkDpi: number | null;
       itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
+      itemArtworkSourceTierOverride: ReturnType<typeof parseCatalogArtworkSourceTierOverride>;
     }
   | { ok: false; error: string } {
   const label = parseAdminCatalogImageRequirementLabel(itemImageRequirementLabel);
@@ -188,6 +191,9 @@ export function parseAdminCatalogItemArtworkForm(
   }
 
   const itemArtworkLetterboxFill = parseAdminCatalogLetterboxFill(itemArtworkLetterboxFillRaw);
+  const itemArtworkSourceTierOverride = parseCatalogArtworkSourceTierOverride(
+    itemArtworkSourceTierOverrideRaw,
+  );
 
   if (hasPrint) {
     return {
@@ -197,6 +203,7 @@ export function parseAdminCatalogItemArtworkForm(
       itemPrintAreaHeightPx: pr.height,
       itemMinArtworkDpi: dpiParsed.value,
       itemArtworkLetterboxFill,
+      itemArtworkSourceTierOverride,
     };
   }
   return {
@@ -206,5 +213,6 @@ export function parseAdminCatalogItemArtworkForm(
     itemPrintAreaHeightPx: null,
     itemMinArtworkDpi: null,
     itemArtworkLetterboxFill,
+    itemArtworkSourceTierOverride,
   };
 }

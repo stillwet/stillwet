@@ -45,6 +45,15 @@ export const ListingArtworkLetterboxFill = {
 export type ListingArtworkLetterboxFill = (typeof ListingArtworkLetterboxFill)[keyof typeof ListingArtworkLetterboxFill]
 
 
+export const AdminCatalogItemArtworkSourceTierOverride = {
+  auto: 'auto',
+  phone_pic_safe: 'phone_pic_safe',
+  camera_or_vector_only: 'camera_or_vector_only'
+} as const
+
+export type AdminCatalogItemArtworkSourceTierOverride = (typeof AdminCatalogItemArtworkSourceTierOverride)[keyof typeof AdminCatalogItemArtworkSourceTierOverride]
+
+
 export const PromotionKind = {
   FRONT_PAGE_ITEM: 'FRONT_PAGE_ITEM',
   HOT_FEATURED_ITEM: 'HOT_FEATURED_ITEM',
