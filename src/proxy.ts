@@ -83,6 +83,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/dashboard/preview-verify-email") ||
     pathname.startsWith("/dashboard/reset-password") ||
     pathname.startsWith("/dashboard/verify-email") ||
+    pathname.startsWith("/account-deletion/confirm") ||
     pathname.startsWith("/dashboard/account-deletion/confirm") ||
     pathname.startsWith("/dashboard/confirm-device") ||
     pathname.startsWith("/api/site-access") ||

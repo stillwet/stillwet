@@ -156,7 +156,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       shop: { select: DASHBOARD_SHOP_SELECT },
     },
   });
-  if (!user) redirect("/dashboard/login");
+  if (!user) {
+    const session = await getShopOwnerSession();
+    session.destroy();
+    redirect("/?accountDeleted=1");
+  }
 
   let shop = user.shop;
   const isPlatform = shop.slug === PLATFORM_SHOP_SLUG;

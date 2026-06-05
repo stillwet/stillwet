@@ -5,6 +5,8 @@ import { DashboardAdminFrozenShopBanner } from "@/components/dashboard/Dashboard
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHeaderFallback } from "@/components/SiteHeaderFallback";
 import { shopIsAdminFrozen } from "@/lib/admin-shop-freeze";
+import { isDashboardLayoutLightPath } from "@/lib/dashboard-layout-light-paths";
+import { isPrismaMissingRelationError } from "@/lib/prisma-missing-relation";
 import { prisma } from "@/lib/prisma";
 import { getShopOwnerSessionReadonly } from "@/lib/session";
 
@@ -24,16 +26,22 @@ export default async function DashboardSectionLayout({
   children: React.ReactNode;
 }) {
   const pathname = (await headers()).get("x-pathname") ?? "";
+  const layoutLight = isDashboardLayoutLightPath(pathname);
   const owner = await getShopOwnerSessionReadonly();
-  const prefetchPromotions = Boolean(owner.shopUserId) && !pathname.startsWith("/dashboard/login");
+  const prefetchPromotions = Boolean(owner.shopUserId) && !layoutLight;
 
   let showAdminFrozenBanner = false;
-  if (owner.shopUserId && !pathname.startsWith("/dashboard/login")) {
-    const row = await prisma.shopUser.findUnique({
-      where: { id: owner.shopUserId },
-      select: { shop: { select: { adminFrozenAt: true } } },
-    });
-    showAdminFrozenBanner = shopIsAdminFrozen({ adminFrozenAt: row?.shop.adminFrozenAt ?? null });
+  if (owner.shopUserId && !layoutLight) {
+    try {
+      const row = await prisma.shopUser.findUnique({
+        where: { id: owner.shopUserId },
+        select: { shop: { select: { adminFrozenAt: true } } },
+      });
+      showAdminFrozenBanner = shopIsAdminFrozen({ adminFrozenAt: row?.shop.adminFrozenAt ?? null });
+    } catch (e) {
+      if (!isPrismaMissingRelationError(e)) throw e;
+      console.error("[dashboard layout] adminFrozenAt read skipped — migration pending?", e);
+    }
   }
 
   return (

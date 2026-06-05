@@ -29,7 +29,7 @@ export async function sendShopAccountDeletionConfirmEmail(
   rawToken: string,
 ): Promise<SendResult> {
   const origin = emailLinkOrigin();
-  const url = `${origin}/dashboard/account-deletion/confirm?t=${encodeURIComponent(rawToken)}`;
+  const url = `${origin}/account-deletion/confirm?t=${encodeURIComponent(rawToken)}`;
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const fromResult = resolveShopTransactionalEmailFrom([

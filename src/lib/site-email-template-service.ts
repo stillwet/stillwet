@@ -64,7 +64,7 @@ export function sampleActionUrlsForAdmin(origin: string): Record<
     shop_dashboard_email_verification: `${o}/dashboard/verify-email?t=__preview__`,
     shop_dashboard_password_reset: `${o}/dashboard/reset-password?t=__preview__`,
     shop_dashboard_password_changed: shopDashboardSupportUrl(o),
-    shop_dashboard_account_deletion_confirm: `${o}/dashboard/account-deletion/confirm?t=__preview__`,
+    shop_dashboard_account_deletion_confirm: `${o}/account-deletion/confirm?t=__preview__`,
     shop_dashboard_two_factor_confirm_device: `${o}/dashboard/confirm-device?t=__preview__`,
     shop_inactivity_deactivation_warning: `${o}/dashboard/login`,
   };
