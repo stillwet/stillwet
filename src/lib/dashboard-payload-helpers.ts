@@ -1,7 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { FulfillmentType } from "@/generated/prisma/enums";
 import { baselineGoodsServicesUnitCents } from "@/lib/baseline-goods-services-unit-cents";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
 import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 
 export type AdminCatalogRowForDisplay = {
@@ -29,7 +28,7 @@ export function dashboardPaidOrderLineDisplayLabel(line: {
   return `${shopLabel} (${adminLabel})`;
 }
 
-/** Uses current admin baseline catalog + listing pick + Printify variant mapping (same as checkout). */
+/** Uses current admin baseline catalog + listing pick (same as checkout). */
 export function paidOrderLineGoodsServicesDisplayCents(
   line: {
     unitPriceCents: number;
@@ -37,7 +36,6 @@ export function paidOrderLineGoodsServicesDisplayCents(
     goodsServicesCostCents: number;
     printifyVariantId: string | null;
     shopListing: { baselineCatalogPickEncoded: string | null } | null;
-    product: { printifyVariants: unknown } | null;
   },
   adminCatalogById: Map<string, AdminCatalogRowForDisplay>,
 ): number {
@@ -47,42 +45,29 @@ export function paidOrderLineGoodsServicesDisplayCents(
   if (!row) return line.goodsServicesCostCents;
   const unit = baselineGoodsServicesUnitCents({
     baselineCatalogPickEncoded: line.shopListing?.baselineCatalogPickEncoded,
-    selectedVariantId: line.printifyVariantId,
     catalogRow: row,
-    productPrintifyVariantsJson: line.product?.printifyVariants,
   });
   const merch = line.unitPriceCents * line.quantity;
   return Math.min(merch, Math.max(0, unit) * line.quantity);
 }
 
-/** Per Printify variant id — unit COGS for profit estimates (same rules as checkout). */
-export function listingGoodsServicesUnitCentsByPrintifyVariantId(
+/** Unit COGS for profit estimates on a listing (same rules as checkout). */
+export function listingGoodsServicesUnitCents(
   listing: {
     baselineCatalogPickEncoded: string | null;
     product: {
       fulfillmentType: FulfillmentType;
-      printifyVariants: Prisma.JsonValue | null;
       printifyVariantId: string | null;
       priceCents: number;
     };
   },
   adminCatalogById: Map<string, AdminCatalogRowForDisplay>,
-): Record<string, number> {
+): number {
   const pick = parseBaselinePick(listing.baselineCatalogPickEncoded ?? "");
   const row = pick ? adminCatalogById.get(pick.itemId) : undefined;
-  const variants = getPrintifyVariantsForProduct(listing.product);
-  const out: Record<string, number> = {};
-  for (const v of variants) {
-    const unit =
-      row != null
-        ? baselineGoodsServicesUnitCents({
-            baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
-            selectedVariantId: v.id,
-            catalogRow: row,
-            productPrintifyVariantsJson: listing.product.printifyVariants,
-          })
-        : 0;
-    out[v.id] = unit;
-  }
-  return out;
+  if (!row) return 0;
+  return baselineGoodsServicesUnitCents({
+    baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
+    catalogRow: row,
+  });
 }

@@ -76,12 +76,14 @@ export async function finalizeShopSetupFeePurchase(
     if (emailTaken) return { status: "email_taken" as const };
 
     const displayKey = shopDisplayNameUniquenessKey(lockedPurchase.pendingSignup.displayName);
-    const displayConflict = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
-      SELECT id FROM "Shop"
-      WHERE LOWER(TRIM("displayName")) = ${displayKey}
-      LIMIT 1
-    `);
-    if (displayConflict.length > 0) return { status: "display_taken" as const };
+    if (displayKey) {
+      const displayConflict = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT id FROM "Shop"
+        WHERE LOWER(TRIM("displayName")) = ${displayKey}
+        LIMIT 1
+      `);
+      if (displayConflict.length > 0) return { status: "display_taken" as const };
+    }
 
     const shop = await tx.shop.create({
       data: {

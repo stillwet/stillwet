@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { verifyShopEmailFromRawToken } from "@/lib/shop-email-verification";
+import { getShopOwnerSessionReadonly } from "@/lib/session";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,14 +35,19 @@ export default async function VerifyShopEmailPage({ searchParams }: PageProps) {
   const result = await verifyShopEmailFromRawToken(token);
 
   if (result.ok) {
+    const owner = await getShopOwnerSessionReadonly();
+    if (owner.shopUserId) {
+      redirect("/dashboard?dash=setup");
+    }
+
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-md flex-col px-4 py-16">
         <h1 className="text-xl font-semibold text-zinc-50">Success! Email is verified</h1>
         <p className="mt-4 text-sm text-zinc-400">
-          Your shop dashboard email is confirmed. You can close this tab or continue to your dashboard.
+          Your shop dashboard email is confirmed. Sign in to continue to your dashboard.
         </p>
         <Link href="/dashboard/login" className="mt-6 text-sm text-blue-400 hover:underline">
-          Go to dashboard
+          Go to login
         </Link>
       </main>
     );

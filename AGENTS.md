@@ -38,9 +38,8 @@ Prioritize **fast loads** for marketing and browse surfaces. **Shopping-critical
 
 When adding caches, snapshots, or cron rebuilds, match the surface to these tiers instead of defaulting everything to “live.”
 
-## Shop listings vs Printify variants
+## Shop listings vs Printify
 
 - **`ShopListing`** is one sellable row per `(shopId, productId)` (`@@unique([shopId, productId])`): a single listing in the shop for that catalog / Printify product.
-- **`Product.printifyVariants`** (JSON from Printify) holds option metadata (variant ids, titles, catalog prices). Options such as size are **not** separate `ShopListing` rows.
-- **Per-option shop prices** for multi-variant Printify listings live on **`ShopListing.listingPrintifyVariantPrices`** (JSON: Printify variant id → cents). Dashboard and cart use `src/lib/listing-cart-price.ts` (`listingCartUnitCents`, `printifyVariantShopPriceCentsByIdForListing`).
-- **`listingPrintifyVariantId`** is the admin-recorded default Printify variant (hero image sync, approval flow). If **`Product.printifyVariants`** has more than one option, the dashboard still uses **per-variant** pricing (`listingPrintifyVariantPrices`); checkout uses the variant the buyer selects. For a true single-variant product (`getPrintifyVariantsForProduct` length ≤ 1), the dashboard uses one **`priceCents`** field.
+- Each item has **one preset Printify variant** only: `Product.printifyVariantId` (platform catalog) and `ShopListing.listingPrintifyVariantId` (shop listing fulfillment). There are **no buyer-facing options** and **no multi-variant JSON** — one shop price on `ShopListing.priceCents`.
+- Dashboard and cart use `src/lib/listing-cart-price.ts` (`listingCartUnitCents`) and `src/lib/printify-variants.ts` (`listingCheckoutPrintifyVariantId`) for checkout fulfillment id resolution.

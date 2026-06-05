@@ -1,12 +1,38 @@
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { acknowledgeShopItemGuidelines } from "@/actions/dashboard-shop-setup";
 import { ItemGuidelinesArticle } from "@/components/ItemGuidelinesArticle";
+
+const btnAcknowledge =
+  "rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed";
+const btnAcknowledgePending =
+  "cursor-wait rounded-lg bg-zinc-100/70 px-4 py-2 text-sm font-medium text-zinc-700 ring-1 ring-zinc-300/60";
+const btnAcknowledged =
+  "cursor-default rounded-lg border border-emerald-800/50 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-300 ring-1 ring-emerald-800/40";
 
 export function ShopItemGuidelinesPanel(props: {
   acknowledged: boolean;
   /** When true, used inside dashboard tab panel (no top margin). */
   embedded?: boolean;
 }) {
-  const { acknowledged, embedded = false } = props;
+  const { acknowledged: acknowledgedProp, embedded = false } = props;
+  const router = useRouter();
+  const [acknowledged, setAcknowledged] = useState(acknowledgedProp);
+  const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setAcknowledged(acknowledgedProp);
+  }, [acknowledgedProp]);
+
+  function handleAcknowledge() {
+    startTransition(async () => {
+      await acknowledgeShopItemGuidelines();
+      setAcknowledged(true);
+      router.refresh();
+    });
+  }
 
   return (
     <section
@@ -17,27 +43,22 @@ export function ShopItemGuidelinesPanel(props: {
       <div className="mt-4">
         <ItemGuidelinesArticle className="space-y-4 text-sm leading-relaxed text-zinc-300" />
 
-        <p className="mt-4 text-xs text-zinc-600">
-          This page is a practical summary, not legal advice. For storefront policies that fans see, see also{" "}
-          <a href="/shop-regulations" className="text-blue-400/90 underline underline-offset-2 hover:text-blue-300">
-            shop regulations
-          </a>
-          .
-        </p>
-
-        <form action={acknowledgeShopItemGuidelines} className="pt-2">
+        <div className="pt-4">
           <button
-            type="submit"
-            disabled={acknowledged}
+            type="button"
+            disabled={acknowledged || pending}
+            onClick={handleAcknowledge}
             className={
-              acknowledged
-                ? "cursor-default rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-300"
-                : "rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
+              acknowledged ? btnAcknowledged : pending ? btnAcknowledgePending : btnAcknowledge
             }
           >
-            {acknowledged ? "Marked as read" : "I have read and acknowledge the shop regulations"}
+            {acknowledged
+              ? "Acknowledged"
+              : pending
+                ? "Acknowledging…"
+                : "I have read and acknowledge the shop regulations"}
           </button>
-        </form>
+        </div>
       </div>
     </section>
   );

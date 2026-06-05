@@ -30,3 +30,15 @@ export async function allocateUniqueShopSlug(
     error: "Could not allocate a unique shop URL from that username. Try a shorter or different one.",
   };
 }
+
+/** Slug for new signups: from display name when provided, otherwise a random internal handle. */
+export async function allocateSignupShopSlug(
+  displayName: string,
+): Promise<{ slug: string } | { error: string }> {
+  const trimmed = displayName.trim();
+  if (trimmed) {
+    const fromName = await allocateUniqueShopSlug(trimmed);
+    if (!("error" in fromName)) return fromName;
+  }
+  return allocateUniqueShopSlug(`shop-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`);
+}

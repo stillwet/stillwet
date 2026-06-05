@@ -34,7 +34,6 @@ export async function collectReferencedR2ObjectKeysFromDatabase(): Promise<Set<s
     select: {
       imageUrl: true,
       imageGallery: true,
-      printifyVariants: true,
     },
   });
   for (const p of products) {

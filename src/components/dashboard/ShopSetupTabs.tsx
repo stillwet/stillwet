@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { dashboardStartStripeConnect } from "@/actions/dashboard-marketplace";
 import { resendShopEmailVerification } from "@/actions/shop-email-verify";
@@ -103,8 +104,23 @@ function StripeConnectSubmitButton({
 }
 
 function ShopEmailVerificationCallout({ verified }: { verified: boolean }) {
+  const router = useRouter();
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (verified) return;
+    const refreshOnboarding = () => router.refresh();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refreshOnboarding();
+    };
+    window.addEventListener("focus", refreshOnboarding);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", refreshOnboarding);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [verified, router]);
 
   if (verified) {
     return null;

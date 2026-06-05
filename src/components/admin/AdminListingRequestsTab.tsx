@@ -28,6 +28,7 @@ import {
   AdminFreezeSubmitButton,
 } from "@/components/admin/AdminListingRequestActionButtons";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
+import { listingRequestArtworkAdminViewUrl } from "@/lib/listing-request-artwork-admin-url";
 
 export type ListingRequestTabRow = {
   id: string;
@@ -753,19 +754,22 @@ function ListingRequestCard({
           {!hideRequestImageUrlList ? (
             imgs.length > 0 ? (
               <ul className="mt-2 list-inside list-disc text-xs text-zinc-500">
-                {imgs.map((u) => (
-                  <li key={u} className="break-all">
-                    <a
-                      href={u}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400/90 underline decoration-blue-500/40 underline-offset-2 hover:text-blue-300"
-                      onClick={(e) => openRequestImageInNewTab(e, u)}
-                    >
-                      {u}
-                    </a>
-                  </li>
-                ))}
+                {imgs.map((u, imageIndex) => {
+                  const viewHref = listingRequestArtworkAdminViewUrl(r.id, imageIndex);
+                  return (
+                    <li key={u} className="break-all">
+                      <a
+                        href={viewHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400/90 underline decoration-blue-500/40 underline-offset-2 hover:text-blue-300"
+                        onClick={(e) => openRequestImageInNewTab(e, viewHref)}
+                      >
+                        {u}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-2 text-xs text-zinc-600">No image URLs submitted.</p>

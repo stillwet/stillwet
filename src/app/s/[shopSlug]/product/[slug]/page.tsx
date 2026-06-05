@@ -16,7 +16,6 @@ export default async function ShopTenantProductPage({ params }: Props) {
         product={detail.product}
         variant="page"
         tenant={detail.tenant}
-        printifyVariantShopPriceCentsById={detail.printifyVariantShopPriceCentsById}
         adminListingSecondaryImageUrl={detail.adminListingSecondaryImageUrl}
         ownerSupplementImageUrl={detail.ownerSupplementImageUrl}
         listingStorefrontCatalogImageUrls={detail.listingStorefrontCatalogImageUrls}

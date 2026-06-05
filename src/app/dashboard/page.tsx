@@ -22,6 +22,7 @@ import {
   type CreatorDashboardSetupPayload,
 } from "@/components/dashboard/DashboardDeferredTabsIsland";
 import { ListingSubmittedFlashBanner } from "@/components/dashboard/ListingSubmittedFlashBanner";
+import { ShopSignupWelcomeConfetti } from "@/components/dashboard/ShopSignupWelcomeConfetti";
 import { DashboardTabsSuspenseFallback } from "./DashboardPageSuspenseFallback";
 import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 import { scopesForInitialTab } from "@/lib/dashboard-scoped-data";
@@ -36,6 +37,7 @@ import {
   stripeConnectFlagsFromAccount,
 } from "@/lib/stripe-connect-account-status";
 import { shopStripeConnectReadyForListingCharges } from "@/lib/shop-stripe-connect-gate";
+import { shopDisplayNameForPublicLabel } from "@/lib/shop-display-name-uniqueness";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 import {
@@ -435,7 +437,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-2xl font-semibold text-zinc-50">Shop Dashboard</h1>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <p className="text-sm text-zinc-500">{shop.displayName}</p>
+            <p className="text-sm text-zinc-500">{shopDisplayNameForPublicLabel(shop.displayName)}</p>
             <form
               action={logoutShopOwner}
               className="border-l border-zinc-700 pl-3 leading-none"
@@ -469,6 +471,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </div>
 
       <Suspense fallback={null}>
+        <ShopSignupWelcomeConfetti />
         <ListingSubmittedFlashBanner />
       </Suspense>
       {fee === "ok" ? (

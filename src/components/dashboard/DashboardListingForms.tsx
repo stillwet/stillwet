@@ -21,15 +21,11 @@ import {
   dashboardUpdateListingStorefrontBlurb,
   dashboardUpdateListingSearchKeywords,
   dashboardUpdateListingPrice,
-  dashboardUpdateListingVariantPrices,
   dashboardWithdrawListingSupplementPending,
   dashboardUploadListingSupplementPhoto,
   type DashboardSubmitListingRequestResult,
   type ListingCatalogImagesFormState,
 } from "@/actions/dashboard-marketplace";
-import {
-  parseListingPrintifyVariantPrices,
-} from "@/lib/listing-printify-variant-prices";
 import { printifyVariantShopFloorCents } from "@/lib/listing-cart-price";
 import {
   SHOP_LISTING_MAX_PRICE_CENTS,
@@ -55,7 +51,6 @@ import {
   splitMerchandiseLineForCheckoutCents,
 } from "@/lib/marketplace-fee";
 import { catalogImageUrlKey } from "@/lib/product-media";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
 import {
   effectiveListingItemDisplayName,
   listingModerationMatchesByFieldForUi,
@@ -553,27 +548,16 @@ export function DashboardListingSearchKeywordsForm({
 type PriceFormProps = {
   listingId: string;
   priceDollarsFormatted: string;
-  listingPriceCents: number;
-  listingPrintifyVariantPrices: unknown;
-  /** Per Printify variant id — unit goods/services COGS from admin baseline (same split as orders Shop Profit). */
-  goodsServicesUnitCentsByPrintifyVariantId?: Record<string, number>;
+  /** Unit goods/services COGS from admin baseline (same split as orders Shop Profit). */
+  goodsServicesUnitCents?: number;
   product: {
     fulfillmentType: FulfillmentType;
     priceCents: number;
     minPriceCents: number;
     printifyVariantId: string | null;
-    printifyVariants: Prisma.JsonValue | null;
   };
   readOnly?: boolean;
 };
-
-/** Stable JSON for comparing variant price maps (key order independent). */
-function variantDollarsStableKey(obj: Record<string, string>): string {
-  const keys = Object.keys(obj).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-  const sorted: Record<string, string> = {};
-  for (const k of keys) sorted[k] = obj[k] ?? "";
-  return JSON.stringify(sorted);
-}
 
 function formatUsdFromCents(cents: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -826,28 +810,10 @@ export function PaidOrderShopProfitHelp({
   );
 }
 
-function initialVariantDollarsById(
-  listingPriceCents: number,
-  listingPrintifyVariantPrices: unknown,
-  product: PriceFormProps["product"],
-): Record<string, string> | null {
-  const variants = getPrintifyVariantsForProduct(product);
-  if (variants.length <= 1) return null;
-  const map = parseListingPrintifyVariantPrices(listingPrintifyVariantPrices);
-  const out: Record<string, string> = {};
-  for (const v of variants) {
-    const c = map?.[v.id] ?? listingPriceCents;
-    out[v.id] = (c / 100).toFixed(2);
-  }
-  return out;
-}
-
 export function DashboardListingPriceForm({
   listingId,
   priceDollarsFormatted,
-  listingPriceCents,
-  listingPrintifyVariantPrices,
-  goodsServicesUnitCentsByPrintifyVariantId = {},
+  goodsServicesUnitCents = 0,
   product,
   readOnly = false,
 }: PriceFormProps) {
@@ -863,38 +829,10 @@ export function DashboardListingPriceForm({
     autosaveGen.current += 1;
   }, [listingId]);
 
-  const printifyVariants = getPrintifyVariantsForProduct(product);
-  const multiVariantPricing = printifyVariants.length > 1;
-
-  const [variantDollars, setVariantDollars] = useState<Record<string, string>>(() =>
-    initialVariantDollarsById(listingPriceCents, listingPrintifyVariantPrices, product) ?? {},
-  );
-  const variantBaseline = useRef<Record<string, string>>(
-    initialVariantDollarsById(listingPriceCents, listingPrintifyVariantPrices, product) ?? {},
-  );
-
-  const catalogVariantsSyncKey = JSON.stringify(product.printifyVariants ?? null);
-  const savedVariantPricesKey = JSON.stringify(listingPrintifyVariantPrices ?? null);
-
   useLayoutEffect(() => {
     setPrice(priceDollarsFormatted);
     baseline.current = priceDollarsFormatted;
   }, [listingId, priceDollarsFormatted]);
-
-  useLayoutEffect(() => {
-    const next =
-      initialVariantDollarsById(listingPriceCents, listingPrintifyVariantPrices, product) ?? {};
-    setVariantDollars(next);
-    variantBaseline.current = { ...next };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- JSON keys + product slice avoid churn vs full `product` identity from parent
-  }, [
-    listingId,
-    listingPriceCents,
-    savedVariantPricesKey,
-    catalogVariantsSyncKey,
-    product.fulfillmentType,
-    product.printifyVariantId,
-  ]);
 
   useLayoutEffect(() => {
     setSavedFlash(false);
@@ -902,17 +840,14 @@ export function DashboardListingPriceForm({
   }, [listingId]);
 
   const dirtySingle = price.trim() !== baseline.current.trim();
-  const dirtyMulti =
-    multiVariantPricing &&
-    variantDollarsStableKey(variantDollars) !== variantDollarsStableKey(variantBaseline.current);
-  const dirty = multiVariantPricing ? dirtyMulti : dirtySingle;
+  const dirty = dirtySingle;
 
   useEffect(() => {
     if (dirty) setSavedFlash(false);
   }, [dirty]);
 
   useEffect(() => {
-    if (readOnly || multiVariantPricing || !dirtySingle) return;
+    if (readOnly || !dirtySingle) return;
     const gen = autosaveGen.current;
     const t = window.setTimeout(() => {
       startTransition(async () => {
@@ -932,109 +867,10 @@ export function DashboardListingPriceForm({
       });
     }, LISTING_AUTOSAVE_DEBOUNCE_MS);
     return () => window.clearTimeout(t);
-  }, [readOnly, multiVariantPricing, dirtySingle, price, listingId, router]);
-
-  useEffect(() => {
-    if (readOnly || !multiVariantPricing || !dirtyMulti) return;
-    const gen = autosaveGen.current;
-    const t = window.setTimeout(() => {
-      startTransition(async () => {
-        const fd = new FormData();
-        fd.set("listingId", listingId);
-        fd.set("variantPricesJson", JSON.stringify(variantDollars));
-        const r = await dashboardUpdateListingVariantPrices(fd);
-        if (gen !== autosaveGen.current) return;
-        if (r.ok) {
-          setSaveError(null);
-          router.refresh();
-          setSavedFlash(true);
-          window.setTimeout(() => setSavedFlash(false), 2500);
-        } else {
-          setSaveError(r.error);
-        }
-      });
-    }, LISTING_AUTOSAVE_DEBOUNCE_MS);
-    return () => window.clearTimeout(t);
-  }, [readOnly, multiVariantPricing, dirtyMulti, variantDollars, listingId, router]);
-
-  if (readOnly && multiVariantPricing) {
-    return (
-      <div className="mt-3 space-y-2">
-        {printifyVariants.map((v) => {
-          const cents =
-            parseListingPrintifyVariantPrices(listingPrintifyVariantPrices)?.[v.id] ??
-            listingPriceCents;
-          const floor = printifyVariantShopFloorCents(product, v.priceCents);
-          const gs = goodsServicesUnitCentsByPrintifyVariantId[v.id] ?? 0;
-          const profitLine = listingEstProfitLine((cents / 100).toFixed(2), floor, gs);
-          return (
-            <div key={v.id} className="space-y-0.5">
-              <p className="text-sm text-zinc-200">
-                <span className="text-zinc-500">{v.title}: </span>
-                <span className="font-mono">{(cents / 100).toFixed(2)}</span>
-              </p>
-              <ListingMerchandiseBreakdownRow
-                priceDollarsStr={(cents / 100).toFixed(2)}
-                minPriceCents={floor}
-                goodsServicesUnitCents={gs}
-              />
-              <p className="text-[11px] text-blue-400/90">{profitLine ?? "Est. profit: —"}</p>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  }, [readOnly, dirtySingle, price, listingId, router]);
 
   if (readOnly) {
     return null;
-  }
-
-  if (multiVariantPricing) {
-    return (
-      <div className="mt-3 space-y-3">
-        <p className="text-[11px] text-zinc-600">Maximum {shopListingMaxPriceUsdLabel()} per option.</p>
-        <p className="text-xs text-zinc-500">Sale Price — each option</p>
-        <ul className="space-y-2">
-          {printifyVariants.map((v) => {
-            const floor = printifyVariantShopFloorCents(product, v.priceCents);
-            const gs = goodsServicesUnitCentsByPrintifyVariantId[v.id] ?? 0;
-            const profitLine = listingEstProfitLine(variantDollars[v.id] ?? "", floor, gs);
-            return (
-              <li key={v.id} className="space-y-0.5">
-                <label className="block min-w-0 max-w-[10rem] text-xs text-zinc-500">
-                  <span className="text-zinc-400">{v.title}</span>
-                  <input
-                    type="text"
-                    value={variantDollars[v.id] ?? ""}
-                    autoComplete="off"
-                    onChange={(ev) => {
-                      setSaveError(null);
-                      setVariantDollars((s) => ({ ...s, [v.id]: ev.target.value }));
-                    }}
-                    className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm leading-snug text-zinc-200"
-                  />
-                </label>
-                <ListingMerchandiseBreakdownRow
-                  priceDollarsStr={variantDollars[v.id] ?? ""}
-                  minPriceCents={floor}
-                  goodsServicesUnitCents={gs}
-                />
-                <p className="text-[11px] text-blue-400/90">{profitLine ?? "Est. profit: —"}</p>
-              </li>
-            );
-          })}
-        </ul>
-        {saveError ? (
-          <p className="text-xs leading-snug text-red-300/90" role="alert">
-            {saveError}
-          </p>
-        ) : null}
-        <div className="flex justify-end">
-          <ListingFieldAutoSaveStatus pending={pending} savedFlash={savedFlash} dirty={dirty} />
-        </div>
-      </div>
-    );
   }
 
   const enteredListPriceCents = (() => {
@@ -1045,16 +881,8 @@ export function DashboardListingPriceForm({
   const showMaxListPriceCapHint =
     enteredListPriceCents != null && enteredListPriceCents > SHOP_LISTING_MAX_PRICE_CENTS;
 
-  const singleFloorCents =
-    printifyVariants.length === 0
-      ? product.minPriceCents > 0
-        ? product.minPriceCents
-        : product.priceCents
-      : printifyVariantShopFloorCents(product, printifyVariants[0]!.priceCents);
-  const singleVariantId = printifyVariants[0]?.id;
-  const singleGoodsServicesCents =
-    singleVariantId != null ? (goodsServicesUnitCentsByPrintifyVariantId[singleVariantId] ?? 0) : 0;
-  const singleProfitLine = listingEstProfitLine(price, singleFloorCents, singleGoodsServicesCents);
+  const singleFloorCents = printifyVariantShopFloorCents(product);
+  const singleProfitLine = listingEstProfitLine(price, singleFloorCents, goodsServicesUnitCents);
 
   return (
     <div className="mt-3 min-w-0 w-full space-y-2">
@@ -1077,7 +905,7 @@ export function DashboardListingPriceForm({
               profitLabel={singleProfitLine ?? "Est. profit: —"}
               priceDollarsStr={price}
               minPriceCents={singleFloorCents}
-              goodsServicesUnitCents={singleGoodsServicesCents}
+              goodsServicesUnitCents={goodsServicesUnitCents}
             />
           </div>
         </label>

@@ -34,7 +34,6 @@ import { platformStripeConnectAccountCountryCode } from "@/lib/platform-checkout
 import { shopStripeConnectReadyForListingCharges } from "@/lib/shop-stripe-connect-gate";
 import { printifyVariantShopFloorCents } from "@/lib/listing-cart-price";
 import { listingCatalogUrlsForPersist } from "@/lib/product-media";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
 import { canStartStripeConnect, computeShopOnboardingSteps } from "@/lib/shop-onboarding-gate";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 import {
@@ -113,10 +112,7 @@ export async function dashboardUpdateListingPrice(
   }
   const cents = Math.round(parsed * 100);
   const p = listing.product;
-  const minCents = printifyVariantShopFloorCents(
-    p,
-    getPrintifyVariantsForProduct(p)[0]?.priceCents ?? p.priceCents,
-  );
+  const minCents = printifyVariantShopFloorCents(p);
   if (cents < minCents) {
     return {
       ok: false,
@@ -130,125 +126,9 @@ export async function dashboardUpdateListingPrice(
     };
   }
 
-  if (getPrintifyVariantsForProduct(listing.product).length > 1) {
-    return { ok: false, error: "Use per-option prices for this product." };
-  }
-
   await prisma.shopListing.update({
     where: { id: listingId },
-    data: { priceCents: cents, listingPrintifyVariantPrices: Prisma.DbNull },
-  });
-  revalidatePath("/dashboard");
-  revalidatePath(`/s/${user.shop.slug}`);
-  return { ok: true };
-}
-
-export type SaveVariantPricesResult =
-  | { ok: true }
-  | { ok: false; error: string };
-
-export async function dashboardUpdateListingVariantPrices(
-  formData: FormData,
-): Promise<SaveVariantPricesResult> {
-  const user = await requireShopOwner();
-  const listingId = String(formData.get("listingId") ?? "").trim();
-  const rawJson = String(formData.get("variantPricesJson") ?? "").trim();
-  if (!listingId || !rawJson) {
-    return { ok: false, error: "Missing listing or price data. Try again." };
-  }
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id: listingId, shopId: user.shopId },
-    include: { product: true },
-  });
-  if (!listing) {
-    return { ok: false, error: "Listing not found." };
-  }
-  if (
-    listing.requestStatus === ListingRequestStatus.rejected ||
-    listing.creatorRemovedFromShopAt != null
-  ) {
-    return { ok: false, error: "This listing can't be edited." };
-  }
-  if (listing.adminRemovedFromShopAt != null) {
-    return { ok: false, error: "This listing is frozen by the platform until support clears it." };
-  }
-  if (
-    listing.requestStatus !== ListingRequestStatus.draft &&
-    listing.requestStatus !== ListingRequestStatus.approved
-  ) {
-    return {
-      ok: false,
-      error:
-        "Prices can't be changed while this request is in review. Wait for approval, or finish editing your draft.",
-    };
-  }
-  const variants = getPrintifyVariantsForProduct(listing.product);
-  if (variants.length <= 1) {
-    return { ok: false, error: "This product doesn't have multiple variants to price separately." };
-  }
-
-  let payload: unknown;
-  try {
-    payload = JSON.parse(rawJson) as unknown;
-  } catch {
-    return { ok: false, error: "Invalid price data. Try again." };
-  }
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    return { ok: false, error: "Invalid price data. Try again." };
-  }
-  const obj = payload as Record<string, unknown>;
-
-  const centsById: Record<string, number> = {};
-  const maxLabel = shopListingMaxPriceUsdLabel();
-  for (const v of variants) {
-    const minAllowed = printifyVariantShopFloorCents(listing.product, v.priceCents);
-    if (minAllowed > SHOP_LISTING_MAX_PRICE_CENTS) {
-      return {
-        ok: false,
-        error: `"${v.title}" requires at least ${formatUsdFromCents(minAllowed)}, which is above the ${maxLabel} listing cap. Contact support if you need an exception.`,
-      };
-    }
-    const raw = obj[v.id];
-    const dollars =
-      typeof raw === "string"
-        ? parseFloat(raw.replace(/[^0-9.]/g, ""))
-        : typeof raw === "number"
-          ? raw
-          : NaN;
-    if (!Number.isFinite(dollars) || dollars < 0) {
-      return {
-        ok: false,
-        error: "Enter a valid USD amount for every option (e.g. 24.99).",
-      };
-    }
-    const cents = Math.round(dollars * 100);
-    if (cents < minAllowed) {
-      const platformHigher =
-        listing.product.minPriceCents > 0 &&
-        listing.product.minPriceCents > v.priceCents;
-      return {
-        ok: false,
-        error: `"${v.title}" must be at least ${formatUsdFromCents(minAllowed)} (this size's synced Printify retail${platformHigher ? "; platform minimum is higher than this size's base" : ""}).`,
-      };
-    }
-    if (cents > SHOP_LISTING_MAX_PRICE_CENTS) {
-      return {
-        ok: false,
-        error: `"${v.title}" cannot exceed ${maxLabel} per listing.`,
-      };
-    }
-    centsById[v.id] = cents;
-  }
-
-  const minListing = Math.min(...Object.values(centsById));
-
-  await prisma.shopListing.update({
-    where: { id: listingId },
-    data: {
-      listingPrintifyVariantPrices: centsById as Prisma.InputJsonValue,
-      priceCents: minListing,
-    },
+    data: { priceCents: cents },
   });
   revalidatePath("/dashboard");
   revalidatePath(`/s/${user.shop.slug}`);
@@ -463,7 +343,6 @@ export async function dashboardCreatorRemoveListingFromShop(formData: FormData):
           name: true,
           imageUrl: true,
           imageGallery: true,
-          printifyVariants: true,
         },
       },
     },

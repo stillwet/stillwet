@@ -126,21 +126,57 @@ export async function putR2ObjectBytes(params: {
   return { ok: false, error: lastError };
 }
 
+/** Public HTTPS URL for an object key (`R2_PUBLIC_BASE_URL` + `/` + key). */
+export function publicHttpsUrlForR2ObjectKey(key: string): string {
+  const baseUrl = readR2Env("R2_PUBLIC_BASE_URL")?.replace(/\/$/, "");
+  if (!baseUrl) throw new Error("R2_PUBLIC_BASE_URL missing");
+  const segments = key.split("/").map((s) => encodeURIComponent(s));
+  return `${baseUrl}/${segments.join("/")}`;
+}
+
+/** HEAD-check that a freshly uploaded public URL is reachable (catches wrong `R2_PUBLIC_BASE_URL`). */
+export async function verifyPublicR2ObjectUrl(url: string): Promise<boolean> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: "HEAD",
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (res.ok) return true;
+      if (res.status === 404 && attempt < 2) {
+        await new Promise((r) => setTimeout(r, 350));
+        continue;
+      }
+      return false;
+    } catch {
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 350));
+    }
+  }
+  return false;
+}
+
 /** Upload bytes and return the public HTTPS URL (R2_PUBLIC_BASE_URL + / + key). */
 export async function putPublicR2Object(params: {
   key: string;
   body: Buffer;
   contentType: string;
 }): Promise<string> {
-  const baseUrl = readR2Env("R2_PUBLIC_BASE_URL")?.replace(/\/$/, "");
-  if (!baseUrl || !readR2Env("R2_ACCESS_KEY_ID") || !readR2Env("R2_SECRET_ACCESS_KEY")) {
+  if (!readR2Env("R2_PUBLIC_BASE_URL") || !readR2Env("R2_ACCESS_KEY_ID") || !readR2Env("R2_SECRET_ACCESS_KEY")) {
     throw new Error("R2 bucket credentials or R2_PUBLIC_BASE_URL missing");
   }
 
   const put = await putR2ObjectBytes(params);
   if (!put.ok) throw new Error(put.error);
 
-  return `${baseUrl}/${params.key}`;
+  const url = publicHttpsUrlForR2ObjectKey(params.key);
+  const reachable = await verifyPublicR2ObjectUrl(url);
+  if (!reachable) {
+    await deleteR2ObjectsByKeys([params.key]);
+    throw new Error(
+      "Artwork uploaded to storage but the public image URL is not reachable. On the server, set R2_PUBLIC_BASE_URL to this bucket's pub-….r2.dev URL (or your CDN domain) — not the private r2.cloudflarestorage.com API host.",
+    );
+  }
+  return url;
 }
 
 const LISTING_ARTWORK_STAGING_SEGMENT = "listing-request-staging";
@@ -251,6 +287,22 @@ export async function createPresignedR2PutUrl(params: {
 }
 
 export async function getR2ObjectBuffer(key: string): Promise<Buffer | null> {
+  const row = await getR2ObjectWithContentType(key);
+  return row?.body ?? null;
+}
+
+function contentTypeFromR2ObjectKey(key: string): string {
+  const lower = key.toLowerCase();
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".gif")) return "image/gif";
+  return "image/jpeg";
+}
+
+/** Fetch object bytes and content-type from R2 (private S3 API — works when public URL 404s). */
+export async function getR2ObjectWithContentType(
+  key: string,
+): Promise<{ body: Buffer; contentType: string } | null> {
   const bucket = readR2BucketName();
   if (!bucket) return null;
   try {
@@ -264,7 +316,9 @@ export async function getR2ObjectBuffer(key: string): Promise<Buffer | null> {
       }
     }
     if (chunks.length === 0) return null;
-    return Buffer.concat(chunks);
+    const contentType =
+      res.ContentType?.split(";")[0]?.trim() || contentTypeFromR2ObjectKey(key);
+    return { body: Buffer.concat(chunks), contentType };
   } catch {
     return null;
   }
@@ -675,12 +729,6 @@ export async function deleteShopListingSupplementPendingObject(
     }
   }
   return false;
-}
-
-function publicHttpsUrlForR2ObjectKey(key: string): string {
-  const baseUrl = readR2Env("R2_PUBLIC_BASE_URL")?.replace(/\/$/, "");
-  if (!baseUrl) throw new Error("R2_PUBLIC_BASE_URL missing");
-  return `${baseUrl}/${key}`;
 }
 
 /**

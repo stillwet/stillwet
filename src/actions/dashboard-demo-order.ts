@@ -106,9 +106,7 @@ export async function simulateShopDemoPurchase(): Promise<SimulateShopDemoPurcha
     }
     const goodsUnit = baselineGoodsServicesUnitCents({
       baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
-      selectedVariantId: orderPrintifyVariantId,
       catalogRow,
-      productPrintifyVariantsJson: p.printifyVariants,
     });
     const goodsLine = Math.min(lineMerchCents, Math.max(0, goodsUnit) * quantity);
     const { goodsServicesCostCents, platformCutCents, shopCutCents } =

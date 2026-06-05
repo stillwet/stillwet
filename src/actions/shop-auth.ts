@@ -21,7 +21,7 @@ import {
   findShopIdConflictingDisplayName,
   SHOP_DISPLAY_NAME_TAKEN_ERROR,
 } from "@/lib/shop-display-name-uniqueness";
-import { allocateUniqueShopSlug } from "@/lib/shop-slug";
+import { allocateSignupShopSlug } from "@/lib/shop-slug";
 import { BETA_TESTER_SIGNUP_LISTING_CREDITS } from "@/lib/beta-tester-codes";
 import { applyBetaTesterSignupPerksInTransaction } from "@/lib/beta-tester-signup-perks";
 import { issueShopEmailVerificationTokenAndSend } from "@/lib/shop-email-verification";
@@ -131,20 +131,14 @@ export async function createShopFromSignup(
     return { error: "Password must be at least 10 characters." };
   }
 
-  const emailLocal = email.split("@")[0] ?? "";
-  const displayNameBase = displayNameOpt || emailLocal || "Shop";
   const displayName =
-    displayNameBase.length > 120 ? displayNameBase.slice(0, 120) : displayNameBase;
+    displayNameOpt.length > 120 ? displayNameOpt.slice(0, 120) : displayNameOpt;
 
-  if (await findShopIdConflictingDisplayName(displayName)) {
+  if (displayName && (await findShopIdConflictingDisplayName(displayName))) {
     return { error: SHOP_DISPLAY_NAME_TAKEN_ERROR };
   }
 
-  /** URL slug from shop display name (slugified); fallback if reserved or collision. */
-  let slugResult = await allocateUniqueShopSlug(displayName);
-  if ("error" in slugResult) {
-    slugResult = await allocateUniqueShopSlug(`shop-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`);
-  }
+  const slugResult = await allocateSignupShopSlug(displayName);
   if ("error" in slugResult) {
     return { error: slugResult.error };
   }
@@ -189,12 +183,14 @@ export async function createShopFromSignup(
       if (emailConflict) return { status: "email_taken" as const };
 
       const displayKey = displayName.trim().toLowerCase();
-      const displayConflict = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
-        SELECT id FROM "Shop"
-        WHERE LOWER(TRIM("displayName")) = ${displayKey}
-        LIMIT 1
-      `);
-      if (displayConflict.length > 0) return { status: "display_taken" as const };
+      if (displayKey) {
+        const displayConflict = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
+          SELECT id FROM "Shop"
+          WHERE LOWER(TRIM("displayName")) = ${displayKey}
+          LIMIT 1
+        `);
+        if (displayConflict.length > 0) return { status: "display_taken" as const };
+      }
 
       const consumed = await tx.creatorGiftCode.updateMany({
         where: { id: giftCode.id, redeemedAt: null },
@@ -281,7 +277,7 @@ export async function createShopFromSignup(
     const session = await getShopOwnerSession();
     session.shopUserId = created.shopUserId;
     await session.save();
-    redirect("/dashboard");
+    redirect("/dashboard?shopWelcome=1");
   }
 
   const base = publicAppBaseUrl();

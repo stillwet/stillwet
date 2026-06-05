@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { FulfillmentType } from "@/generated/prisma/enums";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
+import { listingCheckoutPrintifyVariantId } from "@/lib/printify-variants";
 import { getCartSession } from "@/lib/session";
 import { maxCartLineQty } from "@/lib/cart-limits";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
@@ -42,22 +42,19 @@ export async function addToCart(
   const product = listing.product;
   const lineMax = maxCartLineQty(product.fulfillmentType);
   const q = Math.max(1, Math.min(lineMax, quantity));
-  const variants = getPrintifyVariantsForProduct(product);
-  let vid: string | undefined =
-    typeof printifyVariantId === "string" && printifyVariantId.trim()
-      ? printifyVariantId.trim()
-      : undefined;
-
+  let vid: string | undefined;
   if (product.fulfillmentType === FulfillmentType.printify) {
-    if (variants.length > 1) {
-      if (!vid || !variants.some((x) => x.id === vid)) return { ok: false };
-    } else if (variants.length === 1) {
-      vid = variants[0].id;
-    } else {
-      return { ok: false };
-    }
-  } else {
-    vid = undefined;
+    const requestedVid =
+      typeof printifyVariantId === "string" && printifyVariantId.trim()
+        ? printifyVariantId.trim()
+        : undefined;
+    const resolved = listingCheckoutPrintifyVariantId(
+      listing,
+      product,
+      requestedVid ? { quantity: q, printifyVariantId: requestedVid } : undefined,
+    );
+    if (!resolved) return { ok: false };
+    vid = resolved;
   }
 
   const keys = Object.keys(session.items).filter(

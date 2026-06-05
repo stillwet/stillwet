@@ -163,9 +163,7 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
     const catalogRow = pick ? baselineCatalogById.get(pick.itemId) : undefined;
     const goodsUnit = baselineGoodsServicesUnitCents({
       baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
-      selectedVariantId: orderPrintifyVariantId,
       catalogRow,
-      productPrintifyVariantsJson: p.printifyVariants,
     });
     const goodsLine = Math.min(lineTotal, Math.max(0, goodsUnit) * quantity);
     const { goodsServicesCostCents, platformCutCents, shopCutCents } =

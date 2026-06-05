@@ -24,6 +24,7 @@ import {
   moderationTriggerErrorMessage,
 } from "@/lib/moderation-keyword-scan";
 import { plainTextNoUrlsValidationError } from "@/lib/plain-text-no-urls";
+import { shopDisplayNameForProfileForm } from "@/lib/shop-display-name-uniqueness";
 
 type ProfileModerationBlurState = {
   displayName: string | null;
@@ -138,7 +139,7 @@ export function ShopProfileSetupPanel(props: {
   const [isSocialSavePending, startSocialSaveTransition] = useTransition();
   const [isListedBrowsePending, startListedBrowseTransition] = useTransition();
 
-  const [displayName, setDisplayName] = useState(shop.displayName);
+  const [displayName, setDisplayName] = useState(() => shopDisplayNameForProfileForm(shop.displayName));
   const [listedOnShopsBrowse, setListedOnShopsBrowse] = useState(shop.listedOnShopsBrowse);
   const [welcomeMessage, setWelcomeMessage] = useState(shop.welcomeMessage ?? "");
   const [social, setSocial] = useState(() => socialRecordFromShop(shop.socialLinks));
@@ -152,7 +153,7 @@ export function ShopProfileSetupPanel(props: {
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setDisplayName(shop.displayName);
+    setDisplayName(shopDisplayNameForProfileForm(shop.displayName));
     setWelcomeMessage(shop.welcomeMessage ?? "");
     setSocial(socialRecordFromShop(shop.socialLinks));
     setListedOnShopsBrowse(shop.listedOnShopsBrowse);
@@ -176,7 +177,7 @@ export function ShopProfileSetupPanel(props: {
   );
 
   const profileDirty = useMemo(() => {
-    if (displayName.trim() !== shop.displayName.trim()) return true;
+    if (displayName.trim() !== shopDisplayNameForProfileForm(shop.displayName).trim()) return true;
     if (welcomeMessage.trim() !== (shop.welcomeMessage ?? "").trim()) return true;
     for (const k of SHOP_SOCIAL_KEYS) {
       if ((social[k] ?? "").trim() !== (baselineSocial[k] ?? "").trim()) return true;

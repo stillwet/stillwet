@@ -104,7 +104,6 @@ export type ProductCountAggregateOutputType = {
   checkoutTipEligible: number
   printifyProductId: number
   printifyVariantId: number
-  printifyVariants: number
   designNames: number
   stockQuantity: number
   trackInventory: number
@@ -195,7 +194,6 @@ export type ProductCountAggregateInputType = {
   checkoutTipEligible?: true
   printifyProductId?: true
   printifyVariantId?: true
-  printifyVariants?: true
   designNames?: true
   stockQuantity?: true
   trackInventory?: true
@@ -309,7 +307,6 @@ export type ProductGroupByOutputType = {
   checkoutTipEligible: boolean
   printifyProductId: string | null
   printifyVariantId: string | null
-  printifyVariants: runtime.JsonValue | null
   designNames: runtime.JsonValue | null
   stockQuantity: number
   trackInventory: boolean
@@ -359,7 +356,6 @@ export type ProductWhereInput = {
   checkoutTipEligible?: Prisma.BoolFilter<"Product"> | boolean
   printifyProductId?: Prisma.StringNullableFilter<"Product"> | string | null
   printifyVariantId?: Prisma.StringNullableFilter<"Product"> | string | null
-  printifyVariants?: Prisma.JsonNullableFilter<"Product">
   designNames?: Prisma.JsonNullableFilter<"Product">
   stockQuantity?: Prisma.IntFilter<"Product"> | number
   trackInventory?: Prisma.BoolFilter<"Product"> | boolean
@@ -392,7 +388,6 @@ export type ProductOrderByWithRelationInput = {
   checkoutTipEligible?: Prisma.SortOrder
   printifyProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrderInput | Prisma.SortOrder
-  printifyVariants?: Prisma.SortOrderInput | Prisma.SortOrder
   designNames?: Prisma.SortOrderInput | Prisma.SortOrder
   stockQuantity?: Prisma.SortOrder
   trackInventory?: Prisma.SortOrder
@@ -428,7 +423,6 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   checkoutTipEligible?: Prisma.BoolFilter<"Product"> | boolean
   printifyProductId?: Prisma.StringNullableFilter<"Product"> | string | null
   printifyVariantId?: Prisma.StringNullableFilter<"Product"> | string | null
-  printifyVariants?: Prisma.JsonNullableFilter<"Product">
   designNames?: Prisma.JsonNullableFilter<"Product">
   stockQuantity?: Prisma.IntFilter<"Product"> | number
   trackInventory?: Prisma.BoolFilter<"Product"> | boolean
@@ -461,7 +455,6 @@ export type ProductOrderByWithAggregationInput = {
   checkoutTipEligible?: Prisma.SortOrder
   printifyProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrderInput | Prisma.SortOrder
-  printifyVariants?: Prisma.SortOrderInput | Prisma.SortOrder
   designNames?: Prisma.SortOrderInput | Prisma.SortOrder
   stockQuantity?: Prisma.SortOrder
   trackInventory?: Prisma.SortOrder
@@ -496,7 +489,6 @@ export type ProductScalarWhereWithAggregatesInput = {
   checkoutTipEligible?: Prisma.BoolWithAggregatesFilter<"Product"> | boolean
   printifyProductId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   printifyVariantId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
-  printifyVariants?: Prisma.JsonNullableWithAggregatesFilter<"Product">
   designNames?: Prisma.JsonNullableWithAggregatesFilter<"Product">
   stockQuantity?: Prisma.IntWithAggregatesFilter<"Product"> | number
   trackInventory?: Prisma.BoolWithAggregatesFilter<"Product"> | boolean
@@ -522,7 +514,6 @@ export type ProductCreateInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -555,7 +546,6 @@ export type ProductUncheckedCreateInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -586,7 +576,6 @@ export type ProductUpdateInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -619,7 +608,6 @@ export type ProductUncheckedUpdateInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -651,7 +639,6 @@ export type ProductCreateManyInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -677,7 +664,6 @@ export type ProductUpdateManyMutationInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -704,7 +690,6 @@ export type ProductUncheckedUpdateManyInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -751,7 +736,6 @@ export type ProductCountOrderByAggregateInput = {
   checkoutTipEligible?: Prisma.SortOrder
   printifyProductId?: Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrder
-  printifyVariants?: Prisma.SortOrder
   designNames?: Prisma.SortOrder
   stockQuantity?: Prisma.SortOrder
   trackInventory?: Prisma.SortOrder
@@ -967,7 +951,6 @@ export type ProductCreateWithoutTagByItemSpotlightsInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -999,7 +982,6 @@ export type ProductUncheckedCreateWithoutTagByItemSpotlightsInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1034,7 +1016,6 @@ export type ProductCreateWithoutPrimaryTagInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1065,7 +1046,6 @@ export type ProductUncheckedCreateWithoutPrimaryTagInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1117,7 +1097,6 @@ export type ProductUpdateWithoutTagByItemSpotlightsInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1149,7 +1128,6 @@ export type ProductUncheckedUpdateWithoutTagByItemSpotlightsInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1199,7 +1177,6 @@ export type ProductScalarWhereInput = {
   checkoutTipEligible?: Prisma.BoolFilter<"Product"> | boolean
   printifyProductId?: Prisma.StringNullableFilter<"Product"> | string | null
   printifyVariantId?: Prisma.StringNullableFilter<"Product"> | string | null
-  printifyVariants?: Prisma.JsonNullableFilter<"Product">
   designNames?: Prisma.JsonNullableFilter<"Product">
   stockQuantity?: Prisma.IntFilter<"Product"> | number
   trackInventory?: Prisma.BoolFilter<"Product"> | boolean
@@ -1225,7 +1202,6 @@ export type ProductCreateWithoutTagsInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1257,7 +1233,6 @@ export type ProductUncheckedCreateWithoutTagsInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1303,7 +1278,6 @@ export type ProductUpdateWithoutTagsInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1335,7 +1309,6 @@ export type ProductUncheckedUpdateWithoutTagsInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1365,7 +1338,6 @@ export type ProductCreateWithoutShopListingsInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1397,7 +1369,6 @@ export type ProductUncheckedCreateWithoutShopListingsInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1443,7 +1414,6 @@ export type ProductUpdateWithoutShopListingsInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1475,7 +1445,6 @@ export type ProductUncheckedUpdateWithoutShopListingsInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1505,7 +1474,6 @@ export type ProductCreateWithoutOrderLinesInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1537,7 +1505,6 @@ export type ProductUncheckedCreateWithoutOrderLinesInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1583,7 +1550,6 @@ export type ProductUpdateWithoutOrderLinesInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1615,7 +1581,6 @@ export type ProductUncheckedUpdateWithoutOrderLinesInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1645,7 +1610,6 @@ export type ProductCreateWithoutAdminCatalogItemPlatformLinksInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1677,7 +1641,6 @@ export type ProductUncheckedCreateWithoutAdminCatalogItemPlatformLinksInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1723,7 +1686,6 @@ export type ProductUpdateWithoutAdminCatalogItemPlatformLinksInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1755,7 +1717,6 @@ export type ProductUncheckedUpdateWithoutAdminCatalogItemPlatformLinksInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1785,7 +1746,6 @@ export type ProductCreateManyPrimaryTagInput = {
   checkoutTipEligible?: boolean
   printifyProductId?: string | null
   printifyVariantId?: string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: number
   trackInventory?: boolean
@@ -1811,7 +1771,6 @@ export type ProductUpdateWithoutPrimaryTagInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1842,7 +1801,6 @@ export type ProductUncheckedUpdateWithoutPrimaryTagInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1873,7 +1831,6 @@ export type ProductUncheckedUpdateManyWithoutPrimaryTagInput = {
   checkoutTipEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  printifyVariants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   designNames?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   stockQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   trackInventory?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1967,7 +1924,6 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   checkoutTipEligible?: boolean
   printifyProductId?: boolean
   printifyVariantId?: boolean
-  printifyVariants?: boolean
   designNames?: boolean
   stockQuantity?: boolean
   trackInventory?: boolean
@@ -2001,7 +1957,6 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   checkoutTipEligible?: boolean
   printifyProductId?: boolean
   printifyVariantId?: boolean
-  printifyVariants?: boolean
   designNames?: boolean
   stockQuantity?: boolean
   trackInventory?: boolean
@@ -2029,7 +1984,6 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   checkoutTipEligible?: boolean
   printifyProductId?: boolean
   printifyVariantId?: boolean
-  printifyVariants?: boolean
   designNames?: boolean
   stockQuantity?: boolean
   trackInventory?: boolean
@@ -2057,7 +2011,6 @@ export type ProductSelectScalar = {
   checkoutTipEligible?: boolean
   printifyProductId?: boolean
   printifyVariantId?: boolean
-  printifyVariants?: boolean
   designNames?: boolean
   stockQuantity?: boolean
   trackInventory?: boolean
@@ -2068,7 +2021,7 @@ export type ProductSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "description" | "priceCents" | "imageUrl" | "imageGallery" | "payCard" | "payCashApp" | "audience" | "fulfillmentType" | "primaryTagId" | "checkoutTipEligible" | "printifyProductId" | "printifyVariantId" | "printifyVariants" | "designNames" | "stockQuantity" | "trackInventory" | "active" | "minPriceCents" | "storefrontViewCount" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "description" | "priceCents" | "imageUrl" | "imageGallery" | "payCard" | "payCashApp" | "audience" | "fulfillmentType" | "primaryTagId" | "checkoutTipEligible" | "printifyProductId" | "printifyVariantId" | "designNames" | "stockQuantity" | "trackInventory" | "active" | "minPriceCents" | "storefrontViewCount" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   primaryTag?: boolean | Prisma.Product$primaryTagArgs<ExtArgs>
   tags?: boolean | Prisma.Product$tagsArgs<ExtArgs>
@@ -2111,7 +2064,6 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     checkoutTipEligible: boolean
     printifyProductId: string | null
     printifyVariantId: string | null
-    printifyVariants: runtime.JsonValue | null
     /**
      * * Ordered display labels (e.g. design series); first is primary. JSON string[].
      */
@@ -2575,7 +2527,6 @@ export interface ProductFieldRefs {
   readonly checkoutTipEligible: Prisma.FieldRef<"Product", 'Boolean'>
   readonly printifyProductId: Prisma.FieldRef<"Product", 'String'>
   readonly printifyVariantId: Prisma.FieldRef<"Product", 'String'>
-  readonly printifyVariants: Prisma.FieldRef<"Product", 'Json'>
   readonly designNames: Prisma.FieldRef<"Product", 'Json'>
   readonly stockQuantity: Prisma.FieldRef<"Product", 'Int'>
   readonly trackInventory: Prisma.FieldRef<"Product", 'Boolean'>

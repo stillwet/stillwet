@@ -27,7 +27,7 @@ type OrderLineForDash = Prisma.OrderGetPayload<{
         shopCutCents: true;
         printifyVariantId: true;
         shopListing: { select: { baselineCatalogPickEncoded: true; requestItemName: true } };
-        product: { select: { name: true; printifyVariants: true } };
+        product: { select: { name: true } };
       };
     };
   };
@@ -65,7 +65,7 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
           shopListing: {
             select: { baselineCatalogPickEncoded: true, requestItemName: true },
           },
-          product: { select: { name: true, printifyVariants: true } },
+          product: { select: { name: true } },
         },
       },
     },

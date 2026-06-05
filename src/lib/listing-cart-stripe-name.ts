@@ -1,11 +1,11 @@
 import type { Product } from "@/generated/prisma/client";
 import type { CartLine } from "@/lib/session";
-import { getPrintifyVariantsForProduct, resolvePrintifyCheckoutLine } from "@/lib/printify-variants";
+import { listingCheckoutPrintifyVariantId } from "@/lib/printify-variants";
 import { storefrontListingDisplayTitle } from "@/lib/storefront-listing-display-name";
 
 type P = Pick<
   Product,
-  "name" | "slug" | "fulfillmentType" | "priceCents" | "printifyVariantId" | "printifyVariants"
+  "name" | "slug" | "fulfillmentType" | "priceCents" | "printifyVariantId"
 > & {
   adminCatalogItemPlatformLinks?: { name: string }[] | null;
 };
@@ -25,16 +25,8 @@ export function listingStripeProductName(
     adminCatalogItemName: null,
     product: p,
   });
-  if (getPrintifyVariantsForProduct(p).length > 1) {
-    const r = resolvePrintifyCheckoutLine(p, cartLine, { stripeBaseName: stripeBase });
-    if (!r) return { name: stripeBase, printifyVariantId: p.printifyVariantId };
-    return { name: r.stripeName, printifyVariantId: r.printifyVariantId };
-  }
-  const listingVid = listing.listingPrintifyVariantId?.trim();
-  if (listingVid) {
-    return { name: stripeBase, printifyVariantId: listingVid };
-  }
-  const r = resolvePrintifyCheckoutLine(p, cartLine, { stripeBaseName: stripeBase });
-  if (!r) return { name: stripeBase, printifyVariantId: p.printifyVariantId };
-  return { name: r.stripeName, printifyVariantId: r.printifyVariantId };
+  return {
+    name: stripeBase,
+    printifyVariantId: listingCheckoutPrintifyVariantId(listing, p, cartLine),
+  };
 }

@@ -24,9 +24,8 @@ export default function FaqPage() {
             What does it cost to have a shop? / What fees do you collect?
           </h2>
           <p>
-            <strong className="font-semibold text-zinc-200">Opening a shop has a one-time $15 account fee.</strong> When
-            you pay by card, an estimated card processing fee is added at Stripe checkout. Each shop gets 3 free
-            listings. Additional listings are available for purchase.
+            <strong className="font-semibold text-zinc-200">Opening a shop has a one-time $15 account fee.</strong> Each
+            shop gets 3 free listings. Additional listings are available for purchase.
           </p>
           <p>When you sell an item, you don&apos;t get the full purchase amount.</p>
           <p>

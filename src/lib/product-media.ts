@@ -1,5 +1,4 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { parsePrintifyVariantsJson } from "@/lib/printify-variants";
 
 /** Max images per product listing (admin + storefront). */
 export const MAX_GALLERY = 20;
@@ -74,21 +73,13 @@ export function productImageUrlsUnionHero(product: {
 }
 
 /**
- * Hero ∪ gallery ∪ Printify variant `imageUrl` values (deduped). Use when deleting R2 listing
- * objects that are no longer referenced after a listing save.
+ * Hero ∪ gallery image URLs (deduped). Use when deleting R2 listing objects that are no longer referenced.
  */
 export function productAllStoredImageUrls(product: {
   imageUrl: string | null;
   imageGallery: Prisma.JsonValue | null;
-  printifyVariants?: Prisma.JsonValue | null;
 }): string[] {
-  const fromHeroGallery = productImageUrlsUnionHero(product);
-  const fromVariants: string[] = [];
-  for (const v of parsePrintifyVariantsJson(product.printifyVariants ?? null)) {
-    const u = v.imageUrl?.trim();
-    if (u) fromVariants.push(u);
-  }
-  return uniqueImageUrlsOrdered([...fromHeroGallery, ...fromVariants]);
+  return productImageUrlsUnionHero(product);
 }
 
 export function productPrimaryImage(product: {
@@ -291,7 +282,6 @@ export function productPrimaryImageForShopListing(
   product: {
     imageUrl: string | null;
     imageGallery: Prisma.JsonValue | null;
-    printifyVariants?: Prisma.JsonValue | null;
   },
   extras?: {
     adminListingSecondaryImageUrl?: string | null;
@@ -299,13 +289,7 @@ export function productPrimaryImageForShopListing(
     listingStorefrontCatalogImageUrls?: string[] | null;
   },
 ): string | null {
-  const fromCatalog = productImageUrlsForShopListing(product, extras)[0];
-  if (fromCatalog) return fromCatalog;
-  for (const v of parsePrintifyVariantsJson(product.printifyVariants ?? null)) {
-    const u = v.imageUrl?.trim();
-    if (u) return u;
-  }
-  return null;
+  return productImageUrlsForShopListing(product, extras)[0] ?? null;
 }
 
 export function toGalleryJson(urls: string[]): Prisma.InputJsonValue {

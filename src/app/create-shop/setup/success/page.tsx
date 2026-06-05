@@ -28,7 +28,7 @@ export default async function ShopSetupSuccessPage({ searchParams }: Props) {
     const session = await getShopOwnerSession();
     session.shopUserId = result.shopUserId;
     await session.save();
-    redirect("/dashboard");
+    redirect("/dashboard?shopWelcome=1");
   }
 
   return (

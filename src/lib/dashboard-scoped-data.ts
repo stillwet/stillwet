@@ -56,7 +56,7 @@ import { promotionPriceCentsForKind } from "@/lib/promotions";
 import {
   type AdminCatalogRowForDisplay,
   dashboardPaidOrderLineDisplayLabel,
-  listingGoodsServicesUnitCentsByPrintifyVariantId,
+  listingGoodsServicesUnitCents,
   paidOrderLineGoodsServicesDisplayCents,
 } from "@/lib/dashboard-payload-helpers";
 import {
@@ -142,7 +142,7 @@ type OrderLineForDash = Prisma.OrderGetPayload<{
         shopCutCents: true;
         printifyVariantId: true;
         shopListing: { select: { baselineCatalogPickEncoded: true; requestItemName: true } };
-        product: { select: { name: true; printifyVariants: true } };
+        product: { select: { name: true } };
       };
     };
   };
@@ -805,7 +805,7 @@ export async function loadDashboardScopedChunks(
           listing.ownerSupplementPendingSubmittedAt?.toISOString() ?? null,
         listingStorefrontCatalogImageUrls: listing.listingStorefrontCatalogImageUrls,
         baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
-        goodsServicesUnitCentsByPrintifyVariantId: listingGoodsServicesUnitCentsByPrintifyVariantId(
+        goodsServicesUnitCents: listingGoodsServicesUnitCents(
           {
             baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
             product: listing.product,
@@ -813,7 +813,6 @@ export async function loadDashboardScopedChunks(
           adminCatalogById,
         ),
         listingPrintifyVariantId: listing.listingPrintifyVariantId,
-        listingPrintifyVariantPrices: listing.listingPrintifyVariantPrices,
         requestItemName: listing.requestItemName,
         storefrontItemBlurb: listing.storefrontItemBlurb,
         listingSearchKeywords: listing.listingSearchKeywords,
@@ -833,7 +832,6 @@ export async function loadDashboardScopedChunks(
           imageGallery: listing.product.imageGallery,
           fulfillmentType: listing.product.fulfillmentType,
           printifyVariantId: listing.product.printifyVariantId,
-          printifyVariants: listing.product.printifyVariants,
         },
       };
     });

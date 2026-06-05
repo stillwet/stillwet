@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { ProductAddToCartForm } from "@/components/ProductAddToCartForm";
 import { productImageUrlsForShopListing } from "@/lib/product-media";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
-import { PrintifyVariantAddToCart } from "@/components/PrintifyVariantAddToCart";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { PRODUCT_HERO_GALLERY_WRAP_CLASS } from "@/lib/product-image-gallery-constants";
 import { StoreDocumentPanel } from "@/components/StoreDocumentPanel";
@@ -31,7 +29,6 @@ export function ProductDetailContent({
   adminListingSecondaryImageUrl,
   ownerSupplementImageUrl,
   listingStorefrontCatalogImageUrls,
-  printifyVariantShopPriceCentsById,
   adminCatalogStorefrontDescription,
   /** Shop listing’s item name (`requestItemName`); preferred for title with admin catalog fallback. */
   listingItemName,
@@ -46,8 +43,6 @@ export function ProductDetailContent({
   variant: "page" | "modal";
   /** When set, cart + breadcrumbs target this shop slug (`/s/...`). */
   tenant?: { shopSlug: string; listingPriceCents: number; shopDisplayName: string };
-  /** Per-variant shop unit prices (cents) for multi-variant Printify picker; from listing row. */
-  printifyVariantShopPriceCentsById?: Record<string, number>;
   /** Optional admin-set listing image (tenant PDP only). */
   adminListingSecondaryImageUrl?: string | null;
   /** Extra listing image from the shop owner (tenant PDP only). */
@@ -87,9 +82,6 @@ export function ProductDetailContent({
     ownerSupplementImageUrl,
     listingStorefrontCatalogImageUrls,
   });
-  const printifyVariants = getPrintifyVariantsForProduct(product);
-  const multiPrintify = printifyVariants.length > 1;
-
   const description = (adminCatalogStorefrontDescription ?? "").trim();
   const blurbText = storefrontItemBlurb?.trim() || "";
   const keywordsText = listingSearchKeywords?.trim() || "";
@@ -110,29 +102,13 @@ export function ProductDetailContent({
 
   const grid = (
     <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-8 xl:gap-x-10">
-      {multiPrintify ? (
-        <PrintifyVariantAddToCart
+      <div className={PRODUCT_HERO_GALLERY_WRAP_CLASS}>
+        <ProductImageGallery images={images} />
+        <ProductAddToCartForm
           productId={product.id}
           shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
-          variants={printifyVariants.map((v) => ({
-            id: v.id,
-            title: v.title,
-            priceCents:
-              printifyVariantShopPriceCentsById?.[v.id] ??
-              (tenant != null ? tenant.listingPriceCents : v.priceCents),
-            imageUrl: v.imageUrl ?? null,
-          }))}
-          galleryExtras={images}
         />
-      ) : (
-        <div className={PRODUCT_HERO_GALLERY_WRAP_CLASS}>
-          <ProductImageGallery images={images} />
-          <ProductAddToCartForm
-            productId={product.id}
-            shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
-          />
-        </div>
-      )}
+      </div>
       <div
         className={
           variant === "modal"
@@ -166,17 +142,15 @@ export function ProductDetailContent({
           </h1>
         ) : null}
         {variant === "page" ? adminCatalogSubtitle : null}
-        {!multiPrintify ? (
-          <p
-            className={
-              variant === "page" || tenant
-                ? "mt-3 text-2xl text-blue-200/90"
-                : "text-2xl text-blue-200/90"
-            }
-          >
-            {formatPrice(displayPriceCents)}
-          </p>
-        ) : null}
+        <p
+          className={
+            variant === "page" || tenant
+              ? "mt-3 text-2xl text-blue-200/90"
+              : "text-2xl text-blue-200/90"
+          }
+        >
+          {formatPrice(displayPriceCents)}
+        </p>
         {blurbText ? (
           <p className="mt-6 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">
             {blurbText}

@@ -1,5 +1,4 @@
 import { unstable_cache } from "next/cache";
-import { printifyVariantShopPriceCentsByIdForListing } from "@/lib/listing-cart-price";
 import { parseListingStorefrontCatalogImageSelection } from "@/lib/product-media";
 import { prisma } from "@/lib/prisma";
 import {
@@ -89,8 +88,6 @@ export async function resolveAdminCatalogItemName(
 export type ResolvedPublicProductDetail = {
   product: StorefrontProduct;
   tenant?: { shopSlug: string; listingPriceCents: number; shopDisplayName: string };
-  /** Per Printify variant shop unit price (cents) for multi-variant picker; aligns with cart line pricing. */
-  printifyVariantShopPriceCentsById?: Record<string, number>;
   adminListingSecondaryImageUrl?: string | null;
   ownerSupplementImageUrl?: string | null;
   listingStorefrontCatalogImageUrls?: string[];
@@ -129,7 +126,6 @@ export function mapListingRowToProductDetail(row: StorefrontShopListing): Resolv
       listingPriceCents: row.priceCents,
       shopDisplayName: row.shop.displayName,
     },
-    printifyVariantShopPriceCentsById: printifyVariantShopPriceCentsByIdForListing(row, row.product),
     adminListingSecondaryImageUrl: sanitizeShopListingAdminSecondaryImageUrlForDisplay(
       row.adminListingSecondaryImageUrl,
       row.shopId,

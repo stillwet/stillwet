@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
 import type { Product, Tag } from "@/generated/prisma/client";
 import { getCartSessionReadonly } from "@/lib/session";
-import { cartLineVariantSubtitle } from "@/lib/printify-variants";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
 import { productHref } from "@/lib/marketplace-constants";
 import { storefrontListingDisplayTitle } from "@/lib/storefront-listing-display-name";
@@ -57,7 +56,7 @@ export async function loadActiveCartRows(): Promise<{
       quantity: q,
       line,
       unit,
-      variantSub: cartLineVariantSubtitle(p, cartLine) ?? null,
+      variantSub: null,
       lineDisplayName: storefrontListingDisplayTitle({
         requestItemName: listing.requestItemName,
         product: p,

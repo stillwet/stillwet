@@ -1,4 +1,5 @@
 import { ListingRequestStatus } from "@/generated/prisma/enums";
+import { isShopDisplayNamePending } from "@/lib/shop-display-name-uniqueness";
 
 export type ShopOnboardingSteps = {
   profile: boolean;
@@ -36,7 +37,7 @@ export function computeShopOnboardingSteps(input: {
   connectChargesEnabled: boolean;
   payoutsEnabled: boolean;
 }): ShopOnboardingSteps {
-  const profile = input.displayName.trim().length > 0;
+  const profile = !isShopDisplayNamePending(input.displayName);
   const guidelines = input.itemGuidelinesAcknowledgedAt != null;
   const emailVerified = input.emailVerifiedAt != null;
   const listing =

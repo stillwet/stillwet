@@ -17,10 +17,6 @@ import {
 } from "@/lib/printify";
 import { pickImageForVariant } from "@/lib/printify-catalog";
 import {
-  getPrintifyVariantsForProduct,
-  parsePrintifyVariantsJson,
-} from "@/lib/printify-variants";
-import {
   buildListingPrintifyUserUploadKey,
   isPrintifyManagedListingImageUrl,
   mergePrintifyResyncGallery,
@@ -98,42 +94,11 @@ export async function updateProductDetails(
   const description =
     descRaw.trim() === "" ? null : descRaw.trim().slice(0, MAX_DESC_LEN);
 
-  const printifyVariantRows = getPrintifyVariantsForProduct(product);
-  let priceCents: number;
-  let printifyVariantsNext: Prisma.InputJsonValue | undefined;
-
-  if (
-    product.fulfillmentType === FulfillmentType.printify &&
-    printifyVariantRows.length > 0
-  ) {
-    const nextVariants: {
-      id: string;
-      title: string;
-      priceCents: number;
-      imageUrl: string | null;
-    }[] = [];
-    for (const v of printifyVariantRows) {
-      const raw = String(formData.get(`variantPrice_${v.id}`) ?? "").trim();
-      const priceFloat = parseFloat(raw.replace(/,/g, ""));
-      if (!Number.isFinite(priceFloat) || priceFloat < 0) return;
-      const pc = Math.round(priceFloat * 100);
-      if (pc > 99_999_999) return;
-      nextVariants.push({
-        id: v.id,
-        title: v.title,
-        priceCents: pc,
-        imageUrl: v.imageUrl ?? null,
-      });
-    }
-    printifyVariantsNext = nextVariants;
-    priceCents = nextVariants[0]!.priceCents;
-  } else {
-    const priceRaw = String(formData.get("price") ?? "").trim();
-    const priceFloat = parseFloat(priceRaw.replace(/,/g, ""));
-    if (!Number.isFinite(priceFloat) || priceFloat < 0) return;
-    priceCents = Math.round(priceFloat * 100);
-    if (priceCents > 99_999_999) return;
-  }
+  const priceRaw = String(formData.get("price") ?? "").trim();
+  const priceFloat = parseFloat(priceRaw.replace(/,/g, ""));
+  if (!Number.isFinite(priceFloat) || priceFloat < 0) return;
+  const priceCents = Math.round(priceFloat * 100);
+  if (priceCents > 99_999_999) return;
 
   const galleryRaw = String(formData.get("gallery") ?? "");
   const urls = parseImageUrlList(galleryRaw);
@@ -141,10 +106,6 @@ export async function updateProductDetails(
   const imageGallery = toGalleryJson(urls);
   const previousUrls = productAllStoredImageUrls(product);
   const stillReferenced = new Set(urls.map((s) => s.trim()).filter(Boolean));
-  for (const v of parsePrintifyVariantsJson(product.printifyVariants)) {
-    const u = v.imageUrl?.trim();
-    if (u) stillReferenced.add(u);
-  }
   const removedImageUrls = previousUrls.filter((u) => !stillReferenced.has(u.trim()));
 
   const designNameList = parseDesignNamesFromForm(formData);
@@ -159,9 +120,6 @@ export async function updateProductDetails(
     active: formData.get("active") === "on",
     checkoutTipEligible: formData.get("checkoutTipEligible") === "on",
     audience: Audience.both,
-    ...(printifyVariantsNext !== undefined
-      ? { printifyVariants: printifyVariantsNext }
-      : {}),
   };
 
   const payCashApp = formData.get("payCashApp") === "on";
@@ -289,7 +247,6 @@ async function deleteOrArchivePrintifyListingById(
       active: false,
       printifyProductId: null,
       printifyVariantId: null,
-      printifyVariants: Prisma.DbNull,
     },
   });
   revalidatePath("/product/" + row.slug);
@@ -372,27 +329,16 @@ async function processOnePrintifyCatalogProduct(
     return { updated, created, skipped, removed };
   }
 
-  const variantRows = enabledVariants.map((v) => {
-    const imageUrl = pickImageForVariant(p.images, v.id);
-    const priceCents = v.priceCents > 0 ? v.priceCents : 100;
-    return {
-      id: String(v.id),
-      title: v.title.trim() || `Variant ${v.id}`,
-      priceCents,
-      imageUrl: imageUrl ?? null,
-      sku: v.sku ?? null,
-    };
-  });
-
-  const first = variantRows[0]!;
+  const firstEnabled = enabledVariants[0]!;
+  const variantId = String(firstEnabled.id);
+  const priceCents = firstEnabled.priceCents > 0 ? firstEnabled.priceCents : 100;
   const heroImage =
-    first.imageUrl ??
-    pickImageForVariant(p.images, enabledVariants[0]!.id) ??
+    pickImageForVariant(p.images, firstEnabled.id) ??
+    p.images[0]?.src ??
     null;
   const primaryImageUrl = await resolvePrintifyPrimaryImageUrl(heroImage, p.id);
 
   const name = p.title.slice(0, MAX_NAME_LEN);
-  const variantsJson = variantRows as unknown as Prisma.InputJsonValue;
 
   const existingForProduct = await prisma.product.findMany({
     where: {
@@ -416,12 +362,7 @@ async function processOnePrintifyCatalogProduct(
       productImageUrlsUnionHero(keep),
       primaryImageUrl,
     );
-    const variantImageUrls = variantRows
-      .map((v) => v.imageUrl?.trim())
-      .filter((u): u is string => Boolean(u));
-    const nextSet = new Set(
-      [...nextUrls, ...variantImageUrls].map((x) => x.trim()).filter(Boolean),
-    );
+    const nextSet = new Set(nextUrls.map((x) => x.trim()).filter(Boolean));
     const printifyOrphansToDelete = previousAll.filter(
       (u) => isPrintifyManagedListingImageUrl(u) && !nextSet.has(u.trim()),
     );
@@ -430,9 +371,8 @@ async function processOnePrintifyCatalogProduct(
       data: {
         ...(resyncPreservesStorefront ? {} : { name }),
         printifyProductId: p.id,
-        printifyVariantId: first.id,
-        printifyVariants: variantsJson,
-        priceCents: first.priceCents,
+        printifyVariantId: variantId,
+        priceCents,
         ...(resyncPreservesStorefront
           ? {}
           : typeof p.description === "string"
@@ -469,12 +409,7 @@ async function processOnePrintifyCatalogProduct(
       productImageUrlsUnionHero(match),
       primaryImageUrl,
     );
-    const variantImageUrls = variantRows
-      .map((v) => v.imageUrl?.trim())
-      .filter((u): u is string => Boolean(u));
-    const nextSet = new Set(
-      [...nextUrls, ...variantImageUrls].map((x) => x.trim()).filter(Boolean),
-    );
+    const nextSet = new Set(nextUrls.map((x) => x.trim()).filter(Boolean));
     const printifyOrphansToDelete = previousAll.filter(
       (u) => isPrintifyManagedListingImageUrl(u) && !nextSet.has(u.trim()),
     );
@@ -483,9 +418,8 @@ async function processOnePrintifyCatalogProduct(
       data: {
         ...(resyncPreservesStorefront ? {} : { name }),
         printifyProductId: p.id,
-        printifyVariantId: first.id,
-        printifyVariants: variantsJson,
-        priceCents: first.priceCents,
+        printifyVariantId: variantId,
+        priceCents,
         ...(resyncPreservesStorefront
           ? {}
           : typeof p.description === "string"
@@ -513,7 +447,7 @@ async function processOnePrintifyCatalogProduct(
       slug,
       name,
       description: p.description,
-      priceCents: first.priceCents,
+      priceCents,
       imageUrl: primaryImageUrl,
       imageGallery: toGalleryJson(primaryImageUrl ? [primaryImageUrl] : []),
       audience: aud,
@@ -521,8 +455,7 @@ async function processOnePrintifyCatalogProduct(
       primaryTagId: noTagId,
       tags: { create: [{ tagId: noTagId }] },
       printifyProductId: p.id,
-      printifyVariantId: first.id,
-      printifyVariants: variantsJson,
+      printifyVariantId: variantId,
       stockQuantity: 0,
       trackInventory: false,
       active: true,

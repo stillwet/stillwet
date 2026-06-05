@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { fetchPrintifyCatalog, hasPrintifyApiToken, isPrintifyConfigured } from "@/lib/printify";
 import { isR2UploadConfigured } from "@/lib/r2-upload";
 import { pickImageForVariant } from "@/lib/printify-catalog";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
 import { productImageUrls } from "@/lib/product-media";
 import type { AdminTagRow } from "@/components/admin/ProductTagFields";
 import { ProductDesignNameFields } from "@/components/admin/ProductDesignNameFields";
@@ -62,50 +61,21 @@ function priceInputValue(cents: number): string {
 function PrintifyListingPriceFields({
   listing,
 }: {
-  listing: Pick<
-    Product,
-    "fulfillmentType" | "printifyVariants" | "printifyVariantId" | "priceCents"
-  >;
+  listing: Pick<Product, "priceCents">;
 }) {
-  const variants = getPrintifyVariantsForProduct(listing);
-  if (variants.length === 0) {
-    return (
-      <label className="block text-xs text-zinc-500">
-        Price (USD)
-        <input
-          type="number"
-          name="price"
-          required
-          min={0}
-          step={0.01}
-          defaultValue={priceInputValue(listing.priceCents)}
-          className="mt-1 block w-32 rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm"
-        />
-      </label>
-    );
-  }
   return (
-    <div className="min-w-0 flex-1 space-y-2">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Prices (USD)</p>
-      <ul className="flex min-w-0 flex-wrap items-end gap-x-4 gap-y-3">
-        {variants.map((v) => (
-          <li key={v.id} className="w-32 shrink-0">
-            <label className="block text-xs text-zinc-500">
-              <span className="line-clamp-2 block leading-snug text-zinc-400">{v.title}</span>
-              <input
-                type="number"
-                name={`variantPrice_${v.id}`}
-                required
-                min={0}
-                step={0.01}
-                defaultValue={priceInputValue(v.priceCents)}
-                className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm text-zinc-100"
-              />
-            </label>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <label className="block text-xs text-zinc-500">
+      Price (USD)
+      <input
+        type="number"
+        name="price"
+        required
+        min={0}
+        step={0.01}
+        defaultValue={priceInputValue(listing.priceCents)}
+        className="mt-1 block w-32 rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm"
+      />
+    </label>
   );
 }
 
@@ -389,7 +359,7 @@ export async function PrintifyInventoryTab({
           Storefront listing
         </h3>
         <p className="mt-1 text-xs text-zinc-600">
-          Sync fills Printify ids and variants. Checkout uses the variant chosen on the product page. One listing at a
+          Sync fills Printify ids for one preset variant per item. One listing at a
           time — open it with <strong className="font-medium text-zinc-500">Edit</strong> in the catalog table.
         </p>
         {openListingId && !selectedListing ? (

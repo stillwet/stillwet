@@ -259,6 +259,24 @@ h6 {
   }
 }
 
+@keyframes shop-signup-confetti-fall {
+  0% {
+    transform: translateY(-8vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(108vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shop-signup-confetti-piece {
+    animation: shop-signup-confetti-fall ease-in forwards;
+    animation-iteration-count: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .featured-spotlight-shimmer::after {
     animation: none !important;
@@ -271,6 +289,9 @@ h6 {
     animation: none !important;
     top: 50%;
     opacity: 0.75;
+  }
+  .shop-signup-confetti-piece {
+    display: none;
   }
 }
 

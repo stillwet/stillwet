@@ -154,10 +154,9 @@ export type DashboardListingRow = {
   /** JSON string[] or null — which catalog URLs show on the public PDP. */
   listingStorefrontCatalogImageUrls: unknown;
   baselineCatalogPickEncoded: string | null;
-  /** Per Printify variant id — unit COGS (admin baseline); used for estimated shop profit at list price. */
-  goodsServicesUnitCentsByPrintifyVariantId: Record<string, number>;
+  /** Unit goods/services COGS (admin baseline); used for estimated shop profit at list price. */
+  goodsServicesUnitCents: number;
   listingPrintifyVariantId: string | null;
-  listingPrintifyVariantPrices: unknown;
   product: {
     name: string;
     slug: string;
@@ -169,7 +168,6 @@ export type DashboardListingRow = {
     imageGallery: Prisma.JsonValue | null;
     fulfillmentType: FulfillmentType;
     printifyVariantId: string | null;
-    printifyVariants: Prisma.JsonValue | null;
   };
 };
 
@@ -958,15 +956,12 @@ function ListingCard({
             <DashboardListingPriceForm
               listingId={listing.id}
               priceDollarsFormatted={(listing.priceCents / 100).toFixed(2)}
-              listingPriceCents={listing.priceCents}
-              listingPrintifyVariantPrices={listing.listingPrintifyVariantPrices}
-              goodsServicesUnitCentsByPrintifyVariantId={listing.goodsServicesUnitCentsByPrintifyVariantId}
+              goodsServicesUnitCents={listing.goodsServicesUnitCents}
               product={{
                 fulfillmentType: listing.product.fulfillmentType,
                 priceCents: listing.product.priceCents,
                 minPriceCents: listing.product.minPriceCents,
                 printifyVariantId: listing.product.printifyVariantId,
-                printifyVariants: listing.product.printifyVariants,
               }}
               readOnly={fieldsReadOnly}
             />

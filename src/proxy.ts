@@ -90,6 +90,7 @@ export async function proxy(request: NextRequest) {
     (process.env.NODE_ENV === "development" && pathname.startsWith("/api/dev/")) ||
     pathname.startsWith("/api/health") ||
     pathname.startsWith("/api/dashboard/") ||
+    pathname.startsWith("/api/admin/") ||
     pathname.startsWith("/api/webhooks/") ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico"

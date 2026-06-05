@@ -160,7 +160,6 @@ model Product {
   checkoutTipEligible Boolean         @default(false)
   printifyProductId   String?
   printifyVariantId   String?
-  printifyVariants    Json?
   /** Ordered display labels (e.g. design series); first is primary. JSON string[]. */
   designNames         Json?
   stockQuantity       Int             @default(0)
@@ -634,13 +633,8 @@ model ShopListing {
   listingPublicationFeePaidCents Int?
   /** Shop-specific Printify product id (admin); used for fulfillment instead of Product.printifyProductId when set. */
   listingPrintifyProductId  String?
-  /** Shop-specific Printify variant id for default checkout line when set. */
+  /** Shop-specific Printify variant id for fulfillment when set. */
   listingPrintifyVariantId    String?
-  /**
-   * Per Printify variant id → shop price in cents when the listing exposes multiple variants
-   * (no single forced `listingPrintifyVariantId`). Null = use `priceCents` for every variant until set.
-   */
-  listingPrintifyVariantPrices Json?
   /** Set when an admin saves Printify product/variant IDs (initial or resave); drives “last synced” in admin UI. */
   listingPrintifyCatalogSyncedAt DateTime?
   requestImages      Json?

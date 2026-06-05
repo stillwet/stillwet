@@ -26,7 +26,6 @@ export type PurgeShopListingR2MediaParams = {
   product?: {
     imageUrl: string | null;
     imageGallery: Prisma.JsonValue | null;
-    printifyVariants?: Prisma.JsonValue | null;
   } | null;
 };
 

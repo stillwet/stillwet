@@ -1,7 +1,5 @@
 import type { ProductCardProduct } from "@/components/ProductCard";
-import { parseListingPrintifyVariantPrices } from "@/lib/listing-printify-variant-prices";
 import { parseListingStorefrontCatalogImageSelection } from "@/lib/product-media";
-import { getPrintifyVariantsForProduct } from "@/lib/printify-variants";
 import {
   sanitizeShopListingAdminSecondaryImageUrlForDisplay,
   sanitizeShopListingOwnerSupplementImageUrlForDisplay,
@@ -12,31 +10,11 @@ import {
   titleFromProductSlug,
 } from "@/lib/storefront-listing-display-name";
 
-function listingCardPriceCents(listing: {
-  priceCents: number;
-  listingPrintifyVariantId?: string | null;
-  listingPrintifyVariantPrices?: unknown;
-  product: ProductCardProduct;
-}): number {
-  const p = listing.product;
-  const variants = getPrintifyVariantsForProduct(p);
-  if (variants.length <= 1) return listing.priceCents;
-  const map = parseListingPrintifyVariantPrices(listing.listingPrintifyVariantPrices);
-  let min = Infinity;
-  for (const v of variants) {
-    const c = map?.[v.id] ?? listing.priceCents;
-    min = Math.min(min, c);
-  }
-  return Number.isFinite(min) ? min : listing.priceCents;
-}
-
 export function productCardProductFromListing<
   LP extends {
     id: string;
     shopId: string;
     priceCents: number;
-    listingPrintifyVariantId?: string | null;
-    listingPrintifyVariantPrices?: unknown;
     product: ProductCardProduct;
     requestItemName?: string | null;
     adminListingSecondaryImageUrl?: string | null;
@@ -61,7 +39,7 @@ export function productCardProductFromListing<
     ...listing.product,
     name,
     catalogProductName,
-    priceCents: listingCardPriceCents(listing),
+    priceCents: listing.priceCents,
     ...(storefrontShopSlug ? { storefrontShopSlug } : {}),
     ...(storefrontShopDisplayName ? { storefrontShopDisplayName } : {}),
     adminListingSecondaryImageUrl: sanitizeShopListingAdminSecondaryImageUrlForDisplay(

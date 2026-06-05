@@ -27,7 +27,6 @@ export default async function EmbedProductPage({ params, searchParams }: Props) 
             product={detail.product}
             variant="modal"
             tenant={detail.tenant}
-            printifyVariantShopPriceCentsById={detail.printifyVariantShopPriceCentsById}
             adminListingSecondaryImageUrl={detail.adminListingSecondaryImageUrl}
             ownerSupplementImageUrl={detail.ownerSupplementImageUrl}
             listingStorefrontCatalogImageUrls={detail.listingStorefrontCatalogImageUrls}

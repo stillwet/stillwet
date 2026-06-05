@@ -654,41 +654,51 @@ export function ShopFirstListingRequestPanel(props: {
             <p className="mt-1 text-[11px] leading-relaxed text-zinc-600">
               Select a base item your design will be printed on.
             </p>
-            <ul
-              className="mt-2 h-[350px] divide-y divide-zinc-800/80 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-950/40"
-              role="listbox"
-              aria-label="Items from admin catalog"
-            >
-              {catalogGroups.map((g) => {
-                const selected = listingProductId === g.option.productId;
-                return (
-                  <li key={g.itemId}>
-                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-2.5">
-                      <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-sm text-zinc-200">
-                        <input
-                          type="radio"
-                          name="catalogProductPick"
-                          value={g.option.productId}
-                          checked={selected}
-                          disabled={freezeListingRequestFields}
-                          onChange={() => setListingProductId(g.option.productId)}
-                          className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
-                        />
-                        <span className="min-w-0 truncate">{g.itemName}</span>
-                      </label>
-                      <span className="shrink-0 text-xs tabular-nums text-zinc-500">
-                        Min {formatUsdFromCents(g.option.minPriceCents)}
-                      </span>
-                      {g.option.exampleHref ? (
-                        <CatalogExampleLink href={g.option.exampleHref} />
-                      ) : (
-                        <span className="shrink-0 text-[11px] text-zinc-700">—</span>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/40">
+              <div
+                className="flex items-center gap-x-3 border-b border-zinc-800 bg-zinc-900/60 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-zinc-500"
+                aria-hidden
+              >
+                <span className="min-w-0 flex-1 pl-7">Item</span>
+                <span className="w-20 shrink-0 text-right">Sale Price</span>
+                <span className="w-14 shrink-0" />
+              </div>
+              <ul
+                className="h-[350px] divide-y divide-zinc-800/80 overflow-y-auto"
+                role="listbox"
+                aria-label="Items from admin catalog"
+              >
+                {catalogGroups.map((g) => {
+                  const selected = listingProductId === g.option.productId;
+                  return (
+                    <li key={g.itemId}>
+                      <div className="flex items-center gap-x-3 px-3 py-2.5">
+                        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-sm text-zinc-200">
+                          <input
+                            type="radio"
+                            name="catalogProductPick"
+                            value={g.option.productId}
+                            checked={selected}
+                            disabled={freezeListingRequestFields}
+                            onChange={() => setListingProductId(g.option.productId)}
+                            className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
+                          />
+                          <span className="min-w-0 truncate">{g.itemName}</span>
+                        </label>
+                        <span className="w-20 shrink-0 text-right text-xs tabular-nums text-zinc-500">
+                          {formatUsdFromCents(g.option.minPriceCents)}
+                        </span>
+                        {g.option.exampleHref ? (
+                          <CatalogExampleLink href={g.option.exampleHref} />
+                        ) : (
+                          <span className="w-14 shrink-0 text-center text-[11px] text-zinc-700">—</span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
           <label className="block text-xs text-zinc-500" htmlFor="listing-request-item-name">
             Name item
