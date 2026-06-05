@@ -1,5 +1,9 @@
+import type { ListingArtworkCropPixelArea } from "@/lib/listing-artwork-crop-payload";
+import { minSourceCropPixelsForPrintDpi } from "@/lib/listing-artwork-print-area";
 import {
+  LISTING_ARTWORK_BROWSER_CROP_SOURCE_MAX_BYTES,
   LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES,
   listingRequestArtworkStoredMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 
@@ -80,6 +84,10 @@ async function renderFileToCanvas(file: File, scale: number): Promise<HTMLCanvas
   return canvas;
 }
 
+function artworkUnderUploadCapError(): string {
+  return `Could not fit artwork under the ${LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES / (1024 * 1024)} MB upload limit. Try zooming in on the crop or using a smaller source file.`;
+}
+
 function artworkUnderStoredCapError(): string {
   const capMb = listingRequestArtworkStoredMaxMb();
   return `Could not fit artwork under ${capMb} MB at print size. Try a simpler design, zoom in on the crop, or use a smaller source file.`;
@@ -104,6 +112,89 @@ export async function compressListingArtworkCanvasToFile(
     lastModified: Date.now(),
   });
   return { ok: true, file: out };
+}
+
+/** Large sources are re-encoded before staging upload to reduce server decode RAM. */
+export const LISTING_ARTWORK_STAGING_SOURCE_RECOMPRESS_MIN_BYTES = LISTING_ARTWORK_BROWSER_CROP_SOURCE_MAX_BYTES;
+
+/** Megapixels above which staging upload recompresses even under the byte cap. */
+export const LISTING_ARTWORK_STAGING_SOURCE_RECOMPRESS_MIN_PIXELS = 12_000_000;
+
+/**
+ * Server-crop path: shrink huge photos before chunked staging while preserving crop DPI minimums.
+ */
+export async function compressListingArtworkSourceForStagingUpload(
+  file: File,
+  opts: {
+    crop: ListingArtworkCropPixelArea;
+    printWidthPx: number;
+    printHeightPx: number;
+    minArtworkDpi: number | null;
+  },
+): Promise<{ ok: true; file: File } | { ok: false; error: string }> {
+  let sourceW = 0;
+  let sourceH = 0;
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    sourceW = bitmap.width;
+    sourceH = bitmap.height;
+    bitmap.close();
+  } catch {
+    return {
+      ok: false,
+      error: "Could not read that image in the browser. Try PNG or JPEG.",
+    };
+  }
+
+  const megapixels = sourceW * sourceH;
+  const shouldRecompress =
+    file.size > LISTING_ARTWORK_STAGING_SOURCE_RECOMPRESS_MIN_BYTES ||
+    megapixels > LISTING_ARTWORK_STAGING_SOURCE_RECOMPRESS_MIN_PIXELS;
+
+  if (!shouldRecompress) {
+    return { ok: true, file };
+  }
+
+  const { minW, minH } = minSourceCropPixelsForPrintDpi(
+    opts.printWidthPx,
+    opts.printHeightPx,
+    opts.minArtworkDpi,
+  );
+  const minScaleFromCrop = Math.max(
+    minW / Math.max(1, opts.crop.width),
+    minH / Math.max(1, opts.crop.height),
+    0.01,
+  );
+
+  const preferAlpha = file.type === "image/png" || file.type === "image/webp";
+  const uploadCap = LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES;
+
+  let scale = Math.min(1, minScaleFromCrop * 0.999);
+  for (let attempt = 0; attempt < 14; attempt++) {
+    const canvas = await renderFileToCanvas(file, scale);
+    if (!canvas) {
+      return {
+        ok: false,
+        error: "Could not read that image in the browser. Try PNG or JPEG.",
+      };
+    }
+
+    const blob = await encodeCanvasUnderCap(canvas, uploadCap, preferAlpha);
+    if (blob) {
+      const ext = extForMime(blob.type);
+      const out = new File([blob], `${baseNameFromFile(file)}-staging.${ext}`, {
+        type: blob.type,
+        lastModified: Date.now(),
+      });
+      return { ok: true, file: out };
+    }
+
+    scale *= 0.9;
+    if (scale < minScaleFromCrop) break;
+    if (canvas.width < minW || canvas.height < minH) break;
+  }
+
+  return { ok: false, error: artworkUnderUploadCapError() };
 }
 
 /**

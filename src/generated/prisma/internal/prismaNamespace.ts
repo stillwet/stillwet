@@ -4752,6 +4752,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemPrintAreaHeightPx: 'itemPrintAreaHeightPx',
   itemMinArtworkDpi: 'itemMinArtworkDpi',
   itemLargeListingArtwork: 'itemLargeListingArtwork',
+  itemArtworkLetterboxFill: 'itemArtworkLetterboxFill',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -5271,6 +5272,20 @@ export type EnumFulfillmentJobStatusFieldRefInput<$PrismaModel> = FieldRefInputT
  * Reference to a field of type 'FulfillmentJobStatus[]'
  */
 export type ListEnumFulfillmentJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FulfillmentJobStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ListingArtworkLetterboxFill'
+ */
+export type EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ListingArtworkLetterboxFill'>
+    
+
+
+/**
+ * Reference to a field of type 'ListingArtworkLetterboxFill[]'
+ */
+export type ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ListingArtworkLetterboxFill[]'>
     
 
 

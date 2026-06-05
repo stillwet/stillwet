@@ -9,21 +9,38 @@ import {
 } from "@/actions/dashboard-shop-setup";
 import { ItemGuidelinesPopup } from "@/components/ItemGuidelinesPopup";
 import { ListingSearchKeywordsChipInput } from "@/components/dashboard/ListingSearchKeywordsChipInput";
-import { ListingArtworkCropDialog, ARTWORK_TRANSPARENCY_PREVIEW_STYLE } from "@/components/dashboard/ListingArtworkCropDialog";
+import { ListingArtworkCropDialog } from "@/components/dashboard/ListingArtworkCropDialog";
+import { ListingArtworkComposeDialog } from "@/components/dashboard/ListingArtworkComposeDialog";
+import { listingArtworkLetterboxPreviewStyle } from "@/lib/listing-artwork-letterbox-fill";
+import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
   listingArtworkFileWithinUploadCap,
   listingArtworkUploadCapError,
-  listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
-import { buildListingArtworkCropPreviewObjectUrl } from "@/lib/listing-artwork-crop-preview-client";
+import { bakeListingArtworkV2Client } from "@/lib/listing-artwork-v2/bake-client";
+import {
+  shopInReviewListingRequestLimitError,
+  shopInReviewListingRequestLimitReached,
+} from "@/lib/listing-request-review-limit";
+import {
+  LISTING_ARTWORK_V2_SOURCE_MAX_MB,
+  listingArtworkUploadV2Enabled,
+  listingArtworkV2SourceCapError,
+  listingArtworkV2SourceWithinCap,
+} from "@/lib/listing-artwork-v2/limits";
+import { uploadListingArtworkSourceToR2 } from "@/lib/listing-artwork-v2/upload-client";
+import { bakeListingArtworkFromStagingClient } from "@/lib/listing-artwork-bake-client";
 import { uploadListingArtworkFileToStaging } from "@/lib/listing-artwork-staging-upload-client";
 import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
-import { compressListingArtworkFileIfNeeded } from "@/lib/listing-artwork-source-compress";
+import {
+  compressListingArtworkFileIfNeeded,
+  compressListingArtworkSourceForStagingUpload,
+} from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -126,6 +143,8 @@ export function ShopFirstListingRequestPanel(props: {
   draftListingRequestPrefill?: DraftListingRequestPrefillPayload | null;
   /** When the next listing request needs a listing credit, show credit consent in the dialog. */
   needsListingCreditForNextRequest?: boolean;
+  /** Listings currently in admin review (submitted / images ok / printify step). */
+  inReviewListingRequestCount?: number;
   unpaidPublicationFeeListings?: UnpaidPublicationFeeListingRow[];
   freeListingSlots?: FreeListingRequestSlotsSummary;
   mockListingFeeCheckout?: boolean;
@@ -143,6 +162,7 @@ export function ShopFirstListingRequestPanel(props: {
     listingPickerDiagnostics,
     draftListingRequestPrefill = null,
     needsListingCreditForNextRequest = false,
+    inReviewListingRequestCount = 0,
     unpaidPublicationFeeListings = [],
     freeListingSlots = {
       cap: 3,
@@ -175,11 +195,14 @@ export function ShopFirstListingRequestPanel(props: {
   const [listingRequestItemName, setListingRequestItemName] = useState("");
   const [listingHasFile, setListingHasFile] = useState(false);
   const [listingSubmitArtworkFile, setListingSubmitArtworkFile] = useState<File | null>(null);
-  const [listingServerCrop, setListingServerCrop] = useState<{
-    stagingKey: string;
-    cropJson: string;
+  const [listingPreparedArtwork, setListingPreparedArtwork] = useState<{
+    requestImageKey: string;
+    publicUrl: string;
   } | null>(null);
+  const [listingSourceKey, setListingSourceKey] = useState<string | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [composeDialogOpen, setComposeDialogOpen] = useState(false);
+  const [composeImageUrl, setComposeImageUrl] = useState<string | null>(null);
   const [cropSourceObjectUrl, setCropSourceObjectUrl] = useState<string | null>(null);
   const [cropSourceFile, setCropSourceFile] = useState<File | null>(null);
   const [listingArtworkPreviewUrl, setListingArtworkPreviewUrl] = useState<string | null>(null);
@@ -190,14 +213,18 @@ export function ShopFirstListingRequestPanel(props: {
     total: number;
   } | null>(null);
   const [artworkSourcePreparing, setArtworkSourcePreparing] = useState(false);
+  const [artworkBaking, setArtworkBaking] = useState(false);
   const [listingSavedFlash, setListingSavedFlash] = useState(false);
   const [listingStorefrontBlurb, setListingStorefrontBlurb] = useState("");
   const [keywordTokens, setKeywordTokens] = useState<string[]>([]);
   const [keywordDraft, setKeywordDraft] = useState("");
   const [keywordDuplicateHint, setKeywordDuplicateHint] = useState<string | null>(null);
   const listingFileRef = useRef<HTMLInputElement>(null);
-  const listingServerCropRef = useRef(listingServerCrop);
-  listingServerCropRef.current = listingServerCrop;
+  const listingPreparedArtworkRef = useRef(listingPreparedArtwork);
+  listingPreparedArtworkRef.current = listingPreparedArtwork;
+  const listingSourceKeyRef = useRef(listingSourceKey);
+  listingSourceKeyRef.current = listingSourceKey;
+  const artworkUploadV2 = listingArtworkUploadV2Enabled();
   const prefillAppliedListingIdRef = useRef<string | null>(null);
   const pendingListingFdRef = useRef<FormData | null>(null);
   const [attestationOpen, setAttestationOpen] = useState(false);
@@ -218,6 +245,7 @@ export function ShopFirstListingRequestPanel(props: {
   }, [attestationOpen]);
 
   const listingCreditConsentRequired = needsListingCreditForNextRequest;
+  const shopAtInReviewListingLimit = shopInReviewListingRequestLimitReached(inReviewListingRequestCount);
   const feeConsentOk = !listingCreditConsentRequired || feeChargeConsentChecked;
 
   const catalogOptions = useMemo(
@@ -243,11 +271,9 @@ export function ShopFirstListingRequestPanel(props: {
     }
     setListingArtworkMeasureError(null);
 
-    if (listingServerCrop && printAreaW != null && printAreaH != null) {
+    if (listingPreparedArtwork && printAreaW != null && printAreaH != null) {
       setListingArtworkPixels({ w: printAreaW, h: printAreaH });
-      return () => {
-        URL.revokeObjectURL(listingArtworkPreviewUrl);
-      };
+      return;
     }
 
     setListingArtworkPixels(null);
@@ -265,9 +291,11 @@ export function ShopFirstListingRequestPanel(props: {
     return () => {
       img.onload = null;
       img.onerror = null;
-      URL.revokeObjectURL(listingArtworkPreviewUrl);
+      if (listingArtworkPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(listingArtworkPreviewUrl);
+      }
     };
-  }, [listingArtworkPreviewUrl, listingServerCrop, printAreaW, printAreaH]);
+  }, [listingArtworkPreviewUrl, listingPreparedArtwork, printAreaW, printAreaH]);
 
   useEffect(() => {
     if (
@@ -293,16 +321,21 @@ export function ShopFirstListingRequestPanel(props: {
 
   const listingArtworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
   const listingArtworkUploadMaxBytes = listingRequestArtworkUploadMaxBytes();
-  const listingArtworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
 
   async function applyListingArtworkPickedFile(file: File) {
     setListingSubmitArtworkFile(null);
-    setListingServerCrop(null);
+    setListingPreparedArtwork(null);
+    setListingSourceKey(null);
     setListingArtworkMeasureError(null);
-    if (!listingArtworkFileWithinUploadCap(file.size)) {
+    const uploadCapOk = artworkUploadV2
+      ? listingArtworkV2SourceWithinCap(file.size)
+      : listingArtworkFileWithinUploadCap(file.size);
+    if (!uploadCapOk) {
       setListingHasFile(false);
       setListingArtworkPreviewUrl(null);
-      setListingArtworkMeasureError(listingArtworkUploadCapError());
+      setListingArtworkMeasureError(
+        artworkUploadV2 ? listingArtworkV2SourceCapError() : listingArtworkUploadCapError(),
+      );
       if (listingFileRef.current) listingFileRef.current.value = "";
       return;
     }
@@ -310,8 +343,40 @@ export function ShopFirstListingRequestPanel(props: {
     const ph = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
     const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
 
+    if (needCrop && artworkUploadV2) {
+      if (!listingProductId) {
+        setListingArtworkMeasureError("Select a catalog item before uploading artwork.");
+        if (listingFileRef.current) listingFileRef.current.value = "";
+        return;
+      }
+      setListingPreparedArtwork(null);
+      setListingSourceKey(null);
+      setComposeImageUrl(null);
+      setArtworkSourcePreparing(true);
+      try {
+        const upload = await uploadListingArtworkSourceToR2(file, (loaded, total) => {
+          setArtworkUploadProgress({ current: loaded, total });
+        });
+        setArtworkUploadProgress(null);
+        if (!upload.ok) {
+          setListingArtworkMeasureError(upload.error);
+          setListingHasFile(false);
+          return;
+        }
+        setListingSourceKey(upload.sourceKey);
+        setComposeImageUrl(upload.previewGetUrl);
+        setComposeDialogOpen(true);
+        setListingHasFile(false);
+        setListingArtworkPreviewUrl(null);
+      } finally {
+        setArtworkSourcePreparing(false);
+        setArtworkUploadProgress(null);
+      }
+      return;
+    }
+
     if (needCrop) {
-      setListingServerCrop(null);
+      setListingPreparedArtwork(null);
       setCropSourceFile(file);
       setCropSourceObjectUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
@@ -345,15 +410,19 @@ export function ShopFirstListingRequestPanel(props: {
   }
 
   useEffect(() => {
-    const staleStagingKey = listingServerCropRef.current?.stagingKey;
-    if (staleStagingKey) {
-      void abandonUnconfirmedListingRequestSubmit(staleStagingKey);
+    const staleBakedKey = listingPreparedArtworkRef.current?.requestImageKey;
+    const staleSourceKey = listingSourceKeyRef.current;
+    if (staleBakedKey || staleSourceKey) {
+      void abandonUnconfirmedListingRequestSubmit(null, staleBakedKey, staleSourceKey);
     }
     setListingSubmitArtworkFile(null);
-    setListingServerCrop(null);
+    setListingPreparedArtwork(null);
+    setListingSourceKey(null);
     setListingHasFile(false);
     setListingArtworkPreviewUrl(null);
     setCropDialogOpen(false);
+    setComposeDialogOpen(false);
+    setComposeImageUrl(null);
     setCropSourceFile(null);
     setCropSourceObjectUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -427,12 +496,7 @@ export function ShopFirstListingRequestPanel(props: {
   async function prepareListingArtworkFormData(
     fd: FormData,
   ): Promise<{ ok: true } | { ok: false; error: string }> {
-    if (fd.get("listingArtworkServerCrop") === "1") {
-      const stagingKey = String(fd.get("listingArtworkStagingKey") ?? "").trim();
-      const cropJson = String(fd.get("listingArtworkCropJson") ?? "").trim();
-      if (!stagingKey || !cropJson) {
-        return { ok: false, error: "Crop data is missing. Open the crop dialog and try again." };
-      }
+    if (fd.get("listingArtworkBakedKey")) {
       return { ok: true };
     }
 
@@ -478,7 +542,10 @@ export function ShopFirstListingRequestPanel(props: {
         setKeywordDuplicateHint(null);
         setListingHasFile(false);
         setListingSubmitArtworkFile(null);
-        setListingServerCrop(null);
+        setListingPreparedArtwork(null);
+        setListingSourceKey(null);
+        setComposeDialogOpen(false);
+        setComposeImageUrl(null);
         setListingArtworkPreviewUrl(null);
         if (listingFileRef.current) listingFileRef.current.value = "";
       }
@@ -493,27 +560,27 @@ export function ShopFirstListingRequestPanel(props: {
         }
       }
 
-      async function failUnconfirmedSubmit(stagingKey: string | null) {
+      async function failUnconfirmedSubmit(bakedKey: string | null) {
         try {
-          await abandonUnconfirmedListingRequestSubmit(stagingKey);
+          await abandonUnconfirmedListingRequestSubmit(null, bakedKey);
         } catch {
           /* best-effort cleanup */
         }
         setMessage({ tone: "err", text: LISTING_UPLOAD_CRASH_ERROR });
       }
 
-      async function recoverFromSubmitTransportError(stagingKey: string | null): Promise<boolean> {
+      async function recoverFromSubmitTransportError(bakedKey: string | null): Promise<boolean> {
         if (onListingSubmittedSuccess) onListingSubmittedSuccess();
         const countAfter = await probeDashboardListingCount();
         if (countAfter != null && countAfter > listingCountBefore) {
           await finishListingSubmitSuccess("Listing submitted. Check the Listings tab for status.");
           return true;
         }
-        await failUnconfirmedSubmit(stagingKey);
+        await failUnconfirmedSubmit(bakedKey);
         return false;
       }
 
-      const stagingKey = String(fd.get("listingArtworkStagingKey") ?? "").trim() || null;
+      const bakedKey = String(fd.get("listingArtworkBakedKey") ?? "").trim() || null;
 
       let r: ShopSetupActionResult;
       try {
@@ -525,17 +592,17 @@ export function ShopFirstListingRequestPanel(props: {
           /unexpected response was received from the server/i.test(msg);
         const rscRenderFailure = /error occurred in the Server Components render/i.test(msg);
         if (rscRenderFailure || bodyTooLarge) {
-          const recovered = await recoverFromSubmitTransportError(stagingKey);
+          const recovered = await recoverFromSubmitTransportError(bakedKey);
           if (recovered) return;
           return;
         }
-        await failUnconfirmedSubmit(stagingKey);
+        await failUnconfirmedSubmit(bakedKey);
         return;
       }
       if (r.ok) {
         await finishListingSubmitSuccess(r.message ?? "Listing submitted.");
       } else if (r.error === LISTING_UPLOAD_CRASH_ERROR) {
-        await failUnconfirmedSubmit(stagingKey);
+        await failUnconfirmedSubmit(bakedKey);
       } else {
         setMessage({ tone: "err", text: r.error });
       }
@@ -580,6 +647,11 @@ export function ShopFirstListingRequestPanel(props: {
     printAreaW != null && printAreaH != null && printAreaW > 0 && printAreaH > 0,
   );
   const minArtworkDpi = selectedCatalogGroup?.option.minArtworkDpi ?? null;
+  const artworkLetterboxFill = selectedCatalogGroup?.option.artworkLetterboxFill;
+  const artworkPreviewStyle = useMemo(
+    () => listingArtworkLetterboxPreviewStyle(artworkLetterboxFill),
+    [artworkLetterboxFill],
+  );
   const listingArtworkFileSizeError = (() => {
     const f = listingSubmitArtworkFile;
     if (f && !listingArtworkFileWithinUploadCap(f.size)) {
@@ -589,7 +661,7 @@ export function ShopFirstListingRequestPanel(props: {
   })();
   const printExportDimensionsError = (() => {
     if (!requiresPrintCrop || !listingArtworkPixels) return null;
-    if (listingServerCrop != null) return null;
+    if (listingPreparedArtwork != null) return null;
     if (listingSubmitArtworkFile == null) return null;
     if (printAreaW == null || printAreaH == null) return null;
     if (!exportedImageMeetsPrintDimensions(listingArtworkPixels.w, listingArtworkPixels.h, printAreaW, printAreaH)) {
@@ -603,7 +675,7 @@ export function ShopFirstListingRequestPanel(props: {
     listingArtworkPreviewUrl && !listingArtworkPixels && !listingArtworkMeasureError,
   );
 
-  const hasArtworkReady = listingSubmitArtworkFile != null || listingServerCrop != null;
+  const hasArtworkReady = listingSubmitArtworkFile != null || listingPreparedArtwork != null;
 
   const listingCanSubmit =
     Boolean(listingProductId) &&
@@ -611,9 +683,10 @@ export function ShopFirstListingRequestPanel(props: {
     listingRequestItemNameOk &&
     hasArtworkReady &&
     !listingArtworkResolutionError &&
-    !listingArtworkResolutionPending;
+    !listingArtworkResolutionPending &&
+    !shopAtInReviewListingLimit;
   const artworkUploadInProgress = artworkUploadProgress != null;
-  const artworkBusy = artworkSourcePreparing || artworkUploadInProgress;
+  const artworkBusy = artworkSourcePreparing || artworkUploadInProgress || artworkBaking;
   const artworkUploadPercent =
     artworkUploadProgress && artworkUploadProgress.total > 0
       ? Math.round((artworkUploadProgress.current / artworkUploadProgress.total) * 100)
@@ -631,6 +704,7 @@ export function ShopFirstListingRequestPanel(props: {
       : btnPrimary;
   const isListingFormSubmitDisabled = !listingFormReady || isListingPending || artworkBusy;
   const freezeListingRequestFields = isListingPending || artworkBusy;
+  const listingRequestFieldsDisabled = freezeListingRequestFields || shopAtInReviewListingLimit;
 
   return (
     <div
@@ -682,6 +756,11 @@ export function ShopFirstListingRequestPanel(props: {
               Your next listing will use one listing credit. Buy more credits above if needed.
             </p>
           ) : null}
+          {shopAtInReviewListingLimit ? (
+            <p className="mt-2 rounded-lg border border-blue-900/45 bg-blue-950/25 px-3 py-2 text-xs text-blue-200/90">
+              {shopInReviewListingRequestLimitError()}
+            </p>
+          ) : null}
           <form
             id={listingRequestFormId}
             className={`space-y-4${freezeListingRequestFields ? " pointer-events-none opacity-45" : ""}`}
@@ -696,10 +775,9 @@ export function ShopFirstListingRequestPanel(props: {
               fd.set("requestItemName", listingRequestItemName.trim());
               fd.set("storefrontItemBlurb", listingStorefrontBlurb.trim());
               fd.set("listingSearchKeywords", keywordsJoined.trim());
-              if (listingServerCrop) {
-                fd.set("listingArtworkStagingKey", listingServerCrop.stagingKey);
-                fd.set("listingArtworkServerCrop", "1");
-                fd.set("listingArtworkCropJson", listingServerCrop.cropJson);
+              if (listingPreparedArtwork) {
+                fd.set("listingArtworkBakedKey", listingPreparedArtwork.requestImageKey);
+                fd.set("listingArtworkBakedUrl", listingPreparedArtwork.publicUrl);
               } else {
                 const art = listingSubmitArtworkFile ?? listingFileRef.current?.files?.[0];
                 if (art) fd.set("listingArtwork", art);
@@ -709,13 +787,19 @@ export function ShopFirstListingRequestPanel(props: {
             }}
           >
           <div>
-            <p className="text-xs font-medium text-zinc-400">Item Catalogue</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-zinc-600">
+            <p
+              className={`text-xs font-medium text-zinc-400${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+            >
+              Item Catalogue
+            </p>
+            <p
+              className={`mt-1 text-[11px] leading-relaxed text-zinc-600${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+            >
               Select a base item your design will be printed on.
             </p>
             <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/40">
               <div
-                className="flex items-center gap-x-3 border-b border-zinc-800 bg-zinc-900/60 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-zinc-500"
+                className={`flex items-center gap-x-3 border-b border-zinc-800 bg-zinc-900/60 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
                 aria-hidden
               >
                 <span className="min-w-0 flex-1 pl-7">Item</span>
@@ -726,25 +810,31 @@ export function ShopFirstListingRequestPanel(props: {
                 className="h-[350px] divide-y divide-zinc-800/80 overflow-y-auto"
                 role="listbox"
                 aria-label="Items from admin catalog"
+                aria-disabled={shopAtInReviewListingLimit ? true : undefined}
               >
                 {catalogGroups.map((g) => {
                   const selected = listingProductId === g.option.productId;
+                  const catalogPickDisabled = listingRequestFieldsDisabled;
                   return (
                     <li key={g.itemId}>
                       <div className="flex items-center gap-x-3 px-3 py-2.5">
-                        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-sm text-zinc-200">
+                        <label
+                          className={`flex min-w-0 flex-1 items-center gap-2.5 text-sm text-zinc-200 ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                        >
                           <input
                             type="radio"
                             name="catalogProductPick"
                             value={g.option.productId}
                             checked={selected}
-                            disabled={freezeListingRequestFields}
+                            disabled={catalogPickDisabled}
                             onChange={() => setListingProductId(g.option.productId)}
                             className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
                           />
                           <span className="min-w-0 truncate">{g.itemName}</span>
                         </label>
-                        <span className="w-20 shrink-0 text-right text-xs tabular-nums text-zinc-500">
+                        <span
+                          className={`w-20 shrink-0 text-right text-xs tabular-nums text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                        >
                           {formatUsdFromCents(g.option.minPriceCents)}
                         </span>
                         {g.option.exampleHref ? (
@@ -759,6 +849,10 @@ export function ShopFirstListingRequestPanel(props: {
               </ul>
             </div>
           </div>
+          <div
+            className={shopAtInReviewListingLimit ? "pointer-events-none opacity-45" : undefined}
+            aria-disabled={shopAtInReviewListingLimit ? true : undefined}
+          >
           <label className="block text-xs text-zinc-500" htmlFor="listing-request-item-name">
             Name item
             <input
@@ -768,7 +862,7 @@ export function ShopFirstListingRequestPanel(props: {
               autoComplete="off"
               maxLength={120}
               value={listingRequestItemName}
-              disabled={freezeListingRequestFields}
+              disabled={listingRequestFieldsDisabled}
               onChange={(e) => setListingRequestItemName(e.target.value)}
               onBlur={runRequestListingTextModerationBlur}
               onFocus={runRequestListingTextModerationBlur}
@@ -795,7 +889,7 @@ export function ShopFirstListingRequestPanel(props: {
                     inputMode="decimal"
                     autoComplete="off"
                     value={listingPrice}
-                    disabled={freezeListingRequestFields}
+                    disabled={listingRequestFieldsDisabled}
                     onChange={(e) => setListingPrice(e.target.value)}
                     onBlur={() => {
                       const minC = selectedCatalogGroup.option.minPriceCents;
@@ -828,20 +922,20 @@ export function ShopFirstListingRequestPanel(props: {
                 </p>
               ) : null}
               <p className="mt-2 text-xs leading-relaxed text-zinc-600">
-                List prices must meet each line’s minimum and cannot exceed {shopListingMaxPriceUsdLabel()} per option.
-                Customers may add tips at checkout on eligible carts.
+                List prices cannot exceed {shopListingMaxPriceUsdLabel()} per option. Customers may add tips at checkout
+                on eligible carts.
               </p>
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG — uploads capped at {listingArtworkUploadMaxMb} MB; after crop, stored at{" "}
-            {listingArtworkStoredMaxMb} MB max at print pixel size)
+            Artwork file (PNG or JPEG — uploads capped at{" "}
+            {artworkUploadV2 ? LISTING_ARTWORK_V2_SOURCE_MAX_MB : listingArtworkUploadMaxMb} MB)
             <input
               ref={listingFileRef}
               type="file"
               name="listingArtwork"
               accept="image/jpeg,image/png,image/webp"
-              disabled={freezeListingRequestFields}
+              disabled={listingRequestFieldsDisabled || !listingProductId}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (!file || !file.type.startsWith("image/")) {
@@ -851,11 +945,16 @@ export function ShopFirstListingRequestPanel(props: {
                   setListingArtworkPreviewUrl(null);
                   return;
                 }
-                if (!listingArtworkFileWithinUploadCap(file.size)) {
+                const withinUploadCap = artworkUploadV2
+                  ? listingArtworkV2SourceWithinCap(file.size)
+                  : listingArtworkFileWithinUploadCap(file.size);
+                if (!withinUploadCap) {
                   setListingSubmitArtworkFile(null);
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
-                  setListingArtworkMeasureError(listingArtworkUploadCapError());
+                  setListingArtworkMeasureError(
+                    artworkUploadV2 ? listingArtworkV2SourceCapError() : listingArtworkUploadCapError(),
+                  );
                   if (listingFileRef.current) listingFileRef.current.value = "";
                   return;
                 }
@@ -863,14 +962,20 @@ export function ShopFirstListingRequestPanel(props: {
               }}
               className="mt-1 block w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200 disabled:cursor-not-allowed"
             />
+            {artworkBaking ? (
+              <p className="mt-2 text-[11px] text-zinc-500" role="status">
+                Preparing print file at {printAreaW}×{printAreaH}px…
+              </p>
+            ) : null}
             {artworkSourcePreparing ? (
               <p className="mt-2 text-[11px] text-zinc-500" role="status">
                 Preparing image…
               </p>
             ) : null}
-            {requiresPrintCrop && !listingSubmitArtworkFile && !listingServerCrop ? (
+            {requiresPrintCrop && !listingSubmitArtworkFile && !listingPreparedArtwork ? (
               <p className="mt-2 text-[11px] text-zinc-500">
-                After you choose an image, a crop window opens. You must complete cropping before you can submit.
+                After you choose an image, a {artworkUploadV2 ? "placement" : "crop"} window opens. You must complete{" "}
+                {artworkUploadV2 ? "placement and print preparation" : "cropping"} before you can submit.
               </p>
             ) : null}
             {message ? (
@@ -890,7 +995,7 @@ export function ShopFirstListingRequestPanel(props: {
                 <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-zinc-600">Preview</p>
                 <div
                   className="inline-block max-w-full overflow-hidden rounded-lg border border-zinc-700"
-                  style={ARTWORK_TRANSPARENCY_PREVIEW_STYLE}
+                  style={artworkPreviewStyle}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
                   <img
@@ -899,25 +1004,6 @@ export function ShopFirstListingRequestPanel(props: {
                     className="max-h-40 max-w-full object-contain"
                   />
                 </div>
-                {listingServerCrop ? (
-                  <p className="mt-1.5 text-[11px] text-zinc-500">
-                    Crop saved — final {printAreaW}×{printAreaH}px print file is built when you submit.
-                  </p>
-                ) : null}
-                {requiresPrintCrop && printAreaW != null && printAreaH != null ? (
-                  <p className="mt-1.5 text-[11px] text-zinc-500">
-                    {selectedCatalogGroup?.option.imageRequirementLabel?.trim() ? (
-                      <span>{selectedCatalogGroup.option.imageRequirementLabel.trim()} </span>
-                    ) : null}
-                    Print file must be exactly {printAreaW}×{printAreaH}px after cropping.
-                    {minArtworkDpi != null && minArtworkDpi > 0 ? (
-                      <span className="mt-1 block">
-                        Minimum effective DPI: {minArtworkDpi} (vs. 300 DPI template — crop step enforces enough
-                        source pixels).
-                      </span>
-                    ) : null}
-                  </p>
-                ) : null}
                 {listingArtworkResolutionPending ? (
                   <p className="mt-1.5 text-[11px] text-zinc-500">Reading image size…</p>
                 ) : null}
@@ -944,7 +1030,7 @@ export function ShopFirstListingRequestPanel(props: {
                 maxLength={STOREFRONT_ITEM_BLURB_MAX}
                 rows={1}
                 autoComplete="off"
-                disabled={freezeListingRequestFields}
+                disabled={listingRequestFieldsDisabled}
                 placeholder="Optional short line for your product page…"
                 className="mt-1 block w-full min-w-0 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 disabled:cursor-not-allowed"
               />
@@ -963,7 +1049,7 @@ export function ShopFirstListingRequestPanel(props: {
               </label>
               <ListingSearchKeywordsChipInput
                 inputId={listingKeywordsInputId}
-                disabled={freezeListingRequestFields}
+                disabled={listingRequestFieldsDisabled}
                 keywordTokens={keywordTokens}
                 keywordDraft={keywordDraft}
                 duplicateHint={keywordDuplicateHint}
@@ -980,14 +1066,16 @@ export function ShopFirstListingRequestPanel(props: {
               ) : null}
             </div>
           </div>
+          </div>
           </form>
           {artworkUploadProgress ? (
             <div className="mt-3 space-y-1.5" role="status" aria-live="polite">
               <div className="flex items-center justify-between text-[11px] text-zinc-500">
                 <span>Uploading artwork…</span>
                 <span className="tabular-nums">
-                  {artworkUploadProgress.current}/{artworkUploadProgress.total} parts ({artworkUploadPercent}
-                  %)
+                  {artworkUploadV2
+                    ? `${artworkUploadPercent}%`
+                    : `${artworkUploadProgress.current}/${artworkUploadProgress.total} parts (${artworkUploadPercent}%)`}
                 </span>
               </div>
               <div
@@ -1075,9 +1163,6 @@ export function ShopFirstListingRequestPanel(props: {
             <h3 id="listing-attestation-title" className="text-base font-semibold text-zinc-100">
               Confirm listing request
             </h3>
-            <p className="mt-2 text-sm text-zinc-400">
-              Submitting sends your artwork for admin review. Please confirm the statements below.
-            </p>
             <label className="mt-4 flex cursor-pointer gap-2 text-sm text-zinc-300">
               <input
                 type="checkbox"
@@ -1139,15 +1224,87 @@ export function ShopFirstListingRequestPanel(props: {
                   void handleListingSubmit(fd);
                 }}
               >
-                {artworkUploadProgress
-                  ? `Uploading artwork (${artworkUploadProgress.current}/${artworkUploadProgress.total})…`
-                  : isListingPending
-                    ? "Submitting…"
-                    : "Submit for review"}
+                {artworkBaking
+                  ? "Preparing print file…"
+                  : artworkUploadProgress
+                    ? artworkUploadV2
+                      ? `Uploading artwork (${artworkUploadPercent}%)…`
+                      : `Uploading artwork (${artworkUploadProgress.current}/${artworkUploadProgress.total})…`
+                    : isListingPending
+                      ? "Submitting…"
+                      : "Submit for review"}
               </button>
             </div>
           </div>
         </div>
+      ) : null}
+
+      {composeDialogOpen && composeImageUrl && printAreaW != null && printAreaH != null && listingSourceKey ? (
+        <ListingArtworkComposeDialog
+          open={composeDialogOpen}
+          imageUrl={composeImageUrl}
+          printWidthPx={printAreaW}
+          printHeightPx={printAreaH}
+          minArtworkDpi={minArtworkDpi}
+          artworkLetterboxFill={artworkLetterboxFill ?? ListingArtworkLetterboxFill.transparent}
+          onClose={() => {
+            setComposeDialogOpen(false);
+            setComposeImageUrl(null);
+            const sk = listingSourceKey;
+            setListingSourceKey(null);
+            if (sk) void abandonUnconfirmedListingRequestSubmit(null, null, sk);
+            if (listingFileRef.current) listingFileRef.current.value = "";
+          }}
+          onComplete={(result) => {
+            void (async () => {
+              setComposeDialogOpen(false);
+              if (!listingProductId || !listingSourceKey) {
+                setListingArtworkMeasureError("Select a catalog item before preparing artwork.");
+                return;
+              }
+              setArtworkBaking(true);
+              const sourceKey = listingSourceKey;
+              const previousBakedKey = listingPreparedArtwork?.requestImageKey ?? null;
+              try {
+                const baked = await bakeListingArtworkV2Client({
+                  sourceKey,
+                  transform: result.transform,
+                  productId: listingProductId,
+                });
+                if (!baked.ok) {
+                  setListingArtworkMeasureError(baked.error);
+                  setListingHasFile(false);
+                  setListingPreparedArtwork(null);
+                  return;
+                }
+
+                if (previousBakedKey && previousBakedKey !== baked.requestImageKey) {
+                  void abandonUnconfirmedListingRequestSubmit(null, previousBakedKey);
+                }
+
+                setListingSourceKey(null);
+                setComposeImageUrl(null);
+                setListingSubmitArtworkFile(null);
+                setListingPreparedArtwork({
+                  requestImageKey: baked.requestImageKey,
+                  publicUrl: baked.publicUrl,
+                });
+                setListingHasFile(true);
+                if (result.previewUrl) {
+                  setListingArtworkPreviewUrl((prev) => {
+                    if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+                    return result.previewUrl;
+                  });
+                } else {
+                  setListingArtworkPreviewUrl(baked.publicUrl);
+                }
+              } finally {
+                setArtworkBaking(false);
+              }
+              if (listingFileRef.current) listingFileRef.current.value = "";
+            })();
+          }}
+        />
       ) : null}
 
       {cropDialogOpen && cropSourceObjectUrl && cropSourceFile && printAreaW != null && printAreaH != null ? (
@@ -1158,6 +1315,7 @@ export function ShopFirstListingRequestPanel(props: {
           printWidthPx={printAreaW}
           printHeightPx={printAreaH}
           minArtworkDpi={minArtworkDpi}
+          artworkLetterboxFill={artworkLetterboxFill ?? ListingArtworkLetterboxFill.transparent}
           onClose={() => {
             setCropDialogOpen(false);
             setCropSourceFile(null);
@@ -1176,7 +1334,7 @@ export function ShopFirstListingRequestPanel(props: {
                   if (prev) URL.revokeObjectURL(prev);
                   return null;
                 });
-                setListingServerCrop(null);
+                setListingPreparedArtwork(null);
                 setListingSubmitArtworkFile(result.file);
                 setListingHasFile(true);
                 setListingArtworkPreviewUrl((prev) => {
@@ -1184,59 +1342,80 @@ export function ShopFirstListingRequestPanel(props: {
                   return URL.createObjectURL(result.file);
                 });
               } else {
-                if (!listingArtworkFileWithinUploadCap(result.sourceFile.size)) {
-                  setListingArtworkMeasureError(listingArtworkUploadCapError());
-                  setListingHasFile(false);
-                  setListingServerCrop(null);
+                if (!listingProductId) {
+                  setListingArtworkMeasureError("Select a catalog item before uploading artwork.");
                   return;
                 }
                 setArtworkSourcePreparing(true);
                 const sourceUrl = cropSourceObjectUrl;
-                const previousStagingKey = listingServerCrop?.stagingKey ?? null;
+                const previousBakedKey = listingPreparedArtwork?.requestImageKey ?? null;
                 try {
-                  let previewUrl: string | null = null;
-                  if (sourceUrl) {
-                    try {
-                      previewUrl = await buildListingArtworkCropPreviewObjectUrl(sourceUrl, result.crop);
-                    } catch {
-                      previewUrl = null;
-                    }
+                  const compressed = await compressListingArtworkSourceForStagingUpload(result.sourceFile, {
+                    crop: result.crop.pixelCrop,
+                    printWidthPx: result.crop.printWidthPx,
+                    printHeightPx: result.crop.printHeightPx,
+                    minArtworkDpi: minArtworkDpi,
+                  });
+                  if (!compressed.ok) {
+                    setListingArtworkMeasureError(compressed.error);
+                    setListingHasFile(false);
+                    setListingPreparedArtwork(null);
+                    return;
                   }
-                  const upload = await uploadListingArtworkFileToStaging(result.sourceFile, (current, total) => {
+                  const stagingFile = compressed.file;
+                  if (!listingArtworkFileWithinUploadCap(stagingFile.size)) {
+                    setListingArtworkMeasureError(listingArtworkUploadCapError());
+                    setListingHasFile(false);
+                    setListingPreparedArtwork(null);
+                    return;
+                  }
+
+                  const upload = await uploadListingArtworkFileToStaging(stagingFile, (current, total) => {
                     setArtworkUploadProgress({ current, total });
                   });
                   if (!upload.ok) {
-                    if (previewUrl) URL.revokeObjectURL(previewUrl);
                     setListingArtworkMeasureError(upload.error);
                     setListingHasFile(false);
-                    setListingServerCrop(null);
+                    setListingPreparedArtwork(null);
                     return;
                   }
+
+                  setArtworkUploadProgress(null);
+                  setArtworkBaking(true);
+                  const baked = await bakeListingArtworkFromStagingClient({
+                    stagingKey: upload.stagingKey,
+                    crop: result.crop,
+                    productId: listingProductId,
+                  });
+                  if (!baked.ok) {
+                    setListingArtworkMeasureError(baked.error);
+                    setListingHasFile(false);
+                    setListingPreparedArtwork(null);
+                    void abandonUnconfirmedListingRequestSubmit(upload.stagingKey);
+                    return;
+                  }
+
+                  if (previousBakedKey && previousBakedKey !== baked.requestImageKey) {
+                    void abandonUnconfirmedListingRequestSubmit(null, previousBakedKey);
+                  }
+
                   if (sourceUrl) URL.revokeObjectURL(sourceUrl);
                   setCropSourceObjectUrl(null);
                   setCropSourceFile(null);
                   setListingSubmitArtworkFile(null);
-                  setListingServerCrop({
-                    stagingKey: upload.stagingKey,
-                    cropJson: JSON.stringify(result.crop),
+                  setListingPreparedArtwork({
+                    requestImageKey: baked.requestImageKey,
+                    publicUrl: baked.publicUrl,
                   });
-                  if (previousStagingKey && previousStagingKey !== upload.stagingKey) {
-                    void abandonUnconfirmedListingRequestSubmit(previousStagingKey);
-                  }
                   setListingHasFile(true);
-                  if (!previewUrl) {
-                    setListingArtworkMeasureError("Could not build crop preview. Try cropping again.");
-                    setListingHasFile(false);
-                    setListingServerCrop(null);
-                    return;
-                  }
                   setListingArtworkPreviewUrl((prev) => {
                     if (prev) URL.revokeObjectURL(prev);
-                    return previewUrl;
+                    return baked.publicUrl;
                   });
                 } finally {
                   setArtworkUploadProgress(null);
                   setArtworkSourcePreparing(false);
+                  setArtworkBaking(false);
                 }
               }
               if (listingFileRef.current) listingFileRef.current.value = "";

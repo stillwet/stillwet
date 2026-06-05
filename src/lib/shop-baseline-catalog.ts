@@ -1,3 +1,8 @@
+import {
+  resolveListingArtworkLetterboxFill,
+  type ListingArtworkLetterboxFill,
+} from "@/lib/listing-artwork-letterbox-fill";
+
 /** Picker / form value: opaque token, not a storefront Product id until submit. */
 const PICK_PREFIX = "ab|";
 
@@ -18,6 +23,8 @@ export type ShopSetupCatalogOption = {
   printAreaHeightPx: number | null;
   /** When set with print area, crop must cover extra source pixels vs. 300 DPI template (see listing-artwork-print-area). */
   minArtworkDpi: number | null;
+  /** Letterbox margin when artwork is zoomed out (transparent vs white print substrate). */
+  artworkLetterboxFill: ListingArtworkLetterboxFill;
 };
 
 /** One admin catalog item as a single selectable row. */
@@ -40,6 +47,7 @@ export function flattenShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup[]
     printAreaWidthPx: g.option.printAreaWidthPx,
     printAreaHeightPx: g.option.printAreaHeightPx,
     minArtworkDpi: g.option.minArtworkDpi,
+    artworkLetterboxFill: g.option.artworkLetterboxFill,
   }));
 }
 
@@ -55,6 +63,8 @@ export type AdminBaselineRow = {
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
   itemMinArtworkDpi: number | null;
+  itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
+  itemLargeListingArtwork: boolean;
 };
 
 export type ParsedBaselinePick =
@@ -132,6 +142,13 @@ export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopS
             : null,
         minArtworkDpi:
           item.itemMinArtworkDpi != null && item.itemMinArtworkDpi > 0 ? item.itemMinArtworkDpi : null,
+        artworkLetterboxFill: resolveListingArtworkLetterboxFill({
+          itemArtworkLetterboxFill: item.itemArtworkLetterboxFill,
+          itemLargeListingArtwork: item.itemLargeListingArtwork,
+          catalogItemName: item.name,
+          printAreaWidthPx: item.itemPrintAreaWidthPx,
+          printAreaHeightPx: item.itemPrintAreaHeightPx,
+        }),
       },
     });
   }

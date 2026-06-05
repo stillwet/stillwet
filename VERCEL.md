@@ -156,6 +156,24 @@ Browsers show **HTTPS** only when **TLS is terminated correctly** for the hostna
 
 The app also **redirects HTTP → HTTPS** in production and sends **HSTS** on production deployments; that only helps once requests actually reach your Vercel deployment with a valid certificate.
 
+### Listing artwork upload v2 (`NEXT_PUBLIC_LISTING_ARTWORK_V2=1`)
+
+When enabled, large catalog items (blanket, body pillow, large poster) use **presigned direct-to-R2** uploads — source bytes never pass through Vercel:
+
+- `POST /api/dashboard/listing-artwork/upload/init` — mint presigned PUT (50 MB source cap)
+- Browser PUT → R2 `shops/{shopId}/listing-source/{uuid}.ext`
+- `POST /api/dashboard/listing-artwork/upload/complete` — Sharp metadata only (24 MP decode cap)
+- Compose UI + capped client preview (480 px out)
+- `POST /api/dashboard/listing-artwork/bake` — pipeline encode from `sourceKey` + transform JSON; deletes source on success
+
+Set **`NEXT_PUBLIC_LISTING_ARTWORK_V2=1`** in Preview/Production env vars to QA. Submit sends only `listingArtworkBakedKey` (no multi-MB FormData).
+
+### Listing artwork bake (`POST /api/dashboard/listing-artwork/bake`)
+
+Server-side crop runs when the creator clicks **Prepare print file** (v2) or **Upload + Crop** (v1), not on listing submit. The route [`src/app/api/dashboard/listing-artwork/bake/route.ts`](src/app/api/dashboard/listing-artwork/bake/route.ts) sets **`maxDuration = 120`** (seconds). Large poster / blanket crops can use significant memory during Sharp encode — on **Vercel Pro**, raise function memory in **Project → Settings → Functions** if bake timeouts or OOM appear in logs. Submit only validates the pre-baked `listing-request/` object key (~10 MB read, no crop RAM).
+
+**QA matrix (v2):** blanket 6400×8400, body pillow 8325×3225 (rotate 90°), large poster 5940×4200 with soft upscale warning — verify bake &lt;120s, output exact px, ≤10 MB, preview matches final.
+
 ### Dashboard timeout (“Task timed out after 60s” / 300s)
 
 The shop dashboard does heavy Prisma + promotion work. [`src/app/dashboard/layout.tsx`](src/app/dashboard/layout.tsx) sets `maxDuration` to **300** (seconds) so Vercel can run the RSC to completion on **Pro** and up. In **Vercel → Project → Settings → Functions**, ensure the plan allows that duration (Hobby is still limited to a short window). If timeouts persist, check **Logs** for slow queries or Neon latency.

@@ -21,6 +21,10 @@ import {
   dashboardPayListingFee,
 } from "@/actions/dashboard-marketplace";
 import {
+  countListingRowsInReview,
+  shopInReviewListingRequestLimitReached,
+} from "@/lib/listing-request-review-limit";
+import {
   isFounderUnlimitedFreeListingsShop,
   listingFeeCentsForOrdinal,
   listingFeeFreeSlotCap,
@@ -119,6 +123,8 @@ export type DashboardSetupPanelProps = {
   listingPickerDiagnostics?: { adminCatalogItemCount: number };
   /** When the next listing request needs a listing credit from the bonus pool. */
   needsListingCreditForNextRequest: boolean;
+  /** Listings in submitted / images_ok / printify_item_created. */
+  inReviewListingRequestCount: number;
   /** Legacy — listing credits and upgrades are not gated on Connect readiness. */
   stripeConnectReadyForPaidListings: boolean;
   /** Listings that owe a paid publication fee (shown on Request listing tab). */
@@ -417,6 +423,7 @@ function ListingOptionPanel({
   variantLabel,
   stacked,
   onCloseExpanded,
+  shopAtInReviewListingLimit = false,
 }: {
   listing: DashboardListingRow;
   isPlatform: boolean;
@@ -434,6 +441,7 @@ function ListingOptionPanel({
   stacked?: boolean;
   /** Collapse the listing card (shown beside Delete Listing when removal is allowed). */
   onCloseExpanded?: () => void;
+  shopAtInReviewListingLimit?: boolean;
 }) {
   const removeListingDialogTitleId = useId();
   const [removeListingDialogOpen, setRemoveListingDialogOpen] = useState(false);
@@ -566,6 +574,7 @@ function ListingOptionPanel({
           listingId={listing.id}
           defaultImageUrlsText={imagesDefault}
           feeBlocksSubmit={feeCents > 0 && !listing.listingFeePaidAt}
+          inReviewBlocksSubmit={shopAtInReviewListingLimit}
         />
       ) : null}
 
@@ -710,6 +719,7 @@ function ListingCard({
   stripePublishableKey,
   mockListingFeeCheckout,
   moderationKeywordPhrases,
+  shopAtInReviewListingLimit = false,
 }: {
   listing: DashboardListingRow;
   isPlatform: boolean;
@@ -720,6 +730,7 @@ function ListingCard({
   stripePublishableKey: string | null;
   mockListingFeeCheckout: boolean;
   moderationKeywordPhrases: readonly string[];
+  shopAtInReviewListingLimit?: boolean;
 }) {
   const { fieldsReadOnly, listingLocked, awaitingAdminReview, isFreeListingSlot, founderFreeShop, freeSlotCap } =
     buildListingDerived(listing, shopSlug, isPlatform, listingFeeBonusFreeSlots);
@@ -1026,6 +1037,7 @@ function ListingCard({
             mockListingFeeCheckout={mockListingFeeCheckout}
             freeListingFooterNote={freeListingInline}
             onCloseExpanded={() => setExpanded(false)}
+            shopAtInReviewListingLimit={shopAtInReviewListingLimit}
           />
         </>
       ) : null}
@@ -1233,6 +1245,15 @@ export function DashboardMainTabs(props: {
   const effectiveModerationPhrases = clientTabFetch
     ? tabFetch.moderationKeywordPhrases
     : initialModerationPhrases;
+
+  const inReviewListingRequestCount = useMemo(() => {
+    if (effectiveListings.length > 0) {
+      return countListingRowsInReview(effectiveListings);
+    }
+    return setup?.inReviewListingRequestCount ?? 0;
+  }, [effectiveListings, setup?.inReviewListingRequestCount]);
+
+  const shopAtInReviewListingLimit = shopInReviewListingRequestLimitReached(inReviewListingRequestCount);
 
   const handleNoticeMarkedRead = useCallback(
     async (noticeId: string) => {
@@ -1766,6 +1787,7 @@ export function DashboardMainTabs(props: {
               listingPickerDiagnostics={setup.listingPickerDiagnostics}
               draftListingRequestPrefill={draftListingRequestPrefill}
               needsListingCreditForNextRequest={setup.needsListingCreditForNextRequest}
+              inReviewListingRequestCount={inReviewListingRequestCount}
               unpaidPublicationFeeListings={setup.unpaidPublicationFeeListings}
               freeListingSlots={setup.freeListingSlots}
               mockListingFeeCheckout={mockListingFeeCheckout}
@@ -1862,6 +1884,7 @@ export function DashboardMainTabs(props: {
                   stripePublishableKey={stripePublishableKey}
                   mockListingFeeCheckout={mockListingFeeCheckout}
                   moderationKeywordPhrases={effectiveModerationPhrases}
+                  shopAtInReviewListingLimit={shopAtInReviewListingLimit}
                 />
               ))}
             </ul>
@@ -1889,6 +1912,7 @@ export function DashboardMainTabs(props: {
                   stripePublishableKey={stripePublishableKey}
                   mockListingFeeCheckout={mockListingFeeCheckout}
                   moderationKeywordPhrases={effectiveModerationPhrases}
+                  shopAtInReviewListingLimit={shopAtInReviewListingLimit}
                 />
               ))}
             </ul>
@@ -1920,6 +1944,7 @@ export function DashboardMainTabs(props: {
                   stripePublishableKey={stripePublishableKey}
                   mockListingFeeCheckout={mockListingFeeCheckout}
                   moderationKeywordPhrases={effectiveModerationPhrases}
+                  shopAtInReviewListingLimit={shopAtInReviewListingLimit}
                 />
               ))}
             </ul>

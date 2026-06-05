@@ -9,6 +9,11 @@ import { getStripe } from "@/lib/stripe";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import {
+  LISTING_REQUEST_IN_REVIEW_STATUSES,
+  shopCanSubmitAnotherListingRequest,
+  shopInReviewListingRequestLimitError,
+} from "@/lib/listing-request-review-limit";
+import {
   listingFeeCentsForOrdinal,
   PLATFORM_SHOP_SLUG,
   SHOP_LISTING_MAX_PRICE_CENTS,
@@ -438,6 +443,16 @@ export async function dashboardSubmitListingRequest(
   }
   if (listing.creatorRemovedFromShopAt != null) {
     return { ok: false, error: "This listing cannot be submitted." };
+  }
+
+  const inReviewCount = await prisma.shopListing.count({
+    where: {
+      shopId: shop.id,
+      requestStatus: { in: [...LISTING_REQUEST_IN_REVIEW_STATUSES] },
+    },
+  });
+  if (!shopCanSubmitAnotherListingRequest(inReviewCount)) {
+    return { ok: false, error: shopInReviewListingRequestLimitError() };
   }
 
   const moderationPhrases = await loadModerationKeywordPhrases(prisma);

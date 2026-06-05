@@ -80,7 +80,42 @@ export function parsePrintAreaDimensionPair(
   return { ok: true, width: w, height: h };
 }
 
-/** Crop region in source-image pixels meets minimum coverage for print DPI (no upscaling). */
+/** Admin-configured minimum effective DPI, or null when only soft reference-DPI guidance applies. */
+export function listingArtworkRequiredEffectiveDpi(minArtworkDpi: number | null): number | null {
+  if (minArtworkDpi != null && minArtworkDpi > 0) return minArtworkDpi;
+  return null;
+}
+
+/** Hard block in crop UI when catalog min effective DPI is not met. */
+export function listingArtworkEffectiveDpiBelowRequired(
+  effectiveDpi: number | null,
+  minArtworkDpi: number | null,
+): boolean {
+  const required = listingArtworkRequiredEffectiveDpi(minArtworkDpi);
+  if (required == null || effectiveDpi == null) return false;
+  return effectiveDpi + 0.01 < required;
+}
+
+/** Non-blocking hint: output will be upscaled above the 300 DPI reference. */
+export function listingArtworkEffectiveDpiUpscaleWarning(
+  effectiveDpi: number | null,
+  minArtworkDpi: number | null,
+  referenceDpi: number = PRINT_AREA_REFERENCE_DPI,
+): boolean {
+  if (effectiveDpi == null) return false;
+  if (listingArtworkEffectiveDpiBelowRequired(effectiveDpi, minArtworkDpi)) return false;
+  const ref = referenceDpi > 0 ? referenceDpi : PRINT_AREA_REFERENCE_DPI;
+  return effectiveDpi + 0.01 < ref;
+}
+
+export function listingArtworkEffectiveDpiBlockError(
+  effectiveDpi: number,
+  minArtworkDpi: number,
+): string {
+  return `Effective DPI (~${Math.round(effectiveDpi)}) is below the minimum ${minArtworkDpi} for this item. Zoom out or use a higher-resolution source.`;
+}
+
+/** Crop region in source-image pixels meets minimum coverage for print DPI (legacy no-upscale gate). */
 export function cropRegionMeetsPrintMinimum(
   regionWidth: number,
   regionHeight: number,

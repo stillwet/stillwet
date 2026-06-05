@@ -63,6 +63,7 @@ export type AdminCatalogItemMinAggregateOutputType = {
   itemPrintAreaHeightPx: number | null
   itemMinArtworkDpi: number | null
   itemLargeListingArtwork: boolean | null
+  itemArtworkLetterboxFill: $Enums.ListingArtworkLetterboxFill | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -82,6 +83,7 @@ export type AdminCatalogItemMaxAggregateOutputType = {
   itemPrintAreaHeightPx: number | null
   itemMinArtworkDpi: number | null
   itemLargeListingArtwork: boolean | null
+  itemArtworkLetterboxFill: $Enums.ListingArtworkLetterboxFill | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -102,6 +104,7 @@ export type AdminCatalogItemCountAggregateOutputType = {
   itemPrintAreaHeightPx: number
   itemMinArtworkDpi: number
   itemLargeListingArtwork: number
+  itemArtworkLetterboxFill: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -143,6 +146,7 @@ export type AdminCatalogItemMinAggregateInputType = {
   itemPrintAreaHeightPx?: true
   itemMinArtworkDpi?: true
   itemLargeListingArtwork?: true
+  itemArtworkLetterboxFill?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -162,6 +166,7 @@ export type AdminCatalogItemMaxAggregateInputType = {
   itemPrintAreaHeightPx?: true
   itemMinArtworkDpi?: true
   itemLargeListingArtwork?: true
+  itemArtworkLetterboxFill?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -182,6 +187,7 @@ export type AdminCatalogItemCountAggregateInputType = {
   itemPrintAreaHeightPx?: true
   itemMinArtworkDpi?: true
   itemLargeListingArtwork?: true
+  itemArtworkLetterboxFill?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -289,6 +295,7 @@ export type AdminCatalogItemGroupByOutputType = {
   itemPrintAreaHeightPx: number | null
   itemMinArtworkDpi: number | null
   itemLargeListingArtwork: boolean
+  itemArtworkLetterboxFill: $Enums.ListingArtworkLetterboxFill
   createdAt: Date
   updatedAt: Date
   _count: AdminCatalogItemCountAggregateOutputType | null
@@ -332,6 +339,7 @@ export type AdminCatalogItemWhereInput = {
   itemPrintAreaHeightPx?: Prisma.IntNullableFilter<"AdminCatalogItem"> | number | null
   itemMinArtworkDpi?: Prisma.IntNullableFilter<"AdminCatalogItem"> | number | null
   itemLargeListingArtwork?: Prisma.BoolFilter<"AdminCatalogItem"> | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   itemPlatformProduct?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
@@ -354,6 +362,7 @@ export type AdminCatalogItemOrderByWithRelationInput = {
   itemPrintAreaHeightPx?: Prisma.SortOrderInput | Prisma.SortOrder
   itemMinArtworkDpi?: Prisma.SortOrderInput | Prisma.SortOrder
   itemLargeListingArtwork?: Prisma.SortOrder
+  itemArtworkLetterboxFill?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   itemPlatformProduct?: Prisma.ProductOrderByWithRelationInput
@@ -379,6 +388,7 @@ export type AdminCatalogItemWhereUniqueInput = Prisma.AtLeast<{
   itemPrintAreaHeightPx?: Prisma.IntNullableFilter<"AdminCatalogItem"> | number | null
   itemMinArtworkDpi?: Prisma.IntNullableFilter<"AdminCatalogItem"> | number | null
   itemLargeListingArtwork?: Prisma.BoolFilter<"AdminCatalogItem"> | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   itemPlatformProduct?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
@@ -401,6 +411,7 @@ export type AdminCatalogItemOrderByWithAggregationInput = {
   itemPrintAreaHeightPx?: Prisma.SortOrderInput | Prisma.SortOrder
   itemMinArtworkDpi?: Prisma.SortOrderInput | Prisma.SortOrder
   itemLargeListingArtwork?: Prisma.SortOrder
+  itemArtworkLetterboxFill?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AdminCatalogItemCountOrderByAggregateInput
@@ -429,6 +440,7 @@ export type AdminCatalogItemScalarWhereWithAggregatesInput = {
   itemPrintAreaHeightPx?: Prisma.IntNullableWithAggregatesFilter<"AdminCatalogItem"> | number | null
   itemMinArtworkDpi?: Prisma.IntNullableWithAggregatesFilter<"AdminCatalogItem"> | number | null
   itemLargeListingArtwork?: Prisma.BoolWithAggregatesFilter<"AdminCatalogItem"> | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillWithAggregatesFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AdminCatalogItem"> | Date | string
 }
@@ -448,6 +460,7 @@ export type AdminCatalogItemCreateInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
@@ -470,6 +483,7 @@ export type AdminCatalogItemUncheckedCreateInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
@@ -490,6 +504,7 @@ export type AdminCatalogItemUpdateInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
@@ -512,6 +527,7 @@ export type AdminCatalogItemUncheckedUpdateInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
@@ -533,6 +549,7 @@ export type AdminCatalogItemCreateManyInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -552,6 +569,7 @@ export type AdminCatalogItemUpdateManyMutationInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -572,6 +590,7 @@ export type AdminCatalogItemUncheckedUpdateManyInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -602,6 +621,7 @@ export type AdminCatalogItemCountOrderByAggregateInput = {
   itemPrintAreaHeightPx?: Prisma.SortOrder
   itemMinArtworkDpi?: Prisma.SortOrder
   itemLargeListingArtwork?: Prisma.SortOrder
+  itemArtworkLetterboxFill?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -631,6 +651,7 @@ export type AdminCatalogItemMaxOrderByAggregateInput = {
   itemPrintAreaHeightPx?: Prisma.SortOrder
   itemMinArtworkDpi?: Prisma.SortOrder
   itemLargeListingArtwork?: Prisma.SortOrder
+  itemArtworkLetterboxFill?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -650,6 +671,7 @@ export type AdminCatalogItemMinOrderByAggregateInput = {
   itemPrintAreaHeightPx?: Prisma.SortOrder
   itemMinArtworkDpi?: Prisma.SortOrder
   itemLargeListingArtwork?: Prisma.SortOrder
+  itemArtworkLetterboxFill?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -711,6 +733,10 @@ export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductNestedI
   deleteMany?: Prisma.AdminCatalogItemScalarWhereInput | Prisma.AdminCatalogItemScalarWhereInput[]
 }
 
+export type EnumListingArtworkLetterboxFillFieldUpdateOperationsInput = {
+  set?: $Enums.ListingArtworkLetterboxFill
+}
+
 export type AdminCatalogItemCreateNestedOneWithoutCatalogTagsInput = {
   create?: Prisma.XOR<Prisma.AdminCatalogItemCreateWithoutCatalogTagsInput, Prisma.AdminCatalogItemUncheckedCreateWithoutCatalogTagsInput>
   connectOrCreate?: Prisma.AdminCatalogItemCreateOrConnectWithoutCatalogTagsInput
@@ -740,6 +766,7 @@ export type AdminCatalogItemCreateWithoutItemPlatformProductInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagCreateNestedManyWithoutAdminCatalogItemInput
@@ -760,6 +787,7 @@ export type AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
@@ -810,6 +838,7 @@ export type AdminCatalogItemScalarWhereInput = {
   itemPrintAreaHeightPx?: Prisma.IntNullableFilter<"AdminCatalogItem"> | number | null
   itemMinArtworkDpi?: Prisma.IntNullableFilter<"AdminCatalogItem"> | number | null
   itemLargeListingArtwork?: Prisma.BoolFilter<"AdminCatalogItem"> | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
 }
@@ -829,6 +858,7 @@ export type AdminCatalogItemCreateWithoutCatalogTagsInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
@@ -850,6 +880,7 @@ export type AdminCatalogItemUncheckedCreateWithoutCatalogTagsInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -885,6 +916,7 @@ export type AdminCatalogItemUpdateWithoutCatalogTagsInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
@@ -906,6 +938,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutCatalogTagsInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -925,6 +958,7 @@ export type AdminCatalogItemCreateManyItemPlatformProductInput = {
   itemPrintAreaHeightPx?: number | null
   itemMinArtworkDpi?: number | null
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -944,6 +978,7 @@ export type AdminCatalogItemUpdateWithoutItemPlatformProductInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUpdateManyWithoutAdminCatalogItemNestedInput
@@ -964,6 +999,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutItemPlatformProductInput = {
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
@@ -984,6 +1020,7 @@ export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductInput =
   itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1035,6 +1072,7 @@ export type AdminCatalogItemSelect<ExtArgs extends runtime.Types.Extensions.Inte
   itemPrintAreaHeightPx?: boolean
   itemMinArtworkDpi?: boolean
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
@@ -1058,6 +1096,7 @@ export type AdminCatalogItemSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   itemPrintAreaHeightPx?: boolean
   itemMinArtworkDpi?: boolean
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
@@ -1079,6 +1118,7 @@ export type AdminCatalogItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   itemPrintAreaHeightPx?: boolean
   itemMinArtworkDpi?: boolean
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
@@ -1100,11 +1140,12 @@ export type AdminCatalogItemSelectScalar = {
   itemPrintAreaHeightPx?: boolean
   itemMinArtworkDpi?: boolean
   itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sortOrder" | "name" | "storefrontDescription" | "variants" | "itemPlatformProductId" | "itemExampleListingUrl" | "itemMinPriceCents" | "itemGoodsServicesCostCents" | "itemImageRequirementLabel" | "itemMinArtworkLongEdgePx" | "itemPrintAreaWidthPx" | "itemPrintAreaHeightPx" | "itemMinArtworkDpi" | "itemLargeListingArtwork" | "createdAt" | "updatedAt", ExtArgs["result"]["adminCatalogItem"]>
+export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sortOrder" | "name" | "storefrontDescription" | "variants" | "itemPlatformProductId" | "itemExampleListingUrl" | "itemMinPriceCents" | "itemGoodsServicesCostCents" | "itemImageRequirementLabel" | "itemMinArtworkLongEdgePx" | "itemPrintAreaWidthPx" | "itemPrintAreaHeightPx" | "itemMinArtworkDpi" | "itemLargeListingArtwork" | "itemArtworkLetterboxFill" | "createdAt" | "updatedAt", ExtArgs["result"]["adminCatalogItem"]>
 export type AdminCatalogItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
   catalogTags?: boolean | Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs>
@@ -1183,6 +1224,11 @@ export type $AdminCatalogItemPayload<ExtArgs extends runtime.Types.Extensions.In
      *    * Reserved for per-item upload overrides (see listing-request-artwork-limits). Default limits: 15 MB pick, 10 MB stored.
      */
     itemLargeListingArtwork: boolean
+    /**
+     * *
+     *    * Letterbox margin when artwork is zoomed out: transparent (apparel, mugs) or white (canvas, paper).
+     */
+    itemArtworkLetterboxFill: $Enums.ListingArtworkLetterboxFill
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["adminCatalogItem"]>
@@ -1625,6 +1671,7 @@ export interface AdminCatalogItemFieldRefs {
   readonly itemPrintAreaHeightPx: Prisma.FieldRef<"AdminCatalogItem", 'Int'>
   readonly itemMinArtworkDpi: Prisma.FieldRef<"AdminCatalogItem", 'Int'>
   readonly itemLargeListingArtwork: Prisma.FieldRef<"AdminCatalogItem", 'Boolean'>
+  readonly itemArtworkLetterboxFill: Prisma.FieldRef<"AdminCatalogItem", 'ListingArtworkLetterboxFill'>
   readonly createdAt: Prisma.FieldRef<"AdminCatalogItem", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AdminCatalogItem", 'DateTime'>
 }

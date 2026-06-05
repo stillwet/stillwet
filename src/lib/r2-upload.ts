@@ -180,6 +180,43 @@ export async function putPublicR2Object(params: {
 }
 
 const LISTING_ARTWORK_STAGING_SEGMENT = "listing-request-staging";
+const LISTING_ARTWORK_SOURCE_SEGMENT = "listing-source";
+
+/** v2: original upload before bake (`shops/{shopId}/listing-source/{uuid}.ext`). */
+export function shopListingArtworkSourceObjectKey(shopId: string, fileExtension: string): string {
+  const ext = fileExtension.toLowerCase().replace(/^\./, "");
+  return `shops/${shopId}/${LISTING_ARTWORK_SOURCE_SEGMENT}/${randomUUID()}.${ext}`;
+}
+
+export function isListingArtworkSourceKeyForShop(key: string, shopId: string): boolean {
+  const prefix = `shops/${shopId}/${LISTING_ARTWORK_SOURCE_SEGMENT}/`;
+  const k = key.trim();
+  if (!k.startsWith(prefix) || k.includes("..")) return false;
+  const rest = k.slice(prefix.length);
+  if (!rest || rest.includes("/")) return false;
+  return /^[0-9a-f-]{36}\.[a-z0-9]{2,5}$/i.test(rest);
+}
+
+export async function deleteListingArtworkSource(sourceKey: string): Promise<void> {
+  await deleteR2ObjectsByKeys([sourceKey]);
+}
+
+/** Presigned GET for compose UI (private listing-source objects). */
+export async function createPresignedR2GetUrl(params: {
+  key: string;
+  expiresInSeconds?: number;
+}): Promise<string> {
+  const bucket = readR2BucketName();
+  if (!bucket) throw new Error("R2 bucket missing");
+  const client = r2S3Client();
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: params.key,
+  });
+  return getSignedUrl(client as unknown as Parameters<typeof getSignedUrl>[0], command, {
+    expiresIn: params.expiresInSeconds ?? 3600,
+  });
+}
 
 /** Temporary upload id before submit processes and moves to `listing-request/`. */
 export function shopListingArtworkStagingObjectKey(shopId: string, _fileExtension?: string): string {
@@ -408,6 +445,16 @@ export function publicUrlToR2ObjectKey(publicUrl: string): string | null {
   } catch {
     return key;
   }
+}
+
+/** Final listing-request artwork written at crop time or submit (`shops/{shopId}/listing-request/{uuid}.ext`). */
+export function isListingRequestArtworkKeyForShop(key: string, shopId: string): boolean {
+  const prefix = `shops/${shopId}/listing-request/`;
+  const k = key.trim();
+  if (!k.startsWith(prefix) || k.includes("..")) return false;
+  const rest = k.slice(prefix.length);
+  if (!rest || rest.includes("/")) return false;
+  return /^[0-9a-f-]{36}\.[a-z0-9]{2,5}$/i.test(rest);
 }
 
 /**

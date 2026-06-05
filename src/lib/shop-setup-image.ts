@@ -1,5 +1,11 @@
 import sharp from "sharp";
+import type { ListingArtworkCropPayload } from "@/lib/listing-artwork-crop-payload";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
+import { cropAndEncodeListingArtwork } from "@/lib/listing-artwork-server-crop";
+import {
+  listingArtworkLetterboxFillUsesWhite,
+  type ListingArtworkLetterboxFill,
+} from "@/lib/listing-artwork-letterbox-fill";
 import {
   LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
   LISTING_REQUEST_ARTWORK_UPLOAD_MAX_BYTES,
@@ -121,14 +127,14 @@ function listingArtworkUploadFromBuffer(
 
 async function readListingArtworkDimensions(
   input: Buffer,
-): Promise<{ w: number; h: number; format: string | undefined } | null> {
+): Promise<{ w: number; h: number; format: string | undefined; hasAlpha: boolean } | null> {
   try {
     const meta = await sharp(input, { failOn: "none" }).metadata();
     const w = meta.width;
     const h = meta.height;
     if (w == null || h == null || w < 1 || h < 1) return null;
     if (meta.format === "svg" || meta.format === "gif") return null;
-    return { w, h, format: meta.format };
+    return { w, h, format: meta.format, hasAlpha: meta.hasAlpha === true };
   } catch {
     return null;
   }
@@ -144,6 +150,136 @@ function dimensionsPreserved(
     return exportedImageMeetsPrintDimensions(w, h, printW, printH);
   }
   return true;
+}
+
+function rawRgbaHasAlpha(data: Buffer): boolean {
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i]! < 255) return true;
+  }
+  return false;
+}
+
+/**
+ * Encode raw RGBA print pixels for R2: alpha-safe encodings first, then JPEG fallbacks.
+ */
+export async function encodeListingArtworkRgbaForStorage(
+  data: Buffer,
+  width: number,
+  height: number,
+  storedMaxBytes: number = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  letterboxFill?: ListingArtworkLetterboxFill | null,
+): Promise<ListingRequestArtworkUpload | null> {
+  const fromRaw = () => sharp(data, { raw: { width, height, channels: 4 } });
+  const hasAlpha = rawRgbaHasAlpha(data);
+  const preferOpaqueEncoding = listingArtworkLetterboxFillUsesWhite(letterboxFill);
+
+  type Attempt = () => Promise<ListingRequestArtworkUpload | null>;
+  const attempts: Attempt[] = [];
+
+  if (preferOpaqueEncoding) {
+    for (let q = 92; q >= 58; q -= 6) {
+      const quality = q;
+      attempts.push(async () => {
+        const body = await fromRaw().jpeg({ quality, mozjpeg: true }).toBuffer();
+        if (body.length > storedMaxBytes) return null;
+        const dims = await readListingArtworkDimensions(body);
+        if (!dims || dims.w !== width || dims.h !== height) return null;
+        return { body, contentType: "image/jpeg", fileExtension: "jpeg" };
+      });
+    }
+
+    for (let q = 92; q >= 58; q -= 6) {
+      const quality = q;
+      attempts.push(async () => {
+        const body = await fromRaw().webp({ quality, effort: 4 }).toBuffer();
+        if (body.length > storedMaxBytes) return null;
+        const dims = await readListingArtworkDimensions(body);
+        if (!dims || dims.w !== width || dims.h !== height) return null;
+        return { body, contentType: "image/webp", fileExtension: "webp" };
+      });
+    }
+  }
+
+  attempts.push(async () => {
+    const body = await fromRaw()
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer();
+    if (body.length > storedMaxBytes) return null;
+    const dims = await readListingArtworkDimensions(body);
+    if (!dims || dims.w !== width || dims.h !== height) return null;
+    return { body, contentType: "image/png", fileExtension: "png" };
+  });
+
+  for (let q = 92; q >= 58; q -= 6) {
+    const quality = q;
+    attempts.push(async () => {
+      const body = await fromRaw()
+        .webp({ quality, effort: 4, alphaQuality: quality })
+        .toBuffer();
+      if (body.length > storedMaxBytes) return null;
+      const dims = await readListingArtworkDimensions(body);
+      if (!dims || dims.w !== width || dims.h !== height) return null;
+      return { body, contentType: "image/webp", fileExtension: "webp" };
+    });
+  }
+
+  if (!hasAlpha) {
+    for (let q = 90; q >= 62; q -= 7) {
+      const quality = q;
+      attempts.push(async () => {
+        const body = await fromRaw().jpeg({ quality, mozjpeg: true }).toBuffer();
+        if (body.length > storedMaxBytes) return null;
+        const dims = await readListingArtworkDimensions(body);
+        if (!dims || dims.w !== width || dims.h !== height) return null;
+        return { body, contentType: "image/jpeg", fileExtension: "jpeg" };
+      });
+    }
+  }
+
+  for (let q = 90; q >= 62; q -= 7) {
+    const quality = q;
+    attempts.push(async () => {
+      const body = await fromRaw()
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .jpeg({ quality, mozjpeg: true })
+        .toBuffer();
+      if (body.length > storedMaxBytes) return null;
+      const dims = await readListingArtworkDimensions(body);
+      if (!dims || dims.w !== width || dims.h !== height) return null;
+      return { body, contentType: "image/jpeg", fileExtension: "jpeg" };
+    });
+  }
+
+  for (const attempt of attempts) {
+    const result = await attempt();
+    if (result) return result;
+  }
+
+  return null;
+}
+
+/**
+ * Server crop + encode in one pass (avoids intermediate PNG between crop and storage).
+ */
+export async function cropAndPrepareListingArtworkForStorage(
+  input: Buffer,
+  crop: ListingArtworkCropPayload,
+  storedMaxBytes: number = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
+  printW?: number | null,
+  printH?: number | null,
+  letterboxFill?: ListingArtworkLetterboxFill | null,
+): Promise<ListingRequestArtworkUpload | null> {
+  if (input.length > LISTING_UPLOAD_MAX_BYTES) return null;
+
+  const encoded = await cropAndEncodeListingArtwork(input, crop, storedMaxBytes, { letterboxFill });
+  if (!encoded) return null;
+  if (!dimensionsPreserved(encoded.width, encoded.height, printW, printH)) return null;
+
+  return {
+    body: encoded.body,
+    contentType: encoded.contentType,
+    fileExtension: encoded.fileExtension,
+  };
 }
 
 /**
@@ -172,20 +308,25 @@ export async function prepareListingRequestArtworkForStorage(
 
   const attempts: Attempt[] = [];
 
-  if (source.format === "png") {
-    attempts.push(async () => {
-      const body = await oriented().png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer();
-      const dims = await readListingArtworkDimensions(body);
-      if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
-      if (body.length > storedMaxBytes) return null;
-      return { body, contentType: "image/png", fileExtension: "png" };
-    });
-  }
+  // Alpha-safe encodings first (letterbox margin survives into R2).
+  attempts.push(async () => {
+    const body = await oriented()
+      .ensureAlpha()
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer();
+    const dims = await readListingArtworkDimensions(body);
+    if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
+    if (body.length > storedMaxBytes) return null;
+    return { body, contentType: "image/png", fileExtension: "png" };
+  });
 
   for (let q = 92; q >= 58; q -= 6) {
     const quality = q;
     attempts.push(async () => {
-      const body = await oriented().webp({ quality, effort: 4, alphaQuality: quality }).toBuffer();
+      const body = await oriented()
+        .ensureAlpha()
+        .webp({ quality, effort: 4, alphaQuality: quality })
+        .toBuffer();
       const dims = await readListingArtworkDimensions(body);
       if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
       if (body.length > storedMaxBytes) return null;
@@ -193,6 +334,20 @@ export async function prepareListingRequestArtworkForStorage(
     });
   }
 
+  if (!source.hasAlpha) {
+    for (let q = 90; q >= 62; q -= 7) {
+      const quality = q;
+      attempts.push(async () => {
+        const body = await oriented().jpeg({ quality, mozjpeg: true }).toBuffer();
+        const dims = await readListingArtworkDimensions(body);
+        if (!dims || !dimensionsPreserved(dims.w, dims.h, printW, printH)) return null;
+        if (body.length > storedMaxBytes) return null;
+        return { body, contentType: "image/jpeg", fileExtension: "jpeg" };
+      });
+    }
+  }
+
+  // Last resort: flatten transparency to white (destroys letterbox).
   for (let q = 90; q >= 62; q -= 7) {
     const quality = q;
     attempts.push(async () => {

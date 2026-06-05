@@ -22,6 +22,7 @@ export type CreatorDashboardSetupPayload = {
   shopPanel: ShopSetupShopPayload;
   itemGuidelinesAcknowledged: boolean;
   needsListingCreditForNextRequest: boolean;
+  inReviewListingRequestCount: number;
   stripeConnectReadyForPaidListings: boolean;
 };
 
@@ -96,6 +97,7 @@ function buildDashboardMainTabsProps(
               adminCatalogItemCount: 0,
             },
             needsListingCreditForNextRequest: creatorSetup.needsListingCreditForNextRequest,
+            inReviewListingRequestCount: creatorSetup.inReviewListingRequestCount,
             stripeConnectReadyForPaidListings: creatorSetup.stripeConnectReadyForPaidListings,
             unpaidPublicationFeeListings: [],
             freeListingSlots: {

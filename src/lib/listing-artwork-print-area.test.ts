@@ -4,6 +4,9 @@ import {
   cropRegionMeetsPrintMinimum,
   effectiveArtworkDpiFromCropAndPrint,
   exportedImageMeetsPrintDimensions,
+  listingArtworkEffectiveDpiBelowRequired,
+  listingArtworkEffectiveDpiUpscaleWarning,
+  listingArtworkRequiredEffectiveDpi,
   minSourceCropPixelsForPrintDpi,
   parsePrintAreaDimensionPair,
   PRINT_AREA_REFERENCE_DPI,
@@ -79,6 +82,36 @@ describe("minSourceCropPixelsForPrintDpi", () => {
     const r = minSourceCropPixelsForPrintDpi(100, 100, 150, 150);
     assert.equal(r.minW, 100);
     assert.equal(r.minH, 100);
+  });
+});
+
+describe("listingArtworkRequiredEffectiveDpi", () => {
+  it("returns admin min when set", () => {
+    assert.equal(listingArtworkRequiredEffectiveDpi(600), 600);
+  });
+
+  it("returns null when admin min is unset", () => {
+    assert.equal(listingArtworkRequiredEffectiveDpi(null), null);
+    assert.equal(listingArtworkRequiredEffectiveDpi(0), null);
+  });
+});
+
+describe("listingArtworkEffectiveDpiBelowRequired", () => {
+  it("blocks only when admin min is set and effective DPI is low", () => {
+    assert.equal(listingArtworkEffectiveDpiBelowRequired(250, 300), true);
+    assert.equal(listingArtworkEffectiveDpiBelowRequired(320, 300), false);
+    assert.equal(listingArtworkEffectiveDpiBelowRequired(250, null), false);
+  });
+});
+
+describe("listingArtworkEffectiveDpiUpscaleWarning", () => {
+  it("warns below reference when no admin min", () => {
+    assert.equal(listingArtworkEffectiveDpiUpscaleWarning(250, null), true);
+    assert.equal(listingArtworkEffectiveDpiUpscaleWarning(320, null), false);
+  });
+
+  it("does not warn when admin min already blocks", () => {
+    assert.equal(listingArtworkEffectiveDpiUpscaleWarning(250, 300), false);
   });
 });
 

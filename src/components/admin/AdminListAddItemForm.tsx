@@ -7,6 +7,7 @@ import {
   type AdminCatalogItemSaveResult,
 } from "@/actions/admin-catalog-items";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
+import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
 import { parseAdminCatalogItemArtworkForm, validateItemLevelWhenNoVariants } from "@/lib/admin-catalog-item";
 
@@ -21,6 +22,9 @@ export function AdminListAddItemForm() {
   const [itemPrintAreaWidthPx, setItemPrintAreaWidthPx] = useState("");
   const [itemPrintAreaHeightPx, setItemPrintAreaHeightPx] = useState("");
   const [itemMinArtworkDpi, setItemMinArtworkDpi] = useState("");
+  const [itemArtworkLetterboxFill, setItemArtworkLetterboxFill] = useState<ListingArtworkLetterboxFill>(
+    ListingArtworkLetterboxFill.transparent,
+  );
   const [clientError, setClientError] = useState<string | null>(null);
 
   const [saveState, saveAction, savePending] = useActionState<
@@ -39,6 +43,7 @@ export function AdminListAddItemForm() {
     setItemPrintAreaWidthPx("");
     setItemPrintAreaHeightPx("");
     setItemMinArtworkDpi("");
+    setItemArtworkLetterboxFill(ListingArtworkLetterboxFill.transparent);
     setClientError(null);
     router.refresh();
   }, [saveState, router]);
@@ -65,6 +70,7 @@ export function AdminListAddItemForm() {
       itemPrintAreaWidthPx,
       itemPrintAreaHeightPx,
       itemMinArtworkDpi,
+      itemArtworkLetterboxFill,
     );
     if (!ar.ok) {
       setClientError(ar.error);
@@ -81,6 +87,7 @@ export function AdminListAddItemForm() {
     fd.set("itemPrintAreaWidthPx", itemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
+    fd.set("itemArtworkLetterboxFill", itemArtworkLetterboxFill);
     saveAction(fd);
   }
 
@@ -119,10 +126,12 @@ export function AdminListAddItemForm() {
           printAreaWidthPx={itemPrintAreaWidthPx}
           printAreaHeightPx={itemPrintAreaHeightPx}
           minArtworkDpi={itemMinArtworkDpi}
+          artworkLetterboxFill={itemArtworkLetterboxFill}
           onChangeImageRequirementLabel={setItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setItemMinArtworkDpi}
+          onChangeArtworkLetterboxFill={setItemArtworkLetterboxFill}
         />
 
         {displayError ? (

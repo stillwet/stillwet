@@ -9,6 +9,10 @@ import {
 } from "@/lib/session";
 import { ListingRequestStatus } from "@/generated/prisma/enums";
 import {
+  countListingRowsInReview,
+  LISTING_REQUEST_IN_REVIEW_STATUSES,
+} from "@/lib/listing-request-review-limit";
+import {
   PLATFORM_SHOP_SLUG,
   nextListingRequestRequiresCredit,
 } from "@/lib/marketplace-constants";
@@ -224,6 +228,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const shopIncludesListings = "listings" in shop && Array.isArray((shop as { listings?: unknown }).listings);
 
   let submittedRequestCount: number;
+  let inReviewListingRequestCount: number;
   let setupSteps: ReturnType<typeof computeShopOnboardingSteps>;
 
   if (!isPlatform) {
@@ -234,6 +239,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         }
       ).listings;
       submittedRequestCount = rows.filter((l) => l.requestStatus !== ListingRequestStatus.draft).length;
+      inReviewListingRequestCount = countListingRowsInReview(rows);
       setupSteps = computeShopOnboardingSteps({
         displayName: shop.displayName,
         itemGuidelinesAcknowledgedAt: shop.itemGuidelinesAcknowledgedAt,
@@ -246,7 +252,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         payoutsEnabled: shop.payoutsEnabled,
       });
     } else {
-      const [listingProgressHit, nonDraftCount] = await Promise.all([
+      const [listingProgressHit, nonDraftCount, inReviewCount] = await Promise.all([
         prisma.shopListing.findFirst({
           where: {
             shopId: shop.id,
@@ -266,8 +272,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             requestStatus: { not: ListingRequestStatus.draft },
           },
         }),
+        prisma.shopListing.count({
+          where: {
+            shopId: shop.id,
+            requestStatus: { in: [...LISTING_REQUEST_IN_REVIEW_STATUSES] },
+          },
+        }),
       ]);
       submittedRequestCount = nonDraftCount;
+      inReviewListingRequestCount = inReviewCount;
       setupSteps = computeShopOnboardingSteps({
         displayName: shop.displayName,
         itemGuidelinesAcknowledgedAt: shop.itemGuidelinesAcknowledgedAt,
@@ -279,6 +292,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     }
   } else {
     submittedRequestCount = 0;
+    inReviewListingRequestCount = 0;
     setupSteps = {
       profile: true,
       guidelines: true,
@@ -354,6 +368,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         requestStatus: { not: ListingRequestStatus.draft },
       },
     });
+    inReviewListingRequestCount = await prisma.shopListing.count({
+      where: {
+        shopId: shop.id,
+        requestStatus: { in: [...LISTING_REQUEST_IN_REVIEW_STATUSES] },
+      },
+    });
   }
 
   const stripeConnectBalance =
@@ -413,6 +433,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         },
         itemGuidelinesAcknowledged: shop.itemGuidelinesAcknowledgedAt != null,
         needsListingCreditForNextRequest,
+        inReviewListingRequestCount,
         stripeConnectReadyForPaidListings: shopStripeConnectReadyForCharges,
       }
     : null;
@@ -556,12 +577,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           }
         />
       </Suspense>
-
-      <p className="mt-10 text-center">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
-          ← Platform home
-        </Link>
-      </p>
 
       <SiteLegalFooter />
     </main>

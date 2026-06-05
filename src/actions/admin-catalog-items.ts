@@ -10,6 +10,7 @@ import {
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
+import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -57,6 +58,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemPrintAreaWidthPx: number | null;
       itemPrintAreaHeightPx: number | null;
       itemMinArtworkDpi: number | null;
+      itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
     }
   | { ok: false; error: string } {
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
@@ -69,6 +71,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     String(formData.get("itemPrintAreaWidthPx") ?? ""),
     String(formData.get("itemPrintAreaHeightPx") ?? ""),
     String(formData.get("itemMinArtworkDpi") ?? ""),
+    String(formData.get("itemArtworkLetterboxFill") ?? ""),
   );
   if (!ar.ok) return { ok: false, error: ar.error };
   return {
@@ -80,6 +83,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     itemPrintAreaWidthPx: ar.itemPrintAreaWidthPx,
     itemPrintAreaHeightPx: ar.itemPrintAreaHeightPx,
     itemMinArtworkDpi: ar.itemMinArtworkDpi,
+    itemArtworkLetterboxFill: ar.itemArtworkLetterboxFill,
   };
 }
 
@@ -113,6 +117,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
         itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
         itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
         itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
+        itemArtworkLetterboxFill: itemLevel.itemArtworkLetterboxFill,
       },
     });
   } catch (e) {
@@ -152,6 +157,7 @@ export async function adminUpdateCatalogItem(
         itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
         itemPrintAreaHeightPx: itemLevel.itemPrintAreaHeightPx,
         itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
+        itemArtworkLetterboxFill: itemLevel.itemArtworkLetterboxFill,
       },
     });
   } catch (e) {

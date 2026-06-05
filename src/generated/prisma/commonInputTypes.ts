@@ -661,6 +661,23 @@ export type EnumFulfillmentJobStatusWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumFulfillmentJobStatusFilter<$PrismaModel>
 }
 
+export type EnumListingArtworkLetterboxFillFilter<$PrismaModel = never> = {
+  equals?: $Enums.ListingArtworkLetterboxFill | Prisma.EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  in?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel> | $Enums.ListingArtworkLetterboxFill
+}
+
+export type EnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ListingArtworkLetterboxFill | Prisma.EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  in?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel> | $Enums.ListingArtworkLetterboxFill
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
+}
+
 export type EnumAdminSummaryEmailFrequencyFilter<$PrismaModel = never> = {
   equals?: $Enums.AdminSummaryEmailFrequency | Prisma.EnumAdminSummaryEmailFrequencyFieldRefInput<$PrismaModel>
   in?: $Enums.AdminSummaryEmailFrequency[] | Prisma.ListEnumAdminSummaryEmailFrequencyFieldRefInput<$PrismaModel>
@@ -1299,6 +1316,23 @@ export type NestedEnumFulfillmentJobStatusWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFulfillmentJobStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFulfillmentJobStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel = never> = {
+  equals?: $Enums.ListingArtworkLetterboxFill | Prisma.EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  in?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel> | $Enums.ListingArtworkLetterboxFill
+}
+
+export type NestedEnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ListingArtworkLetterboxFill | Prisma.EnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  in?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ListingArtworkLetterboxFill[] | Prisma.ListEnumListingArtworkLetterboxFillFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumListingArtworkLetterboxFillWithAggregatesFilter<$PrismaModel> | $Enums.ListingArtworkLetterboxFill
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumListingArtworkLetterboxFillFilter<$PrismaModel>
 }
 
 export type NestedEnumAdminSummaryEmailFrequencyFilter<$PrismaModel = never> = {

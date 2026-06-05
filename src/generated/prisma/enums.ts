@@ -37,6 +37,14 @@ export const ListingRequestStatus = {
 export type ListingRequestStatus = (typeof ListingRequestStatus)[keyof typeof ListingRequestStatus]
 
 
+export const ListingArtworkLetterboxFill = {
+  transparent: 'transparent',
+  white: 'white'
+} as const
+
+export type ListingArtworkLetterboxFill = (typeof ListingArtworkLetterboxFill)[keyof typeof ListingArtworkLetterboxFill]
+
+
 export const PromotionKind = {
   FRONT_PAGE_ITEM: 'FRONT_PAGE_ITEM',
   HOT_FEATURED_ITEM: 'HOT_FEATURED_ITEM',

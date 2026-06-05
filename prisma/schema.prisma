@@ -28,6 +28,12 @@ enum ListingRequestStatus {
   rejected
 }
 
+/** Crop letterbox margin for listing artwork (physical print substrate vs transparent). */
+enum ListingArtworkLetterboxFill {
+  transparent
+  white
+}
+
 /** Paid placement products (merchant dashboard); public ranking integration is separate. */
 enum PromotionKind {
   FRONT_PAGE_ITEM
@@ -1062,6 +1068,10 @@ model AdminCatalogItem {
    * Reserved for per-item upload overrides (see listing-request-artwork-limits). Default limits: 15 MB pick, 10 MB stored.
    */
   itemLargeListingArtwork Boolean @default(false)
+  /**
+   * Letterbox margin when artwork is zoomed out: transparent (apparel, mugs) or white (canvas, paper).
+   */
+  itemArtworkLetterboxFill ListingArtworkLetterboxFill @default(transparent)
   catalogTags           AdminCatalogItemTag[]
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

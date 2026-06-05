@@ -12,6 +12,7 @@ import {
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
+import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
 import {
   AdminCatalogItemTagsEditor,
@@ -31,6 +32,7 @@ export type AdminListItemSerializable = {
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
   itemMinArtworkDpi: number | null;
+  itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   tags: AdminListItemTag[];
 };
 
@@ -69,6 +71,9 @@ export function AdminListItemEditForm({
   const [editItemMinArtworkDpi, setEditItemMinArtworkDpi] = useState(
     item.itemMinArtworkDpi != null ? String(item.itemMinArtworkDpi) : "",
   );
+  const [editItemArtworkLetterboxFill, setEditItemArtworkLetterboxFill] = useState(
+    item.itemArtworkLetterboxFill,
+  );
   const [clientError, setClientError] = useState<string | null>(null);
 
   const [saveState, saveAction, savePending] = useActionState<
@@ -104,6 +109,7 @@ export function AdminListItemEditForm({
       editItemPrintAreaWidthPx,
       editItemPrintAreaHeightPx,
       editItemMinArtworkDpi,
+      editItemArtworkLetterboxFill,
     );
     if (!ar.ok) {
       setClientError(ar.error);
@@ -121,6 +127,7 @@ export function AdminListItemEditForm({
     fd.set("itemPrintAreaWidthPx", editItemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", editItemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
+    fd.set("itemArtworkLetterboxFill", editItemArtworkLetterboxFill);
     saveAction(fd);
   }
 
@@ -158,10 +165,12 @@ export function AdminListItemEditForm({
           printAreaWidthPx={editItemPrintAreaWidthPx}
           printAreaHeightPx={editItemPrintAreaHeightPx}
           minArtworkDpi={editItemMinArtworkDpi}
+          artworkLetterboxFill={editItemArtworkLetterboxFill}
           onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
           onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
           onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
           onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
+          onChangeArtworkLetterboxFill={setEditItemArtworkLetterboxFill}
         />
         {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">

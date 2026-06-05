@@ -31,6 +31,7 @@ import {
   SHOP_LISTING_MAX_PRICE_CENTS,
   shopListingMaxPriceUsdLabel,
 } from "@/lib/marketplace-constants";
+import { shopInReviewListingRequestLimitError } from "@/lib/listing-request-review-limit";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
 import { ListingSearchKeywordsChipInput } from "@/components/dashboard/ListingSearchKeywordsChipInput";
@@ -930,12 +931,15 @@ type SubmitRequestFormProps = {
   defaultImageUrlsText: string;
   /** When true, listing credits are required before submit (server also enforces). */
   feeBlocksSubmit?: boolean;
+  /** When true, shop already has the max in-review listing requests. */
+  inReviewBlocksSubmit?: boolean;
 };
 
 export function DashboardSubmitListingRequestForm({
   listingId,
   defaultImageUrlsText,
   feeBlocksSubmit = false,
+  inReviewBlocksSubmit = false,
 }: SubmitRequestFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -960,15 +964,17 @@ export function DashboardSubmitListingRequestForm({
 
   const hasUrls = text.trim().length > 0;
 
+  const submitBlocked = feeBlocksSubmit || inReviewBlocksSubmit;
+
   const onSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!hasUrls || pending || feeBlocksSubmit) return;
+      if (!hasUrls || pending || submitBlocked) return;
       const fd = new FormData(e.currentTarget);
       pendingFdRef.current = fd;
       setAttestationOpen(true);
     },
-    [hasUrls, pending, feeBlocksSubmit],
+    [hasUrls, pending, submitBlocked],
   );
 
   const label = pending
@@ -1000,12 +1006,18 @@ export function DashboardSubmitListingRequestForm({
         </label>
         <button
           type="submit"
-          disabled={!hasUrls || pending || savedFlash || feeBlocksSubmit}
+          disabled={!hasUrls || pending || savedFlash || submitBlocked}
           className={btnClass}
         >
           {label}
         </button>
       </form>
+
+      {inReviewBlocksSubmit ? (
+        <p className="mt-2 text-xs leading-snug text-amber-200/85" role="status">
+          {shopInReviewListingRequestLimitError()}
+        </p>
+      ) : null}
 
       {feeBlocksSubmit ? (
         <p className="mt-2 text-xs leading-snug text-amber-200/85" role="status">
@@ -1068,11 +1080,11 @@ export function DashboardSubmitListingRequestForm({
               </button>
               <button
                 type="button"
-                disabled={!attestationChecked || pending || feeBlocksSubmit}
+                disabled={!attestationChecked || pending || submitBlocked}
                 className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => {
                   const fd = pendingFdRef.current;
-                  if (!fd || !attestationChecked || feeBlocksSubmit) return;
+                  if (!fd || !attestationChecked || submitBlocked) return;
                   fd.set("guidelinesAttestation", "1");
                   setAttestationOpen(false);
                   pendingFdRef.current = null;

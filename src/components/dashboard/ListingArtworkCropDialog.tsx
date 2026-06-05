@@ -1,14 +1,20 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import type { ListingArtworkCropCompleteResult } from "@/lib/listing-artwork-crop-payload";
 import { renderListingArtworkCropCanvas } from "@/lib/listing-artwork-crop-canvas-client";
 import {
-  cropRegionMeetsPrintMinimum,
+  listingArtworkLetterboxFillUsesWhite,
+  listingArtworkLetterboxPreviewStyle,
+  type ListingArtworkLetterboxFill,
+} from "@/lib/listing-artwork-letterbox-fill";
+import {
   effectiveArtworkDpiFromCropAndPrint,
-  minSourceCropPixelsForPrintDpi,
+  listingArtworkEffectiveDpiBlockError,
+  listingArtworkEffectiveDpiBelowRequired,
+  listingArtworkEffectiveDpiUpscaleWarning,
+  listingArtworkRequiredEffectiveDpi,
   PRINT_AREA_REFERENCE_DPI,
 } from "@/lib/listing-artwork-print-area";
 import { compressListingArtworkCanvasToFile } from "@/lib/listing-artwork-source-compress";
@@ -19,16 +25,10 @@ import {
   listingRequestArtworkStoredMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 
-/** Dark checkerboard so transparent / letterboxed areas read as “empty”, not solid white. */
-export const ARTWORK_TRANSPARENCY_PREVIEW_STYLE: CSSProperties = {
-  backgroundColor: "#09090b",
-  backgroundImage:
-    "linear-gradient(45deg, rgb(39 39 42 / 0.95) 25%, transparent 25%), linear-gradient(-45deg, rgb(39 39 42 / 0.95) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(39 39 42 / 0.95) 75%), linear-gradient(-45deg, transparent 75%, rgb(39 39 42 / 0.95) 75%)",
-  backgroundSize: "12px 12px",
-  backgroundPosition: "0 0, 0 6px, 6px -6px, -6px 0px",
-};
+/** @deprecated Use {@link ARTWORK_TRANSPARENT_LETTERBOX_PREVIEW_STYLE} from listing-artwork-letterbox-fill. */
+export { ARTWORK_TRANSPARENT_LETTERBOX_PREVIEW_STYLE as ARTWORK_TRANSPARENCY_PREVIEW_STYLE } from "@/lib/listing-artwork-letterbox-fill";
 
-/** Lets the artwork sit smaller than the crop frame (letterbox); export keeps transparency (PNG). */
+/** Lets the artwork sit smaller than the crop frame (letterbox); margin fill depends on catalog item. */
 const CROP_MIN_ZOOM = 0.2;
 const CROP_MAX_ZOOM = 4;
 
@@ -39,6 +39,7 @@ export function ListingArtworkCropDialog({
   printWidthPx,
   printHeightPx,
   minArtworkDpi,
+  artworkLetterboxFill,
   onClose,
   onComplete,
 }: {
@@ -47,13 +48,19 @@ export function ListingArtworkCropDialog({
   sourceFile: File;
   printWidthPx: number;
   printHeightPx: number;
-  /** When set with print area, requires more source pixels vs. 300 DPI template. */
+  /** When set, blocks crop apply when effective DPI is below this (server upscales to print size). */
   minArtworkDpi: number | null;
+  artworkLetterboxFill: ListingArtworkLetterboxFill;
   onClose: () => void;
   onComplete: (result: ListingArtworkCropCompleteResult) => void;
 }) {
   const aspect = printWidthPx / printHeightPx;
   const useServerCrop = listingArtworkUseServerSideCrop(printWidthPx, printHeightPx, sourceFile.size);
+  const letterboxPreviewStyle = useMemo(
+    () => listingArtworkLetterboxPreviewStyle(artworkLetterboxFill),
+    [artworkLetterboxFill],
+  );
+  const preferAlphaExport = !listingArtworkLetterboxFillUsesWhite(artworkLetterboxFill);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -86,11 +93,9 @@ export function ListingArtworkCropDialog({
     );
   }, [croppedAreaPixels, printWidthPx, printHeightPx]);
 
-  const effectiveDpiBelowMin =
-    effectiveDpi != null &&
-    minArtworkDpi != null &&
-    minArtworkDpi > 0 &&
-    effectiveDpi + 0.01 < minArtworkDpi;
+  const requiredEffectiveDpi = listingArtworkRequiredEffectiveDpi(minArtworkDpi);
+  const effectiveDpiBelowMin = listingArtworkEffectiveDpiBelowRequired(effectiveDpi, minArtworkDpi);
+  const upscaleSoftWarning = listingArtworkEffectiveDpiUpscaleWarning(effectiveDpi, minArtworkDpi);
 
   async function apply() {
     setApplyError(null);
@@ -98,13 +103,16 @@ export function ListingArtworkCropDialog({
       setApplyError("Adjust the crop, then try again.");
       return;
     }
-    const { minW, minH } = minSourceCropPixelsForPrintDpi(printWidthPx, printHeightPx, minArtworkDpi);
-    if (!cropRegionMeetsPrintMinimum(croppedAreaPixels.width, croppedAreaPixels.height, minW, minH)) {
-      setApplyError(
-        minArtworkDpi != null && minArtworkDpi > 0
-          ? `Zoom out so the crop covers at least ${minW}×${minH}px of your image (${minArtworkDpi} DPI vs. 300 DPI template — no upscaling).`
-          : `Zoom out so the crop covers at least ${printWidthPx}×${printHeightPx}px of your image (no upscaling).`,
-      );
+    if (!(croppedAreaPixels.width > 0) || !(croppedAreaPixels.height > 0)) {
+      setApplyError("Adjust the crop, then try again.");
+      return;
+    }
+    if (effectiveDpi == null) {
+      setApplyError("Could not read crop size. Adjust the crop and try again.");
+      return;
+    }
+    if (requiredEffectiveDpi != null && effectiveDpi + 0.01 < requiredEffectiveDpi) {
+      setApplyError(listingArtworkEffectiveDpiBlockError(effectiveDpi, requiredEffectiveDpi));
       return;
     }
     if (!listingArtworkFileWithinUploadCap(sourceFile.size)) {
@@ -139,12 +147,17 @@ export function ListingArtworkCropDialog({
         printWidthPx,
         printHeightPx,
         rotation,
+        { letterboxFill: artworkLetterboxFill },
       );
       if (!canvas) {
         setApplyError("Could not build the cropped image. Try another file.");
         return;
       }
-      const compressed = await compressListingArtworkCanvasToFile(canvas, "listing-artwork", false);
+      const compressed = await compressListingArtworkCanvasToFile(
+        canvas,
+        "listing-artwork",
+        preferAlphaExport,
+      );
       if (!compressed.ok) {
         setApplyError(compressed.error);
         return;
@@ -164,7 +177,7 @@ export function ListingArtworkCropDialog({
       ? "Saving crop…"
       : `Compressing to ${listingRequestArtworkStoredMaxMb()} MB…`
     : useServerCrop
-      ? "Upload + Crop"
+      ? "Upload"
       : "Use cropped artwork";
 
   return (
@@ -180,7 +193,7 @@ export function ListingArtworkCropDialog({
             Crop artwork to print area
           </h3>
         </div>
-        <div className="relative h-[min(52vh,400px)] w-full" style={ARTWORK_TRANSPARENCY_PREVIEW_STYLE}>
+        <div className="relative h-[min(52vh,400px)] w-full" style={letterboxPreviewStyle}>
           <Cropper
             key={imageUrl}
             image={imageUrl}
@@ -197,7 +210,7 @@ export function ListingArtworkCropDialog({
             restrictPosition={false}
             minZoom={CROP_MIN_ZOOM}
             maxZoom={CROP_MAX_ZOOM}
-            style={{ containerStyle: ARTWORK_TRANSPARENCY_PREVIEW_STYLE }}
+            style={{ containerStyle: letterboxPreviewStyle }}
           />
         </div>
         <div className="space-y-2 border-t border-zinc-800 px-4 py-3">
@@ -246,6 +259,17 @@ export function ListingArtworkCropDialog({
               className="min-w-0 flex-1"
             />
           </label>
+          {upscaleSoftWarning && effectiveDpi != null ? (
+            <p className="text-xs text-zinc-500" role="status">
+              <span className="font-semibold text-zinc-100">
+                Below {PRINT_AREA_REFERENCE_DPI} DPI
+              </span>
+              {" "}
+              — Not recommended, but acceptable.
+              <br />
+              Print may look soft; zoom out or use a higher-resolution file for sharper results.
+            </p>
+          ) : null}
           {applyError ? (
             <p className="text-xs text-amber-200/90" role="alert">
               {applyError}
@@ -260,12 +284,14 @@ export function ListingArtworkCropDialog({
               {effectiveDpi != null ? (
                 <>
                   Effective DPI: ~{Math.round(effectiveDpi)}
-                  {minArtworkDpi != null && minArtworkDpi > 0 ? (
+                  {requiredEffectiveDpi != null ? (
                     <span className={effectiveDpiBelowMin ? "text-amber-200/80" : "text-zinc-600"}>
                       {" "}
-                      (min {minArtworkDpi})
+                      (min {requiredEffectiveDpi})
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="text-zinc-600"> (ref {PRINT_AREA_REFERENCE_DPI})</span>
+                  )}
                 </>
               ) : (
                 <>Effective DPI: —</>

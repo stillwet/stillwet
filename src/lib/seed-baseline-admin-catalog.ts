@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import { defaultLetterboxFillForCatalogItemName } from "@/lib/listing-artwork-letterbox-fill";
 
 type AdminBaselineDb = Pick<PrismaClient, "adminCatalogItem" | "product">;
 
@@ -28,6 +29,7 @@ export async function createBaselineAdminCatalogFromProducts(db: AdminBaselineDb
     const p = rows.find((r) => r.slug === slug);
     if (!p) continue;
     const itemMinPriceCents = Math.max(p.priceCents, p.minPriceCents);
+    const letterboxFill = defaultLetterboxFillForCatalogItemName(p.name);
     await db.adminCatalogItem.create({
       data: {
         name: p.name,
@@ -36,6 +38,7 @@ export async function createBaselineAdminCatalogFromProducts(db: AdminBaselineDb
         itemPlatformProductId: p.id,
         itemExampleListingUrl: `/product/${p.slug}`,
         itemMinPriceCents,
+        itemArtworkLetterboxFill: letterboxFill,
       },
     });
     created++;

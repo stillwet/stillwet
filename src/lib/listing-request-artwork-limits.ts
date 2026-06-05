@@ -2,9 +2,9 @@
  * Listing request artwork limits (client-safe — no sharp).
  *
  * - **Picker** (browser): up to 15 MB.
- * - **Crop path**: crop to print pixels first, then re-encode in-browser to ≤10 MB (same dimensions).
- * - **Upload** (post-crop): up to 15 MB to staging (chunked).
- * - **Stored** (R2): up to 10 MB via dimension-preserving compression on the server.
+ * - **Crop path**: source uploads to staging (chunked), then `/api/dashboard/listing-artwork/bake`
+ *   crops and writes final print file to `listing-request/` on **Upload + Crop** (not on submit).
+ * - **Submit**: references pre-baked key only (~10 MB validation read, no crop RAM).
  *
  * Profile / supplement images use ~100 KiB WebP in `shop-setup-image.ts`.
  * All listing artwork uploads use chunked staging (`listing-artwork-staging/chunk`) before submit.
@@ -64,3 +64,6 @@ export const LISTING_ARTWORK_BROWSER_CROP_MAX_PIXELS = 10_000_000;
 
 /** Large upload bytes trigger server crop when no print template is configured. */
 export const LISTING_ARTWORK_BROWSER_CROP_SOURCE_MAX_BYTES = 6 * 1024 * 1024;
+
+/** Max decoded source pixels for server crop (avoids multi-hundred-MB sharp workspaces). */
+export const LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS = 24_000_000;

@@ -1,6 +1,10 @@
 "use client";
 
 import { PRINT_AREA_REFERENCE_DPI } from "@/lib/listing-artwork-print-area";
+import {
+  type ListingArtworkLetterboxFill,
+} from "@/lib/listing-artwork-letterbox-fill";
+import { ListingArtworkLetterboxFill as ListingArtworkLetterboxFillEnum } from "@/generated/prisma/enums";
 
 /** Per catalog item: optional print-area pixels, optional min DPI vs. reference, plus note for creators. */
 export function AdminCatalogArtworkRequirementFields({
@@ -8,19 +12,23 @@ export function AdminCatalogArtworkRequirementFields({
   printAreaWidthPx,
   printAreaHeightPx,
   minArtworkDpi,
+  artworkLetterboxFill,
   onChangeImageRequirementLabel,
   onChangePrintAreaWidthPx,
   onChangePrintAreaHeightPx,
   onChangeMinArtworkDpi,
+  onChangeArtworkLetterboxFill,
 }: {
   imageRequirementLabel: string;
   printAreaWidthPx: string;
   printAreaHeightPx: string;
   minArtworkDpi: string;
+  artworkLetterboxFill: ListingArtworkLetterboxFill;
   onChangeImageRequirementLabel: (v: string) => void;
   onChangePrintAreaWidthPx: (v: string) => void;
   onChangePrintAreaHeightPx: (v: string) => void;
   onChangeMinArtworkDpi: (v: string) => void;
+  onChangeArtworkLetterboxFill: (v: ListingArtworkLetterboxFill) => void;
 }) {
   return (
     <div className="space-y-3 border-t border-zinc-800/80 pt-4">
@@ -71,6 +79,20 @@ export function AdminCatalogArtworkRequirementFields({
           />
         </label>
       </div>
+      <label className="block text-xs text-zinc-500">
+        Letterbox margin (zoomed-out crop)
+        <select
+          value={artworkLetterboxFill}
+          onChange={(e) => onChangeArtworkLetterboxFill(e.target.value as ListingArtworkLetterboxFill)}
+          className="mt-1 block w-full max-w-xs rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+        >
+          <option value={ListingArtworkLetterboxFillEnum.transparent}>Transparent (mugs, apparel)</option>
+          <option value={ListingArtworkLetterboxFillEnum.white}>White (canvas, paper, poster)</option>
+        </select>
+        <span className="mt-1 block text-[11px] text-zinc-600">
+          Empty margin in the final print file. White compresses better and matches physical substrate.
+        </span>
+      </label>
     </div>
   );
 }

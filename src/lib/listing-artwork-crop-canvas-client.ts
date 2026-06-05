@@ -2,6 +2,10 @@ import {
   listingArtworkRotateSize,
   type ListingArtworkCropArea,
 } from "@/lib/listing-artwork-crop-math";
+import {
+  listingArtworkLetterboxFillUsesWhite,
+  type ListingArtworkLetterboxFill,
+} from "@/lib/listing-artwork-letterbox-fill";
 
 export type { ListingArtworkCropArea };
 
@@ -72,7 +76,7 @@ export async function renderListingArtworkCropCanvas(
   outW: number,
   outH: number,
   rotationDeg: number,
-  options?: { maxSourceLongEdge?: number },
+  options?: { maxSourceLongEdge?: number; letterboxFill?: ListingArtworkLetterboxFill | null },
 ): Promise<HTMLCanvasElement | null> {
   const image = await loadImage(imageSrc);
   const prepared =
@@ -104,9 +108,15 @@ export async function renderListingArtworkCropCanvas(
   const out = document.createElement("canvas");
   out.width = outW;
   out.height = outH;
-  const octx = out.getContext("2d", { alpha: true });
+  const useWhiteLetterbox = listingArtworkLetterboxFillUsesWhite(options?.letterboxFill);
+  const octx = out.getContext("2d", { alpha: !useWhiteLetterbox });
   if (!octx) return null;
-  octx.clearRect(0, 0, out.width, out.height);
+  if (useWhiteLetterbox) {
+    octx.fillStyle = "#ffffff";
+    octx.fillRect(0, 0, out.width, out.height);
+  } else {
+    octx.clearRect(0, 0, out.width, out.height);
+  }
   octx.imageSmoothingEnabled = true;
   octx.imageSmoothingQuality = "high";
   octx.drawImage(

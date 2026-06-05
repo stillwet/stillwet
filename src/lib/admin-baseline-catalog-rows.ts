@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { AdminBaselineRow } from "@/lib/shop-baseline-catalog";
+import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 
 const adminCatalogSelect = {
   id: true,
@@ -11,6 +12,8 @@ const adminCatalogSelect = {
   itemPrintAreaWidthPx: true,
   itemPrintAreaHeightPx: true,
   itemMinArtworkDpi: true,
+  itemArtworkLetterboxFill: true,
+  itemLargeListingArtwork: true,
 } as const;
 
 /** Admin baseline rows for shop dashboard catalog. */
@@ -22,9 +25,12 @@ export async function loadAdminBaselineCatalogRows(): Promise<AdminBaselineRow[]
 }
 
 export type AdminCatalogItemArtworkPolicyRow = {
+  name: string;
   itemImageRequirementLabel: string | null;
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
+  itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
+  itemLargeListingArtwork: boolean;
 };
 
 /** Print-area metadata for listing submit validation. */
@@ -34,9 +40,12 @@ export async function loadAdminCatalogItemArtworkPolicy(
   return prisma.adminCatalogItem.findUnique({
     where: { id: itemId },
     select: {
+      name: true,
       itemImageRequirementLabel: true,
       itemPrintAreaWidthPx: true,
       itemPrintAreaHeightPx: true,
+      itemArtworkLetterboxFill: true,
+      itemLargeListingArtwork: true,
     },
   });
 }
@@ -53,6 +62,7 @@ const adminListItemSelect = {
   itemPrintAreaWidthPx: true,
   itemPrintAreaHeightPx: true,
   itemMinArtworkDpi: true,
+  itemArtworkLetterboxFill: true,
   catalogTags: {
     select: {
       tag: { select: { id: true, name: true, slug: true } },
