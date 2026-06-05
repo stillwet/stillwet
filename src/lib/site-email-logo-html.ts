@@ -1,12 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { emailLinkOrigin } from "@/lib/public-app-url";
 import { BRAND_LOGO_MARK, BRAND_MERCH_NAME } from "@/lib/site-brand";
 import {
   SITE_EMAIL_BRAND_HEADER_MARKER,
   SITE_EMAIL_LOGO_PLACEHOLDER,
-  SITE_EMAIL_LOGO_PUBLIC_PATH,
 } from "@/lib/site-email-logo-constants";
+import { siteEmailLogoOutboundUrl } from "@/lib/site-email-logo-url";
 
 const SITE_EMAIL_LOGO_FILENAME = "still-wet-logo-2048.png";
 
@@ -17,8 +16,7 @@ const SITE_EMAIL_WORDMARK_STYLE =
 let cachedAdminPreviewLogoDataUri: string | null = null;
 
 export function siteEmailLogoAbsoluteUrl(origin?: string): string {
-  const base = (origin ?? emailLinkOrigin()).replace(/\/$/, "");
-  return `${base}${SITE_EMAIL_LOGO_PUBLIC_PATH}`;
+  return siteEmailLogoOutboundUrl(origin);
 }
 
 function escapeHtmlAttr(value: string): string {
@@ -147,17 +145,18 @@ export type SiteEmailLogoOptions = {
 
 function resolveLogoUrl(options?: SiteEmailLogoOptions): string {
   if (options?.logoUrl) return options.logoUrl;
-  return siteEmailLogoAbsoluteUrl(options?.origin);
+  return siteEmailLogoOutboundUrl(options?.origin);
 }
 
 /** Resolves `{{EMAIL_LOGO}}` or inserts the brand mark at the top of the inner card. */
 export function applySiteEmailLogoToHtml(html: string, options?: SiteEmailLogoOptions): string {
-  const block = buildSiteEmailLogoHeaderHtml(resolveLogoUrl(options));
+  const logoUrl = resolveLogoUrl(options);
+  const block = buildSiteEmailLogoHeaderHtml(logoUrl);
   if (html.includes(SITE_EMAIL_LOGO_PLACEHOLDER)) {
     return html.split(SITE_EMAIL_LOGO_PLACEHOLDER).join(block);
   }
   if (emailHtmlHasBrandHeader(html)) {
-    return html;
+    return replaceBrandHeaderLogoSrc(html, logoUrl);
   }
   if (emailHtmlHasLogoImage(html)) {
     return replaceLegacyLogoOnlyHeader(html, block);

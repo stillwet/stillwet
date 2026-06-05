@@ -182,10 +182,9 @@ export async function dashboardCancelAccountDeletionRequest(): Promise<AccountDa
   revalidatePath("/shops");
   return {
     ok: true,
-    message:
-      reopen
-        ? "Deletion request cancelled. Your shop can appear on browse again. Listing photos removed from storage are not restored — re-upload if you need them."
-        : "Deletion request cancelled.",
+    message: reopen
+      ? "Deletion request cancelled. Your shop can appear on browse again."
+      : "Deletion request cancelled.",
   };
 }
 
