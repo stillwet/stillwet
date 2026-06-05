@@ -13,6 +13,7 @@ import {
   SHOP_SETUP_FEE_CENTS,
   SHOP_SETUP_FEE_LABEL,
 } from "@/lib/creator-gift-codes";
+import { isPurchasedShopSetupGiftCodeExpired } from "@/lib/creator-gift-code-expiration";
 import { prisma } from "@/lib/prisma";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { getShopOwnerSession } from "@/lib/session";
@@ -169,10 +170,23 @@ export async function createShopFromSignup(
         },
         select: {
           id: true,
-          purchase: { select: { isBetaTesterBatch: true } },
+          createdAt: true,
+          purchase: {
+            select: {
+              isBetaTesterBatch: true,
+              isWaivedShopFeeBatch: true,
+            },
+          },
         },
       });
       if (!giftCode) return { status: "invalid_code" as const };
+      if (
+        !giftCode.purchase.isBetaTesterBatch &&
+        !giftCode.purchase.isWaivedShopFeeBatch &&
+        isPurchasedShopSetupGiftCodeExpired({ createdAt: giftCode.createdAt })
+      ) {
+        return { status: "expired_code" as const };
+      }
 
       const emailConflict = await tx.shopUser.findUnique({
         where: { email },
@@ -238,6 +252,9 @@ export async function createShopFromSignup(
 
     if (created.status === "invalid_code") {
       return { error: "That shop setup gift code is invalid or has already been used." };
+    }
+    if (created.status === "expired_code") {
+      return { error: "That shop setup gift code has expired." };
     }
     if (created.status === "email_taken") {
       return { error: "That email is already registered." };

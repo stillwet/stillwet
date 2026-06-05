@@ -919,9 +919,12 @@ model CreatorGiftCode {
   redeemedByShop               Shop?               @relation("CreatorGiftCodeRedeemedByShop", fields: [redeemedByShopId], references: [id], onDelete: SetNull)
   /** Optional internal admin notes (beta / waived-fee code tracker). */
   adminNotes                   String?
+  /** Purchased shop-setup gift codes expire; admin/beta invite codes leave this null. */
+  expiresAt                    DateTime?
   createdAt                    DateTime            @default(now())
 
   @@index([purchaseId, type])
+  @@index([type, expiresAt])
   @@index([type, redeemedAt])
   @@index([redeemedByShopId])
 }

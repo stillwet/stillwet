@@ -657,6 +657,7 @@ export const CreatorGiftCodeScalarFieldEnum = {
   redeemedAt: 'redeemedAt',
   redeemedByShopId: 'redeemedByShopId',
   adminNotes: 'adminNotes',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 } as const
 
