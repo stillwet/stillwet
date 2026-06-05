@@ -1,6 +1,7 @@
 /**
- * Copy `AdminCatalogItem` rows from a remote DB (e.g. production) into the local target DB,
+ * Copy Admin → List data from a remote DB (e.g. production) into the local target DB,
  * remapping `itemPlatformProductId` and per-variant `platformProductId` via `Product.slug`.
+ * Also syncs linked `Tag` rows and `AdminCatalogItemTag` associations.
  *
  * Target must be local Postgres (localhost / 127.0.0.1) unless ADMIN_CATALOG_SYNC_CONFIRM=1.
  *
@@ -8,15 +9,11 @@
  *   # .env → local DATABASE_URL
  *   # .env.production.local → production URL (or set ADMIN_CATALOG_SYNC_FROM_URL)
  *   npm run db:sync:admin-catalog
- *
- * PowerShell: run `npm` from the repo folder (`cd …\StillWetMerch`). Paste the real Neon/Vercel URL;
- * use single quotes if it contains `&`: `$env:ADMIN_CATALOG_SYNC_FROM_URL = 'postgresql://…'`
- * (do not use the literal characters `…` — copy the full string from Vercel → Env / Neon dashboard).
  */
 import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import pg from "pg";
 
 const root = path.join(__dirname, "..");
@@ -73,6 +70,18 @@ function normalizeUrl(u: string): string {
   }
 }
 
+function maskHost(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "(invalid)";
+  }
+}
+
+function newRowId(): string {
+  return randomBytes(12).toString("base64url").slice(0, 25);
+}
+
 /** Reject placeholders and malformed URLs before `pg` (avoids opaque getaddrinfo EINVAL). */
 function assertValidPostgresUrl(label: string, url: string): void {
   const t = url.trim();
@@ -102,10 +111,18 @@ function assertValidPostgresUrl(label: string, url: string): void {
 type AdminRow = {
   sortOrder: number;
   name: string;
+  storefrontDescription: string | null;
   variants: unknown;
   itemPlatformProductId: string | null;
   itemExampleListingUrl: string | null;
   itemMinPriceCents: number;
+  itemGoodsServicesCostCents: number;
+  itemImageRequirementLabel: string | null;
+  itemMinArtworkLongEdgePx: number | null;
+  itemPrintAreaWidthPx: number | null;
+  itemPrintAreaHeightPx: number | null;
+  itemMinArtworkDpi: number | null;
+  itemLargeListingArtwork: boolean;
 };
 
 function remapVariantJson(
@@ -154,6 +171,9 @@ async function main() {
   assertValidPostgresUrl("Source (ADMIN_CATALOG_SYNC_FROM_URL or .env.production.local)", sourceUrl);
   assertValidPostgresUrl("Target (.env DATABASE_URL)", targetUrl);
 
+  console.log(`[sync-admin-catalog] Source host: ${maskHost(sourceUrl)}`);
+  console.log(`[sync-admin-catalog] Target host: ${maskHost(targetUrl)}`);
+
   const sourcePool = new pg.Pool({ connectionString: sourceUrl });
   const targetPool = new pg.Pool({ connectionString: targetUrl });
 
@@ -171,12 +191,23 @@ async function main() {
     const { rows: sourceItems } = await sourcePool.query<{
       sortOrder: number;
       name: string;
+      storefrontDescription: string | null;
       variants: unknown;
       itemPlatformProductId: string | null;
       itemExampleListingUrl: string | null;
       itemMinPriceCents: number;
+      itemGoodsServicesCostCents: number;
+      itemImageRequirementLabel: string | null;
+      itemMinArtworkLongEdgePx: number | null;
+      itemPrintAreaWidthPx: number | null;
+      itemPrintAreaHeightPx: number | null;
+      itemMinArtworkDpi: number | null;
+      itemLargeListingArtwork: boolean;
     }>(
-      `SELECT "sortOrder", name, variants, "itemPlatformProductId", "itemExampleListingUrl", "itemMinPriceCents"
+      `SELECT "sortOrder", name, "storefrontDescription", variants, "itemPlatformProductId",
+              "itemExampleListingUrl", "itemMinPriceCents", "itemGoodsServicesCostCents",
+              "itemImageRequirementLabel", "itemMinArtworkLongEdgePx", "itemPrintAreaWidthPx",
+              "itemPrintAreaHeightPx", "itemMinArtworkDpi", "itemLargeListingArtwork"
        FROM "AdminCatalogItem"
        ORDER BY "sortOrder" ASC, "createdAt" ASC`,
     );
@@ -185,6 +216,21 @@ async function main() {
       console.log("[sync-admin-catalog] Source has 0 admin catalog rows; leaving target unchanged.");
       return;
     }
+
+    const { rows: catalogTags } = await sourcePool.query<{
+      itemSortOrder: number;
+      itemName: string;
+      tagSlug: string;
+      tagName: string;
+      tagSortOrder: number;
+    }>(
+      `SELECT i."sortOrder" AS "itemSortOrder", i.name AS "itemName", t.slug AS "tagSlug",
+              t.name AS "tagName", t."sortOrder" AS "tagSortOrder"
+       FROM "AdminCatalogItemTag" ct
+       JOIN "AdminCatalogItem" i ON i.id = ct."adminCatalogItemId"
+       JOIN "Tag" t ON t.id = ct."tagId"
+       ORDER BY i."sortOrder", t.slug`,
+    );
 
     const mapped: AdminRow[] = [];
     for (const row of sourceItems) {
@@ -197,46 +243,119 @@ async function main() {
       mapped.push({
         sortOrder: row.sortOrder,
         name: row.name,
+        storefrontDescription: row.storefrontDescription,
         variants,
         itemPlatformProductId,
         itemExampleListingUrl: row.itemExampleListingUrl,
         itemMinPriceCents: row.itemMinPriceCents,
+        itemGoodsServicesCostCents: row.itemGoodsServicesCostCents,
+        itemImageRequirementLabel: row.itemImageRequirementLabel,
+        itemMinArtworkLongEdgePx: row.itemMinArtworkLongEdgePx,
+        itemPrintAreaWidthPx: row.itemPrintAreaWidthPx,
+        itemPrintAreaHeightPx: row.itemPrintAreaHeightPx,
+        itemMinArtworkDpi: row.itemMinArtworkDpi,
+        itemLargeListingArtwork: row.itemLargeListingArtwork,
       });
+    }
+
+    const tagsBySlug = new Map<string, { name: string; sortOrder: number }>();
+    for (const link of catalogTags) {
+      if (!tagsBySlug.has(link.tagSlug)) {
+        tagsBySlug.set(link.tagSlug, { name: link.tagName, sortOrder: link.tagSortOrder });
+      }
     }
 
     const client = await targetPool.connect();
     try {
       await client.query("BEGIN");
-      await client.query(`DELETE FROM "AdminCatalogItem"`);
       const now = new Date().toISOString();
+
+      for (const [slug, tag] of tagsBySlug) {
+        await client.query(
+          `INSERT INTO "Tag" (id, slug, name, "sortOrder", "byItemSpotlightProductId", "createdAt", "updatedAt")
+           VALUES ($1, $2, $3, $4, NULL, $5::timestamptz, $6::timestamptz)
+           ON CONFLICT (slug) DO UPDATE SET
+             name = EXCLUDED.name,
+             "sortOrder" = EXCLUDED."sortOrder",
+             "updatedAt" = EXCLUDED."updatedAt"`,
+          [newRowId(), slug, tag.name, tag.sortOrder, now, now],
+        );
+      }
+
+      await client.query(`DELETE FROM "AdminCatalogItemTag"`);
+      await client.query(`DELETE FROM "AdminCatalogItem"`);
+
+      const itemKeyToId = new Map<string, string>();
       for (const m of mapped) {
-        const id = randomUUID().replace(/-/g, "").slice(0, 25);
+        const id = newRowId();
+        const key = `${m.sortOrder}\0${m.name}`;
+        itemKeyToId.set(key, id);
         await client.query(
           `INSERT INTO "AdminCatalogItem" (
-            id, "sortOrder", name, variants, "itemPlatformProductId", "itemExampleListingUrl", "itemMinPriceCents", "createdAt", "updatedAt"
-          ) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8::timestamptz, $9::timestamptz)`,
+            id, "sortOrder", name, "storefrontDescription", variants,
+            "itemPlatformProductId", "itemExampleListingUrl", "itemMinPriceCents",
+            "itemGoodsServicesCostCents", "itemImageRequirementLabel",
+            "itemMinArtworkLongEdgePx", "itemPrintAreaWidthPx", "itemPrintAreaHeightPx", "itemMinArtworkDpi",
+            "itemLargeListingArtwork",
+            "createdAt", "updatedAt"
+          ) VALUES (
+            $1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+            $16::timestamptz, $17::timestamptz
+          )`,
           [
             id,
             m.sortOrder,
             m.name,
+            m.storefrontDescription,
             JSON.stringify(m.variants ?? []),
             m.itemPlatformProductId,
             m.itemExampleListingUrl,
             m.itemMinPriceCents,
+            m.itemGoodsServicesCostCents,
+            m.itemImageRequirementLabel,
+            m.itemMinArtworkLongEdgePx,
+            m.itemPrintAreaWidthPx,
+            m.itemPrintAreaHeightPx,
+            m.itemMinArtworkDpi,
+            m.itemLargeListingArtwork,
             now,
             now,
           ],
         );
       }
+
+      let catalogTagLinks = 0;
+      for (const link of catalogTags) {
+        const itemId = itemKeyToId.get(`${link.itemSortOrder}\0${link.itemName}`);
+        if (!itemId) continue;
+        const tagRow = await client.query<{ id: string }>(`SELECT id FROM "Tag" WHERE slug = $1`, [
+          link.tagSlug,
+        ]);
+        const tagId = tagRow.rows[0]?.id;
+        if (!tagId) continue;
+        await client.query(
+          `INSERT INTO "AdminCatalogItemTag" ("adminCatalogItemId", "tagId")
+           VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [itemId, tagId],
+        );
+        catalogTagLinks++;
+      }
+
       await client.query("COMMIT");
+
+      console.log(
+        `[sync-admin-catalog] Done.\n` +
+          `  Admin catalog items: ${mapped.length}\n` +
+          `  Tags upserted: ${tagsBySlug.size}\n` +
+          `  Catalog↔tag links: ${catalogTagLinks} of ${catalogTags.length}`,
+      );
     } catch (e) {
       await client.query("ROLLBACK");
       throw e;
     } finally {
       client.release();
     }
-
-    console.log(`[sync-admin-catalog] Replaced local AdminCatalogItem with ${mapped.length} row(s) from source.`);
   } finally {
     await sourcePool.end();
     await targetPool.end();

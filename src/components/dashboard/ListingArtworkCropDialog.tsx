@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
+import type { ListingArtworkCropCompleteResult } from "@/lib/listing-artwork-crop-payload";
 import {
   cropRegionMeetsPrintMinimum,
   effectiveArtworkDpiFromCropAndPrint,
@@ -10,6 +11,7 @@ import {
   PRINT_AREA_REFERENCE_DPI,
 } from "@/lib/listing-artwork-print-area";
 import { compressListingArtworkCanvasToFile } from "@/lib/listing-artwork-source-compress";
+import { listingArtworkUseServerSideCrop } from "@/lib/listing-artwork-browser-crop-threshold";
 import { listingRequestArtworkStoredMaxMb } from "@/lib/listing-request-artwork-limits";
 
 /** Dark checkerboard so transparent / letterboxed areas read as “empty”, not solid white. */
@@ -46,7 +48,7 @@ function rotateSize(width: number, height: number, rotationDeg: number): { width
 
 /**
  * `pixelCrop` from react-easy-crop is in the rotated image’s bounding-box space when `rotationDeg !== 0`.
- * Draw rotated full image, crop that region, then scale to print pixels.
+ * One rotated buffer, then scale the crop region straight into the print-sized output canvas.
  */
 async function getCroppedCanvas(
   imageSrc: string,
@@ -73,26 +75,6 @@ async function getCroppedCanvas(
   rctx.rotate(rad);
   rctx.drawImage(image, -nw / 2, -nh / 2);
 
-  const cropped = document.createElement("canvas");
-  cropped.width = Math.round(pixelCrop.width);
-  cropped.height = Math.round(pixelCrop.height);
-  const cctx = cropped.getContext("2d", { alpha: true });
-  if (!cctx) throw new Error("Canvas unsupported");
-  cctx.clearRect(0, 0, cropped.width, cropped.height);
-  cctx.imageSmoothingEnabled = true;
-  cctx.imageSmoothingQuality = "high";
-  cctx.drawImage(
-    rotated,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    cropped.width,
-    cropped.height,
-  );
-
   const out = document.createElement("canvas");
   out.width = outW;
   out.height = outH;
@@ -101,7 +83,17 @@ async function getCroppedCanvas(
   octx.clearRect(0, 0, out.width, out.height);
   octx.imageSmoothingEnabled = true;
   octx.imageSmoothingQuality = "high";
-  octx.drawImage(cropped, 0, 0, cropped.width, cropped.height, 0, 0, outW, outH);
+  octx.drawImage(
+    rotated,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    outW,
+    outH,
+  );
 
   return out;
 }
@@ -109,6 +101,7 @@ async function getCroppedCanvas(
 export function ListingArtworkCropDialog({
   open,
   imageUrl,
+  sourceFile,
   printWidthPx,
   printHeightPx,
   minArtworkDpi,
@@ -117,14 +110,16 @@ export function ListingArtworkCropDialog({
 }: {
   open: boolean;
   imageUrl: string;
+  sourceFile: File;
   printWidthPx: number;
   printHeightPx: number;
   /** When set with print area, requires more source pixels vs. 300 DPI template. */
   minArtworkDpi: number | null;
   onClose: () => void;
-  onComplete: (file: File) => void;
+  onComplete: (result: ListingArtworkCropCompleteResult) => void;
 }) {
   const aspect = printWidthPx / printHeightPx;
+  const useServerCrop = listingArtworkUseServerSideCrop(printWidthPx, printHeightPx, sourceFile.size);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -180,6 +175,25 @@ export function ListingArtworkCropDialog({
     }
     setBusy(true);
     try {
+      if (useServerCrop) {
+        onComplete({
+          mode: "serverCrop",
+          crop: {
+            pixelCrop: {
+              x: croppedAreaPixels.x,
+              y: croppedAreaPixels.y,
+              width: croppedAreaPixels.width,
+              height: croppedAreaPixels.height,
+            },
+            rotation,
+            printWidthPx,
+            printHeightPx,
+          },
+          sourceFile,
+        });
+        return;
+      }
+
       const canvas = await getCroppedCanvas(
         imageUrl,
         croppedAreaPixels,
@@ -187,12 +201,12 @@ export function ListingArtworkCropDialog({
         printHeightPx,
         rotation,
       );
-      const compressed = await compressListingArtworkCanvasToFile(canvas, "listing-artwork", true);
+      const compressed = await compressListingArtworkCanvasToFile(canvas, "listing-artwork", false);
       if (!compressed.ok) {
         setApplyError(compressed.error);
         return;
       }
-      onComplete(compressed.file);
+      onComplete({ mode: "file", file: compressed.file });
     } catch {
       setApplyError("Could not build the cropped image. Try another file.");
     } finally {
@@ -201,6 +215,14 @@ export function ListingArtworkCropDialog({
   }
 
   if (!open) return null;
+
+  const applyLabel = busy
+    ? useServerCrop
+      ? "Saving crop…"
+      : `Compressing to ${listingRequestArtworkStoredMaxMb()} MB…`
+    : useServerCrop
+      ? "Upload crop for server processing"
+      : "Use cropped artwork";
 
   return (
     <div
@@ -214,6 +236,12 @@ export function ListingArtworkCropDialog({
           <h3 id="listing-artwork-crop-title" className="text-sm font-semibold text-zinc-100">
             Crop artwork to print area
           </h3>
+          {useServerCrop ? (
+            <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
+              Your crop is saved and the final {printWidthPx}×{printHeightPx}px file is built on the server so large
+              artwork files do not crash your browser.
+            </p>
+          ) : null}
         </div>
         <div className="relative h-[min(52vh,400px)] w-full" style={ARTWORK_TRANSPARENCY_PREVIEW_STYLE}>
           <Cropper
@@ -321,7 +349,7 @@ export function ListingArtworkCropDialog({
                 className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
                 onClick={() => void apply()}
               >
-                {busy ? `Compressing to ${listingRequestArtworkStoredMaxMb()} MB…` : "Use cropped artwork"}
+                {applyLabel}
               </button>
             </div>
           </div>

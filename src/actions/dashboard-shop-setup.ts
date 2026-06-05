@@ -75,6 +75,8 @@ import {
   LISTING_UPLOAD_CRASH_ERROR,
   listingArtworkServerProcessingError,
 } from "@/lib/listing-request-submit-errors";
+import { listingArtworkCropPayloadFromForm } from "@/lib/listing-artwork-crop-payload";
+import { cropListingArtworkBufferOnServer } from "@/lib/listing-artwork-server-crop";
 
 const WELCOME_MAX = 280;
 const STOREFRONT_ITEM_BLURB_MAX = 280;
@@ -616,6 +618,25 @@ export async function submitFirstListingSetup(
     }
     rawBuf = staged;
     stagingKeyToDelete = stagingKeyRaw;
+
+    const useServerCrop = formData.get("listingArtworkServerCrop") === "1";
+    if (useServerCrop) {
+      const cropPayload = listingArtworkCropPayloadFromForm(formData);
+      if (!cropPayload) {
+        return {
+          ok: false,
+          error: "Invalid crop data. Open the crop dialog, adjust the crop, and try again.",
+        };
+      }
+      const cropped = await cropListingArtworkBufferOnServer(rawBuf, cropPayload);
+      if (!cropped) {
+        return {
+          ok: false,
+          error: listingArtworkServerProcessingError(artworkStoredMaxMb),
+        };
+      }
+      rawBuf = cropped;
+    }
   } else {
     return {
       ok: false,

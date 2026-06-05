@@ -235,7 +235,7 @@ function ListingAdminSecondaryImageUploadForm({
   );
 
   return (
-    <form action={formAction} encType="multipart/form-data" className="mt-2 flex flex-col gap-2 sm:max-w-lg">
+    <form action={formAction} className="mt-2 flex flex-col gap-2 sm:max-w-lg">
       <input type="hidden" name="listingId" value={listingId} />
       <label className="block text-[11px] text-zinc-500">
         Upload (JPEG / PNG / WebP / GIF, max 20 MB before compression)

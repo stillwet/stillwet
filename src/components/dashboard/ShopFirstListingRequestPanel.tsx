@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import {
   abandonUnconfirmedListingRequestSubmit,
-  createListingArtworkStagingUpload,
   submitFirstListingSetup,
   type ShopSetupActionResult,
 } from "@/actions/dashboard-shop-setup";
@@ -15,12 +14,11 @@ import { flattenShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
-  LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES,
   listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
-import { listingArtworkStagingChunkCount } from "@/lib/listing-artwork-staging-chunks";
+import { uploadListingArtworkFileToStaging } from "@/lib/listing-artwork-staging-upload-client";
 import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
 import { compressListingArtworkFileIfNeeded } from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
@@ -174,8 +172,13 @@ export function ShopFirstListingRequestPanel(props: {
   const [listingRequestItemName, setListingRequestItemName] = useState("");
   const [listingHasFile, setListingHasFile] = useState(false);
   const [listingSubmitArtworkFile, setListingSubmitArtworkFile] = useState<File | null>(null);
+  const [listingServerCrop, setListingServerCrop] = useState<{
+    stagingKey: string;
+    cropJson: string;
+  } | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [cropSourceObjectUrl, setCropSourceObjectUrl] = useState<string | null>(null);
+  const [cropSourceFile, setCropSourceFile] = useState<File | null>(null);
   const [listingArtworkPreviewUrl, setListingArtworkPreviewUrl] = useState<string | null>(null);
   const [listingArtworkPixels, setListingArtworkPixels] = useState<{ w: number; h: number } | null>(null);
   const [listingArtworkMeasureError, setListingArtworkMeasureError] = useState<string | null>(null);
@@ -284,6 +287,8 @@ export function ShopFirstListingRequestPanel(props: {
     const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
 
     if (needCrop) {
+      setListingServerCrop(null);
+      setCropSourceFile(file);
       setCropSourceObjectUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return URL.createObjectURL(file);
@@ -317,9 +322,11 @@ export function ShopFirstListingRequestPanel(props: {
 
   useEffect(() => {
     setListingSubmitArtworkFile(null);
+    setListingServerCrop(null);
     setListingHasFile(false);
     setListingArtworkPreviewUrl(null);
     setCropDialogOpen(false);
+    setCropSourceFile(null);
     setCropSourceObjectUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -392,6 +399,15 @@ export function ShopFirstListingRequestPanel(props: {
   async function prepareListingArtworkFormData(
     fd: FormData,
   ): Promise<{ ok: true } | { ok: false; error: string }> {
+    if (fd.get("listingArtworkServerCrop") === "1") {
+      const stagingKey = String(fd.get("listingArtworkStagingKey") ?? "").trim();
+      const cropJson = String(fd.get("listingArtworkCropJson") ?? "").trim();
+      if (!stagingKey || !cropJson) {
+        return { ok: false, error: "Crop data is missing. Open the crop dialog and try again." };
+      }
+      return { ok: true };
+    }
+
     const art = fd.get("listingArtwork");
     if (!(art instanceof File) || art.size === 0) {
       return { ok: false, error: "Upload a print-ready artwork file." };
@@ -403,54 +419,14 @@ export function ShopFirstListingRequestPanel(props: {
       };
     }
 
-    const prep = await createListingArtworkStagingUpload(art.type, art.size);
-    if (!prep.ok) return prep;
-
-    const totalParts = listingArtworkStagingChunkCount(art.size);
-    setArtworkUploadProgress({ current: 0, total: totalParts });
-
-    const chunkSize = LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES;
-    let partIndex = 0;
-    try {
-      for (let offset = 0; offset < art.size; offset += chunkSize, partIndex++) {
-        const slice = art.slice(offset, offset + chunkSize);
-        const chunkFd = new FormData();
-        chunkFd.set("stagingKey", prep.stagingKey);
-        chunkFd.set("partIndex", String(partIndex));
-        chunkFd.set("chunk", slice, `part-${partIndex}`);
-        let chunkRes: Response;
-        try {
-          chunkRes = await fetch("/api/dashboard/listing-artwork-staging/chunk", {
-            method: "POST",
-            body: chunkFd,
-          });
-        } catch {
-          return {
-            ok: false,
-            error: "Artwork upload failed (network). Check your connection and try again.",
-          };
-        }
-        if (!chunkRes.ok) {
-          let detail = "";
-          try {
-            const j = (await chunkRes.json()) as { error?: string };
-            detail = j.error?.trim() ?? "";
-          } catch {
-            /* ignore */
-          }
-          return {
-            ok: false,
-            error: detail || `Artwork upload failed (${chunkRes.status}). Try again.`,
-          };
-        }
-        setArtworkUploadProgress({ current: partIndex + 1, total: totalParts });
-      }
-    } finally {
-      setArtworkUploadProgress(null);
-    }
+    const upload = await uploadListingArtworkFileToStaging(art, (current, total) => {
+      setArtworkUploadProgress({ current, total });
+    });
+    setArtworkUploadProgress(null);
+    if (!upload.ok) return upload;
 
     fd.delete("listingArtwork");
-    fd.set("listingArtworkStagingKey", prep.stagingKey);
+    fd.set("listingArtworkStagingKey", upload.stagingKey);
     return { ok: true };
   }
 
@@ -477,6 +453,7 @@ export function ShopFirstListingRequestPanel(props: {
         setKeywordDuplicateHint(null);
         setListingHasFile(false);
         setListingSubmitArtworkFile(null);
+        setListingServerCrop(null);
         setListingArtworkPreviewUrl(null);
         if (listingFileRef.current) listingFileRef.current.value = "";
       }
@@ -588,7 +565,9 @@ export function ShopFirstListingRequestPanel(props: {
     return null;
   })();
   const printExportDimensionsError = (() => {
-    if (!requiresPrintCrop || listingSubmitArtworkFile == null || !listingArtworkPixels) return null;
+    if (!requiresPrintCrop || !listingArtworkPixels) return null;
+    if (listingServerCrop != null) return null;
+    if (listingSubmitArtworkFile == null) return null;
     if (printAreaW == null || printAreaH == null) return null;
     if (!exportedImageMeetsPrintDimensions(listingArtworkPixels.w, listingArtworkPixels.h, printAreaW, printAreaH)) {
       return `Expected ${printAreaW}×${printAreaH}px after crop; this file is ${listingArtworkPixels.w}×${listingArtworkPixels.h}px.`;
@@ -601,7 +580,7 @@ export function ShopFirstListingRequestPanel(props: {
     listingArtworkPreviewUrl && !listingArtworkPixels && !listingArtworkMeasureError,
   );
 
-  const hasArtworkReady = listingSubmitArtworkFile != null;
+  const hasArtworkReady = listingSubmitArtworkFile != null || listingServerCrop != null;
 
   const listingCanSubmit =
     Boolean(listingProductId) &&
@@ -694,8 +673,14 @@ export function ShopFirstListingRequestPanel(props: {
               fd.set("requestItemName", listingRequestItemName.trim());
               fd.set("storefrontItemBlurb", listingStorefrontBlurb.trim());
               fd.set("listingSearchKeywords", keywordsJoined.trim());
-              const art = listingSubmitArtworkFile ?? listingFileRef.current?.files?.[0];
-              if (art) fd.set("listingArtwork", art);
+              if (listingServerCrop) {
+                fd.set("listingArtworkStagingKey", listingServerCrop.stagingKey);
+                fd.set("listingArtworkServerCrop", "1");
+                fd.set("listingArtworkCropJson", listingServerCrop.cropJson);
+              } else {
+                const art = listingSubmitArtworkFile ?? listingFileRef.current?.files?.[0];
+                if (art) fd.set("listingArtwork", art);
+              }
               pendingListingFdRef.current = fd;
               setAttestationOpen(true);
             }}
@@ -861,7 +846,7 @@ export function ShopFirstListingRequestPanel(props: {
                 Preparing image…
               </p>
             ) : null}
-            {requiresPrintCrop && !listingSubmitArtworkFile ? (
+            {requiresPrintCrop && !listingSubmitArtworkFile && !listingServerCrop ? (
               <p className="mt-2 text-[11px] text-zinc-500">
                 After you choose an image, a crop window opens. You must complete cropping before you can submit.
               </p>
@@ -892,6 +877,11 @@ export function ShopFirstListingRequestPanel(props: {
                     className="max-h-40 max-w-full object-contain"
                   />
                 </div>
+                {listingServerCrop ? (
+                  <p className="mt-1.5 text-[11px] text-zinc-500">
+                    Crop saved — final {printAreaW}×{printAreaH}px print file is built when you submit.
+                  </p>
+                ) : null}
                 {requiresPrintCrop && printAreaW != null && printAreaH != null ? (
                   <p className="mt-1.5 text-[11px] text-zinc-500">
                     {selectedCatalogGroup?.option.imageRequirementLabel?.trim() ? (
@@ -1138,34 +1128,72 @@ export function ShopFirstListingRequestPanel(props: {
         </div>
       ) : null}
 
-      {cropDialogOpen && cropSourceObjectUrl && printAreaW != null && printAreaH != null ? (
+      {cropDialogOpen && cropSourceObjectUrl && cropSourceFile && printAreaW != null && printAreaH != null ? (
         <ListingArtworkCropDialog
           open={cropDialogOpen}
           imageUrl={cropSourceObjectUrl}
+          sourceFile={cropSourceFile}
           printWidthPx={printAreaW}
           printHeightPx={printAreaH}
           minArtworkDpi={minArtworkDpi}
           onClose={() => {
             setCropDialogOpen(false);
+            setCropSourceFile(null);
             setCropSourceObjectUrl((prev) => {
               if (prev) URL.revokeObjectURL(prev);
               return null;
             });
             if (listingFileRef.current) listingFileRef.current.value = "";
           }}
-          onComplete={(file) => {
-            setCropDialogOpen(false);
-            setCropSourceObjectUrl((prev) => {
-              if (prev) URL.revokeObjectURL(prev);
-              return null;
-            });
-            setListingSubmitArtworkFile(file);
-            setListingHasFile(true);
-            setListingArtworkPreviewUrl((prev) => {
-              if (prev) URL.revokeObjectURL(prev);
-              return URL.createObjectURL(file);
-            });
-            if (listingFileRef.current) listingFileRef.current.value = "";
+          onComplete={(result) => {
+            void (async () => {
+              setCropDialogOpen(false);
+              if (result.mode === "file") {
+                setCropSourceFile(null);
+                setCropSourceObjectUrl((prev) => {
+                  if (prev) URL.revokeObjectURL(prev);
+                  return null;
+                });
+                setListingServerCrop(null);
+                setListingSubmitArtworkFile(result.file);
+                setListingHasFile(true);
+                setListingArtworkPreviewUrl((prev) => {
+                  if (prev) URL.revokeObjectURL(prev);
+                  return URL.createObjectURL(result.file);
+                });
+              } else {
+                setArtworkSourcePreparing(true);
+                try {
+                  const upload = await uploadListingArtworkFileToStaging(result.sourceFile, (current, total) => {
+                    setArtworkUploadProgress({ current, total });
+                  });
+                  if (!upload.ok) {
+                    setListingArtworkMeasureError(upload.error);
+                    setListingHasFile(false);
+                    setListingServerCrop(null);
+                    return;
+                  }
+                  const previewUrl = cropSourceObjectUrl;
+                  setCropSourceObjectUrl(null);
+                  setCropSourceFile(null);
+                  setListingSubmitArtworkFile(null);
+                  setListingServerCrop({
+                    stagingKey: upload.stagingKey,
+                    cropJson: JSON.stringify(result.crop),
+                  });
+                  setListingHasFile(true);
+                  setListingArtworkPixels({ w: printAreaW, h: printAreaH });
+                  setListingArtworkPreviewUrl((prev) => {
+                    if (prev) URL.revokeObjectURL(prev);
+                    return previewUrl;
+                  });
+                } finally {
+                  setArtworkUploadProgress(null);
+                  setArtworkSourcePreparing(false);
+                }
+              }
+              if (listingFileRef.current) listingFileRef.current.value = "";
+            })();
           }}
         />
       ) : null}

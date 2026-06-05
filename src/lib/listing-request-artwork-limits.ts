@@ -46,3 +46,12 @@ export function listingRequestArtworkStoredMaxMb(): number {
 
 /** Per-request chunk for same-origin staging upload (under Vercel ~4.5 MB body cap). */
 export const LISTING_REQUEST_ARTWORK_STAGING_CHUNK_BYTES = 2.5 * 1024 * 1024;
+
+/**
+ * Legacy threshold for print templates without fixed dimensions (unused when print W×H are set).
+ * All admin catalog items with print areas always use server crop.
+ */
+export const LISTING_ARTWORK_BROWSER_CROP_MAX_PIXELS = 10_000_000;
+
+/** Large upload bytes trigger server crop when no print template is configured. */
+export const LISTING_ARTWORK_BROWSER_CROP_SOURCE_MAX_BYTES = 6 * 1024 * 1024;
