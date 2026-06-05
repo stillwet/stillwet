@@ -24,6 +24,7 @@ describe("site-email-logo-html", () => {
     assert.ok(out.includes('src="https://stillwet.com/still-wet-logo-2048.png"'));
     assert.ok(out.includes(BRAND_LOGO_MARK));
     assert.ok(out.includes("letter-spacing:0.2em"));
+    assert.ok(out.indexOf(BRAND_LOGO_MARK) < out.indexOf('width="48"'));
   });
 
   it("uses an inline data URI for admin preview", () => {

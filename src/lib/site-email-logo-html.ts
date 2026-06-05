@@ -32,11 +32,11 @@ export function buildSiteEmailLogoHeaderHtml(logoUrl: string): string {
     <td align="left" style="padding:0;">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="border-collapse:collapse;">
         <tr>
-          <td style="vertical-align:middle;padding-right:10px;line-height:0;">
-            <img src="${src}" alt="${alt}" width="48" height="48" style="display:block;width:48px;height:48px;border:0;outline:none;text-decoration:none;" />
-          </td>
-          <td style="vertical-align:middle;">
+          <td style="vertical-align:middle;padding-right:10px;">
             <span style="${SITE_EMAIL_WORDMARK_STYLE}">${wordmark}</span>
+          </td>
+          <td style="vertical-align:middle;line-height:0;">
+            <img src="${src}" alt="${alt}" width="48" height="48" style="display:block;width:48px;height:48px;border:0;outline:none;text-decoration:none;" />
           </td>
         </tr>
       </table>
