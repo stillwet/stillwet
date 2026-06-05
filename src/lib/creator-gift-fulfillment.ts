@@ -16,6 +16,10 @@ import {
   notifyCreatorGiftShopFlair,
 } from "@/lib/creator-gift-notices";
 import { defaultGiftRedemptionEmailVars } from "@/lib/gift-redemption-code-email-html";
+import {
+  parseCreatorGiftMockSessionId,
+} from "@/lib/creator-gift-mock-checkout";
+import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { syncFreeListingFeeWaivers } from "@/lib/listing-fee";
 import { prisma } from "@/lib/prisma";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
@@ -38,6 +42,178 @@ function checkoutSessionEmail(session: Stripe.Checkout.Session): string {
   )
     .trim()
     .toLowerCase();
+}
+
+function isCreatorGiftCheckoutSessionPaid(session: Stripe.Checkout.Session): boolean {
+  return session.payment_status === "paid" || session.payment_status === "no_payment_required";
+}
+
+/** Idempotent: send redemption email when purchase is paid and not yet emailed. */
+export async function ensureCreatorGiftRedemptionEmailSent(
+  purchaseId: string,
+): Promise<{ sent: boolean; error: string | null }> {
+  const purchase = await prisma.creatorGiftPurchase.findUnique({
+    where: { id: purchaseId },
+    include: {
+      codes: {
+        where: { type: CreatorGiftCodeType.shop_setup },
+        select: { code: true },
+        take: 1,
+      },
+    },
+  });
+  if (!purchase) return { sent: false, error: "Gift purchase not found." };
+  if (purchase.fulfillmentMode !== CreatorGiftFulfillmentMode.email_codes) {
+    return { sent: true, error: null };
+  }
+  if (purchase.emailedAt) return { sent: true, error: null };
+  if (purchase.status !== CreatorGiftPurchaseStatus.paid) {
+    return { sent: false, error: "Gift purchase is not marked paid yet." };
+  }
+
+  const purchaserEmail = purchase.purchaserEmail?.trim();
+  if (!purchaserEmail) {
+    return { sent: false, error: "Missing purchaser email on gift purchase." };
+  }
+
+  const setupCode = purchase.codes[0]?.code ?? "Not included";
+  const send = await sendGiftRedemptionCodeEmail({
+    toEmail: purchaserEmail,
+    ...defaultGiftRedemptionEmailVars({ setupCode }),
+  });
+  if (!send.ok) {
+    console.error("[creator-gift] email failed:", send.error);
+    return { sent: false, error: send.error };
+  }
+
+  await prisma.creatorGiftPurchase.update({
+    where: { id: purchaseId },
+    data: { emailedAt: new Date() },
+  });
+  return { sent: true, error: null };
+}
+
+async function fulfillCreatorGiftPurchaseRecord(
+  purchaseId: string,
+  payment: {
+    stripeCheckoutSessionId?: string | null;
+    stripePaymentIntentId?: string | null;
+    purchaserEmail?: string | null;
+    paidAmountCents?: number;
+  },
+): Promise<boolean> {
+  const purchase = await prisma.creatorGiftPurchase.findUnique({
+    where: { id: purchaseId },
+    include: { codes: true },
+  });
+  if (!purchase) return false;
+  if (
+    purchase.status !== CreatorGiftPurchaseStatus.pending &&
+    purchase.status !== CreatorGiftPurchaseStatus.paid
+  ) {
+    return false;
+  }
+
+  if (
+    payment.paidAmountCents !== undefined &&
+    payment.paidAmountCents !== purchase.amountCents
+  ) {
+    console.warn("[creator-gift] paid amount mismatch; fulfilling anyway", {
+      purchaseId: purchase.id,
+      expectedCents: purchase.amountCents,
+      paidCents: payment.paidAmountCents,
+    });
+  }
+
+  if (purchase.fulfillmentMode === CreatorGiftFulfillmentMode.direct_to_shop) {
+    if (purchase.status === CreatorGiftPurchaseStatus.pending) {
+      const result = await prisma.$transaction(async (tx) => {
+        await tx.creatorGiftPurchase.update({
+          where: { id: purchase.id },
+          data: {
+            status: CreatorGiftPurchaseStatus.paid,
+            paidAt: new Date(),
+            ...(payment.stripeCheckoutSessionId
+              ? { stripeCheckoutSessionId: payment.stripeCheckoutSessionId }
+              : {}),
+            ...(payment.stripePaymentIntentId
+              ? { stripePaymentIntentId: payment.stripePaymentIntentId }
+              : {}),
+          },
+        });
+        return applyDirectToShopCredits(tx, purchase);
+      });
+      if (!result.ok) return false;
+
+      const { shopId } = result;
+      const giftFromName = purchase.giftFromName;
+
+      if (purchase.listingCreditsGranted > 0) {
+        await syncFreeListingFeeWaivers(shopId);
+        await notifyCreatorGiftListingCredits({
+          shopId,
+          creditsGranted: purchase.listingCreditsGranted,
+          giftFromName,
+        });
+      }
+      if (purchase.promotionCreditsGranted > 0 && purchase.promotionKind) {
+        await notifyCreatorGiftPromotionCredits({
+          shopId,
+          kind: purchase.promotionKind,
+          creditsGranted: purchase.promotionCreditsGranted,
+          giftFromName,
+        });
+      }
+      if (purchase.googleShoppingCreditsGranted > 0) {
+        await notifyCreatorGiftGoogleShoppingCredits({
+          shopId,
+          creditsGranted: purchase.googleShoppingCreditsGranted,
+          giftFromName,
+        });
+      }
+      if (purchase.shopFlairIncluded) {
+        await notifyCreatorGiftShopFlair({ shopId, giftFromName });
+        revalidateShopUpgradesDashboardPaths();
+      }
+    }
+    return true;
+  }
+
+  const purchaserEmail =
+    payment.purchaserEmail?.trim() || purchase.purchaserEmail?.trim() || null;
+  if (!purchaserEmail) {
+    console.error("[creator-gift] missing purchaser email", { purchaseId: purchase.id });
+    return false;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (purchase.status === CreatorGiftPurchaseStatus.pending) {
+      await tx.creatorGiftPurchase.update({
+        where: { id: purchase.id },
+        data: {
+          status: CreatorGiftPurchaseStatus.paid,
+          paidAt: new Date(),
+          purchaserEmail,
+          ...(payment.stripeCheckoutSessionId
+            ? { stripeCheckoutSessionId: payment.stripeCheckoutSessionId }
+            : {}),
+          ...(payment.stripePaymentIntentId
+            ? { stripePaymentIntentId: payment.stripePaymentIntentId }
+            : {}),
+        },
+      });
+    } else if (purchase.purchaserEmail !== purchaserEmail) {
+      await tx.creatorGiftPurchase.update({
+        where: { id: purchase.id },
+        data: { purchaserEmail },
+      });
+    }
+
+    await fulfillEmailCodesGift(tx, purchase);
+  });
+
+  await ensureCreatorGiftRedemptionEmailSent(purchaseId);
+  return true;
 }
 
 type FulfilledGiftCode = {
@@ -104,30 +280,6 @@ async function createUniqueGiftCode(
     }
   }
   throw new Error("Could not generate a unique gift code.");
-}
-
-async function markPurchasePaid(
-  tx: Prisma.TransactionClient,
-  args: {
-    purchaseId: string;
-    session: Stripe.Checkout.Session;
-    paymentIntentId: string | null;
-    purchaserEmail?: string | null;
-  },
-) {
-  const stripeEmail = checkoutSessionEmail(args.session);
-  const purchaserEmail = args.purchaserEmail?.trim() || stripeEmail || null;
-
-  await tx.creatorGiftPurchase.update({
-    where: { id: args.purchaseId },
-    data: {
-      status: CreatorGiftPurchaseStatus.paid,
-      paidAt: new Date(),
-      stripeCheckoutSessionId: args.session.id,
-      ...(args.paymentIntentId ? { stripePaymentIntentId: args.paymentIntentId } : {}),
-      ...(purchaserEmail ? { purchaserEmail } : {}),
-    },
-  });
 }
 
 async function applyDirectToShopCredits(
@@ -292,166 +444,26 @@ export async function fulfillCreatorGiftCheckoutSession(
   if (session.metadata?.kind !== "creator_gift") return false;
   const purchaseId = session.metadata.purchaseId;
   if (!purchaseId || typeof purchaseId !== "string") return true;
-  if (session.payment_status !== "paid") return true;
+  if (!isCreatorGiftCheckoutSessionPaid(session)) return true;
 
   const paidAmountCents =
     typeof session.amount_total === "number" && Number.isFinite(session.amount_total)
       ? session.amount_total
       : undefined;
-  const paymentIntentId = paymentIntentIdFromCheckoutSession(session);
 
-  const purchase = await prisma.creatorGiftPurchase.findUnique({
-    where: { id: purchaseId },
-    include: { codes: true },
+  return fulfillCreatorGiftPurchaseRecord(purchaseId, {
+    stripeCheckoutSessionId: session.id,
+    stripePaymentIntentId: paymentIntentIdFromCheckoutSession(session),
+    purchaserEmail: checkoutSessionEmail(session) || undefined,
+    paidAmountCents,
   });
-  if (!purchase) return true;
-  if (
-    purchase.status !== CreatorGiftPurchaseStatus.pending &&
-    purchase.status !== CreatorGiftPurchaseStatus.paid
-  ) {
-    return true;
-  }
-  if (paidAmountCents !== undefined && paidAmountCents !== purchase.amountCents) {
-    return true;
-  }
-
-  if (purchase.fulfillmentMode === CreatorGiftFulfillmentMode.direct_to_shop) {
-    if (purchase.status === CreatorGiftPurchaseStatus.pending) {
-      const result = await prisma.$transaction(async (tx) => {
-        await markPurchasePaid(tx, {
-          purchaseId: purchase.id,
-          session,
-          paymentIntentId,
-        });
-        return applyDirectToShopCredits(tx, purchase);
-      });
-      if (!result.ok) return true;
-
-      const { shopId } = result;
-      const giftFromName = purchase.giftFromName;
-
-      if (purchase.listingCreditsGranted > 0) {
-        await syncFreeListingFeeWaivers(shopId);
-        await notifyCreatorGiftListingCredits({
-          shopId,
-          creditsGranted: purchase.listingCreditsGranted,
-          giftFromName,
-        });
-      }
-      if (purchase.promotionCreditsGranted > 0 && purchase.promotionKind) {
-        await notifyCreatorGiftPromotionCredits({
-          shopId,
-          kind: purchase.promotionKind,
-          creditsGranted: purchase.promotionCreditsGranted,
-          giftFromName,
-        });
-      }
-      if (purchase.googleShoppingCreditsGranted > 0) {
-        await notifyCreatorGiftGoogleShoppingCredits({
-          shopId,
-          creditsGranted: purchase.googleShoppingCreditsGranted,
-          giftFromName,
-        });
-      }
-      if (purchase.shopFlairIncluded) {
-        await notifyCreatorGiftShopFlair({ shopId, giftFromName });
-        revalidateShopUpgradesDashboardPaths();
-      }
-    }
-    return true;
-  }
-
-  const purchaserEmail = purchase.purchaserEmail?.trim() || checkoutSessionEmail(session);
-  if (!purchaserEmail) {
-    console.error("[creator-gift] Stripe checkout completed without a purchaser email", {
-      purchaseId: purchase.id,
-      checkoutSessionId: session.id,
-    });
-    return true;
-  }
-
-  const fulfilled = await prisma.$transaction(async (tx) => {
-    if (purchase.status === CreatorGiftPurchaseStatus.pending) {
-      await markPurchasePaid(tx, {
-        purchaseId: purchase.id,
-        session,
-        paymentIntentId,
-        purchaserEmail,
-      });
-    } else if (purchase.purchaserEmail !== purchaserEmail) {
-      await tx.creatorGiftPurchase.update({
-        where: { id: purchase.id },
-        data: { purchaserEmail },
-      });
-    }
-
-    const codes = await fulfillEmailCodesGift(tx, purchase);
-
-    const setupCode =
-      codes.find((c) => c.type === CreatorGiftCodeType.shop_setup)?.code ?? "Not included";
-
-    return {
-      purchaseId: purchase.id,
-      purchaserEmail,
-      emailedAt: purchase.emailedAt,
-      emailVars: defaultGiftRedemptionEmailVars({ setupCode }),
-    };
-  });
-
-  if (!fulfilled.emailedAt) {
-    const send = await sendGiftRedemptionCodeEmail({
-      toEmail: fulfilled.purchaserEmail,
-      ...fulfilled.emailVars,
-    });
-    if (send.ok) {
-      await prisma.creatorGiftPurchase.update({
-        where: { id: fulfilled.purchaseId },
-        data: { emailedAt: new Date() },
-      });
-    } else {
-      console.error("[creator-gift] email failed:", send.error);
-    }
-  }
-  return true;
 }
 
-export type FinalizeCreatorGiftCheckoutResult =
-  | {
-      ok: true;
-      fulfillmentMode: CreatorGiftFulfillmentMode;
-      purchaserEmail: string | null;
-      setupCode: string | null;
-      emailSent: boolean;
-      emailPending: boolean;
-      emailError: string | null;
-      shopSlug: string | null;
-    }
-  | { ok: false; error: string };
-
-/**
- * Success-page fallback when Stripe redirects before the webhook runs (or webhook delivery fails).
- * Idempotent with {@link fulfillCreatorGiftCheckoutSession}.
- */
-export async function finalizeCreatorGiftCheckoutSessionId(
-  sessionId: string,
+async function buildFinalizeCreatorGiftCheckoutResult(
+  purchaseId: string,
+  sessionMetadata?: Stripe.Metadata | Record<string, string> | null,
 ): Promise<FinalizeCreatorGiftCheckoutResult> {
-  const session = await getStripe().checkout.sessions.retrieve(sessionId);
-  if (session.metadata?.kind !== "creator_gift") {
-    return { ok: false, error: "This checkout is not a creator gift purchase." };
-  }
-  if (session.payment_status !== "paid") {
-    return {
-      ok: false,
-      error: "Payment is not complete yet. Wait a moment and refresh, or contact support.",
-    };
-  }
-
-  await fulfillCreatorGiftCheckoutSession(session);
-
-  const purchaseId = session.metadata.purchaseId;
-  if (!purchaseId || typeof purchaseId !== "string") {
-    return { ok: false, error: "Gift checkout is missing purchase metadata." };
-  }
+  await ensureCreatorGiftRedemptionEmailSent(purchaseId);
 
   const purchase = await prisma.creatorGiftPurchase.findUnique({
     where: { id: purchaseId },
@@ -476,8 +488,8 @@ export async function finalizeCreatorGiftCheckoutSessionId(
     !emailSent;
 
   const shopSlugFromMeta =
-    typeof session.metadata.recipientShopSlug === "string"
-      ? session.metadata.recipientShopSlug.trim()
+    sessionMetadata && typeof sessionMetadata.recipientShopSlug === "string"
+      ? sessionMetadata.recipientShopSlug.trim()
       : "";
 
   return {
@@ -492,4 +504,72 @@ export async function finalizeCreatorGiftCheckoutSessionId(
       : null,
     shopSlug: purchase.recipientShop?.slug ?? (shopSlugFromMeta || null),
   };
+}
+
+export type FinalizeCreatorGiftCheckoutResult =
+  | {
+      ok: true;
+      fulfillmentMode: CreatorGiftFulfillmentMode;
+      purchaserEmail: string | null;
+      setupCode: string | null;
+      emailSent: boolean;
+      emailPending: boolean;
+      emailError: string | null;
+      shopSlug: string | null;
+    }
+  | { ok: false; error: string };
+
+/**
+ * Success-page fallback when Stripe redirects before the webhook runs (or webhook delivery fails).
+ * Idempotent with {@link fulfillCreatorGiftCheckoutSession}.
+ */
+export async function finalizeCreatorGiftCheckoutSessionId(
+  sessionId: string,
+): Promise<FinalizeCreatorGiftCheckoutResult> {
+  const trimmedSessionId = sessionId.trim();
+  const mockPurchaseId = parseCreatorGiftMockSessionId(trimmedSessionId);
+  if (mockPurchaseId) {
+    if (!isMockCheckoutEnabled()) {
+      return { ok: false, error: "Invalid gift checkout session." };
+    }
+    const purchase = await prisma.creatorGiftPurchase.findUnique({
+      where: { id: mockPurchaseId },
+      select: { id: true, purchaserEmail: true, amountCents: true },
+    });
+    if (!purchase) {
+      return { ok: false, error: "Gift purchase record not found." };
+    }
+    await fulfillCreatorGiftPurchaseRecord(mockPurchaseId, {
+      stripeCheckoutSessionId: trimmedSessionId,
+      paidAmountCents: purchase.amountCents,
+      purchaserEmail: purchase.purchaserEmail,
+    });
+    return buildFinalizeCreatorGiftCheckoutResult(mockPurchaseId, null);
+  }
+
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await getStripe().checkout.sessions.retrieve(trimmedSessionId);
+  } catch (e) {
+    console.error("[creator-gift] checkout session retrieve failed", e);
+    return { ok: false, error: "Could not load checkout session. Try refreshing this page." };
+  }
+
+  if (session.metadata?.kind !== "creator_gift") {
+    return { ok: false, error: "This checkout is not a creator gift purchase." };
+  }
+  if (!isCreatorGiftCheckoutSessionPaid(session)) {
+    return {
+      ok: false,
+      error: "Payment is not complete yet. Wait a moment and refresh, or contact support.",
+    };
+  }
+
+  const purchaseId = session.metadata.purchaseId;
+  if (!purchaseId || typeof purchaseId !== "string") {
+    return { ok: false, error: "Gift checkout is missing purchase metadata." };
+  }
+
+  await fulfillCreatorGiftCheckoutSession(session);
+  return buildFinalizeCreatorGiftCheckoutResult(purchaseId, session.metadata);
 }

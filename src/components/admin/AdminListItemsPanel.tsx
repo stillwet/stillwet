@@ -9,7 +9,10 @@ import {
   AdminListItemEditForm,
   type AdminListItemSerializable,
 } from "@/components/admin/AdminListItemEditForm";
-import { LISTING_REQUEST_ARTWORK_UPLOAD_MAX_MB } from "@/lib/listing-request-artwork-limits";
+import {
+  LISTING_REQUEST_ARTWORK_STORED_MAX_MB,
+  LISTING_REQUEST_ARTWORK_UPLOAD_MAX_MB,
+} from "@/lib/listing-request-artwork-limits";
 
 export type { AdminListItemSerializable, AdminListItemTag, AdminListTagOption };
 
@@ -195,7 +198,8 @@ export function AdminListItemsPanel({
                 <td className="max-w-[12rem] p-3 align-top text-zinc-400">
                   <div className="text-[11px] leading-relaxed">
                     <p className="tabular-nums text-zinc-500">
-                      Upload: {LISTING_REQUEST_ARTWORK_UPLOAD_MAX_MB} MB (stored ≤15 MB)
+                      Upload: {LISTING_REQUEST_ARTWORK_UPLOAD_MAX_MB} MB (stored ≤
+                      {LISTING_REQUEST_ARTWORK_STORED_MAX_MB} MB)
                     </p>
                     {item.itemPrintAreaWidthPx != null &&
                     item.itemPrintAreaHeightPx != null &&

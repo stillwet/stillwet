@@ -1180,7 +1180,7 @@ export type $AdminCatalogItemPayload<ExtArgs extends runtime.Types.Extensions.In
     itemMinArtworkDpi: number | null
     /**
      * *
-     *    * When true, listing request artwork may be up to 30 MB; otherwise 15 MB (see listing-request-artwork-limits).
+     *    * Reserved for per-item upload overrides (see listing-request-artwork-limits). Default limits: 15 MB pick, 10 MB stored.
      */
     itemLargeListingArtwork: boolean
     createdAt: Date

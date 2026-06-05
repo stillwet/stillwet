@@ -9,6 +9,8 @@ import {
   minSourceCropPixelsForPrintDpi,
   PRINT_AREA_REFERENCE_DPI,
 } from "@/lib/listing-artwork-print-area";
+import { compressListingArtworkCanvasToFile } from "@/lib/listing-artwork-source-compress";
+import { listingRequestArtworkStoredMaxMb } from "@/lib/listing-request-artwork-limits";
 
 /** Dark checkerboard so transparent / letterboxed areas read as “empty”, not solid white. */
 export const ARTWORK_TRANSPARENCY_PREVIEW_STYLE: CSSProperties = {
@@ -46,14 +48,13 @@ function rotateSize(width: number, height: number, rotationDeg: number): { width
  * `pixelCrop` from react-easy-crop is in the rotated image’s bounding-box space when `rotationDeg !== 0`.
  * Draw rotated full image, crop that region, then scale to print pixels.
  */
-async function getCroppedImageFile(
+async function getCroppedCanvas(
   imageSrc: string,
   pixelCrop: Area,
   outW: number,
   outH: number,
   rotationDeg: number,
-  filename: string,
-): Promise<File> {
+): Promise<HTMLCanvasElement> {
   const image = await loadImage(imageSrc);
   const nw = image.naturalWidth;
   const nh = image.naturalHeight;
@@ -102,10 +103,7 @@ async function getCroppedImageFile(
   octx.imageSmoothingQuality = "high";
   octx.drawImage(cropped, 0, 0, cropped.width, cropped.height, 0, 0, outW, outH);
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    out.toBlob((b) => (b ? resolve(b) : reject(new Error("Could not encode image"))), "image/png");
-  });
-  return new File([blob], filename, { type: "image/png", lastModified: Date.now() });
+  return out;
 }
 
 export function ListingArtworkCropDialog({
@@ -182,15 +180,19 @@ export function ListingArtworkCropDialog({
     }
     setBusy(true);
     try {
-      const file = await getCroppedImageFile(
+      const canvas = await getCroppedCanvas(
         imageUrl,
         croppedAreaPixels,
         printWidthPx,
         printHeightPx,
         rotation,
-        "listing-artwork.png",
       );
-      onComplete(file);
+      const compressed = await compressListingArtworkCanvasToFile(canvas, "listing-artwork", true);
+      if (!compressed.ok) {
+        setApplyError(compressed.error);
+        return;
+      }
+      onComplete(compressed.file);
     } catch {
       setApplyError("Could not build the cropped image. Try another file.");
     } finally {
@@ -319,7 +321,7 @@ export function ListingArtworkCropDialog({
                 className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
                 onClick={() => void apply()}
               >
-                {busy ? "Saving…" : "Use cropped artwork"}
+                {busy ? `Compressing to ${listingRequestArtworkStoredMaxMb()} MB…` : "Use cropped artwork"}
               </button>
             </div>
           </div>

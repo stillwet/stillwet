@@ -1745,7 +1745,10 @@ export function DashboardMainTabs(props: {
         >
           {clientTabFetch && tabFetch.failedTabs.requestListingCatalog ? (
             <DashboardTabLoadFailed
-              message="Could not load the listing catalog. Your listing may still have been saved — open the Listings tab or try again."
+              message={
+                tabFetch.tabLoadError ??
+                "Could not load the listing catalog. Your listing may still have been saved — open the Listings tab or try again."
+              }
               onRetry={() => tabFetch.retryTab("requestListingCatalog")}
             />
           ) : !effectiveLoadedFlags.requestListingCatalog ? (
@@ -1820,7 +1823,10 @@ export function DashboardMainTabs(props: {
         {clientTabFetch && tabFetch.failedTabs.listings ? (
           activeTab === "listings" ? (
             <DashboardTabLoadFailed
-              message="Could not load your listings. Try again, or refresh the page."
+              message={
+                tabFetch.tabLoadError ??
+                "Could not load your listings. Try again, or refresh the page."
+              }
               onRetry={() => tabFetch.retryTab("listings")}
             />
           ) : null

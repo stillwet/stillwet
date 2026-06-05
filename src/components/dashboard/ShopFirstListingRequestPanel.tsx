@@ -22,7 +22,7 @@ import {
 } from "@/lib/listing-request-artwork-limits";
 import { listingArtworkStagingChunkCount } from "@/lib/listing-artwork-staging-chunks";
 import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
-import { compressListingArtworkSourceIfNeeded } from "@/lib/listing-artwork-source-compress";
+import { compressListingArtworkFileIfNeeded } from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
@@ -279,9 +279,24 @@ export function ShopFirstListingRequestPanel(props: {
   async function applyListingArtworkPickedFile(file: File) {
     setListingSubmitArtworkFile(null);
     setListingArtworkMeasureError(null);
+    const pw = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
+    const ph = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
+    const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
+
+    if (needCrop) {
+      setCropSourceObjectUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(file);
+      });
+      setCropDialogOpen(true);
+      setListingHasFile(false);
+      setListingArtworkPreviewUrl(null);
+      return;
+    }
+
     setArtworkSourcePreparing(true);
     try {
-      const prepared = await compressListingArtworkSourceIfNeeded(file);
+      const prepared = await compressListingArtworkFileIfNeeded(file);
       if (!prepared.ok) {
         setListingHasFile(false);
         setListingArtworkPreviewUrl(null);
@@ -289,19 +304,6 @@ export function ShopFirstListingRequestPanel(props: {
         return;
       }
       const ready = prepared.file;
-      const pw = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
-      const ph = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
-      const needCrop = pw != null && ph != null && pw > 0 && ph > 0;
-      if (needCrop) {
-        setCropSourceObjectUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return URL.createObjectURL(ready);
-        });
-        setCropDialogOpen(true);
-        setListingHasFile(false);
-        setListingArtworkPreviewUrl(null);
-        return;
-      }
       setListingSubmitArtworkFile(ready);
       setListingHasFile(true);
       setListingArtworkPreviewUrl((prev) => {
@@ -824,9 +826,8 @@ export function ShopFirstListingRequestPanel(props: {
             </div>
           ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — files over {listingArtworkStoredMaxMb} MB are
-            compressed in your browser to {listingArtworkStoredMaxMb} MB before crop; final file stored up to{" "}
-            {listingArtworkStoredMaxMb} MB at print pixel size)
+            Artwork file (PNG or JPEG, up to {listingArtworkUploadMaxMb} MB — after crop, compressed to{" "}
+            {listingArtworkStoredMaxMb} MB at print pixel size before upload)
             <input
               ref={listingFileRef}
               type="file"
@@ -857,7 +858,7 @@ export function ShopFirstListingRequestPanel(props: {
             />
             {artworkSourcePreparing ? (
               <p className="mt-2 text-[11px] text-zinc-500" role="status">
-                Preparing image (compressing to {listingArtworkStoredMaxMb} MB before crop)…
+                Preparing image…
               </p>
             ) : null}
             {requiresPrintCrop && !listingSubmitArtworkFile ? (
@@ -1160,7 +1161,10 @@ export function ShopFirstListingRequestPanel(props: {
             });
             setListingSubmitArtworkFile(file);
             setListingHasFile(true);
-            setListingArtworkPreviewUrl(URL.createObjectURL(file));
+            setListingArtworkPreviewUrl((prev) => {
+              if (prev) URL.revokeObjectURL(prev);
+              return URL.createObjectURL(file);
+            });
             if (listingFileRef.current) listingFileRef.current.value = "";
           }}
         />

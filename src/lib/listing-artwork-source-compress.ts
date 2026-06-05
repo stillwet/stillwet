@@ -1,14 +1,7 @@
 import {
-  LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES,
   LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
   listingRequestArtworkStoredMaxMb,
 } from "@/lib/listing-request-artwork-limits";
-
-export {
-  LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES,
-  LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES,
-  listingRequestArtworkStoredMaxMb as listingArtworkPreCropTargetMaxMb,
-};
 
 function canvasToBlob(
   canvas: HTMLCanvasElement,
@@ -46,7 +39,7 @@ async function encodeCanvasUnderCap(
   preferAlpha: boolean,
 ): Promise<Blob | null> {
   const mimeOrder = preferAlpha
-    ? ["image/webp", "image/jpeg"]
+    ? ["image/webp", "image/png", "image/jpeg"]
     : ["image/jpeg", "image/webp"];
 
   for (const mime of mimeOrder) {
@@ -87,20 +80,44 @@ async function renderFileToCanvas(file: File, scale: number): Promise<HTMLCanvas
   return canvas;
 }
 
+function artworkUnderStoredCapError(): string {
+  const capMb = listingRequestArtworkStoredMaxMb();
+  return `Could not fit artwork under ${capMb} MB at print size. Try a simpler design, zoom in on the crop, or use a smaller source file.`;
+}
+
 /**
- * If `file` exceeds {@link LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES}, re-encode in the browser
- * at full resolution when possible (quality only), then slight downscale as a last resort — before crop/DPI.
+ * After crop (fixed print pixel size): re-encode without resizing when possible.
  */
-export async function compressListingArtworkSourceIfNeeded(
+export async function compressListingArtworkCanvasToFile(
+  canvas: HTMLCanvasElement,
+  filenameStem: string,
+  preferAlpha = true,
+): Promise<{ ok: true; file: File } | { ok: false; error: string }> {
+  const cap = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES;
+  const blob = await encodeCanvasUnderCap(canvas, cap, preferAlpha);
+  if (!blob) {
+    return { ok: false, error: artworkUnderStoredCapError() };
+  }
+  const ext = extForMime(blob.type);
+  const out = new File([blob], `${filenameStem}.${ext}`, {
+    type: blob.type,
+    lastModified: Date.now(),
+  });
+  return { ok: true, file: out };
+}
+
+/**
+ * Non-crop path: re-encode when over the stored cap (quality, then slight downscale).
+ */
+export async function compressListingArtworkFileIfNeeded(
   file: File,
 ): Promise<{ ok: true; file: File } | { ok: false; error: string }> {
-  if (file.size <= LISTING_REQUEST_ARTWORK_PRE_CROP_MAX_BYTES) {
+  if (file.size <= LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES) {
     return { ok: true, file };
   }
 
   const preferAlpha = file.type === "image/png" || file.type === "image/webp";
   const cap = LISTING_REQUEST_ARTWORK_STORED_MAX_BYTES;
-  const capMb = listingRequestArtworkStoredMaxMb();
 
   let scale = 1;
   for (let attempt = 0; attempt < 12; attempt++) {
@@ -126,8 +143,8 @@ export async function compressListingArtworkSourceIfNeeded(
     if (canvas.width < 800 || canvas.height < 800) break;
   }
 
-  return {
-    ok: false,
-    error: `Could not compress that image to ${capMb} MB before crop. Try a smaller export or lower resolution.`,
-  };
+  return { ok: false, error: artworkUnderStoredCapError() };
 }
+
+/** @deprecated Use {@link compressListingArtworkFileIfNeeded}. */
+export const compressListingArtworkSourceIfNeeded = compressListingArtworkFileIfNeeded;

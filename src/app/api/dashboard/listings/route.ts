@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loadDashboardListingsTab, loadDashboardPlatformListingsTab } from "@/lib/dashboard-scoped-data";
 import { resolveDashboardTabApiShop } from "@/lib/dashboard-tab-api-session";
 import { syncFreeListingFeeWaivers } from "@/lib/listing-fee";
+import { dashboardTabPrismaErrorMessage } from "@/lib/prisma-missing-relation";
 
 export async function GET() {
   try {
@@ -26,6 +27,10 @@ export async function GET() {
     });
   } catch (e) {
     console.error("[api/dashboard/listings]", e);
-    return NextResponse.json({ error: "load_failed" }, { status: 500 });
+    const detail = dashboardTabPrismaErrorMessage(e);
+    return NextResponse.json(
+      { error: detail ?? "load_failed" },
+      { status: 500 },
+    );
   }
 }

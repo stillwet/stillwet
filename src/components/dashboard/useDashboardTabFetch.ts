@@ -26,9 +26,27 @@ export type DashboardTabLoadedFlags = {
 
 type TabFetchId = keyof DashboardTabLoadedFlags;
 
+class DashboardTabFetchError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DashboardTabFetchError";
+  }
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
   const r = await fetch(url, { credentials: "same-origin" });
-  if (!r.ok) throw new Error(String(r.status));
+  if (!r.ok) {
+    let detail = "";
+    try {
+      const j = (await r.json()) as { error?: string };
+      detail = j.error?.trim() ?? "";
+    } catch {
+      /* ignore */
+    }
+    throw new DashboardTabFetchError(
+      detail && detail !== "load_failed" ? detail : `Request failed (${r.status}).`,
+    );
+  }
   return r.json() as Promise<T>;
 }
 
@@ -160,8 +178,12 @@ export function useDashboardTabFetch(options: {
             );
             markLoaded("requestListingCatalog");
           }
-        } catch {
-          setTabLoadError("Could not load this tab. Try again.");
+        } catch (e) {
+          const msg =
+            e instanceof DashboardTabFetchError
+              ? e.message
+              : "Could not load this tab. Try again.";
+          setTabLoadError(msg);
           setFailedTabs((f) => ({ ...f, [tab]: true }));
           markLoaded(tab);
         } finally {

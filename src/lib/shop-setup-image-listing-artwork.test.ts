@@ -17,7 +17,7 @@ describe("prepareListingRequestArtworkForStorage", () => {
       .png()
       .toBuffer();
 
-    const result = await prepareListingRequestArtworkForStorage(input, 15 * 1024 * 1024, 120, 80);
+    const result = await prepareListingRequestArtworkForStorage(input, 10 * 1024 * 1024, 120, 80);
     assert.ok(result);
     const dims = await widthHeightPxFromImageBuffer(result!.body);
     assert.deepEqual(dims, { w: 120, h: 80 });

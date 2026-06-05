@@ -2,7 +2,9 @@
 
 import { CreatorGiftFulfillmentMode, CreatorGiftPurchaseStatus } from "@/generated/prisma/enums";
 import { verifyGiftRecipientShop } from "@/actions/gift-creator-shop-search";
+import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { SHOP_SETUP_FEE_CENTS, SHOP_SETUP_FEE_LABEL } from "@/lib/creator-gift-codes";
+import { creatorGiftMockSessionId } from "@/lib/creator-gift-mock-checkout";
 import { normalizeGiftFromName } from "@/lib/creator-gift-notices";
 import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
@@ -244,6 +246,19 @@ export async function startCreatorGiftCheckout(
 
   try {
     const appBase = base.replace(/\/$/, "");
+
+    if (isMockCheckoutEnabled()) {
+      const mockSessionId = creatorGiftMockSessionId(purchase.id);
+      await prisma.creatorGiftPurchase.update({
+        where: { id: purchase.id },
+        data: { stripeCheckoutSessionId: mockSessionId },
+      });
+      return {
+        ok: true,
+        url: `${appBase}/gift-creator/success?mode=setup&session_id=${encodeURIComponent(mockSessionId)}`,
+      };
+    }
+
     const lineItems: CheckoutLineItem[] = [
       {
         quantity: 1,
@@ -352,6 +367,19 @@ export async function startCreatorGiftExistingShopCheckout(
 
   try {
     const appBase = base.replace(/\/$/, "");
+
+    if (isMockCheckoutEnabled()) {
+      const mockSessionId = creatorGiftMockSessionId(purchase.id);
+      await prisma.creatorGiftPurchase.update({
+        where: { id: purchase.id },
+        data: { stripeCheckoutSessionId: mockSessionId },
+      });
+      return {
+        ok: true,
+        url: `${appBase}/gift-creator/success?mode=direct&shop=${encodeURIComponent(shopResult.shop.slug)}&session_id=${encodeURIComponent(mockSessionId)}`,
+      };
+    }
+
     const lineItems = buildExistingShopLineItems(options, processingLine);
 
     const session = await getStripe().checkout.sessions.create({

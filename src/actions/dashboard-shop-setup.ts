@@ -71,7 +71,10 @@ import type { ShopSocialLinksRecord } from "@/lib/shop-social-links";
 import { revalidatePublicStorefront } from "@/lib/revalidate-public-storefront";
 import { plainTextNoUrlsValidationError } from "@/lib/plain-text-no-urls";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
-import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors";
+import {
+  LISTING_UPLOAD_CRASH_ERROR,
+  listingArtworkServerProcessingError,
+} from "@/lib/listing-request-submit-errors";
 
 const WELCOME_MAX = 280;
 const STOREFRONT_ITEM_BLURB_MAX = 280;
@@ -774,9 +777,14 @@ export async function submitFirstListingSetup(
       requestImageKey: uploadedRequestImageKey,
       requestImageUrl: uploadedRequestImageUrl,
     });
+    const msg = e instanceof Error ? e.message : String(e);
+    const imageProcessingFailure =
+      /memory|alloc|heap|ENOMEM|process out of|sharp|vips|image exceeds pixel limit/i.test(msg);
     return {
       ok: false,
-      error: LISTING_UPLOAD_CRASH_ERROR,
+      error: imageProcessingFailure
+        ? listingArtworkServerProcessingError(artworkStoredMaxMb)
+        : LISTING_UPLOAD_CRASH_ERROR,
     };
   }
 }
