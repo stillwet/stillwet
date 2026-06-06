@@ -4,6 +4,10 @@ import { redirect } from "next/navigation";
 import { getStripe } from "@/lib/stripe";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { normalizeSupportTipUsdToCents } from "@/lib/support-site";
+import {
+  buyerPaymentProcessingFeeCents,
+  stripeCheckoutPaymentProcessingLineItem,
+} from "@/lib/stripe-card-processing-fee";
 
 /**
  * Starts a one-time Stripe Checkout for a voluntary site tip (platform revenue, not a shop payout).
@@ -23,6 +27,8 @@ export async function startSupportSiteCheckout(formData: FormData) {
   const cents = normalizeSupportTipUsdToCents(formData.get("tipUsd"));
   if (cents == null) redirect("/?support=invalid");
 
+  const processingLine = stripeCheckoutPaymentProcessingLineItem({ subtotalCents: cents });
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -38,9 +44,12 @@ export async function startSupportSiteCheckout(formData: FormData) {
           },
         },
       },
+      ...(processingLine ? [processingLine] : []),
     ],
     metadata: {
       kind: "support_tip",
+      subtotalCents: String(cents),
+      paymentProcessingCents: String(buyerPaymentProcessingFeeCents({ subtotalCents: cents })),
     },
     success_url: `${base.replace(/\/$/, "")}/support-thanks`,
     cancel_url: `${base.replace(/\/$/, "")}/?support=cancelled`,

@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { SHOP_NEW_SALE_NOTICE_KIND, shopNewSaleNoticeBody } from "@/lib/shop-new-sale-notice-content";
 import { prisma } from "@/lib/prisma";
+import { invalidateShopSalesDashboardSnapshot } from "@/lib/shop-sales-dashboard-snapshot";
 
 export { SHOP_NEW_SALE_NOTICE_KIND, shopNewSaleNoticeBody } from "@/lib/shop-new-sale-notice-content";
 
@@ -14,7 +15,10 @@ export async function notifyShopNewSale(args: {
     where: { shopId, kind: SHOP_NEW_SALE_NOTICE_KIND, relatedOrderId: orderId },
     select: { id: true },
   });
-  if (existing) return;
+  if (existing) {
+    await invalidateShopSalesDashboardSnapshot(shopId);
+    return;
+  }
 
   try {
     await prisma.shopOwnerNotice.create({
@@ -25,6 +29,7 @@ export async function notifyShopNewSale(args: {
         relatedOrderId: orderId,
       },
     });
+    await invalidateShopSalesDashboardSnapshot(shopId);
     revalidatePath("/dashboard");
   } catch (e) {
     console.warn("[notifyShopNewSale]", shopId, orderId, e);

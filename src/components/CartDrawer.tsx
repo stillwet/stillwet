@@ -11,7 +11,7 @@ const DRAWER_SEED: CartCheckoutState = {
   taxCents: null,
   estimatedTotalCents: null,
   estimatedSalesTaxRate: null,
-  stripeTaxBuyerFeeEnabled: false,
+  paymentProcessingIncludeTaxService: false,
   buyerCheckoutDisabled: false,
 };
 

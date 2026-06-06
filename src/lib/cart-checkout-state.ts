@@ -4,10 +4,9 @@ import {
   estimatedTaxCents,
   parseEstimatedSalesTaxRate,
 } from "@/lib/checkout-estimates";
-import {
-  buyerStripeTaxServiceFeeCents,
-  isStripeTaxBuyerFeePassThroughEnabled,
-} from "@/lib/stripe-tax-buyer-fee";
+import { buyerPaymentProcessingFeeCents } from "@/lib/stripe-card-processing-fee";
+import { isStripeCheckoutAutomaticTaxEnabled } from "@/lib/stripe-checkout-tax";
+import { isStripeTaxBuyerFeePassThroughEnabled } from "@/lib/stripe-tax-buyer-fee";
 import { cartRowProductHref, loadActiveCartRows } from "@/lib/cart-rows-active";
 
 export type CartCheckoutLine = {
@@ -31,8 +30,8 @@ export type CartCheckoutState = {
   taxCents: number | null;
   estimatedTotalCents: number | null;
   estimatedSalesTaxRate: number | null;
-  /** When true, cart shows a 0.5% sales tax processing line (Stripe Tax pass-through). */
-  stripeTaxBuyerFeeEnabled: boolean;
+  /** When true, Payment Processing includes the Stripe Tax service pass-through. */
+  paymentProcessingIncludeTaxService: boolean;
   /** When true, cart UI disables payment; {@link startCheckout} rejects on the server. */
   buyerCheckoutDisabled: boolean;
 };
@@ -42,15 +41,17 @@ export async function loadCartCheckoutState(): Promise<CartCheckoutState> {
   const shippingCents = getShippingFlatCents();
   const rate = parseEstimatedSalesTaxRate();
   const taxCents = estimatedTaxCents(subtotal, rate);
-  const stripeTaxBuyerFeeEnabled = isStripeTaxBuyerFeePassThroughEnabled();
-  const stripeTaxServiceFeeCents = buyerStripeTaxServiceFeeCents({
+  const paymentProcessingIncludeTaxService =
+    isStripeCheckoutAutomaticTaxEnabled() && isStripeTaxBuyerFeePassThroughEnabled();
+  const paymentProcessingCents = buyerPaymentProcessingFeeCents({
     subtotalCents: subtotal,
     shippingCents,
     tipCents: 0,
+    includeTaxService: paymentProcessingIncludeTaxService,
   });
   const estimatedTotalCents =
     taxCents != null
-      ? subtotal + shippingCents + taxCents + stripeTaxServiceFeeCents
+      ? subtotal + shippingCents + taxCents + paymentProcessingCents
       : null;
   return {
     lines: rows.map((r) => ({
@@ -71,7 +72,7 @@ export async function loadCartCheckoutState(): Promise<CartCheckoutState> {
     taxCents,
     estimatedTotalCents,
     estimatedSalesTaxRate: rate,
-    stripeTaxBuyerFeeEnabled,
+    paymentProcessingIncludeTaxService,
     buyerCheckoutDisabled: isStorefrontBuyerCheckoutDisabled(),
   };
 }

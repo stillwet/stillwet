@@ -12,6 +12,7 @@ import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import { getShopOwnerSession } from "@/lib/session";
 import { paymentIntentStartErrorMessage } from "@/lib/payment-intent-start-error";
 import { getStripe } from "@/lib/stripe";
+import { buyerPaymentProcessingFeeCents } from "@/lib/stripe-card-processing-fee";
 
 async function requireShopOwner() {
   const session = await getShopOwnerSession();
@@ -50,11 +51,15 @@ export async function startShopFlairAccessPaymentIntent(): Promise<StartShopFlai
     };
   }
 
+  const subtotalCents = SHOP_FLAIR_ACCESS_PRICE_CENTS;
+  const paymentProcessingCents = buyerPaymentProcessingFeeCents({ subtotalCents });
+  const chargeCents = subtotalCents + paymentProcessingCents;
+
   const purchase = await prisma.shopFlairPurchase.create({
     data: {
       shopId: shop.id,
       shopUserId: user.id,
-      amountCents: SHOP_FLAIR_ACCESS_PRICE_CENTS,
+      amountCents: chargeCents,
       currency: "usd",
       status: ShopFlairPurchaseStatus.pending,
     },
@@ -63,14 +68,16 @@ export async function startShopFlairAccessPaymentIntent(): Promise<StartShopFlai
   try {
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: SHOP_FLAIR_ACCESS_PRICE_CENTS,
+      amount: chargeCents,
       currency: "usd",
       payment_method_types: ["card"],
       metadata: {
         kind: "shop_flair_access",
         purchaseId: purchase.id,
         shopId: shop.id,
-        amountCents: String(SHOP_FLAIR_ACCESS_PRICE_CENTS),
+        subtotalCents: String(subtotalCents),
+        paymentProcessingCents: String(paymentProcessingCents),
+        amountCents: String(chargeCents),
       },
     });
 

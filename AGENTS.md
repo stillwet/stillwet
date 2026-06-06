@@ -27,6 +27,10 @@ AI agents **must not** perform destructive or data-mutating database operations 
 
 If it is unclear whether the user authorized mutating a **real** database, **stop and ask** before running CLI commands, migrations, or scripts.
 
+## Free-tier stack (Vercel Hobby, free R2, Neon, Git)
+
+Design and ship for **free tiers** unless the user explicitly approves paid upgrades in chat. Vercel Hobby: **≤60s** functions, **≤1024 MB** memory — do not add Pro-only `vercel.json` function config without approval. Prefer Hobby-compatible fixes (presigned R2 upload, optimized serverless, warn before usage spikes). See `.cursor/rules/free-tier-stack.mdc`.
+
 ## Freshness vs speed
 
 Prioritize **fast loads** for marketing and browse surfaces. **Shopping-critical paths must stay accurate:**

@@ -53,3 +53,12 @@ export async function writeShopSalesDashboardSnapshot(
     update: { periodKey, payload: orders, builtAt: new Date() },
   });
 }
+
+/** Drop cached Sales tab data so the next load reflects a new paid order. */
+export async function invalidateShopSalesDashboardSnapshot(shopId: string): Promise<void> {
+  try {
+    await prisma.shopSalesDashboardSnapshot.deleteMany({ where: { shopId } });
+  } catch (e) {
+    console.warn("[salesSnapshot] invalidate failed", shopId, e);
+  }
+}

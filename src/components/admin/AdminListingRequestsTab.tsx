@@ -27,7 +27,7 @@ import {
   AdminListingRejectForm,
   AdminFreezeSubmitButton,
 } from "@/components/admin/AdminListingRequestActionButtons";
-import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
+import { formatDisplayedDate, formatDisplayedDateTime } from "@/lib/format-display-datetime";
 import { listingRequestArtworkAdminViewUrl } from "@/lib/listing-request-artwork-admin-url";
 
 export type ListingRequestTabRow = {
@@ -36,6 +36,8 @@ export type ListingRequestTabRow = {
   active: boolean;
   adminRemovedFromShopAt: string | null;
   updatedAt: string;
+  /** When the shop listing row was created (queue sort: oldest first). */
+  createdAt: string;
   requestStatus: ListingRequestStatus;
   requestItemName: string | null;
   storefrontItemBlurb: string | null;
@@ -65,9 +67,12 @@ export type ListingRequestTabRow = {
 type RequestsTabId = "new" | "fee";
 
 function sortRows(rows: ListingRequestTabRow[]): ListingRequestTabRow[] {
-  return [...rows].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  );
+  return [...rows].sort((a, b) => {
+    const byCreated =
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    if (byCreated !== 0) return byCreated;
+    return a.id.localeCompare(b.id);
+  });
 }
 
 export type PrintifyCatalogPickEntry = {
@@ -718,7 +723,9 @@ function ListingRequestCard({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <p className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               <span className="font-medium">{r.shop.displayName}</span>
-              <span className="font-mono text-xs text-zinc-500">/s/{r.shop.slug}</span>
+              <time dateTime={r.createdAt} className="text-xs tabular-nums text-zinc-500">
+                {formatDisplayedDate(r.createdAt)}
+              </time>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide ${adminQueueStatusChipClass(r.requestStatus)}`}
               >

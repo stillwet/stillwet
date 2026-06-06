@@ -23,7 +23,7 @@ import {
 import { getStripe } from "@/lib/stripe";
 import {
   buyerCheckoutTotalCents,
-  stripeCheckoutProcessingFeeLineItem,
+  stripeCheckoutPaymentProcessingLineItem,
 } from "@/lib/stripe-card-processing-fee";
 
 export type StartCreatorGiftCheckoutResult =
@@ -144,7 +144,7 @@ function existingShopMerchandiseSubtotalCents(
 
 function buildExistingShopLineItems(
   options: ReturnType<typeof parseExistingShopGiftOptions>,
-  processingLine: ReturnType<typeof stripeCheckoutProcessingFeeLineItem>,
+  processingLine: ReturnType<typeof stripeCheckoutPaymentProcessingLineItem>,
 ): CheckoutLineItem[] {
   const lineItems: CheckoutLineItem[] = [];
   const { listingPack, googlePack, promotionKind, promotionCredits, includeShopFlair } = options;
@@ -230,7 +230,9 @@ export async function startCreatorGiftCheckout(
 
   const merchandiseSubtotalCents = SHOP_SETUP_FEE_CENTS;
   const checkoutTotalCents = buyerCheckoutTotalCents(merchandiseSubtotalCents);
-  const processingLine = stripeCheckoutProcessingFeeLineItem(merchandiseSubtotalCents);
+  const processingLine = stripeCheckoutPaymentProcessingLineItem({
+    subtotalCents: merchandiseSubtotalCents,
+  });
 
   const purchase = await prisma.creatorGiftPurchase.create({
     data: {
@@ -341,7 +343,9 @@ export async function startCreatorGiftExistingShopCheckout(
   }
 
   const checkoutTotalCents = buyerCheckoutTotalCents(merchandiseSubtotalCents);
-  const processingLine = stripeCheckoutProcessingFeeLineItem(merchandiseSubtotalCents);
+  const processingLine = stripeCheckoutPaymentProcessingLineItem({
+    subtotalCents: merchandiseSubtotalCents,
+  });
   const { listingPack, googlePack, promotionKind, promotionCredits, includeShopFlair } = options;
 
   const purchase = await prisma.creatorGiftPurchase.create({

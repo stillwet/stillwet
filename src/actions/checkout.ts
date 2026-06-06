@@ -19,9 +19,10 @@ import {
   stripeCheckoutAutomaticTax,
 } from "@/lib/stripe-checkout-tax";
 import {
-  buyerStripeTaxServiceFeeCents,
-  stripeCheckoutTaxServiceFeeLineItem,
-} from "@/lib/stripe-tax-buyer-fee";
+  buyerPaymentProcessingFeeCents,
+  stripeCheckoutPaymentProcessingLineItem,
+} from "@/lib/stripe-card-processing-fee";
+import { isStripeTaxBuyerFeePassThroughEnabled } from "@/lib/stripe-tax-buyer-fee";
 import { FulfillmentType, OrderProceedsRouting, OrderStatus } from "@/generated/prisma/enums";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
@@ -205,19 +206,22 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
 
   const ship = platformFlatShippingCents();
   const automaticTaxEnabled = isStripeCheckoutAutomaticTaxEnabled();
-  const stripeTaxServiceFeeCents = buyerStripeTaxServiceFeeCents({
+  const includeTaxService =
+    automaticTaxEnabled && isStripeTaxBuyerFeePassThroughEnabled();
+  const paymentProcessingCents = buyerPaymentProcessingFeeCents({
     subtotalCents,
     shippingCents: ship,
     tipCents,
+    includeTaxService,
   });
-  const totalCents = subtotalCents + tipCents + ship + stripeTaxServiceFeeCents;
+  const totalCents = subtotalCents + tipCents + ship + paymentProcessingCents;
 
   const stripeLineItems: Array<{
     quantity: number;
     price_data: {
       currency: "usd";
       unit_amount: number;
-      tax_behavior: "exclusive";
+      tax_behavior?: "exclusive";
       product_data: {
         name: string;
         description?: string;
@@ -261,14 +265,15 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
     });
   }
 
-  const taxServiceFeeLine = stripeCheckoutTaxServiceFeeLineItem({
+  const paymentProcessingLine = stripeCheckoutPaymentProcessingLineItem({
     subtotalCents,
     shippingCents: ship,
     tipCents,
-    automaticTaxEnabled,
+    includeTaxService,
+    exclusiveTax: true,
   });
-  if (taxServiceFeeLine) {
-    stripeLineItems.push(taxServiceFeeLine);
+  if (paymentProcessingLine) {
+    stripeLineItems.push(paymentProcessingLine);
   }
 
   const order = await prisma.$transaction(async (tx) => {
@@ -360,7 +365,7 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
     checkoutApplicationFeeCents({
       merchandiseApplicationFeeCents,
       tipCents,
-    }) + (useStripeConnect ? stripeTaxServiceFeeCents : 0);
+    }) + (useStripeConnect ? paymentProcessingCents : 0);
   const connectAccountId = useStripeConnect ? shopRecord!.stripeConnectAccountId! : null;
 
   let checkoutSession;
@@ -398,7 +403,7 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
                 orderId: order.id,
                 tipCents: String(tipCents),
                 platformTipFeeCents: String(platformTipFeeCents),
-                stripeTaxServiceFeeCents: String(stripeTaxServiceFeeCents),
+                paymentProcessingCents: String(paymentProcessingCents),
               },
               transfer_data: {
                 destination: shopRecord.stripeConnectAccountId!,

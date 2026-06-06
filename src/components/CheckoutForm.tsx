@@ -7,14 +7,14 @@ import {
   MAX_CHECKOUT_TIP_CENTS,
   clampCheckoutTipCents,
 } from "@/lib/checkout-tip";
-import { buyerStripeTaxServiceFeeCents } from "@/lib/stripe-tax-buyer-fee";
+import { buyerPaymentProcessingFeeCents } from "@/lib/stripe-card-processing-fee";
 import { STOREFRONT_BUYER_CHECKOUT_DISABLED_MESSAGE } from "@/lib/storefront-buyer-checkout";
 
 type Props = {
   subtotalCents: number;
   shippingCents: number;
   estimatedSalesTaxRate: number | null;
-  stripeTaxBuyerFeeEnabled?: boolean;
+  paymentProcessingIncludeTaxService?: boolean;
   buyerCheckoutDisabled?: boolean;
 };
 
@@ -29,7 +29,7 @@ export function CheckoutForm({
   subtotalCents,
   shippingCents,
   estimatedSalesTaxRate,
-  stripeTaxBuyerFeeEnabled = false,
+  paymentProcessingIncludeTaxService = false,
   buyerCheckoutDisabled = false,
 }: Props) {
   const [tipInput, setTipInput] = useState("0.00");
@@ -49,14 +49,15 @@ export function CheckoutForm({
       : estimatedSalesTaxRate != null
         ? 0
         : null;
-  const stripeTaxServiceFeeCents = buyerStripeTaxServiceFeeCents({
-    enabled: stripeTaxBuyerFeeEnabled,
+  const paymentProcessingCents = buyerPaymentProcessingFeeCents({
     subtotalCents,
     shippingCents,
     tipCents,
+    includeTaxService: paymentProcessingIncludeTaxService,
   });
-  const grandTotalCents =
-    subtotalCents + tipCents + shippingCents + stripeTaxServiceFeeCents + (taxCents ?? 0);
+  const preTaxTotalCents =
+    subtotalCents + tipCents + shippingCents + paymentProcessingCents;
+  const grandTotalCents = preTaxTotalCents + (taxCents ?? 0);
 
   useEffect(() => {
     if (!tipMaxNotice) return;
@@ -175,10 +176,10 @@ export function CheckoutForm({
               <span className="text-right text-xs text-zinc-500 italic">Calculated at checkout</span>
             )}
           </div>
-          {stripeTaxServiceFeeCents > 0 ? (
+          {paymentProcessingCents > 0 ? (
             <div className="mt-2 flex justify-between">
-              <span>Sales tax processing</span>
-              <span className="text-zinc-200">{formatPrice(stripeTaxServiceFeeCents)}</span>
+              <span>Payment Processing</span>
+              <span className="text-zinc-200">{formatPrice(paymentProcessingCents)}</span>
             </div>
           ) : null}
           <div className="mt-2 flex items-center justify-between gap-3">
@@ -216,7 +217,7 @@ export function CheckoutForm({
             <span>
               {estimatedSalesTaxRate != null
                 ? formatPrice(grandTotalCents)
-                : `${formatPrice(subtotalCents + tipCents + shippingCents + stripeTaxServiceFeeCents)} + tax`}
+                : `${formatPrice(preTaxTotalCents)} + tax`}
             </span>
           </div>
           {!buyerCheckoutDisabled ? (

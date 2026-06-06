@@ -18,3 +18,15 @@ export function formatDisplayedDateTime(iso: string | number | Date | null | und
   });
   return `${datePart} ${timePart}`;
 }
+
+/** Date only (no time), same MM/DD/YY style as {@link formatDisplayedDateTime}. */
+export function formatDisplayedDate(iso: string | number | Date | null | undefined): string {
+  if (iso == null || iso === "") return "—";
+  const d = iso instanceof Date ? iso : new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "2-digit",
+  });
+}

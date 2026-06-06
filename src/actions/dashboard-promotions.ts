@@ -37,6 +37,11 @@ import {
 } from "@/lib/promotions";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import {
+  buyerCheckoutTotalCents,
+  buyerPaymentProcessingFeeCents,
+  stripeCheckoutPaymentProcessingLineItem,
+} from "@/lib/stripe-card-processing-fee";
+import {
   countPromotionKindPaidSlotsThreePeriodsCached,
   purchaseOfferForChosenPlacementOffset,
   resolveHotItemPlacementOfferWithCounts,
@@ -220,8 +225,13 @@ export async function startPromotionCheckoutSession(input: {
 
   const priced = await resolvePromotionPricing(kind, placementPeriodOffset);
   if (!priced.ok) return { ok: false, error: priced.error };
-  const { amountCents, eligibleFrom } = priced;
-  if (amountCents <= 0) return { ok: false, error: "Invalid promotion price." };
+  const { amountCents: merchandiseSubtotalCents, eligibleFrom } = priced;
+  if (merchandiseSubtotalCents <= 0) return { ok: false, error: "Invalid promotion price." };
+
+  const checkoutTotalCents = buyerCheckoutTotalCents(merchandiseSubtotalCents);
+  const processingLine = stripeCheckoutPaymentProcessingLineItem({
+    subtotalCents: merchandiseSubtotalCents,
+  });
 
   if (!promotionStripePaymentsAvailable()) {
     return {
@@ -241,7 +251,7 @@ export async function startPromotionCheckoutSession(input: {
       shopUserId: user.id,
       kind,
       shopListingId: null,
-      amountCents,
+      amountCents: checkoutTotalCents,
       currency: "usd",
       status: PromotionPurchaseStatus.pending,
       eligibleFrom,
@@ -259,13 +269,14 @@ export async function startPromotionCheckoutSession(input: {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: amountCents,
+            unit_amount: merchandiseSubtotalCents,
             product_data: {
               name: promotionKindLabel(kind),
               description: "Shop promotion credit (Pacific placement period).",
             },
           },
         },
+        ...(processingLine ? [processingLine] : []),
       ],
       metadata: {
         kind: "promotion_checkout",
@@ -273,7 +284,8 @@ export async function startPromotionCheckoutSession(input: {
         shopId: shop.id,
         promotionKind: kind,
         placementPeriodOffset: String(placementPeriodOffset),
-        amountCents: String(amountCents),
+        subtotalCents: String(merchandiseSubtotalCents),
+        amountCents: String(checkoutTotalCents),
         ...(eligibleFrom ? { eligibleFromIso: eligibleFrom.toISOString() } : {}),
       },
       success_url: `${appBase}${dashboardPromotionsUrl({ promo: "ok" })}`,
@@ -336,8 +348,13 @@ export async function startPromotionPurchaseIntent(input: {
   const placementPeriodOffset = normalizePlacementPeriodOffsetFromClient(input.placementPeriodOffset);
   const priced = await resolvePromotionPricing(kind, placementPeriodOffset);
   if (!priced.ok) return { ok: false, error: priced.error };
-  const { amountCents, eligibleFrom } = priced;
-  if (amountCents <= 0) return { ok: false, error: "Invalid promotion price." };
+  const { amountCents: merchandiseSubtotalCents, eligibleFrom } = priced;
+  if (merchandiseSubtotalCents <= 0) return { ok: false, error: "Invalid promotion price." };
+
+  const checkoutTotalCents = buyerCheckoutTotalCents(merchandiseSubtotalCents);
+  const paymentProcessingCents = buyerPaymentProcessingFeeCents({
+    subtotalCents: merchandiseSubtotalCents,
+  });
 
   if (!promotionStripePaymentsAvailable()) {
     return {
@@ -354,7 +371,7 @@ export async function startPromotionPurchaseIntent(input: {
       shopUserId: user.id,
       kind,
       shopListingId,
-      amountCents,
+      amountCents: checkoutTotalCents,
       currency: "usd",
       status: PromotionPurchaseStatus.pending,
       eligibleFrom,
@@ -364,7 +381,7 @@ export async function startPromotionPurchaseIntent(input: {
   try {
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountCents,
+      amount: checkoutTotalCents,
       currency: "usd",
       payment_method_types: ["card"],
       metadata: {
@@ -373,7 +390,9 @@ export async function startPromotionPurchaseIntent(input: {
         shopId: shop.id,
         promotionKind: kind,
         ...(shopListingId ? { shopListingId } : {}),
-        amountCents: String(amountCents),
+        subtotalCents: String(merchandiseSubtotalCents),
+        paymentProcessingCents: String(paymentProcessingCents),
+        amountCents: String(checkoutTotalCents),
         ...(eligibleFrom ? { eligibleFromIso: eligibleFrom.toISOString() } : {}),
       },
     });

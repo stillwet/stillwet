@@ -9,6 +9,8 @@ import {
 } from "@/lib/checkout-mock";
 import { clearCart } from "@/actions/cart";
 import { OrderStatus } from "@/generated/prisma/enums";
+import { fulfillMerchandiseOrderFromCheckoutSession } from "@/lib/order-checkout-fulfillment";
+import { fulfillPaidOrderPrintify } from "@/lib/order-printify-fulfillment";
 
 function checkoutSessionShouldClearCart(session: {
   status: string | null;
@@ -35,6 +37,16 @@ export async function clearCartAfterPaidSession(sessionId: string) {
 
     const session = await getStripe().checkout.sessions.retrieve(trimmed);
     if (checkoutSessionShouldClearCart(session)) {
+      const orderId =
+        typeof session.metadata?.orderId === "string" ? session.metadata.orderId.trim() : "";
+      const newlyPaid = orderId
+        ? await fulfillMerchandiseOrderFromCheckoutSession(trimmed)
+        : false;
+      if (newlyPaid && orderId) {
+        void fulfillPaidOrderPrintify(orderId).catch((e) => {
+          console.error("[clearCartAfterPaidSession] Printify fulfillment failed", e);
+        });
+      }
       await clearCart();
       return;
     }

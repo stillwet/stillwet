@@ -32,7 +32,7 @@ import { notifyShopFreeListingSlotsGranted } from "@/lib/shop-free-listing-grant
 import { getStripe } from "@/lib/stripe";
 import {
   buyerCheckoutTotalCents,
-  stripeCheckoutProcessingFeeLineItem,
+  stripeCheckoutPaymentProcessingLineItem,
 } from "@/lib/stripe-card-processing-fee";
 import { SHOP_REACTIVATION_FEE_CENTS, SHOP_REACTIVATION_FEE_LABEL } from "@/lib/shop-inactivity-policy";
 
@@ -54,11 +54,16 @@ async function startReactivationCheckoutForUser(user: {
   if (!base) {
     return { error: "App URL is not configured. Set NEXT_PUBLIC_APP_URL before taking reactivation payments." };
   }
+  const reactivationSubtotalCents = SHOP_REACTIVATION_FEE_CENTS;
+  const checkoutTotalCents = buyerCheckoutTotalCents(reactivationSubtotalCents);
+  const processingLine = stripeCheckoutPaymentProcessingLineItem({
+    subtotalCents: reactivationSubtotalCents,
+  });
   const purchase = await prisma.shopReactivationPurchase.create({
     data: {
       shopId: user.shopId,
       shopUserId: user.id,
-      amountCents: SHOP_REACTIVATION_FEE_CENTS,
+      amountCents: checkoutTotalCents,
       currency: "usd",
       status: ShopReactivationPurchaseStatus.pending,
     },
@@ -81,13 +86,15 @@ async function startReactivationCheckoutForUser(user: {
             },
           },
         },
+        ...(processingLine ? [processingLine] : []),
       ],
       metadata: {
         kind: "shop_reactivation",
         purchaseId: purchase.id,
         shopId: user.shopId,
         shopUserId: user.id,
-        amountCents: String(SHOP_REACTIVATION_FEE_CENTS),
+        subtotalCents: String(reactivationSubtotalCents),
+        amountCents: String(checkoutTotalCents),
       },
       success_url: `${appBase}/dashboard/reactivate/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBase}/dashboard/login?reactivate=cancel`,
@@ -315,7 +322,7 @@ export async function createShopFromSignup(
   });
   const setupSubtotalCents = SHOP_SETUP_FEE_CENTS;
   const checkoutTotalCents = buyerCheckoutTotalCents(setupSubtotalCents);
-  const processingLine = stripeCheckoutProcessingFeeLineItem(setupSubtotalCents);
+  const processingLine = stripeCheckoutPaymentProcessingLineItem({ subtotalCents: setupSubtotalCents });
 
   const purchase = await prisma.shopSetupFeePurchase.create({
     data: {

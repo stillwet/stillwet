@@ -68,7 +68,7 @@ export function CreateShopForm() {
               Pay ${(SHOP_SETUP_FEE_CENTS / 100).toFixed(2)} shop creation fee
             </span>
             <span className="mt-0.5 block text-xs text-zinc-500">
-              Card processing fee is added at Stripe checkout.
+              Payment processing fee is added at checkout.
             </span>
           </span>
         </label>

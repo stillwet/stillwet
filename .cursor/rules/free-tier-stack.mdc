@@ -1,0 +1,35 @@
+---
+description: Design for Vercel Hobby, free R2, free Neon, free Git — ask before exceeding limits or spiking usage
+alwaysApply: true
+---
+
+# Free-tier stack — design within limits
+
+Production runs on **free tiers only** unless the user explicitly approves paid upgrades **in this chat**:
+
+| Service | Plan | Agent assumptions |
+|---------|------|-------------------|
+| Vercel | **Hobby** | Function **≤60s**, memory **≤1024 MB**; no `vercel.json` `functions` overrides above Hobby caps without approval |
+| Cloudflare R2 | **Free** | Prefer presigned PUT/GET; avoid shipping large binaries through Vercel; watch storage + Class A/B ops |
+| Neon | **Free** | Minimize queries, connection churn, and heavy cron/backfill; no full-table scans without approval |
+| GitHub | **Free** | Standard git; no paid Actions minutes assumptions |
+| Google Cloud | **$0** | See `google-cloud-budget-zero.mdc` |
+
+## Before changing infra or config
+
+- **Do not** add Vercel Pro/Enterprise-only settings (`memory` >1024, `maxDuration` >60 on Hobby, Fluid-only features) without explaining the limit conflict and getting approval.
+- **Do not** suggest upgrading to Pro as the default fix — prefer Hobby-compatible code paths first.
+- **Do** validate `vercel.json`, route `maxDuration`, cron schedules, and env flags against Hobby caps before committing.
+
+## Compute and cost spikes — optimize or warn
+
+When adding features that increase **function invocations**, **CPU time**, **Neon compute**, **R2 operations**, or **egress**:
+
+1. Prefer the cheapest path (client-side work, presigned R2 upload, same-origin streaming proxies, snapshots/caches per `AGENTS.md` freshness tiers).
+2. Keep heavy image work off Vercel when possible (**listing artwork v2**: direct-to-R2 source, bake only the cropped print).
+3. **Warn the user in chat** if a change could noticeably spike usage (new cron, per-request full-table job, unbounded polling, passing multi‑MB files through serverless, blanket-sized Sharp on a 60s/1GB function).
+4. For artwork: assume **Hobby bake limits** — design and test keychain/small prints on Hobby; large blankets may need v2 upload + optimized pipeline, not a paid tier.
+
+## Database
+
+Follow `database-agent-safety.mdc` for mutations. On free Neon, also avoid migrations or queries that grow storage/compute unexpectedly without calling it out.

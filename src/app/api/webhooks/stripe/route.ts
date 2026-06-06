@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { after } from "next/server";
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { splitCheckoutTipCents } from "@/lib/checkout-tip";
 import { getStripe } from "@/lib/stripe";
+import { fulfillMerchandiseOrderFromCheckoutSession } from "@/lib/order-checkout-fulfillment";
 import { fulfillPaidOrderPrintify } from "@/lib/order-printify-fulfillment";
 import { Prisma } from "@/generated/prisma/client";
-import { OrderProceedsRouting, OrderStatus } from "@/generated/prisma/enums";
+import { OrderStatus } from "@/generated/prisma/enums";
 import { fulfillListingCreditPackPurchaseIfPending } from "@/lib/listing-credit-pack-fulfillment";
 import { fulfillShopFlairPurchaseIfPending } from "@/lib/shop-flair-fulfillment";
 import { fulfillShopGoogleShoppingPurchaseIfPending } from "@/lib/shop-google-shopping-fulfillment";
@@ -187,77 +187,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
   const orderId = session.metadata?.orderId;
   if (!orderId) return;
 
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { lines: { include: { product: true } } },
-  });
-  if (!order) return;
-
-  const stripe = getStripe();
-  const full = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ["customer_details"],
-  });
-
-  const email =
-    full.customer_details?.email ?? full.customer_email ?? session.customer_email ?? null;
-  const phone = full.customer_details?.phone ?? "";
-  const shipping = full.collected_information?.shipping_details;
-  const shipName = shipping?.name ?? "";
-  const addr = shipping?.address;
-
-  const paymentIntentId =
-    typeof full.payment_intent === "string"
-      ? full.payment_intent
-      : full.payment_intent?.id ?? null;
-
-  let orderNewlyPaid = false;
-  await prisma.$transaction(async (tx) => {
-    const updated = await tx.order.updateMany({
-      where: { id: orderId, status: OrderStatus.pending_payment },
-      data: {
-        status: OrderStatus.paid,
-        email,
-        stripePaymentIntentId: paymentIntentId,
-        shippingName: shipName || null,
-        shippingLine1: addr?.line1 ?? null,
-        shippingLine2: addr?.line2 ?? null,
-        shippingCity: addr?.city ?? null,
-        shippingState: addr?.state ?? null,
-        shippingPostal: addr?.postal_code ?? null,
-        shippingCountry: addr?.country ?? null,
-        shippingPhone: phone || null,
-      },
-    });
-
-    if ((updated?.count ?? 0) === 0) return;
-    orderNewlyPaid = true;
-
-    const merchandiseCents = order.lines.reduce(
-      (s, l) => s + l.unitPriceCents * l.quantity,
-      0,
-    );
-    const { shopTipCents } = splitCheckoutTipCents(order.tipCents);
-    const shopSalesIncrementCents =
-      order.proceedsRouting === OrderProceedsRouting.platform_inactivity_deactivated
-        ? 0
-        : merchandiseCents + shopTipCents;
-    if (order.shopId && shopSalesIncrementCents > 0) {
-      await tx.shop.update({
-        where: { id: order.shopId },
-        data: { totalSalesCents: { increment: shopSalesIncrementCents } },
-      });
-    }
-  });
-
-  if (
-    orderNewlyPaid &&
-    order.shopId &&
-    order.proceedsRouting !== OrderProceedsRouting.platform_inactivity_deactivated
-  ) {
-    const { notifyShopNewSale } = await import("@/lib/shop-new-sale-notice");
-    void notifyShopNewSale({ shopId: order.shopId, orderId });
-  }
-
+  const orderNewlyPaid = await fulfillMerchandiseOrderFromCheckoutSession(session.id);
   if (orderNewlyPaid) {
     after(async () => {
       try {

@@ -10,6 +10,9 @@ import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { prisma } from "@/lib/prisma";
 import { getShopOwnerSession } from "@/lib/session";
 import { getStripe } from "@/lib/stripe";
+import {
+  buyerPaymentProcessingFeeCents,
+} from "@/lib/stripe-card-processing-fee";
 
 async function requireShopOwner() {
   const session = await getShopOwnerSession();
@@ -48,13 +51,17 @@ export async function startListingCreditPackPaymentIntent(
     };
   }
 
+  const subtotalCents = pack.priceCents;
+  const paymentProcessingCents = buyerPaymentProcessingFeeCents({ subtotalCents });
+  const chargeCents = subtotalCents + paymentProcessingCents;
+
   const purchase = await prisma.listingCreditPackPurchase.create({
     data: {
       shopId: shop.id,
       shopUserId: user.id,
       packId: pack.id,
       creditsGranted: pack.credits,
-      amountCents: pack.priceCents,
+      amountCents: chargeCents,
       currency: "usd",
       status: ListingCreditPackPurchaseStatus.pending,
     },
@@ -63,7 +70,7 @@ export async function startListingCreditPackPaymentIntent(
   try {
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: pack.priceCents,
+      amount: chargeCents,
       currency: "usd",
       payment_method_types: ["card"],
       metadata: {
@@ -72,7 +79,9 @@ export async function startListingCreditPackPaymentIntent(
         shopId: shop.id,
         packId: pack.id,
         creditsGranted: String(pack.credits),
-        amountCents: String(pack.priceCents),
+        subtotalCents: String(subtotalCents),
+        paymentProcessingCents: String(paymentProcessingCents),
+        amountCents: String(chargeCents),
       },
     });
 

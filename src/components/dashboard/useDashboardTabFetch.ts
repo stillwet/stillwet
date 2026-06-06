@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { DashboardSupportChatPayload } from "@/lib/dashboard-scoped-data";
-import { pacificCalendarDateKey } from "@/lib/promotion-period-pacific";
 import type {
   DashboardListingRow,
   DashboardNoticeRow,
@@ -13,8 +12,6 @@ import type { ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { GroupedDashboardListing } from "@/lib/dashboard-legacy-baseline-listing-groups";
 import type { FreeListingRequestSlotsSummary } from "@/lib/marketplace-constants";
 import type { UnpaidPublicationFeeListingRow } from "@/lib/listing-fee-unpaid-rows";
-
-const SALES_PERIOD_STORAGE_KEY = "dashboard_sales_period_key";
 
 export type DashboardTabLoadedFlags = {
   listings: boolean;
@@ -48,24 +45,6 @@ async function fetchJson<T>(url: string): Promise<T> {
     );
   }
   return r.json() as Promise<T>;
-}
-
-function readSalesPeriodGate(): string | null {
-  if (typeof sessionStorage === "undefined") return null;
-  try {
-    return sessionStorage.getItem(SALES_PERIOD_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeSalesPeriodGate(periodKey: string) {
-  if (typeof sessionStorage === "undefined") return;
-  try {
-    sessionStorage.setItem(SALES_PERIOD_STORAGE_KEY, periodKey);
-  } catch {
-    /* ignore */
-  }
 }
 
 export function useDashboardTabFetch(options: {
@@ -114,10 +93,8 @@ export function useDashboardTabFetch(options: {
     async (tab: TabFetchId, options?: { force?: boolean }) => {
       if (!enabled) return;
 
-      if (tab === "orders" && !isPlatform) {
-        const today = pacificCalendarDateKey();
-        if (!options?.force && readSalesPeriodGate() === today && loadedFlags.orders) return;
-      } else if (!options?.force && loadedFlags[tab]) {
+      // Sales tab refetches each visit; server snapshot limits DB load unless invalidated after a sale.
+      if (tab !== "orders" && !options?.force && loadedFlags[tab]) {
         return;
       }
 
@@ -146,9 +123,6 @@ export function useDashboardTabFetch(options: {
             const data = await fetchJson<{ orders: DashboardPaidOrderRow[] }>("/api/dashboard/orders");
             setPaidOrders(data.orders);
             markLoaded("orders");
-            if (!isPlatform) {
-              writeSalesPeriodGate(pacificCalendarDateKey());
-            }
             return;
           }
           if (tab === "notifications") {

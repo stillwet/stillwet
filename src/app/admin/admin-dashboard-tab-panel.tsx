@@ -160,6 +160,7 @@ function buildListingRequestTabRowsFromLoaded(
       active: r.active,
       adminRemovedFromShopAt: r.adminRemovedFromShopAt?.toISOString() ?? null,
       updatedAt: r.updatedAt.toISOString(),
+      createdAt: r.createdAt.toISOString(),
       requestStatus: r.requestStatus,
       requestItemName: r.requestItemName,
       storefrontItemBlurb: r.storefrontItemBlurb,
@@ -525,7 +526,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
   if (adminSection === "main" && inventoryTab === "requests") {
     const listingRequestRows = await prisma.shopListing.findMany({
       where: listingRequestTabPrismaWhere,
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       take: 500,
       include: {
         shop: {

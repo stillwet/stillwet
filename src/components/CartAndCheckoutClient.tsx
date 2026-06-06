@@ -194,7 +194,7 @@ export function CartAndCheckoutClient({
           subtotalCents={subtotal}
           shippingCents={shippingCents}
           estimatedSalesTaxRate={state.estimatedSalesTaxRate}
-          stripeTaxBuyerFeeEnabled={state.stripeTaxBuyerFeeEnabled}
+          paymentProcessingIncludeTaxService={state.paymentProcessingIncludeTaxService}
           buyerCheckoutDisabled={state.buyerCheckoutDisabled}
         />
       </div>
