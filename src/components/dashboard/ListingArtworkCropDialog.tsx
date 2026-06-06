@@ -247,10 +247,20 @@ export function ListingArtworkCropDialog({
             onRotationChange={setRotation}
             onCropComplete={onCropComplete}
             onMediaLoaded={(mediaSize) => {
-              setMediaNatural({
-                width: mediaSize.naturalWidth,
-                height: mediaSize.naturalHeight,
-              });
+              void (async () => {
+                try {
+                  const bitmap = await createImageBitmap(sourceFile, {
+                    imageOrientation: "from-image",
+                  });
+                  setMediaNatural({ width: bitmap.width, height: bitmap.height });
+                  bitmap.close();
+                } catch {
+                  setMediaNatural({
+                    width: mediaSize.naturalWidth,
+                    height: mediaSize.naturalHeight,
+                  });
+                }
+              })();
             }}
             restrictPosition={false}
             minZoom={CROP_MIN_ZOOM}

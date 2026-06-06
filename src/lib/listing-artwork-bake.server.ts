@@ -4,7 +4,7 @@ import type { ListingArtworkCropPayload } from "@/lib/listing-artwork-crop-paylo
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 import {
-  listingArtworkServerProcessingError,
+  listingArtworkBakeFailureMessage,
 } from "@/lib/listing-request-submit-errors";
 import {
   listingRequestArtworkStoredMaxBytes,
@@ -24,9 +24,12 @@ import {
   isListingArtworkStagingKeyForShop,
   isListingRequestArtworkKeyForShop,
   loadListingArtworkStagingBuffer,
-  putPublicR2Object,
+  publicHttpsUrlForR2ObjectKey,
+  putR2ObjectBytes,
+  verifyPublicR2ObjectUrl,
 } from "@/lib/r2-upload";
-import { cropAndPrepareListingArtworkForStorage } from "@/lib/shop-setup-image";
+import { normalizeListingArtworkSourceBuffer } from "@/lib/listing-artwork-source-normalize.server";
+import { cropAndEncodeListingArtworkResult } from "@/lib/listing-artwork-server-crop";
 
 export type ListingArtworkBakeSuccess = {
   ok: true;
@@ -57,30 +60,40 @@ async function bakeListingArtworkFromBuffer(params: {
 }): Promise<ListingArtworkBakeResult> {
   const { shopId, sourceBuffer, cropPayload, printAreaW, printAreaH, letterboxFill, maxDecodePixels } =
     params;
+  const storedMaxBytes = listingRequestArtworkStoredMaxBytes();
+  const storedMaxMb = listingRequestArtworkStoredMaxMb();
 
-  let artwork: Awaited<ReturnType<typeof cropAndPrepareListingArtworkForStorage>>;
-  try {
-    artwork = await cropAndPrepareListingArtworkForStorage(
-      sourceBuffer,
-      cropPayload,
-      listingRequestArtworkStoredMaxBytes(),
-      printAreaW,
-      printAreaH,
-      letterboxFill,
-      maxDecodePixels,
-    );
-  } catch (e) {
-    console.error("[bakeListingArtworkFromBuffer] crop failed", { shopId, e });
-    return { ok: false, error: listingArtworkServerProcessingError(listingRequestArtworkStoredMaxMb()), status: 500 };
-  }
-
-  if (!artwork) {
+  if (sourceBuffer.length > listingRequestArtworkUploadMaxBytes()) {
     return {
       ok: false,
-      error: listingArtworkServerProcessingError(listingRequestArtworkStoredMaxMb()),
-      status: 500,
+      error: listingArtworkBakeFailureMessage("input_too_large", storedMaxMb),
+      status: 413,
     };
   }
+
+  const cropResult = await cropAndEncodeListingArtworkResult(
+    sourceBuffer,
+    cropPayload,
+    storedMaxBytes,
+    { letterboxFill, maxDecodePixels },
+  );
+  if (!cropResult.ok) {
+    console.warn("[bakeListingArtworkFromBuffer] crop/encode failed", {
+      shopId,
+      stage: cropResult.stage,
+      printAreaW,
+      printAreaH,
+      referenceSourceWidthPx: cropPayload.referenceSourceWidthPx,
+      referenceSourceHeightPx: cropPayload.referenceSourceHeightPx,
+    });
+    return {
+      ok: false,
+      error: listingArtworkBakeFailureMessage(cropResult.stage, storedMaxMb),
+      status: cropResult.stage === "decode_cap" ? 413 : 500,
+    };
+  }
+
+  const artwork = cropResult.encoded;
 
   if (printAreaW != null && printAreaH != null) {
     const outDims = await widthHeightPxFromImageBuffer(artwork.body);
@@ -97,17 +110,26 @@ async function bakeListingArtworkFromBuffer(params: {
 
   const outDims = await widthHeightPxFromImageBuffer(artwork.body);
   const requestImageKey = `shops/${shopId}/listing-request/${randomUUID()}.${artwork.fileExtension}`;
-  let publicUrl: string;
-  try {
-    publicUrl = await putPublicR2Object({
-      key: requestImageKey,
-      body: artwork.body,
-      contentType: artwork.contentType,
-    });
-  } catch (e) {
-    console.error("[bakeListingArtworkFromBuffer] R2 put failed", { shopId, requestImageKey, e });
-    return { ok: false, error: listingArtworkServerProcessingError(listingRequestArtworkStoredMaxMb()), status: 500 };
+  const put = await putR2ObjectBytes({
+    key: requestImageKey,
+    body: artwork.body,
+    contentType: artwork.contentType,
+  });
+  if (!put.ok) {
+    console.error("[bakeListingArtworkFromBuffer] R2 put failed", { shopId, requestImageKey, error: put.error });
+    return { ok: false, error: put.error, status: 500 };
   }
+
+  const publicUrl = publicHttpsUrlForR2ObjectKey(requestImageKey);
+  void verifyPublicR2ObjectUrl(publicUrl).then((reachable) => {
+    if (!reachable) {
+      console.warn("[bakeListingArtworkFromBuffer] public URL verify failed after bake", {
+        shopId,
+        requestImageKey,
+        publicUrl,
+      });
+    }
+  });
 
   return {
     ok: true,
@@ -157,7 +179,7 @@ export async function bakeListingArtworkFromSource(params: {
 
   const result = await bakeListingArtworkFromBuffer({
     shopId,
-    sourceBuffer: source,
+    sourceBuffer: await normalizeListingArtworkSourceBuffer(source),
     cropPayload: params.cropPayload,
     printAreaW: params.printAreaW,
     printAreaH: params.printAreaH,
@@ -209,9 +231,11 @@ export async function bakeListingArtworkFromStaging(params: {
     return { ok: false, error: listingArtworkUploadCapError(), status: 413 };
   }
 
+  const normalizedStaged = await normalizeListingArtworkSourceBuffer(staged);
+
   const result = await bakeListingArtworkFromBuffer({
     shopId,
-    sourceBuffer: staged,
+    sourceBuffer: normalizedStaged,
     cropPayload,
     printAreaW,
     printAreaH,

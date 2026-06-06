@@ -29,6 +29,20 @@ export type ListingArtworkEncodedPrint = {
   height: number;
 };
 
+export type ListingArtworkCropEncodeFailureStage =
+  | "input_too_large"
+  | "metadata"
+  | "decode_cap"
+  | "rotate"
+  | "region"
+  | "print"
+  | "encode"
+  | "dimensions";
+
+export type ListingArtworkCropEncodeResult =
+  | { ok: true; encoded: ListingArtworkEncodedPrint }
+  | { ok: false; stage: ListingArtworkCropEncodeFailureStage };
+
 const SHARP_INPUT = { failOn: "none" as const, limitInputPixels: false };
 /** Direct crop canvas above this size uses scaled placement instead (extreme zoom-out). */
 const CROP_REGION_DIRECT_MAX_PIXELS = 25_000_000;
@@ -334,23 +348,23 @@ async function encodeTransparentPrintFromPng(
 /**
  * Crop + composite + encode in one pass without materializing a full print-sized RGBA buffer.
  */
-export async function cropAndEncodeListingArtwork(
+export async function cropAndEncodeListingArtworkResult(
   input: Buffer,
   crop: ListingArtworkCropPayload,
   storedMaxBytes: number,
   options?: ListingArtworkPrintBuildOptions,
-): Promise<ListingArtworkEncodedPrint | null> {
+): Promise<ListingArtworkCropEncodeResult> {
   const { pixelCrop: cropPixelCrop, rotation, printWidthPx, printHeightPx } = crop;
   const useWhite = listingArtworkLetterboxFillUsesWhite(options?.letterboxFill);
 
   try {
     const orientedMeta = await getOrientedMetadata(input);
-    if (!orientedMeta) return null;
+    if (!orientedMeta) return { ok: false, stage: "metadata" };
 
     const sourceWidthPx = orientedMeta.width;
     const sourceHeightPx = orientedMeta.height;
     const maxDecodePixels = options?.maxDecodePixels ?? LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS;
-    if (sourceWidthPx * sourceHeightPx > maxDecodePixels) return null;
+    if (sourceWidthPx * sourceHeightPx > maxDecodePixels) return { ok: false, stage: "decode_cap" };
 
     const pixelCrop = listingArtworkCropPixelCropForSourceDimensions({
       pixelCrop: cropPixelCrop,
@@ -361,7 +375,7 @@ export async function cropAndEncodeListingArtwork(
     });
 
     const rotated = await buildRotatedImagePng(input, sourceWidthPx, sourceHeightPx, rotation);
-    if (!rotated) return null;
+    if (!rotated) return { ok: false, stage: "rotate" };
 
     const region = listingArtworkCropExtractRegionForRotatedImage({
       pixelCrop,
@@ -373,10 +387,10 @@ export async function cropAndEncodeListingArtwork(
       printWidthPx,
       printHeightPx,
     });
-    if (!region) return null;
+    if (!region) return { ok: false, stage: "region" };
 
     const printPng = await buildPrintPngFromCrop(rotated, region, printWidthPx, printHeightPx, useWhite);
-    if (!printPng) return null;
+    if (!printPng) return { ok: false, stage: "print" };
 
     const encoded = useWhite
       ? await encodeWhitePrintJpegFromPng(printPng, printWidthPx, printHeightPx, storedMaxBytes)
@@ -386,14 +400,24 @@ export async function cropAndEncodeListingArtwork(
       !encoded ||
       !exportedImageMeetsPrintDimensions(encoded.width, encoded.height, printWidthPx, printHeightPx)
     ) {
-      return null;
+      return { ok: false, stage: encoded ? "dimensions" : "encode" };
     }
 
-    return encoded;
+    return { ok: true, encoded };
   } catch (e) {
     console.error("[listing-artwork-server-crop]", e);
-    return null;
+    return { ok: false, stage: "print" };
   }
+}
+
+export async function cropAndEncodeListingArtwork(
+  input: Buffer,
+  crop: ListingArtworkCropPayload,
+  storedMaxBytes: number,
+  options?: ListingArtworkPrintBuildOptions,
+): Promise<ListingArtworkEncodedPrint | null> {
+  const result = await cropAndEncodeListingArtworkResult(input, crop, storedMaxBytes, options);
+  return result.ok ? result.encoded : null;
 }
 
 /**

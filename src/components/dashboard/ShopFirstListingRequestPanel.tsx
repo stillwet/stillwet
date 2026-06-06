@@ -44,6 +44,7 @@ import { LISTING_UPLOAD_CRASH_ERROR } from "@/lib/listing-request-submit-errors"
 import {
   compressListingArtworkFileIfNeeded,
   compressListingArtworkSourceForStagingUpload,
+  normalizeListingArtworkSourceFileForCrop,
 } from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
@@ -403,14 +404,27 @@ export function ShopFirstListingRequestPanel(props: {
 
     if (needCrop) {
       setListingPreparedArtwork(null);
-      setCropSourceFile(file);
-      setCropSourceObjectUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return URL.createObjectURL(file);
-      });
-      setCropDialogOpen(true);
-      setListingHasFile(false);
-      setListingArtworkPreviewUrl(null);
+      setArtworkSourcePreparing(true);
+      try {
+        const normalized = await normalizeListingArtworkSourceFileForCrop(file);
+        if (!normalized.ok) {
+          setListingHasFile(false);
+          setListingArtworkPreviewUrl(null);
+          setListingArtworkMeasureError(normalized.error);
+          if (listingFileRef.current) listingFileRef.current.value = "";
+          return;
+        }
+        setCropSourceFile(normalized.file);
+        setCropSourceObjectUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(normalized.file);
+        });
+        setCropDialogOpen(true);
+        setListingHasFile(false);
+        setListingArtworkPreviewUrl(null);
+      } finally {
+        setArtworkSourcePreparing(false);
+      }
       return;
     }
 

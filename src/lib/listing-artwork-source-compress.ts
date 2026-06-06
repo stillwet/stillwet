@@ -239,3 +239,81 @@ export async function compressListingArtworkFileIfNeeded(
 
 /** @deprecated Use {@link compressListingArtworkFileIfNeeded}. */
 export const compressListingArtworkSourceIfNeeded = compressListingArtworkFileIfNeeded;
+
+/**
+ * Strip EXIF orientation into pixel data so cropper coords match server bake.
+ * Run before opening the crop dialog (v1 path).
+ */
+export async function normalizeListingArtworkSourceFileForCrop(
+  file: File,
+): Promise<{ ok: true; file: File; width: number; height: number } | { ok: false; error: string }> {
+  if (file.type === "image/svg+xml") {
+    return { ok: false, error: "SVG is not supported. Use PNG or JPEG." };
+  }
+
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    return {
+      ok: false,
+      error: "Could not read that image in the browser. Try PNG or JPEG.",
+    };
+  }
+
+  const width = bitmap.width;
+  const height = bitmap.height;
+  if (!(width > 0) || !(height > 0)) {
+    bitmap.close();
+    return {
+      ok: false,
+      error: "Could not read that image in the browser. Try PNG or JPEG.",
+    };
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { alpha: true });
+  if (!ctx) {
+    bitmap.close();
+    return {
+      ok: false,
+      error: "Could not read that image in the browser. Try PNG or JPEG.",
+    };
+  }
+  ctx.clearRect(0, 0, width, height);
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const preferAlpha = file.type === "image/png" || file.type === "image/webp";
+  const mimeOrder = preferAlpha
+    ? ["image/webp", "image/png", "image/jpeg"]
+    : ["image/jpeg", "image/webp"];
+
+  let blob: Blob | null = null;
+  let mime = "image/jpeg";
+  for (const candidate of mimeOrder) {
+    if (!mimeSupported(candidate)) continue;
+    const attempt = await canvasToBlob(canvas, candidate, candidate === "image/jpeg" ? 0.92 : undefined);
+    if (attempt && attempt.size > 0) {
+      blob = attempt;
+      mime = candidate;
+      break;
+    }
+  }
+  if (!blob) {
+    return {
+      ok: false,
+      error: "Could not prepare that image for cropping. Try PNG or JPEG.",
+    };
+  }
+
+  const ext = extForMime(mime);
+  const stem = baseNameFromFile(file);
+  const out = new File([blob], `${stem}-oriented.${ext}`, {
+    type: mime,
+    lastModified: Date.now(),
+  });
+  return { ok: true, file: out, width, height };
+}
