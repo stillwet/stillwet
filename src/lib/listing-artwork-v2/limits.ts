@@ -63,6 +63,11 @@ export function listingArtworkComposeSourceApiUrl(sourceKey: string): string {
   return `/api/dashboard/listing-artwork/source?sourceKey=${encodeURIComponent(sourceKey)}`;
 }
 
+/** Same-origin preview for post-bake listing-request artwork (shop dashboard only). */
+export function listingArtworkBakedPreviewApiUrl(requestImageKey: string): string {
+  return `/api/dashboard/listing-artwork/baked?requestImageKey=${encodeURIComponent(requestImageKey)}`;
+}
+
 export function listingArtworkV2DecodeCapError(
   width: number,
   height: number,

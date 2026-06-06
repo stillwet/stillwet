@@ -1,6 +1,12 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm run build",
+  "functions": {
+    "src/app/api/dashboard/listing-artwork/bake/route.ts": {
+      "maxDuration": 120,
+      "memory": 3009
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/daily-maintenance",

@@ -32,6 +32,7 @@ import {
   shopInReviewListingRequestLimitReached,
 } from "@/lib/listing-request-review-limit";
 import {
+  listingArtworkBakedPreviewApiUrl,
   listingArtworkSourceMaxBytesForPrintArea,
   listingArtworkUploadV2Enabled,
   listingArtworkV2SourceCapError,
@@ -283,6 +284,15 @@ export function ShopFirstListingRequestPanel(props: {
   );
   const listingArtworkV2SourceMaxMb = listingArtworkV2SourceMaxBytes / (1024 * 1024);
 
+  function replaceListingArtworkPreviewUrl(next: string | null) {
+    setListingArtworkPreviewUrl((prev) => {
+      if (prev?.startsWith("blob:") && prev !== next) {
+        URL.revokeObjectURL(prev);
+      }
+      return next;
+    });
+  }
+
   useEffect(() => {
     if (!listingArtworkPreviewUrl) {
       setListingArtworkPixels(null);
@@ -310,9 +320,6 @@ export function ShopFirstListingRequestPanel(props: {
     return () => {
       img.onload = null;
       img.onerror = null;
-      if (listingArtworkPreviewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(listingArtworkPreviewUrl);
-      }
     };
   }, [listingArtworkPreviewUrl, listingPreparedArtwork, printAreaW, printAreaH]);
 
@@ -440,10 +447,7 @@ export function ShopFirstListingRequestPanel(props: {
       const ready = prepared.file;
       setListingSubmitArtworkFile(ready);
       setListingHasFile(true);
-      setListingArtworkPreviewUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return URL.createObjectURL(ready);
-      });
+      replaceListingArtworkPreviewUrl(URL.createObjectURL(ready));
     } finally {
       setArtworkSourcePreparing(false);
     }
@@ -1089,11 +1093,18 @@ export function ShopFirstListingRequestPanel(props: {
                   className="inline-block max-w-full overflow-hidden rounded-lg border border-zinc-700"
                   style={artworkPreviewStyle}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- blob or same-origin baked preview */}
                   <img
                     src={listingArtworkPreviewUrl}
                     alt=""
                     className="max-h-40 max-w-full object-contain"
+                    onError={() => {
+                      const bakedKey = listingPreparedArtwork?.requestImageKey;
+                      if (!bakedKey || listingArtworkPreviewUrl.startsWith("/api/dashboard/listing-artwork/baked")) {
+                        return;
+                      }
+                      replaceListingArtworkPreviewUrl(listingArtworkBakedPreviewApiUrl(bakedKey));
+                    }}
                   />
                 </div>
                 {listingArtworkResolutionPending ? (
@@ -1382,14 +1393,9 @@ export function ShopFirstListingRequestPanel(props: {
                   publicUrl: baked.publicUrl,
                 });
                 setListingHasFile(true);
-                if (result.previewUrl) {
-                  setListingArtworkPreviewUrl((prev) => {
-                    if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-                    return result.previewUrl;
-                  });
-                } else {
-                  setListingArtworkPreviewUrl(baked.publicUrl);
-                }
+                replaceListingArtworkPreviewUrl(
+                  result.previewUrl ?? listingArtworkBakedPreviewApiUrl(baked.requestImageKey),
+                );
               } finally {
                 setArtworkBaking(false);
               }
@@ -1429,10 +1435,7 @@ export function ShopFirstListingRequestPanel(props: {
                 setListingPreparedArtwork(null);
                 setListingSubmitArtworkFile(result.file);
                 setListingHasFile(true);
-                setListingArtworkPreviewUrl((prev) => {
-                  if (prev) URL.revokeObjectURL(prev);
-                  return URL.createObjectURL(result.file);
-                });
+                replaceListingArtworkPreviewUrl(URL.createObjectURL(result.file));
               } else {
                 if (!listingProductId) {
                   setListingArtworkMeasureError("Select a catalog item before uploading artwork.");
@@ -1500,10 +1503,9 @@ export function ShopFirstListingRequestPanel(props: {
                     publicUrl: baked.publicUrl,
                   });
                   setListingHasFile(true);
-                  setListingArtworkPreviewUrl((prev) => {
-                    if (prev) URL.revokeObjectURL(prev);
-                    return baked.publicUrl;
-                  });
+                  replaceListingArtworkPreviewUrl(
+                    listingArtworkBakedPreviewApiUrl(baked.requestImageKey),
+                  );
                 } finally {
                   setArtworkUploadProgress(null);
                   setArtworkSourcePreparing(false);
