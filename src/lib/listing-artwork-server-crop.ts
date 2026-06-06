@@ -3,6 +3,7 @@ import type { ListingArtworkCropPayload } from "@/lib/listing-artwork-crop-paylo
 import {
   cropCompositePlacementOnPrint,
   listingArtworkCropExtractRegionForRotatedImage,
+  listingArtworkCropPixelCropForSourceDimensions,
   visibleCompositeSlice,
 } from "@/lib/listing-artwork-crop-math";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
@@ -339,7 +340,7 @@ export async function cropAndEncodeListingArtwork(
   storedMaxBytes: number,
   options?: ListingArtworkPrintBuildOptions,
 ): Promise<ListingArtworkEncodedPrint | null> {
-  const { pixelCrop, rotation, printWidthPx, printHeightPx } = crop;
+  const { pixelCrop: cropPixelCrop, rotation, printWidthPx, printHeightPx } = crop;
   const useWhite = listingArtworkLetterboxFillUsesWhite(options?.letterboxFill);
 
   try {
@@ -350,6 +351,14 @@ export async function cropAndEncodeListingArtwork(
     const sourceHeightPx = orientedMeta.height;
     const maxDecodePixels = options?.maxDecodePixels ?? LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS;
     if (sourceWidthPx * sourceHeightPx > maxDecodePixels) return null;
+
+    const pixelCrop = listingArtworkCropPixelCropForSourceDimensions({
+      pixelCrop: cropPixelCrop,
+      sourceWidthPx,
+      sourceHeightPx,
+      referenceSourceWidthPx: crop.referenceSourceWidthPx,
+      referenceSourceHeightPx: crop.referenceSourceHeightPx,
+    });
 
     const rotated = await buildRotatedImagePng(input, sourceWidthPx, sourceHeightPx, rotation);
     if (!rotated) return null;

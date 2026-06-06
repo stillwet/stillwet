@@ -35,12 +35,14 @@ describe("parseListingArtworkTransformV2", () => {
 });
 
 describe("listingArtworkTransformV2 roundtrip", () => {
-  it("converts to crop payload and back", () => {
+  it("roundtrips reference source dimensions", () => {
     const crop = {
       pixelCrop: { x: 10, y: 20, width: 500, height: 400 },
       rotation: 180,
       printWidthPx: 8325,
       printHeightPx: 3225,
+      referenceSourceWidthPx: 3000,
+      referenceSourceHeightPx: 2000,
     };
     const t = listingArtworkCropPayloadToTransformV2(crop, "transparent");
     const back = listingArtworkTransformV2ToCropPayload(t);

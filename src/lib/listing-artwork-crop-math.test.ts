@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { listingArtworkCropExtractRegionForRotatedImage } from "@/lib/listing-artwork-crop-math";
+import {
+  listingArtworkCropExtractRegionForRotatedImage,
+  listingArtworkCropPixelCropForSourceDimensions,
+} from "@/lib/listing-artwork-crop-math";
 
 describe("listingArtworkCropExtractRegionForRotatedImage", () => {
   it("preserves print aspect ratio for gloss poster crop", () => {
@@ -53,5 +56,33 @@ describe("listingArtworkCropExtractRegionForRotatedImage", () => {
     assert.equal(region!.y, -150);
     assert.equal(region!.width, 3400);
     assert.equal(region!.height, 2400);
+  });
+});
+
+describe("listingArtworkCropPixelCropForSourceDimensions", () => {
+  it("returns crop unchanged when reference matches decoded source", () => {
+    const crop = { x: 10, y: 20, width: 800, height: 600 };
+    const mapped = listingArtworkCropPixelCropForSourceDimensions({
+      pixelCrop: crop,
+      sourceWidthPx: 4000,
+      sourceHeightPx: 3000,
+      referenceSourceWidthPx: 4000,
+      referenceSourceHeightPx: 3000,
+    });
+    assert.deepEqual(mapped, crop);
+  });
+
+  it("scales crop coords when staging recompress shrinks the source", () => {
+    const mapped = listingArtworkCropPixelCropForSourceDimensions({
+      pixelCrop: { x: 100, y: 50, width: 2000, height: 1500 },
+      sourceWidthPx: 2000,
+      sourceHeightPx: 1500,
+      referenceSourceWidthPx: 4000,
+      referenceSourceHeightPx: 3000,
+    });
+    assert.equal(mapped.x, 50);
+    assert.equal(mapped.y, 25);
+    assert.equal(mapped.width, 1000);
+    assert.equal(mapped.height, 750);
   });
 });

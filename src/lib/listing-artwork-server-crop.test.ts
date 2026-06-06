@@ -35,6 +35,20 @@ describe("parseListingArtworkCropPayload", () => {
     assert.equal(parsed?.rotation, 90);
   });
 
+  it("parses reference source dimensions", () => {
+    const parsed = parseListingArtworkCropPayload({
+      pixelCrop: { x: 0, y: 0, width: 608, height: 884 },
+      rotation: 0,
+      printWidthPx: 775,
+      printHeightPx: 1125,
+      referenceSourceWidthPx: 608,
+      referenceSourceHeightPx: 912,
+    });
+    assert.ok(parsed);
+    assert.equal(parsed?.referenceSourceWidthPx, 608);
+    assert.equal(parsed?.referenceSourceHeightPx, 912);
+  });
+
   it("rejects invalid crop json", () => {
     assert.equal(parseListingArtworkCropPayload({ pixelCrop: { x: 0 } }), null);
   });
@@ -182,5 +196,79 @@ describe("cropListingArtworkBufferOnServer", () => {
     assert.equal(corner.a, 255);
     const center = rgbAt(Math.floor(info.width / 2), Math.floor(info.height / 2));
     assert.ok(center.r < 240);
+  });
+
+  it("crops playing-card sized sources to print pixels", async () => {
+    const src = await sharp({
+      create: {
+        width: 608,
+        height: 912,
+        channels: 4,
+        background: { r: 120, g: 80, b: 200, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    const aspect = 775 / 1125;
+    const w = 608;
+    const h = 912;
+    let cropW: number;
+    let cropH: number;
+    if (w / h > aspect) {
+      cropH = h;
+      cropW = cropH * aspect;
+    } else {
+      cropW = w;
+      cropH = cropW / aspect;
+    }
+    const pixelCrop = {
+      x: (w - cropW) / 2,
+      y: (h - cropH) / 2,
+      width: cropW,
+      height: cropH,
+    };
+
+    const out = await cropListingArtworkBufferOnServer(src, {
+      pixelCrop,
+      rotation: 0,
+      printWidthPx: 775,
+      printHeightPx: 1125,
+      referenceSourceWidthPx: w,
+      referenceSourceHeightPx: h,
+    });
+    assert.ok(out);
+    const meta = await sharp(out!).metadata();
+    assert.equal(meta.width, 775);
+    assert.equal(meta.height, 1125);
+  });
+
+  it("bakes when staging recompress halves source but reference crop coords are kept", async () => {
+    const src = await sharp({
+      create: {
+        width: 4000,
+        height: 3000,
+        channels: 3,
+        background: { r: 200, g: 50, b: 50 },
+      },
+    })
+      .jpeg()
+      .toBuffer();
+
+    const staged = await sharp(src).resize(2000, 1500).jpeg().toBuffer();
+    const pixelCrop = { x: 200, y: 100, width: 1414, height: 1000 };
+
+    const out = await cropListingArtworkBufferOnServer(staged, {
+      pixelCrop,
+      rotation: 0,
+      printWidthPx: 775,
+      printHeightPx: 1125,
+      referenceSourceWidthPx: 4000,
+      referenceSourceHeightPx: 3000,
+    });
+    assert.ok(out);
+    const meta = await sharp(out!).metadata();
+    assert.equal(meta.width, 775);
+    assert.equal(meta.height, 1125);
   });
 });

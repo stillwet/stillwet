@@ -139,6 +139,10 @@ export function ListingArtworkCropDialog({
       setApplyError(listingArtworkEffectiveDpiBlockError(effectiveDpi, requiredEffectiveDpi));
       return;
     }
+    if (useServerCrop && !mediaNatural) {
+      setApplyError("Image is still loading. Wait a moment, then try again.");
+      return;
+    }
     if (!listingArtworkFileWithinUploadCap(sourceFile.size)) {
       setApplyError(listingArtworkUploadCapError());
       return;
@@ -159,6 +163,12 @@ export function ListingArtworkCropDialog({
             rotation,
             printWidthPx,
             printHeightPx,
+            ...(mediaNatural
+              ? {
+                  referenceSourceWidthPx: mediaNatural.width,
+                  referenceSourceHeightPx: mediaNatural.height,
+                }
+              : {}),
           },
           sourceFile,
         });

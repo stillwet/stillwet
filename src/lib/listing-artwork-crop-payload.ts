@@ -11,6 +11,9 @@ export type ListingArtworkCropPayload = {
   rotation: number;
   printWidthPx: number;
   printHeightPx: number;
+  /** Natural oriented size when the cropper computed `pixelCrop` (may differ from staged upload). */
+  referenceSourceWidthPx?: number;
+  referenceSourceHeightPx?: number;
 };
 
 export function parseListingArtworkCropPayload(raw: unknown): ListingArtworkCropPayload | null {
@@ -26,6 +29,12 @@ export function parseListingArtworkCropPayload(raw: unknown): ListingArtworkCrop
   const rotation = Number(o.rotation);
   const printWidthPx = Number(o.printWidthPx);
   const printHeightPx = Number(o.printHeightPx);
+  const referenceSourceWidthPxRaw = o.referenceSourceWidthPx;
+  const referenceSourceHeightPxRaw = o.referenceSourceHeightPx;
+  const referenceSourceWidthPx =
+    referenceSourceWidthPxRaw != null ? Number(referenceSourceWidthPxRaw) : undefined;
+  const referenceSourceHeightPx =
+    referenceSourceHeightPxRaw != null ? Number(referenceSourceHeightPxRaw) : undefined;
   if (
     !Number.isFinite(x) ||
     !Number.isFinite(y) ||
@@ -41,11 +50,29 @@ export function parseListingArtworkCropPayload(raw: unknown): ListingArtworkCrop
   ) {
     return null;
   }
+  if (
+    referenceSourceWidthPx != null &&
+    (!Number.isFinite(referenceSourceWidthPx) || referenceSourceWidthPx <= 0)
+  ) {
+    return null;
+  }
+  if (
+    referenceSourceHeightPx != null &&
+    (!Number.isFinite(referenceSourceHeightPx) || referenceSourceHeightPx <= 0)
+  ) {
+    return null;
+  }
   return {
     pixelCrop: { x, y, width, height },
     rotation,
     printWidthPx: Math.round(printWidthPx),
     printHeightPx: Math.round(printHeightPx),
+    ...(referenceSourceWidthPx != null && referenceSourceHeightPx != null
+      ? {
+          referenceSourceWidthPx: Math.round(referenceSourceWidthPx),
+          referenceSourceHeightPx: Math.round(referenceSourceHeightPx),
+        }
+      : {}),
   };
 }
 

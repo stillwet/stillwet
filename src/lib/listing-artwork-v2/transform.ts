@@ -10,6 +10,8 @@ export type ListingArtworkTransformV2 = {
   printWidthPx: number;
   printHeightPx: number;
   letterboxFill: ListingArtworkLetterboxFill;
+  referenceSourceWidthPx?: number;
+  referenceSourceHeightPx?: number;
 };
 
 export function parseListingArtworkTransformV2(raw: unknown): ListingArtworkTransformV2 | null {
@@ -52,6 +54,25 @@ export function parseListingArtworkTransformV2(raw: unknown): ListingArtworkTran
       : null;
   if (!letterboxFill) return null;
 
+  const referenceSourceWidthPxRaw = o.referenceSourceWidthPx;
+  const referenceSourceHeightPxRaw = o.referenceSourceHeightPx;
+  const referenceSourceWidthPx =
+    referenceSourceWidthPxRaw != null ? Number(referenceSourceWidthPxRaw) : undefined;
+  const referenceSourceHeightPx =
+    referenceSourceHeightPxRaw != null ? Number(referenceSourceHeightPxRaw) : undefined;
+  if (
+    referenceSourceWidthPx != null &&
+    (!Number.isFinite(referenceSourceWidthPx) || referenceSourceWidthPx <= 0)
+  ) {
+    return null;
+  }
+  if (
+    referenceSourceHeightPx != null &&
+    (!Number.isFinite(referenceSourceHeightPx) || referenceSourceHeightPx <= 0)
+  ) {
+    return null;
+  }
+
   return {
     v: LISTING_ARTWORK_TRANSFORM_V2,
     pixelCrop: { x, y, width, height },
@@ -59,6 +80,12 @@ export function parseListingArtworkTransformV2(raw: unknown): ListingArtworkTran
     printWidthPx: Math.round(printWidthPx),
     printHeightPx: Math.round(printHeightPx),
     letterboxFill,
+    ...(referenceSourceWidthPx != null && referenceSourceHeightPx != null
+      ? {
+          referenceSourceWidthPx: Math.round(referenceSourceWidthPx),
+          referenceSourceHeightPx: Math.round(referenceSourceHeightPx),
+        }
+      : {}),
   };
 }
 
@@ -71,6 +98,12 @@ export function listingArtworkTransformV2ToCropPayload(
     rotation: transform.rotation,
     printWidthPx: transform.printWidthPx,
     printHeightPx: transform.printHeightPx,
+    ...(transform.referenceSourceWidthPx != null && transform.referenceSourceHeightPx != null
+      ? {
+          referenceSourceWidthPx: transform.referenceSourceWidthPx,
+          referenceSourceHeightPx: transform.referenceSourceHeightPx,
+        }
+      : {}),
   };
 }
 
@@ -85,5 +118,11 @@ export function listingArtworkCropPayloadToTransformV2(
     printWidthPx: crop.printWidthPx,
     printHeightPx: crop.printHeightPx,
     letterboxFill,
+    ...(crop.referenceSourceWidthPx != null && crop.referenceSourceHeightPx != null
+      ? {
+          referenceSourceWidthPx: crop.referenceSourceWidthPx,
+          referenceSourceHeightPx: crop.referenceSourceHeightPx,
+        }
+      : {}),
   };
 }

@@ -67,6 +67,29 @@ export function listingArtworkCropExtractRegionForRotatedImage(params: {
   return roundCropArea(scaled);
 }
 
+/** Map cropper coords from reference natural size onto the actual source buffer sharp decoded. */
+export function listingArtworkCropPixelCropForSourceDimensions(params: {
+  pixelCrop: ListingArtworkCropArea;
+  sourceWidthPx: number;
+  sourceHeightPx: number;
+  referenceSourceWidthPx?: number;
+  referenceSourceHeightPx?: number;
+}): ListingArtworkCropArea {
+  const refW = params.referenceSourceWidthPx ?? params.sourceWidthPx;
+  const refH = params.referenceSourceHeightPx ?? params.sourceHeightPx;
+  if (refW <= 0 || refH <= 0) return params.pixelCrop;
+  if (refW === params.sourceWidthPx && refH === params.sourceHeightPx) return params.pixelCrop;
+
+  const scaleX = params.sourceWidthPx / refW;
+  const scaleY = params.sourceHeightPx / refH;
+  return {
+    x: params.pixelCrop.x * scaleX,
+    y: params.pixelCrop.y * scaleY,
+    width: params.pixelCrop.width * scaleX,
+    height: params.pixelCrop.height * scaleY,
+  };
+}
+
 /**
  * Maps bbox-space crop coords onto a print-sized canvas — same math as server bake and
  * {@link renderListingArtworkCropCanvas}.

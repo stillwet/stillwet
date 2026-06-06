@@ -717,7 +717,7 @@ export async function submitFirstListingSetup(
       artwork = await cropAndPrepareListingArtworkForStorage(
         staged,
         cropPayload,
-        undefined,
+        listingRequestArtworkStoredMaxBytes(),
         printAreaW,
         printAreaH,
         letterboxFill,

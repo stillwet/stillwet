@@ -153,6 +153,12 @@ export function ListingArtworkComposeDialog({
           printWidthPx,
           printHeightPx,
           letterboxFill: artworkLetterboxFill,
+          ...(mediaNatural
+            ? {
+                referenceSourceWidthPx: mediaNatural.width,
+                referenceSourceHeightPx: mediaNatural.height,
+              }
+            : {}),
         };
         const url = await buildListingArtworkV2PreviewObjectUrl(imageUrl, transform);
         if (livePreviewUrlRef.current?.startsWith("blob:")) {
@@ -174,6 +180,7 @@ export function ListingArtworkComposeDialog({
     printHeightPx,
     artworkLetterboxFill,
     imageUrl,
+    mediaNatural,
   ]);
 
   useEffect(() => {
@@ -206,6 +213,10 @@ export function ListingArtworkComposeDialog({
       setApplyError(listingArtworkEffectiveDpiBlockError(effectiveDpi, requiredEffectiveDpi));
       return;
     }
+    if (!mediaNatural) {
+      setApplyError("Image is still loading. Wait a moment, then try again.");
+      return;
+    }
 
     setBusy(true);
     try {
@@ -219,6 +230,12 @@ export function ListingArtworkComposeDialog({
         rotation,
         printWidthPx,
         printHeightPx,
+        ...(mediaNatural
+          ? {
+              referenceSourceWidthPx: mediaNatural.width,
+              referenceSourceHeightPx: mediaNatural.height,
+            }
+          : {}),
       };
       const transform = listingArtworkCropPayloadToTransformV2(cropPayload, artworkLetterboxFill);
       let previewUrl = livePreviewUrl;

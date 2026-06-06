@@ -74,7 +74,7 @@ export default async function DemoInstructionsPage() {
             </li>
             <li>
               <span className="block text-xs font-semibold uppercase tracking-wide text-zinc-300">
-                Demo payments
+                Not live yet
               </span>
               <p className="mt-2">
                 The website is in beta testing, so no item sales are possible at this time. The site will go
