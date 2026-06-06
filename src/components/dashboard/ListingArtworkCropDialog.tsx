@@ -93,17 +93,14 @@ export function ListingArtworkCropDialog({
     }
   }, [open, imageUrl]);
 
-  const composeCropSize = useMemo(
-    () =>
-      mediaNatural
-        ? listingArtworkComposeCropSize({
-            viewportCropSize: cropSize,
-            naturalWidth: mediaNatural.width,
-            naturalHeight: mediaNatural.height,
-          })
-        : cropSize ?? undefined,
-    [cropSize, mediaNatural],
-  );
+  const composeCropSize = useMemo(() => {
+    if (!mediaNatural || !cropSize) return undefined;
+    return listingArtworkComposeCropSize({
+      viewportCropSize: cropSize,
+      naturalWidth: mediaNatural.width,
+      naturalHeight: mediaNatural.height,
+    });
+  }, [cropSize, mediaNatural]);
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixelsInner: Area) => {
     setCroppedAreaPixels(croppedAreaPixelsInner);

@@ -17,6 +17,18 @@ describe("computeListingArtworkCropViewportSize", () => {
     assert.ok(Math.abs(size.width / size.height - 16 / 9) < 0.001);
   });
 
+  it("skips viewport cropSize override for phone-sized sources", () => {
+    const viewport = { width: 396, height: 520 };
+    assert.equal(
+      listingArtworkComposeCropSize({
+        viewportCropSize: viewport,
+        naturalWidth: 608,
+        naturalHeight: 912,
+      }),
+      undefined,
+    );
+  });
+
   it("skips viewport cropSize override for large sources", () => {
     const viewport = { width: 396, height: 520 };
     assert.equal(
@@ -29,13 +41,13 @@ describe("computeListingArtworkCropViewportSize", () => {
     );
   });
 
-  it("keeps viewport cropSize override for small sources", () => {
+  it("keeps viewport cropSize override for tiny clipart", () => {
     const viewport = { width: 396, height: 520 };
     assert.deepEqual(
       listingArtworkComposeCropSize({
         viewportCropSize: viewport,
-        naturalWidth: 800,
-        naturalHeight: 600,
+        naturalWidth: 320,
+        naturalHeight: 240,
       }),
       viewport,
     );

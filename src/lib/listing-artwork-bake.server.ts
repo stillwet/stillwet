@@ -4,13 +4,13 @@ import type { ListingArtworkCropPayload } from "@/lib/listing-artwork-crop-paylo
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 import {
-  listingArtworkServerCropFailedError,
   listingArtworkServerProcessingError,
 } from "@/lib/listing-request-submit-errors";
 import {
+  listingRequestArtworkStoredMaxBytes,
+  listingRequestArtworkStoredMaxMb,
   listingRequestArtworkUploadMaxBytes,
   listingArtworkUploadCapError,
-  listingRequestArtworkStoredMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 import {
   listingArtworkV2SourceCapError,
@@ -63,7 +63,7 @@ async function bakeListingArtworkFromBuffer(params: {
     artwork = await cropAndPrepareListingArtworkForStorage(
       sourceBuffer,
       cropPayload,
-      undefined,
+      listingRequestArtworkStoredMaxBytes(),
       printAreaW,
       printAreaH,
       letterboxFill,
@@ -75,7 +75,11 @@ async function bakeListingArtworkFromBuffer(params: {
   }
 
   if (!artwork) {
-    return { ok: false, error: listingArtworkServerCropFailedError(), status: 500 };
+    return {
+      ok: false,
+      error: listingArtworkServerProcessingError(listingRequestArtworkStoredMaxMb()),
+      status: 500,
+    };
   }
 
   if (printAreaW != null && printAreaH != null) {

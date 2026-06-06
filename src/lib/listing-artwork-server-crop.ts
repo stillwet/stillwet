@@ -195,41 +195,45 @@ async function buildPrintPngFromCrop(
   printHeightPx: number,
   useWhite: boolean,
 ): Promise<Buffer | null> {
-  if (region.width * region.height <= CROP_REGION_DIRECT_MAX_PIXELS) {
-    const cropPng = await buildExtractedCropPng(rotated.buffer, rotated.width, rotated.height, region);
-    if (!cropPng) return null;
-    return sharp(cropPng)
-      .resize(printWidthPx, printHeightPx, {
-        fit: "fill",
-        kernel: sharp.kernel.lanczos3,
-        withoutEnlargement: false,
-      })
+  try {
+    if (region.width * region.height <= CROP_REGION_DIRECT_MAX_PIXELS) {
+      const cropPng = await buildExtractedCropPng(rotated.buffer, rotated.width, rotated.height, region);
+      if (!cropPng) return null;
+      return sharp(cropPng)
+        .resize(printWidthPx, printHeightPx, {
+          fit: "fill",
+          kernel: sharp.kernel.lanczos3,
+          withoutEnlargement: false,
+        })
+        .png()
+        .toBuffer();
+    }
+
+    const overlay = await buildOverlayPngFromPlacement(
+      rotated.buffer,
+      rotated.width,
+      rotated.height,
+      region,
+      printWidthPx,
+      printHeightPx,
+    );
+    if (!overlay) return null;
+
+    const background = useWhite ? whiteBackground() : transparentBackground();
+    return sharp({
+      create: {
+        width: printWidthPx,
+        height: printHeightPx,
+        channels: 4,
+        background,
+      },
+    })
+      .composite([{ input: overlay.png, left: overlay.destLeft, top: overlay.destTop }])
       .png()
       .toBuffer();
+  } catch {
+    return null;
   }
-
-  const overlay = await buildOverlayPngFromPlacement(
-    rotated.buffer,
-    rotated.width,
-    rotated.height,
-    region,
-    printWidthPx,
-    printHeightPx,
-  );
-  if (!overlay) return null;
-
-  const background = useWhite ? whiteBackground() : transparentBackground();
-  return sharp({
-    create: {
-      width: printWidthPx,
-      height: printHeightPx,
-      channels: 4,
-      background,
-    },
-  })
-    .composite([{ input: overlay.png, left: overlay.destLeft, top: overlay.destTop }])
-    .png()
-    .toBuffer();
 }
 
 async function encodeWhitePrintJpegFromPng(
