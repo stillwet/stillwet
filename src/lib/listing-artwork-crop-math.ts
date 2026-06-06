@@ -66,3 +66,50 @@ export function listingArtworkCropExtractRegionForRotatedImage(params: {
   // Aspect ratio is already enforced by the cropper (`aspect` prop). We keep exactly what the UI requested.
   return roundCropArea(scaled);
 }
+
+/**
+ * Maps bbox-space crop coords onto a print-sized canvas — same math as server bake and
+ * {@link renderListingArtworkCropCanvas}.
+ */
+export function cropCompositePlacementOnPrint(
+  rotatedWidthPx: number,
+  rotatedHeightPx: number,
+  crop: ListingArtworkCropArea,
+  printWidthPx: number,
+  printHeightPx: number,
+): { left: number; top: number; scaledWidthPx: number; scaledHeightPx: number } {
+  const cropWidthPx = crop.width;
+  const cropHeightPx = crop.height;
+  return {
+    left: Math.round((-crop.x / cropWidthPx) * printWidthPx),
+    top: Math.round((-crop.y / cropHeightPx) * printHeightPx),
+    scaledWidthPx: Math.max(1, Math.round((rotatedWidthPx / cropWidthPx) * printWidthPx)),
+    scaledHeightPx: Math.max(1, Math.round((rotatedHeightPx / cropHeightPx) * printHeightPx)),
+  };
+}
+
+/** Clip a layer to the print canvas, matching browser drawImage overflow behavior. */
+export function visibleCompositeSlice(params: {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  canvasWidth: number;
+  canvasHeight: number;
+}): { destLeft: number; destTop: number; srcLeft: number; srcTop: number; width: number; height: number } | null {
+  const visibleLeft = Math.max(0, params.left);
+  const visibleTop = Math.max(0, params.top);
+  const visibleRight = Math.min(params.canvasWidth, params.left + params.width);
+  const visibleBottom = Math.min(params.canvasHeight, params.top + params.height);
+  const width = visibleRight - visibleLeft;
+  const height = visibleBottom - visibleTop;
+  if (width < 1 || height < 1) return null;
+  return {
+    destLeft: visibleLeft,
+    destTop: visibleTop,
+    srcLeft: visibleLeft - params.left,
+    srcTop: visibleTop - params.top,
+    width,
+    height,
+  };
+}

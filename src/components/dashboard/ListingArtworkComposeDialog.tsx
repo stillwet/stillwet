@@ -21,7 +21,7 @@ import {
 import { buildListingArtworkV2PreviewObjectUrl } from "@/lib/listing-artwork-v2/preview-client";
 import type { ListingArtworkTransformV2 } from "@/lib/listing-artwork-v2/transform";
 import { listingArtworkCropPayloadToTransformV2 } from "@/lib/listing-artwork-v2/transform";
-import { useListingArtworkCropViewportSize } from "@/lib/listing-artwork-crop-viewport";
+import { useListingArtworkCropViewportSize, listingArtworkComposeCropSize } from "@/lib/listing-artwork-crop-viewport";
 
 export type ListingArtworkComposeCompleteResult = {
   transform: ListingArtworkTransformV2;
@@ -72,8 +72,27 @@ export function ListingArtworkComposeDialog({
   const [applyError, setApplyError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null);
+  const [imageLoadError, setImageLoadError] = useState<string | null>(null);
+  const [mediaNatural, setMediaNatural] = useState<{ width: number; height: number } | null>(null);
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const livePreviewUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setImageLoadError(null);
+    const img = new Image();
+    img.onload = () => setImageLoadError(null);
+    img.onerror = () => {
+      setImageLoadError(
+        "Could not load this image for placement. Try a smaller export, or use PNG/JPEG instead of an unusual format.",
+      );
+    };
+    img.src = imageUrl;
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [open, imageUrl]);
 
   useEffect(() => {
     if (open) {
@@ -83,9 +102,22 @@ export function ListingArtworkComposeDialog({
       setCroppedAreaPixels(null);
       setApplyError(null);
       setLivePreviewUrl(null);
+      setMediaNatural(null);
       livePreviewUrlRef.current = null;
     }
   }, [open, imageUrl]);
+
+  const composeCropSize = useMemo(
+    () =>
+      mediaNatural
+        ? listingArtworkComposeCropSize({
+            viewportCropSize: cropSize,
+            naturalWidth: mediaNatural.width,
+            naturalHeight: mediaNatural.height,
+          })
+        : cropSize ?? undefined,
+    [cropSize, mediaNatural],
+  );
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixelsInner: Area) => {
     setCroppedAreaPixels(croppedAreaPixelsInner);
@@ -157,6 +189,10 @@ export function ListingArtworkComposeDialog({
 
   async function apply() {
     setApplyError(null);
+    if (imageLoadError) {
+      setApplyError(imageLoadError);
+      return;
+    }
     if (!croppedAreaPixels) {
       setApplyError("Adjust the placement, then try again.");
       return;
@@ -224,15 +260,14 @@ export function ListingArtworkComposeDialog({
             className="relative h-[min(60vh,520px)] min-h-[280px] w-full"
             style={letterboxPreviewStyle}
           >
-            {cropSize ? (
-              <Cropper
+            <Cropper
                 key={imageUrl}
                 image={imageUrl}
                 crop={crop}
                 zoom={zoom}
                 rotation={rotation}
                 aspect={aspect}
-                cropSize={cropSize}
+                {...(composeCropSize ? { cropSize: composeCropSize } : {})}
                 onCropChange={setCrop}
                 onZoomChange={(z) =>
                   setZoom(
@@ -241,11 +276,22 @@ export function ListingArtworkComposeDialog({
                 }
                 onRotationChange={setRotation}
                 onCropComplete={onCropComplete}
+                onMediaLoaded={(mediaSize) => {
+                  setMediaNatural({
+                    width: mediaSize.naturalWidth,
+                    height: mediaSize.naturalHeight,
+                  });
+                  setImageLoadError(null);
+                }}
                 restrictPosition={false}
                 minZoom={LISTING_ARTWORK_V2_COMPOSE_MIN_ZOOM}
                 maxZoom={LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM}
                 style={{ containerStyle: cropperContainerStyle }}
               />
+            {imageLoadError ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/80 px-4 text-center text-xs text-amber-200/90">
+                {imageLoadError}
+              </div>
             ) : null}
           </div>
           {livePreviewUrl ? (

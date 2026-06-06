@@ -41,3 +41,19 @@ export function useListingArtworkCropViewportSize(aspect: number) {
 
   return { containerRef, cropSize };
 }
+
+/** Large uploads should use react-easy-crop's built-in crop frame so pixel coords stay accurate. */
+export const LISTING_ARTWORK_LARGE_SOURCE_CROP_NATURAL_LONG_EDGE = 1200;
+
+export function listingArtworkComposeCropSize(params: {
+  viewportCropSize: { width: number; height: number } | null;
+  naturalWidth: number;
+  naturalHeight: number;
+}): { width: number; height: number } | undefined {
+  if (!params.viewportCropSize) return undefined;
+  const naturalLong = Math.max(params.naturalWidth, params.naturalHeight);
+  if (naturalLong > LISTING_ARTWORK_LARGE_SOURCE_CROP_NATURAL_LONG_EDGE) {
+    return undefined;
+  }
+  return params.viewportCropSize;
+}

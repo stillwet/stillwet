@@ -16,6 +16,11 @@ const adminCatalogSelect = {
   itemArtworkLetterboxFill: true,
   itemLargeListingArtwork: true,
   itemArtworkSourceTierOverride: true,
+  catalogTags: {
+    select: {
+      tag: { select: { id: true, name: true, slug: true, sortOrder: true } },
+    },
+  },
 } as const;
 
 /** Admin baseline rows for shop dashboard catalog. */

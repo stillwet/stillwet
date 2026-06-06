@@ -1,9 +1,9 @@
 import sharp from "sharp";
 import type { ListingArtworkCropPayload } from "@/lib/listing-artwork-crop-payload";
-import type { ListingArtworkCropArea } from "@/lib/listing-artwork-crop-math";
 import {
+  cropCompositePlacementOnPrint,
   listingArtworkCropExtractRegionForRotatedImage,
-  listingArtworkRotateSize,
+  visibleCompositeSlice,
 } from "@/lib/listing-artwork-crop-math";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
 import {
@@ -29,6 +29,8 @@ export type ListingArtworkEncodedPrint = {
 };
 
 const SHARP_INPUT = { failOn: "none" as const, limitInputPixels: false };
+/** Direct crop canvas above this size uses scaled placement instead (extreme zoom-out). */
+const CROP_REGION_DIRECT_MAX_PIXELS = 25_000_000;
 
 function transparentBackground(): { r: number; g: number; b: number; alpha: number } {
   return { r: 0, g: 0, b: 0, alpha: 0 };
@@ -42,54 +44,6 @@ function printBackground(letterboxFill: ListingArtworkLetterboxFill | null | und
   return listingArtworkLetterboxFillUsesWhite(letterboxFill) ? whiteBackground() : transparentBackground();
 }
 
-/**
- * Maps bbox-space crop coords onto a print-sized canvas — same math as
- * `drawImage(rotated, cx, cy, cw, ch, 0, 0, printW, printH)` in
- * {@link renderListingArtworkCropCanvas}. Never allocates a buffer larger than print px.
- */
-export function cropCompositePlacementOnPrint(
-  rotatedWidthPx: number,
-  rotatedHeightPx: number,
-  crop: ListingArtworkCropArea,
-  printWidthPx: number,
-  printHeightPx: number,
-): { left: number; top: number; scaledWidthPx: number; scaledHeightPx: number } {
-  const cropWidthPx = crop.width;
-  const cropHeightPx = crop.height;
-  return {
-    left: Math.round((-crop.x / cropWidthPx) * printWidthPx),
-    top: Math.round((-crop.y / cropHeightPx) * printHeightPx),
-    scaledWidthPx: Math.max(1, Math.round((rotatedWidthPx / cropWidthPx) * printWidthPx)),
-    scaledHeightPx: Math.max(1, Math.round((rotatedHeightPx / cropHeightPx) * printHeightPx)),
-  };
-}
-
-/** Clip a layer to the print canvas, matching browser drawImage overflow behavior. */
-export function visibleCompositeSlice(params: {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  canvasWidth: number;
-  canvasHeight: number;
-}): { destLeft: number; destTop: number; srcLeft: number; srcTop: number; width: number; height: number } | null {
-  const visibleLeft = Math.max(0, params.left);
-  const visibleTop = Math.max(0, params.top);
-  const visibleRight = Math.min(params.canvasWidth, params.left + params.width);
-  const visibleBottom = Math.min(params.canvasHeight, params.top + params.height);
-  const width = visibleRight - visibleLeft;
-  const height = visibleBottom - visibleTop;
-  if (width < 1 || height < 1) return null;
-  return {
-    destLeft: visibleLeft,
-    destTop: visibleTop,
-    srcLeft: visibleLeft - params.left,
-    srcTop: visibleTop - params.top,
-    width,
-    height,
-  };
-}
-
 async function getOrientedMetadata(input: Buffer): Promise<{ width: number; height: number } | null> {
   try {
     const meta = await sharp(input, SHARP_INPUT).rotate().metadata();
@@ -101,8 +55,7 @@ async function getOrientedMetadata(input: Buffer): Promise<{ width: number; heig
 }
 
 /**
- * Rotated bbox image as a compressed PNG (one decode pass, no full raw RGBA workspace).
- * Matches browser: center on bbox canvas, then rotate.
+ * Rotated bbox image as PNG — matches react-easy-crop `getCroppedImg` and browser canvas export.
  */
 async function buildRotatedImagePng(
   input: Buffer,
@@ -117,27 +70,8 @@ async function buildRotatedImagePng(
     return { buffer, width: meta.width, height: meta.height };
   }
 
-  const expectedBbox = listingArtworkRotateSize(sourceWidthPx, sourceHeightPx, rotation);
-  const bboxWidthPx = Math.max(1, Math.round(expectedBbox.width));
-  const bboxHeightPx = Math.max(1, Math.round(expectedBbox.height));
-
   const oriented = await sharp(input, SHARP_INPUT).rotate().toBuffer();
-
-  const rotated = await sharp({
-    create: {
-      width: bboxWidthPx,
-      height: bboxHeightPx,
-      channels: 4,
-      background: transparentBackground(),
-    },
-  })
-    .composite([
-      {
-        input: oriented,
-        left: Math.round((bboxWidthPx - sourceWidthPx) / 2),
-        top: Math.round((bboxHeightPx - sourceHeightPx) / 2),
-      },
-    ])
+  const rotated = await sharp(oriented)
     .rotate(rotation, { background: transparentBackground() })
     .png()
     .toBuffer({ resolveWithObject: true });
@@ -149,12 +83,88 @@ async function buildRotatedImagePng(
   };
 }
 
-/** Scaled + clipped artwork layer as PNG (small vs full print canvas). */
-async function buildOverlayPng(
+/** Extract crop region (supports letterbox via negative x/y) then resize to print pixels. */
+async function buildExtractedCropPng(
   rotatedPng: Buffer,
-  placement: ReturnType<typeof cropCompositePlacementOnPrint>,
-  slice: NonNullable<ReturnType<typeof visibleCompositeSlice>>,
+  rotatedWidthPx: number,
+  rotatedHeightPx: number,
+  crop: { x: number; y: number; width: number; height: number },
 ): Promise<Buffer | null> {
+  const cropW = Math.max(1, Math.round(crop.width));
+  const cropH = Math.max(1, Math.round(crop.height));
+  const cropX = Math.round(crop.x);
+  const cropY = Math.round(crop.y);
+
+  try {
+    if (cropX >= 0 && cropY >= 0 && cropX + cropW <= rotatedWidthPx && cropY + cropH <= rotatedHeightPx) {
+      return await sharp(rotatedPng)
+        .extract({ left: cropX, top: cropY, width: cropW, height: cropH })
+        .png()
+        .toBuffer();
+    }
+
+    const srcLeft = Math.max(0, cropX);
+    const srcTop = Math.max(0, cropY);
+    const srcRight = Math.min(rotatedWidthPx, cropX + cropW);
+    const srcBottom = Math.min(rotatedHeightPx, cropY + cropH);
+    const visibleW = srcRight - srcLeft;
+    const visibleH = srcBottom - srcTop;
+
+    let pipeline = sharp({
+      create: {
+        width: cropW,
+        height: cropH,
+        channels: 4,
+        background: transparentBackground(),
+      },
+    });
+
+    if (visibleW > 0 && visibleH > 0) {
+      const slice = await sharp(rotatedPng)
+        .extract({ left: srcLeft, top: srcTop, width: visibleW, height: visibleH })
+        .png()
+        .toBuffer();
+      pipeline = pipeline.composite([
+        {
+          input: slice,
+          left: srcLeft - cropX,
+          top: srcTop - cropY,
+        },
+      ]);
+    }
+
+    return await pipeline.png().toBuffer();
+  } catch {
+    return null;
+  }
+}
+
+/** Scaled + clipped artwork layer for extreme zoom-out (avoids huge crop canvases). */
+async function buildOverlayPngFromPlacement(
+  rotatedPng: Buffer,
+  rotatedWidthPx: number,
+  rotatedHeightPx: number,
+  region: { x: number; y: number; width: number; height: number },
+  printWidthPx: number,
+  printHeightPx: number,
+): Promise<{ png: Buffer; destLeft: number; destTop: number } | null> {
+  const placement = cropCompositePlacementOnPrint(
+    rotatedWidthPx,
+    rotatedHeightPx,
+    region,
+    printWidthPx,
+    printHeightPx,
+  );
+  const slice = visibleCompositeSlice({
+    left: placement.left,
+    top: placement.top,
+    width: placement.scaledWidthPx,
+    height: placement.scaledHeightPx,
+    canvasWidth: printWidthPx,
+    canvasHeight: printHeightPx,
+  });
+  if (!slice) return null;
+
   try {
     let pipeline = sharp(rotatedPng).resize(placement.scaledWidthPx, placement.scaledHeightPx, {
       fit: "fill",
@@ -171,43 +181,71 @@ async function buildOverlayPng(
       });
     }
 
-    return await pipeline.png().toBuffer();
+    const png = await pipeline.png().toBuffer();
+    return { png, destLeft: slice.destLeft, destTop: slice.destTop };
   } catch {
     return null;
   }
 }
 
-async function encodeWhitePrintJpeg(
-  overlayPng: Buffer,
-  destLeft: number,
-  destTop: number,
+async function buildPrintPngFromCrop(
+  rotated: { buffer: Buffer; width: number; height: number },
+  region: { x: number; y: number; width: number; height: number },
+  printWidthPx: number,
+  printHeightPx: number,
+  useWhite: boolean,
+): Promise<Buffer | null> {
+  if (region.width * region.height <= CROP_REGION_DIRECT_MAX_PIXELS) {
+    const cropPng = await buildExtractedCropPng(rotated.buffer, rotated.width, rotated.height, region);
+    if (!cropPng) return null;
+    return sharp(cropPng)
+      .resize(printWidthPx, printHeightPx, {
+        fit: "fill",
+        kernel: sharp.kernel.lanczos3,
+        withoutEnlargement: false,
+      })
+      .png()
+      .toBuffer();
+  }
+
+  const overlay = await buildOverlayPngFromPlacement(
+    rotated.buffer,
+    rotated.width,
+    rotated.height,
+    region,
+    printWidthPx,
+    printHeightPx,
+  );
+  if (!overlay) return null;
+
+  const background = useWhite ? whiteBackground() : transparentBackground();
+  return sharp({
+    create: {
+      width: printWidthPx,
+      height: printHeightPx,
+      channels: 4,
+      background,
+    },
+  })
+    .composite([{ input: overlay.png, left: overlay.destLeft, top: overlay.destTop }])
+    .png()
+    .toBuffer();
+}
+
+async function encodeWhitePrintJpegFromPng(
+  printPng: Buffer,
   printWidthPx: number,
   printHeightPx: number,
   storedMaxBytes: number,
 ): Promise<ListingArtworkEncodedPrint | null> {
-  const composite = [
-    {
-      input: overlayPng,
-      left: destLeft,
-      top: destTop,
-    },
-  ];
-
   let low = 52;
   let high = 92;
   let best: Buffer | null = null;
 
   while (low <= high) {
     const quality = Math.floor((low + high) / 2);
-    const body = await sharp({
-      create: {
-        width: printWidthPx,
-        height: printHeightPx,
-        channels: 3,
-        background: whiteBackground(),
-      },
-    })
-      .composite(composite)
+    const body = await sharp(printPng)
+      .flatten({ background: whiteBackground() })
       .jpeg({ quality, mozjpeg: true })
       .toBuffer();
 
@@ -220,15 +258,8 @@ async function encodeWhitePrintJpeg(
   }
 
   if (!best) {
-    const body = await sharp({
-      create: {
-        width: printWidthPx,
-        height: printHeightPx,
-        channels: 3,
-        background: whiteBackground(),
-      },
-    })
-      .composite(composite)
+    const body = await sharp(printPng)
+      .flatten({ background: whiteBackground() })
       .jpeg({ quality: 52, mozjpeg: true })
       .toBuffer();
     if (body.length > storedMaxBytes) return null;
@@ -244,29 +275,13 @@ async function encodeWhitePrintJpeg(
   };
 }
 
-async function encodeTransparentPrint(
-  overlayPng: Buffer,
-  destLeft: number,
-  destTop: number,
+async function encodeTransparentPrintFromPng(
+  printPng: Buffer,
   printWidthPx: number,
   printHeightPx: number,
   storedMaxBytes: number,
 ): Promise<ListingArtworkEncodedPrint | null> {
-  const base = () =>
-    sharp({
-      create: {
-        width: printWidthPx,
-        height: printHeightPx,
-        channels: 4,
-        background: transparentBackground(),
-      },
-    }).composite([
-      {
-        input: overlayPng,
-        left: destLeft,
-        top: destTop,
-      },
-    ]);
+  const base = () => sharp(printPng).ensureAlpha();
 
   const pngBody = await base().png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer();
   if (pngBody.length <= storedMaxBytes) {
@@ -347,44 +362,12 @@ export async function cropAndEncodeListingArtwork(
     });
     if (!region) return null;
 
-    const placement = cropCompositePlacementOnPrint(
-      rotated.width,
-      rotated.height,
-      region,
-      printWidthPx,
-      printHeightPx,
-    );
-
-    const slice = visibleCompositeSlice({
-      left: placement.left,
-      top: placement.top,
-      width: placement.scaledWidthPx,
-      height: placement.scaledHeightPx,
-      canvasWidth: printWidthPx,
-      canvasHeight: printHeightPx,
-    });
-    if (!slice) return null;
-
-    const overlayPng = await buildOverlayPng(rotated.buffer, placement, slice);
-    if (!overlayPng) return null;
+    const printPng = await buildPrintPngFromCrop(rotated, region, printWidthPx, printHeightPx, useWhite);
+    if (!printPng) return null;
 
     const encoded = useWhite
-      ? await encodeWhitePrintJpeg(
-          overlayPng,
-          slice.destLeft,
-          slice.destTop,
-          printWidthPx,
-          printHeightPx,
-          storedMaxBytes,
-        )
-      : await encodeTransparentPrint(
-          overlayPng,
-          slice.destLeft,
-          slice.destTop,
-          printWidthPx,
-          printHeightPx,
-          storedMaxBytes,
-        );
+      ? await encodeWhitePrintJpegFromPng(printPng, printWidthPx, printHeightPx, storedMaxBytes)
+      : await encodeTransparentPrintFromPng(printPng, printWidthPx, printHeightPx, storedMaxBytes);
 
     if (
       !encoded ||

@@ -67,8 +67,9 @@ export async function resolveListingArtworkProductPolicy(
         printAreaW,
         printAreaH,
         artworkSourceTier,
+        adminItem.name,
       ),
-      maxSourceBytes: listingArtworkSourceMaxBytesForPrintArea(printAreaW, printAreaH),
+      maxSourceBytes: listingArtworkSourceMaxBytesForPrintArea(printAreaW, printAreaH, adminItem.name),
     };
   }
 

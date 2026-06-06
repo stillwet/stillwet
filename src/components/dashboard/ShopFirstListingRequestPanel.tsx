@@ -272,15 +272,19 @@ export function ShopFirstListingRequestPanel(props: {
   const printAreaW = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
   const printAreaH = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
   const listingArtworkV2SourceMaxBytes = useMemo(
-    () => listingArtworkSourceMaxBytesForPrintArea(printAreaW, printAreaH),
-    [printAreaW, printAreaH],
+    () =>
+      listingArtworkSourceMaxBytesForPrintArea(
+        printAreaW,
+        printAreaH,
+        selectedCatalogGroup?.itemName ?? null,
+      ),
+    [printAreaW, printAreaH, selectedCatalogGroup?.itemName],
   );
   const listingArtworkV2SourceMaxMb = listingArtworkV2SourceMaxBytes / (1024 * 1024);
 
   useEffect(() => {
     if (!listingArtworkPreviewUrl) {
       setListingArtworkPixels(null);
-      setListingArtworkMeasureError(null);
       return;
     }
     setListingArtworkMeasureError(null);
@@ -382,6 +386,7 @@ export function ShopFirstListingRequestPanel(props: {
         if (!upload.ok) {
           setListingArtworkMeasureError(upload.error);
           setListingHasFile(false);
+          if (listingFileRef.current) listingFileRef.current.value = "";
           return;
         }
         setListingSourceKey(upload.sourceKey);
@@ -1038,6 +1043,11 @@ export function ShopFirstListingRequestPanel(props: {
             {artworkSourcePreparing ? (
               <p className="mt-2 text-[11px] text-zinc-500" role="status">
                 Preparing image…
+              </p>
+            ) : null}
+            {listingArtworkResolutionError && !listingArtworkPreviewUrl ? (
+              <p className="mt-2 text-[11px] text-amber-200/90" role="alert">
+                {listingArtworkResolutionError}
               </p>
             ) : null}
             {requiresPrintCrop && !listingSubmitArtworkFile && !listingPreparedArtwork ? (

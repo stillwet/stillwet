@@ -123,6 +123,31 @@ describe("cropListingArtworkBufferOnServer", () => {
     assert.ok(alphaAt(info.width - 1, 0) < 255);
   });
 
+  it("crops and resizes to print pixels with 90° rotation", async () => {
+    const src = await sharp({
+      create: {
+        width: 2000,
+        height: 1500,
+        channels: 3,
+        background: { r: 200, g: 50, b: 50 },
+      },
+    })
+      .jpeg()
+      .toBuffer();
+
+    const out = await cropListingArtworkBufferOnServer(src, {
+      pixelCrop: { x: 50, y: 100, width: 1500, height: 2000 },
+      rotation: 90,
+      printWidthPx: 420,
+      printHeightPx: 297,
+    });
+    assert.ok(out);
+
+    const meta = await sharp(out!).metadata();
+    assert.equal(meta.width, 420);
+    assert.equal(meta.height, 297);
+  });
+
   it("uses white letterbox corners when catalog item policy is white", async () => {
     const src = await sharp({
       create: {

@@ -11,6 +11,14 @@ import {
 /** Picker / form value: opaque token, not a storefront Product id until submit. */
 const PICK_PREFIX = "ab|";
 
+/** Admin catalog category tag (shop picker grouping). */
+export type ShopSetupCatalogCategoryTag = {
+  id: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+};
+
 /** One selectable catalog line (one admin baseline item). */
 export type ShopSetupCatalogOption = {
   /** Baseline pick token (submitted as `productId`); server maps to a stub Product. */
@@ -38,7 +46,19 @@ export type ShopSetupCatalogOption = {
 export type ShopSetupCatalogGroup = {
   itemId: string;
   itemName: string;
+  /** Primary category for grouping (lowest tag sortOrder). */
+  categoryTag: ShopSetupCatalogCategoryTag | null;
   option: Omit<ShopSetupCatalogOption, "label">;
+};
+
+/** Category subsection in the shop catalog picker. */
+export type ShopSetupCatalogCategorySection = {
+  categoryKey: string;
+  categoryName: string;
+  categorySortOrder: number;
+  /** Smallest print canvas in this category (used for sort order). */
+  minPrintAreaPx: number;
+  groups: ShopSetupCatalogGroup[];
 };
 
 /** Flat list for resolving selection (price min, labels). */
@@ -74,6 +94,7 @@ export type AdminBaselineRow = {
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   itemLargeListingArtwork: boolean;
   itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
+  catalogTags?: Array<{ tag: ShopSetupCatalogCategoryTag }>;
 };
 
 export type ParsedBaselinePick =
@@ -119,15 +140,118 @@ function exampleHrefFromAdminUrl(raw: string | null | undefined): string | null 
   return null;
 }
 
+const UNCategorizedCatalogCategoryKey = "__uncategorized__";
+const UNCategorizedCatalogCategoryName = "Other";
+
+/** Print canvas area in pixels (0 when unknown). */
+export function shopBaselineCatalogPrintAreaPixels(
+  printAreaWidthPx: number | null,
+  printAreaHeightPx: number | null,
+): number {
+  if (printAreaWidthPx == null || printAreaHeightPx == null) return 0;
+  if (printAreaWidthPx <= 0 || printAreaHeightPx <= 0) return 0;
+  return printAreaWidthPx * printAreaHeightPx;
+}
+
+export function shopBaselineCatalogGroupPrintAreaPixels(group: ShopSetupCatalogGroup): number {
+  return shopBaselineCatalogPrintAreaPixels(
+    group.option.printAreaWidthPx,
+    group.option.printAreaHeightPx,
+  );
+}
+
+function compareShopBaselineCatalogGroupsByPrintAreaAsc(
+  a: ShopSetupCatalogGroup,
+  b: ShopSetupCatalogGroup,
+): number {
+  const areaDiff =
+    shopBaselineCatalogGroupPrintAreaPixels(a) - shopBaselineCatalogGroupPrintAreaPixels(b);
+  if (areaDiff !== 0) return areaDiff;
+  return a.itemName.localeCompare(b.itemName, undefined, { sensitivity: "base" });
+}
+
+export function sortShopBaselineCatalogGroupsByPrintAreaAsc(
+  groups: ShopSetupCatalogGroup[],
+): ShopSetupCatalogGroup[] {
+  return [...groups].sort(compareShopBaselineCatalogGroupsByPrintAreaAsc);
+}
+
+function primaryCategoryTagForItem(
+  catalogTags: Array<{ tag: ShopSetupCatalogCategoryTag }> | undefined,
+): ShopSetupCatalogCategoryTag | null {
+  if (!catalogTags?.length) return null;
+  const tags = catalogTags.map((ct) => ct.tag);
+  tags.sort(
+    (a, b) =>
+      a.sortOrder - b.sortOrder ||
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+  return tags[0] ?? null;
+}
+
+function categoryKeyForGroup(group: ShopSetupCatalogGroup): string {
+  return group.categoryTag?.id ?? UNCategorizedCatalogCategoryKey;
+}
+
+function categoryNameForGroup(group: ShopSetupCatalogGroup): string {
+  return group.categoryTag?.name ?? UNCategorizedCatalogCategoryName;
+}
+
+function categorySortOrderForGroup(group: ShopSetupCatalogGroup): number {
+  return group.categoryTag?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+}
+
+/** Group catalog rows by category; categories ordered by smallest print canvas in each. */
+export function organizeShopBaselineCatalogByCategory(
+  groups: ShopSetupCatalogGroup[],
+): ShopSetupCatalogCategorySection[] {
+  const byCategory = new Map<string, ShopSetupCatalogGroup[]>();
+  for (const group of groups) {
+    const key = categoryKeyForGroup(group);
+    const bucket = byCategory.get(key);
+    if (bucket) bucket.push(group);
+    else byCategory.set(key, [group]);
+  }
+
+  const sections: ShopSetupCatalogCategorySection[] = [];
+  for (const [categoryKey, categoryGroups] of byCategory) {
+    const sortedGroups = sortShopBaselineCatalogGroupsByPrintAreaAsc(categoryGroups);
+    const sample = sortedGroups[0];
+    sections.push({
+      categoryKey,
+      categoryName: categoryNameForGroup(sample),
+      categorySortOrder: categorySortOrderForGroup(sample),
+      minPrintAreaPx: shopBaselineCatalogGroupPrintAreaPixels(sortedGroups[0]),
+      groups: sortedGroups,
+    });
+  }
+
+  sections.sort((a, b) => {
+    const aOther = a.categoryKey === UNCategorizedCatalogCategoryKey;
+    const bOther = b.categoryKey === UNCategorizedCatalogCategoryKey;
+    if (aOther && !bOther) return 1;
+    if (!aOther && bOther) return -1;
+    const byCanvas = a.minPrintAreaPx - b.minPrintAreaPx;
+    if (byCanvas !== 0) return byCanvas;
+    const byTagOrder = a.categorySortOrder - b.categorySortOrder;
+    if (byTagOrder !== 0) return byTagOrder;
+    return a.categoryName.localeCompare(b.categoryName, undefined, { sensitivity: "base" });
+  });
+
+  return sections;
+}
+
 /**
  * Shop “Add to store” options: one row per admin catalog item (item-level pricing only).
  */
 export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopSetupCatalogGroup[] {
   const out: ShopSetupCatalogGroup[] = [];
   for (const item of items) {
+    const categoryTag = primaryCategoryTagForItem(item.catalogTags);
     out.push({
       itemId: item.id,
       itemName: item.name,
+      categoryTag,
       option: {
         productId: encodeBaselinePickItem(item.id),
         minPriceCents: Math.max(0, item.itemMinPriceCents),
@@ -183,5 +307,8 @@ export function partitionShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup
       cameraOrVectorOnly.push(g);
     }
   }
-  return { phonePicSafe, cameraOrVectorOnly };
+  return {
+    phonePicSafe: sortShopBaselineCatalogGroupsByPrintAreaAsc(phonePicSafe),
+    cameraOrVectorOnly: sortShopBaselineCatalogGroupsByPrintAreaAsc(cameraOrVectorOnly),
+  };
 }

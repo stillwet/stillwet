@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeListingArtworkCropViewportSize } from "@/lib/listing-artwork-crop-viewport";
+import { computeListingArtworkCropViewportSize, listingArtworkComposeCropSize } from "@/lib/listing-artwork-crop-viewport";
 
 describe("computeListingArtworkCropViewportSize", () => {
   it("fills a wide container height for portrait print aspect", () => {
@@ -15,5 +15,29 @@ describe("computeListingArtworkCropViewportSize", () => {
     assert.ok(size);
     assert.equal(Math.round(size.width), 400);
     assert.ok(Math.abs(size.width / size.height - 16 / 9) < 0.001);
+  });
+
+  it("skips viewport cropSize override for large sources", () => {
+    const viewport = { width: 396, height: 520 };
+    assert.equal(
+      listingArtworkComposeCropSize({
+        viewportCropSize: viewport,
+        naturalWidth: 6000,
+        naturalHeight: 6000,
+      }),
+      undefined,
+    );
+  });
+
+  it("keeps viewport cropSize override for small sources", () => {
+    const viewport = { width: 396, height: 520 };
+    assert.deepEqual(
+      listingArtworkComposeCropSize({
+        viewportCropSize: viewport,
+        naturalWidth: 800,
+        naturalHeight: 600,
+      }),
+      viewport,
+    );
   });
 });

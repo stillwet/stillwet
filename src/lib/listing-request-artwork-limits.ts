@@ -98,12 +98,26 @@ export function isBlanketCatalogPrintArea(
   );
 }
 
+/** Blanket catalog row — print template or name fallback when print px are unset in admin. */
+export function isBlanketCatalogItem(
+  printAreaWidthPx: number | null,
+  printAreaHeightPx: number | null,
+  catalogItemName?: string | null,
+): boolean {
+  if (isBlanketCatalogPrintArea(printAreaWidthPx, printAreaHeightPx)) return true;
+  return String(catalogItemName ?? "")
+    .trim()
+    .toLowerCase()
+    .includes("blanket");
+}
+
 export function listingArtworkDecodeMaxPixelsForPrintArea(
   printAreaWidthPx: number | null,
   printAreaHeightPx: number | null,
   artworkSourceTier: "phone_pic_safe" | "camera_or_vector_only",
+  catalogItemName?: string | null,
 ): number {
-  if (isBlanketCatalogPrintArea(printAreaWidthPx, printAreaHeightPx)) {
+  if (isBlanketCatalogItem(printAreaWidthPx, printAreaHeightPx, catalogItemName)) {
     return LISTING_ARTWORK_BLANKET_DECODE_MAX_PIXELS;
   }
   if (artworkSourceTier === "camera_or_vector_only") {
@@ -115,8 +129,9 @@ export function listingArtworkDecodeMaxPixelsForPrintArea(
 export function listingArtworkSourceMaxBytesForPrintArea(
   printAreaWidthPx: number | null,
   printAreaHeightPx: number | null,
+  catalogItemName?: string | null,
 ): number {
-  if (isBlanketCatalogPrintArea(printAreaWidthPx, printAreaHeightPx)) {
+  if (isBlanketCatalogItem(printAreaWidthPx, printAreaHeightPx, catalogItemName)) {
     return LISTING_ARTWORK_BLANKET_SOURCE_MAX_BYTES;
   }
   return 50 * 1024 * 1024;

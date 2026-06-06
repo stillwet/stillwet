@@ -45,10 +45,18 @@ describe("blanket catalog print area helpers", () => {
       LISTING_ARTWORK_BLANKET_DECODE_MAX_PIXELS,
     );
     assert.equal(
+      listingArtworkDecodeMaxPixelsForPrintArea(null, null, "camera_or_vector_only", "Velveteen Blanket"),
+      LISTING_ARTWORK_BLANKET_DECODE_MAX_PIXELS,
+    );
+    assert.equal(
       listingArtworkDecodeMaxPixelsForPrintArea(5000, 7000, "camera_or_vector_only"),
       LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS_HIGH_RES,
     );
     assert.equal(listingArtworkSourceMaxBytesForPrintArea(6400, 8400), LISTING_ARTWORK_BLANKET_SOURCE_MAX_BYTES);
+    assert.equal(
+      listingArtworkSourceMaxBytesForPrintArea(null, null, "Microfiber Blanket"),
+      LISTING_ARTWORK_BLANKET_SOURCE_MAX_BYTES,
+    );
   });
 });
 

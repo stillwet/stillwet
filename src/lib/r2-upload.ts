@@ -378,6 +378,31 @@ export async function getR2ObjectWithContentType(
   }
 }
 
+/** Stream object from R2 with byte length (for sharp metadata without buffering entire file). */
+export async function openR2ObjectWithLength(
+  key: string,
+): Promise<{
+  body: NodeJS.ReadableStream;
+  contentType: string;
+  contentLength: number | null;
+} | null> {
+  const bucket = readR2BucketName();
+  if (!bucket) return null;
+  try {
+    const res = await r2S3Client().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    if (!res.Body) return null;
+    const contentType =
+      res.ContentType?.split(";")[0]?.trim() || contentTypeFromR2ObjectKey(key);
+    return {
+      body: res.Body as NodeJS.ReadableStream,
+      contentType,
+      contentLength: res.ContentLength ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Stream an object from R2 for same-origin browser compose (avoids presigned GET + CORS). */
 export async function openR2ObjectStream(
   key: string,

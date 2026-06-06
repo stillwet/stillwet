@@ -19,7 +19,7 @@ import {
 } from "@/lib/listing-artwork-print-area";
 import { compressListingArtworkCanvasToFile } from "@/lib/listing-artwork-source-compress";
 import { listingArtworkUseServerSideCrop } from "@/lib/listing-artwork-browser-crop-threshold";
-import { useListingArtworkCropViewportSize } from "@/lib/listing-artwork-crop-viewport";
+import { useListingArtworkCropViewportSize, listingArtworkComposeCropSize } from "@/lib/listing-artwork-crop-viewport";
 import {
   listingArtworkFileWithinUploadCap,
   listingArtworkUploadCapError,
@@ -80,6 +80,7 @@ export function ListingArtworkCropDialog({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [applyError, setApplyError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [mediaNatural, setMediaNatural] = useState<{ width: number; height: number } | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -88,8 +89,21 @@ export function ListingArtworkCropDialog({
       setCrop({ x: 0, y: 0 });
       setCroppedAreaPixels(null);
       setApplyError(null);
+      setMediaNatural(null);
     }
   }, [open, imageUrl]);
+
+  const composeCropSize = useMemo(
+    () =>
+      mediaNatural
+        ? listingArtworkComposeCropSize({
+            viewportCropSize: cropSize,
+            naturalWidth: mediaNatural.width,
+            naturalHeight: mediaNatural.height,
+          })
+        : cropSize ?? undefined,
+    [cropSize, mediaNatural],
+  );
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixelsInner: Area) => {
     setCroppedAreaPixels(croppedAreaPixelsInner);
@@ -211,27 +225,31 @@ export function ListingArtworkCropDialog({
           className="relative h-[min(60vh,520px)] min-h-[280px] w-full"
           style={letterboxPreviewStyle}
         >
-          {cropSize ? (
-            <Cropper
-              key={imageUrl}
-              image={imageUrl}
-              crop={crop}
-              zoom={zoom}
-              rotation={rotation}
-              aspect={aspect}
-              cropSize={cropSize}
-              onCropChange={setCrop}
-              onZoomChange={(z) =>
-                setZoom(Math.min(CROP_MAX_ZOOM, Math.max(CROP_MIN_ZOOM, z)))
-              }
-              onRotationChange={setRotation}
-              onCropComplete={onCropComplete}
-              restrictPosition={false}
-              minZoom={CROP_MIN_ZOOM}
-              maxZoom={CROP_MAX_ZOOM}
-              style={{ containerStyle: cropperContainerStyle }}
-            />
-          ) : null}
+          <Cropper
+            key={imageUrl}
+            image={imageUrl}
+            crop={crop}
+            zoom={zoom}
+            rotation={rotation}
+            aspect={aspect}
+            {...(composeCropSize ? { cropSize: composeCropSize } : {})}
+            onCropChange={setCrop}
+            onZoomChange={(z) =>
+              setZoom(Math.min(CROP_MAX_ZOOM, Math.max(CROP_MIN_ZOOM, z)))
+            }
+            onRotationChange={setRotation}
+            onCropComplete={onCropComplete}
+            onMediaLoaded={(mediaSize) => {
+              setMediaNatural({
+                width: mediaSize.naturalWidth,
+                height: mediaSize.naturalHeight,
+              });
+            }}
+            restrictPosition={false}
+            minZoom={CROP_MIN_ZOOM}
+            maxZoom={CROP_MAX_ZOOM}
+            style={{ containerStyle: cropperContainerStyle }}
+          />
         </div>
         <div className="space-y-2 border-t border-zinc-800 px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
