@@ -5,11 +5,12 @@ import {
   shopNewSaleNoticeBody,
 } from "@/lib/shop-new-sale-notice-content";
 
-test("shopNewSaleNoticeBody mentions Sales tab and 24 hours", () => {
+test("shopNewSaleNoticeBody mentions sale and 24 hour dashboard delay", () => {
   const body = shopNewSaleNoticeBody();
-  assert.match(body, /Sales tab/i);
+  assert.match(body, /Cha-ching!/i);
+  assert.match(body, /made a sale/i);
   assert.match(body, /24 hours/i);
-  assert.match(body, /\[Sales tab\]\(/);
+  assert.match(body, /dashboard/i);
 });
 
 test("new sale notice kind is stable", () => {

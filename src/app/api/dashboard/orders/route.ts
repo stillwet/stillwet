@@ -17,6 +17,7 @@ export async function GET(req: Request) {
     const chunks = await loadDashboardPlatformOrdersTab(resolved.shop.shopId);
     return NextResponse.json({
       orders: chunks.paidOrders,
+      profitSummary: null,
       periodKey: null,
       builtAtIso: null,
       fromCache: false,
@@ -27,6 +28,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     orders: result.orders,
+    profitSummary: result.profitSummary,
     periodKey: result.periodKey,
     builtAtIso: result.builtAtIso,
     fromCache: result.fromCache,

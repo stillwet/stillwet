@@ -57,6 +57,9 @@ import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody"
 import { dashboardListingMinPriceHintCents } from "@/lib/listing-cart-price";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
 import {
+  type ShopSalesProfitSummary,
+} from "@/lib/shop-sales-profit-summary";
+import {
   parseListingStorefrontCatalogImageSelection,
   productImageUrlsUnionHero,
   productPrimaryImageForShopListing,
@@ -256,6 +259,27 @@ function formatMoney(cents: number) {
     style: "currency",
     currency: "USD",
   }).format(cents / 100);
+}
+
+function ShopSalesProfitSummaryCards({ summary }: { summary: ShopSalesProfitSummary }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div className="rounded-lg border border-zinc-800/90 bg-zinc-950/40 px-4 py-3">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Monthly profit</p>
+        <p className="mt-1 text-lg font-medium tabular-nums text-blue-100">
+          {formatMoney(summary.monthlyProfitCents)}
+        </p>
+        <p className="mt-0.5 text-[10px] text-zinc-600">{summary.monthTitle}</p>
+      </div>
+      <div className="rounded-lg border border-zinc-800/90 bg-zinc-950/40 px-4 py-3">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">YTD profit</p>
+        <p className="mt-1 text-lg font-medium tabular-nums text-blue-100">
+          {formatMoney(summary.ytdProfitCents)}
+        </p>
+        <p className="mt-0.5 text-[10px] text-zinc-600">{summary.ytdYear}</p>
+      </div>
+    </div>
+  );
 }
 
 /** UTC calendar date as MM/DD for listing status lines. */
@@ -1149,6 +1173,8 @@ export function DashboardMainTabs(props: {
     removed: GroupedDashboardListing<DashboardListingRow>[];
   };
   paidOrders: DashboardPaidOrderRow[];
+  /** Pacific month + YTD merchandise shop profit (creator Sales tab). */
+  salesProfitSummary?: ShopSalesProfitSummary | null;
   /** R2 configured for optional listing photo uploads (creator shops). */
   r2Configured: boolean;
   /** When set, Request listing tab pre-fills from this draft (baseline stub listings only). */
@@ -1182,6 +1208,7 @@ export function DashboardMainTabs(props: {
     listings: initialListings,
     groupedListingSections: initialGroupedListingSections,
     paidOrders: initialPaidOrders,
+    salesProfitSummary: initialSalesProfitSummary = null,
     r2Configured,
     draftListingRequestPrefill: initialDraftPrefill = null,
     mockListingFeeCheckout,
@@ -1212,6 +1239,7 @@ export function DashboardMainTabs(props: {
   const [listings, setListings] = useState(initialListings);
   const [groupedListingSections, setGroupedListingSections] = useState(initialGroupedListingSections);
   const [paidOrders, setPaidOrders] = useState(initialPaidOrders);
+  const [salesProfitSummary, setSalesProfitSummary] = useState(initialSalesProfitSummary);
   const [notifications, setNotifications] = useState(initialNotifications);
   const [notificationsPage, setNotificationsPage] = useState(1);
   const [supportChat, setSupportChat] = useState(initialSupportChat);
@@ -1240,6 +1268,9 @@ export function DashboardMainTabs(props: {
     ? tabFetch.groupedListingSections
     : groupedListingSections;
   const effectivePaidOrders = clientTabFetch ? tabFetch.paidOrders : paidOrders;
+  const effectiveSalesProfitSummary = clientTabFetch
+    ? tabFetch.salesProfitSummary
+    : salesProfitSummary;
   const effectiveNotifications = clientTabFetch ? tabFetch.notifications : notifications;
   const effectiveSupportChat = clientTabFetch ? tabFetch.supportChat : supportChat;
   const effectiveModerationPhrases = clientTabFetch
@@ -2094,6 +2125,9 @@ export function DashboardMainTabs(props: {
         ) : (
             <>
         {activeTab === "orders" && showDemoPurchaseButton ? <DemoShopPurchaseButtonLazy /> : null}
+        {!isPlatform && effectiveSalesProfitSummary ? (
+          <ShopSalesProfitSummaryCards summary={effectiveSalesProfitSummary} />
+        ) : null}
         {effectivePaidOrders.length > 0 ? (
           <>
             <div

@@ -10,6 +10,7 @@ import {
   updateCartLineFromForm,
   removeCartLineFromForm,
 } from "@/actions/cart";
+import { notifyCartHeaderChanged } from "@/lib/cart-header-sync-client";
 import type { CartCheckoutState } from "@/lib/cart-checkout-state";
 
 function formatPrice(cents: number) {
@@ -67,6 +68,7 @@ export function CartAndCheckoutClient({
   const handleQtySubmit = (formData: FormData) => {
     startTransition(async () => {
       await updateCartLineFromForm(formData);
+      notifyCartHeaderChanged();
       if (mode === "drawer") await refetch();
       router.refresh();
     });
@@ -75,6 +77,7 @@ export function CartAndCheckoutClient({
   const handleRemoveSubmit = (formData: FormData) => {
     startTransition(async () => {
       await removeCartLineFromForm(formData);
+      notifyCartHeaderChanged();
       if (mode === "drawer") await refetch();
       router.refresh();
     });

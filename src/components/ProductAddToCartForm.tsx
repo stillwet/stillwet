@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addToCart } from "@/actions/cart";
+import { notifyCartHeaderChanged } from "@/lib/cart-header-sync-client";
 
 const ADDED_MS = 2200;
 
@@ -33,6 +34,7 @@ export function ProductAddToCartForm({
         startTransition(async () => {
           const r = await addToCart(productId, 1, undefined, shopSlug ?? undefined);
           if (!r.ok) return;
+          notifyCartHeaderChanged();
           router.refresh();
           setAdded(true);
           if (timerRef.current) clearTimeout(timerRef.current);

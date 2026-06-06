@@ -7,6 +7,7 @@ import type {
   DashboardNoticeRow,
   DashboardPaidOrderRow,
 } from "@/components/dashboard/DashboardMainTabs";
+import type { ShopSalesProfitSummary } from "@/lib/shop-sales-profit-summary";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import type { ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import type { GroupedDashboardListing } from "@/lib/dashboard-legacy-baseline-listing-groups";
@@ -69,6 +70,7 @@ export function useDashboardTabFetch(options: {
     removed: GroupedDashboardListing<DashboardListingRow>[];
   }>({ live: [], request: [], removed: [] });
   const [paidOrders, setPaidOrders] = useState<DashboardPaidOrderRow[]>([]);
+  const [salesProfitSummary, setSalesProfitSummary] = useState<ShopSalesProfitSummary | null>(null);
   const [notifications, setNotifications] = useState<{
     rows: DashboardNoticeRow[];
     unreadCount: number;
@@ -120,8 +122,12 @@ export function useDashboardTabFetch(options: {
             return;
           }
           if (tab === "orders") {
-            const data = await fetchJson<{ orders: DashboardPaidOrderRow[] }>("/api/dashboard/orders");
+            const data = await fetchJson<{
+              orders: DashboardPaidOrderRow[];
+              profitSummary: ShopSalesProfitSummary | null;
+            }>("/api/dashboard/orders");
             setPaidOrders(data.orders);
+            setSalesProfitSummary(data.profitSummary);
             markLoaded("orders");
             return;
           }
@@ -186,6 +192,7 @@ export function useDashboardTabFetch(options: {
     listings,
     groupedListingSections,
     paidOrders,
+    salesProfitSummary,
     notifications,
     supportChat,
     requestListingCatalog,

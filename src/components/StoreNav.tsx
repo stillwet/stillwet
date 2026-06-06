@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CartDrawer } from "@/components/CartDrawer";
+import { CART_HEADER_CHANGED_EVENT } from "@/lib/cart-header-sync-client";
 import { PLATFORM_SHOP_SLUG, shopAllProductsHref, shopCartHref } from "@/lib/marketplace-constants";
 import { BrandLogoLink } from "@/components/BrandLogoLink";
 
@@ -48,9 +49,11 @@ export function StoreNav({
   useEffect(() => {
     if (!hydrateHeaderState) return;
     let alive = true;
-    void fetch("/api/header-state", { credentials: "same-origin" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: HeaderState | null) => {
+
+    async function refreshHeaderState() {
+      try {
+        const res = await fetch("/api/header-state", { credentials: "same-origin" });
+        const data = res.ok ? ((await res.json()) as HeaderState) : null;
         if (!alive || !data) return;
         setHeaderState({
           cartQty: Number.isFinite(data.cartQty) ? Math.max(0, Math.floor(data.cartQty)) : 0,
@@ -61,10 +64,16 @@ export function StoreNav({
               ? data.shopOwnerDisplayName
               : undefined,
         });
-      })
-      .catch(() => {});
+      } catch {
+        // Offline or unreachable — keep showing last known header state.
+      }
+    }
+
+    void refreshHeaderState();
+    window.addEventListener(CART_HEADER_CHANGED_EVENT, refreshHeaderState);
     return () => {
       alive = false;
+      window.removeEventListener(CART_HEADER_CHANGED_EVENT, refreshHeaderState);
     };
   }, [hydrateHeaderState]);
 

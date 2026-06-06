@@ -162,31 +162,22 @@ export function CheckoutForm({
             <span>Subtotal</span>
             <span className="text-zinc-200">{formatPrice(subtotalCents)}</span>
           </div>
-          <div className="mt-2 flex justify-between">
-            <span>Shipping</span>
-            <span className="text-zinc-200">
-              {shippingCents === 0 ? "Free shipping" : formatPrice(shippingCents)}
-            </span>
-          </div>
-          <div className="mt-2 flex justify-between">
-            <span>Sales tax</span>
-            {taxCents != null ? (
-              <span className="text-zinc-200">{formatPrice(taxCents)}</span>
-            ) : (
-              <span className="text-right text-xs text-zinc-500 italic">Calculated at checkout</span>
-            )}
-          </div>
-          {paymentProcessingCents > 0 ? (
+          {subtotalCents > 0 ? (
             <div className="mt-2 flex justify-between">
               <span>Payment Processing</span>
               <span className="text-zinc-200">{formatPrice(paymentProcessingCents)}</span>
             </div>
           ) : null}
           <div className="mt-2 flex items-center justify-between gap-3">
-            <label htmlFor="checkout-tip" className="shrink-0">
-              Tip
-            </label>
-            <div className="relative shrink-0">
+            <div className="min-w-0 flex-1">
+              <label htmlFor="checkout-tip" className="block leading-none">
+                Tip
+              </label>
+              <p className="mt-1 text-[10px] italic leading-tight text-zinc-600">
+                (Optional) 25 cent platform fee; the rest goes to the creator.
+              </p>
+            </div>
+            <div className="relative shrink-0 self-center">
               {tipMaxNotice ? (
                 <div
                   role="status"
@@ -205,13 +196,24 @@ export function CheckoutForm({
                 onChange={(e) => syncTipFromInput(e.target.value)}
                 onFocus={(e) => e.target.select()}
                 onBlur={formatTipOnBlur}
-                className="w-[3rem] shrink-0 rounded-md border border-zinc-700 bg-zinc-950 px-1 py-0.5 text-right text-xs tabular-nums text-zinc-400 focus:border-zinc-500 focus:text-zinc-200 focus:outline-none"
+                className="h-7 w-[3.25rem] shrink-0 rounded-md border border-zinc-700 bg-zinc-950 px-1.5 text-right text-sm tabular-nums leading-none text-zinc-200 focus:border-zinc-500 focus:outline-none"
               />
             </div>
           </div>
-          <p className="mt-0.5 text-[10px] italic leading-tight text-zinc-600">
-            (Optional) 25 cent platform fee; the rest goes to the creator.
-          </p>
+          <div className="mt-2 flex justify-between">
+            <span>Sales tax</span>
+            {taxCents != null ? (
+              <span className="text-zinc-200">{formatPrice(taxCents)}</span>
+            ) : (
+              <span className="text-right text-xs text-zinc-500 italic">Calculated at checkout</span>
+            )}
+          </div>
+          <div className="mt-2 flex justify-between">
+            <span>Shipping</span>
+            <span className="text-zinc-200">
+              {shippingCents === 0 ? "Free shipping" : formatPrice(shippingCents)}
+            </span>
+          </div>
           <div className="mt-3 flex justify-between border-t border-zinc-800/80 pt-3 font-medium text-zinc-100">
             <span>Estimated total</span>
             <span>

@@ -12,6 +12,10 @@ import {
   readShopSalesDashboardSnapshot,
   writeShopSalesDashboardSnapshot,
 } from "@/lib/shop-sales-dashboard-snapshot";
+import {
+  loadShopSalesProfitSummary,
+  type ShopSalesProfitSummary,
+} from "@/lib/shop-sales-profit-summary";
 
 type OrderLineForDash = Prisma.OrderGetPayload<{
   select: {
@@ -95,6 +99,7 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
 
 export type LoadPaidOrdersForShopDashboardResult = {
   orders: DashboardPaidOrderRow[];
+  profitSummary: ShopSalesProfitSummary;
   periodKey: string;
   builtAtIso: string | null;
   fromCache: boolean;
@@ -109,11 +114,13 @@ export async function loadPaidOrdersForShopDashboard(
   options?: { force?: boolean },
 ): Promise<LoadPaidOrdersForShopDashboardResult> {
   const periodKey = pacificCalendarDateKey();
+  const profitSummary = await loadShopSalesProfitSummary(shopId);
   if (!options?.force) {
     const cached = await readShopSalesDashboardSnapshot(shopId, periodKey);
     if (cached.ok) {
       return {
         orders: cached.orders,
+        profitSummary,
         periodKey: cached.periodKey,
         builtAtIso: cached.builtAtIso,
         fromCache: true,
@@ -125,6 +132,7 @@ export async function loadPaidOrdersForShopDashboard(
   await writeShopSalesDashboardSnapshot(shopId, periodKey, orders);
   return {
     orders,
+    profitSummary,
     periodKey,
     builtAtIso: new Date().toISOString(),
     fromCache: false,

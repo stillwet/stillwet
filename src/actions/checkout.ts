@@ -249,6 +249,17 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
     });
   }
 
+  const paymentProcessingLine = stripeCheckoutPaymentProcessingLineItem({
+    subtotalCents,
+    shippingCents: ship,
+    tipCents,
+    includeTaxService,
+    exclusiveTax: true,
+  });
+  if (paymentProcessingLine) {
+    stripeLineItems.push(paymentProcessingLine);
+  }
+
   if (tipCents > 0) {
     stripeLineItems.push({
       quantity: 1,
@@ -263,17 +274,6 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
         },
       },
     });
-  }
-
-  const paymentProcessingLine = stripeCheckoutPaymentProcessingLineItem({
-    subtotalCents,
-    shippingCents: ship,
-    tipCents,
-    includeTaxService,
-    exclusiveTax: true,
-  });
-  if (paymentProcessingLine) {
-    stripeLineItems.push(paymentProcessingLine);
   }
 
   const order = await prisma.$transaction(async (tx) => {
