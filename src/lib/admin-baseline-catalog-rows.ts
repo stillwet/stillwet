@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { AdminBaselineRow } from "@/lib/shop-baseline-catalog";
 import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
+import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 
 const adminCatalogSelect = {
   id: true,
@@ -32,6 +33,7 @@ export type AdminCatalogItemArtworkPolicyRow = {
   itemPrintAreaHeightPx: number | null;
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   itemLargeListingArtwork: boolean;
+  itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
 };
 
 /** Print-area metadata for listing submit validation. */
@@ -47,6 +49,7 @@ export async function loadAdminCatalogItemArtworkPolicy(
       itemPrintAreaHeightPx: true,
       itemArtworkLetterboxFill: true,
       itemLargeListingArtwork: true,
+      itemArtworkSourceTierOverride: true,
     },
   });
 }

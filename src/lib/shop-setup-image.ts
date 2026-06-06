@@ -268,10 +268,14 @@ export async function cropAndPrepareListingArtworkForStorage(
   printW?: number | null,
   printH?: number | null,
   letterboxFill?: ListingArtworkLetterboxFill | null,
+  maxDecodePixels?: number,
 ): Promise<ListingRequestArtworkUpload | null> {
   if (input.length > LISTING_UPLOAD_MAX_BYTES) return null;
 
-  const encoded = await cropAndEncodeListingArtwork(input, crop, storedMaxBytes, { letterboxFill });
+  const encoded = await cropAndEncodeListingArtwork(input, crop, storedMaxBytes, {
+    letterboxFill,
+    maxDecodePixels,
+  });
   if (!encoded) return null;
   if (!dimensionsPreserved(encoded.width, encoded.height, printW, printH)) return null;
 

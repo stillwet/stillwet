@@ -9,6 +9,7 @@ import {
   listingArtworkV2SourceCapError,
   listingArtworkV2SourceWithinCap,
 } from "@/lib/listing-artwork-v2/limits";
+import { resolveListingArtworkProductPolicy } from "@/lib/listing-artwork-product-policy";
 import { resolveDashboardTabApiShop } from "@/lib/dashboard-tab-api-session";
 
 export const runtime = "nodejs";
@@ -26,6 +27,7 @@ function listingArtworkExtensionForContentType(contentType: string): string | nu
 type InitBody = {
   contentType?: string;
   byteSize?: number;
+  productId?: string;
 };
 
 export async function POST(request: Request) {
@@ -49,6 +51,7 @@ export async function POST(request: Request) {
 
   const contentType = String(body.contentType ?? "").trim();
   const byteSize = Number(body.byteSize);
+  const productId = String(body.productId ?? "").trim();
   const ext = listingArtworkExtensionForContentType(contentType);
 
   if (!ext) {
@@ -57,8 +60,18 @@ export async function POST(request: Request) {
   if (!Number.isFinite(byteSize) || byteSize <= 0) {
     return NextResponse.json({ error: "Choose an artwork file to upload." }, { status: 400 });
   }
-  if (!listingArtworkV2SourceWithinCap(byteSize)) {
-    return NextResponse.json({ error: listingArtworkV2SourceCapError() }, { status: 413 });
+  if (!productId) {
+    return NextResponse.json({ error: "Select a catalog item before uploading artwork." }, { status: 400 });
+  }
+
+  const policy = await resolveListingArtworkProductPolicy(productId);
+  if (!policy) {
+    return NextResponse.json({ error: "That catalog item is not available." }, { status: 400 });
+  }
+
+  const maxSourceBytes = policy.maxSourceBytes;
+  if (!listingArtworkV2SourceWithinCap(byteSize, maxSourceBytes)) {
+    return NextResponse.json({ error: listingArtworkV2SourceCapError(maxSourceBytes) }, { status: 413 });
   }
 
   const writeCheck = await verifyListingArtworkStagingR2Write(resolved.shop.shopId);

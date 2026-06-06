@@ -21,6 +21,7 @@ import {
 import { buildListingArtworkV2PreviewObjectUrl } from "@/lib/listing-artwork-v2/preview-client";
 import type { ListingArtworkTransformV2 } from "@/lib/listing-artwork-v2/transform";
 import { listingArtworkCropPayloadToTransformV2 } from "@/lib/listing-artwork-v2/transform";
+import { useListingArtworkCropViewportSize } from "@/lib/listing-artwork-crop-viewport";
 
 export type ListingArtworkComposeCompleteResult = {
   transform: ListingArtworkTransformV2;
@@ -50,6 +51,18 @@ export function ListingArtworkComposeDialog({
   const letterboxPreviewStyle = useMemo(
     () => listingArtworkLetterboxPreviewStyle(artworkLetterboxFill),
     [artworkLetterboxFill],
+  );
+  const { containerRef, cropSize } = useListingArtworkCropViewportSize(aspect);
+  const cropperContainerStyle = useMemo(
+    () => ({
+      ...letterboxPreviewStyle,
+      position: "absolute" as const,
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+    }),
+    [letterboxPreviewStyle],
   );
 
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -206,27 +219,34 @@ export function ListingArtworkComposeDialog({
           </p>
         </div>
         <div className="grid gap-0 md:grid-cols-[1fr_min(200px,35%)]">
-          <div className="relative h-[min(52vh,400px)] w-full" style={letterboxPreviewStyle}>
-            <Cropper
-              key={imageUrl}
-              image={imageUrl}
-              crop={crop}
-              zoom={zoom}
-              rotation={rotation}
-              aspect={aspect}
-              onCropChange={setCrop}
-              onZoomChange={(z) =>
-                setZoom(
-                  Math.min(LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM, Math.max(LISTING_ARTWORK_V2_COMPOSE_MIN_ZOOM, z)),
-                )
-              }
-              onRotationChange={setRotation}
-              onCropComplete={onCropComplete}
-              restrictPosition={false}
-              minZoom={LISTING_ARTWORK_V2_COMPOSE_MIN_ZOOM}
-              maxZoom={LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM}
-              style={{ containerStyle: letterboxPreviewStyle }}
-            />
+          <div
+            ref={containerRef}
+            className="relative h-[min(60vh,520px)] min-h-[280px] w-full"
+            style={letterboxPreviewStyle}
+          >
+            {cropSize ? (
+              <Cropper
+                key={imageUrl}
+                image={imageUrl}
+                crop={crop}
+                zoom={zoom}
+                rotation={rotation}
+                aspect={aspect}
+                cropSize={cropSize}
+                onCropChange={setCrop}
+                onZoomChange={(z) =>
+                  setZoom(
+                    Math.min(LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM, Math.max(LISTING_ARTWORK_V2_COMPOSE_MIN_ZOOM, z)),
+                  )
+                }
+                onRotationChange={setRotation}
+                onCropComplete={onCropComplete}
+                restrictPosition={false}
+                minZoom={LISTING_ARTWORK_V2_COMPOSE_MIN_ZOOM}
+                maxZoom={LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM}
+                style={{ containerStyle: cropperContainerStyle }}
+              />
+            ) : null}
           </div>
           {livePreviewUrl ? (
             <div className="hidden border-l border-zinc-800 p-3 md:block">

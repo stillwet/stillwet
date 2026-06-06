@@ -17,6 +17,7 @@ sharp.concurrency(1);
 
 export type ListingArtworkPrintBuildOptions = {
   letterboxFill?: ListingArtworkLetterboxFill | null;
+  maxDecodePixels?: number;
 };
 
 export type ListingArtworkEncodedPrint = {
@@ -110,7 +111,7 @@ async function buildRotatedImagePng(
   rotation: number,
 ): Promise<{ buffer: Buffer; width: number; height: number } | null> {
   if (rotation % 360 === 0) {
-    const buffer = await sharp(input, SHARP_INPUT).rotate().png().toBuffer();
+    const buffer = await sharp(input, SHARP_INPUT).rotate().toBuffer();
     const meta = await sharp(buffer).metadata();
     if (!meta.width || !meta.height) return null;
     return { buffer, width: meta.width, height: meta.height };
@@ -328,7 +329,8 @@ export async function cropAndEncodeListingArtwork(
 
     const sourceWidthPx = orientedMeta.width;
     const sourceHeightPx = orientedMeta.height;
-    if (sourceWidthPx * sourceHeightPx > LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS) return null;
+    const maxDecodePixels = options?.maxDecodePixels ?? LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS;
+    if (sourceWidthPx * sourceHeightPx > maxDecodePixels) return null;
 
     const rotated = await buildRotatedImagePng(input, sourceWidthPx, sourceHeightPx, rotation);
     if (!rotated) return null;

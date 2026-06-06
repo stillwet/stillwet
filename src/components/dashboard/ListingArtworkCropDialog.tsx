@@ -19,6 +19,7 @@ import {
 } from "@/lib/listing-artwork-print-area";
 import { compressListingArtworkCanvasToFile } from "@/lib/listing-artwork-source-compress";
 import { listingArtworkUseServerSideCrop } from "@/lib/listing-artwork-browser-crop-threshold";
+import { useListingArtworkCropViewportSize } from "@/lib/listing-artwork-crop-viewport";
 import {
   listingArtworkFileWithinUploadCap,
   listingArtworkUploadCapError,
@@ -59,6 +60,18 @@ export function ListingArtworkCropDialog({
   const letterboxPreviewStyle = useMemo(
     () => listingArtworkLetterboxPreviewStyle(artworkLetterboxFill),
     [artworkLetterboxFill],
+  );
+  const { containerRef, cropSize } = useListingArtworkCropViewportSize(aspect);
+  const cropperContainerStyle = useMemo(
+    () => ({
+      ...letterboxPreviewStyle,
+      position: "absolute" as const,
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+    }),
+    [letterboxPreviewStyle],
   );
   const preferAlphaExport = !listingArtworkLetterboxFillUsesWhite(artworkLetterboxFill);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -193,25 +206,32 @@ export function ListingArtworkCropDialog({
             Crop artwork to print area
           </h3>
         </div>
-        <div className="relative h-[min(52vh,400px)] w-full" style={letterboxPreviewStyle}>
-          <Cropper
-            key={imageUrl}
-            image={imageUrl}
-            crop={crop}
-            zoom={zoom}
-            rotation={rotation}
-            aspect={aspect}
-            onCropChange={setCrop}
-            onZoomChange={(z) =>
-              setZoom(Math.min(CROP_MAX_ZOOM, Math.max(CROP_MIN_ZOOM, z)))
-            }
-            onRotationChange={setRotation}
-            onCropComplete={onCropComplete}
-            restrictPosition={false}
-            minZoom={CROP_MIN_ZOOM}
-            maxZoom={CROP_MAX_ZOOM}
-            style={{ containerStyle: letterboxPreviewStyle }}
-          />
+        <div
+          ref={containerRef}
+          className="relative h-[min(60vh,520px)] min-h-[280px] w-full"
+          style={letterboxPreviewStyle}
+        >
+          {cropSize ? (
+            <Cropper
+              key={imageUrl}
+              image={imageUrl}
+              crop={crop}
+              zoom={zoom}
+              rotation={rotation}
+              aspect={aspect}
+              cropSize={cropSize}
+              onCropChange={setCrop}
+              onZoomChange={(z) =>
+                setZoom(Math.min(CROP_MAX_ZOOM, Math.max(CROP_MIN_ZOOM, z)))
+              }
+              onRotationChange={setRotation}
+              onCropComplete={onCropComplete}
+              restrictPosition={false}
+              minZoom={CROP_MIN_ZOOM}
+              maxZoom={CROP_MAX_ZOOM}
+              style={{ containerStyle: cropperContainerStyle }}
+            />
+          ) : null}
         </div>
         <div className="space-y-2 border-t border-zinc-800 px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">

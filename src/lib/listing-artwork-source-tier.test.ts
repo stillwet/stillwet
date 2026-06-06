@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { ADMIN_CATALOG_PRINT_AREA_FIXTURES } from "@/lib/admin-catalog-print-areas";
 import {
   computedCatalogArtworkSourceTier,
+  listingArtworkDecodeMaxPixelsForSourceTier,
   referencePhoneEffectiveDpiForPrint,
   resolveCatalogArtworkSourceTier,
 } from "@/lib/listing-artwork-source-tier";
@@ -55,5 +56,12 @@ describe("resolveCatalogArtworkSourceTier", () => {
       }),
       "phone_pic_safe",
     );
+  });
+});
+
+describe("listingArtworkDecodeMaxPixelsForSourceTier", () => {
+  it("allows higher decode only for camera/vector only tier", () => {
+    assert.equal(listingArtworkDecodeMaxPixelsForSourceTier("phone_pic_safe"), 24_000_000);
+    assert.equal(listingArtworkDecodeMaxPixelsForSourceTier("camera_or_vector_only"), 54_000_000);
   });
 });

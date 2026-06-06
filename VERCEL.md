@@ -162,7 +162,8 @@ When enabled, large catalog items (blanket, body pillow, large poster) use **pre
 
 - `POST /api/dashboard/listing-artwork/upload/init` — mint presigned PUT (50 MB source cap)
 - Browser PUT → R2 `shops/{shopId}/listing-source/{uuid}.ext`
-- `POST /api/dashboard/listing-artwork/upload/complete` — Sharp metadata only (24 MP decode cap)
+- `POST /api/dashboard/listing-artwork/upload/complete` — Sharp metadata; **24 MP** decode cap for phone-safe items, **~54 MP** for Camera / vector only catalog items (requires `productId`)
+- Same-origin `GET /api/dashboard/listing-artwork/source` — compose UI streams source from R2 (no presigned GET / CORS)
 - Compose UI + capped client preview (480 px out)
 - `POST /api/dashboard/listing-artwork/bake` — pipeline encode from `sourceKey` + transform JSON; deletes source on success
 

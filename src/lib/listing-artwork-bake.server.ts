@@ -53,8 +53,10 @@ async function bakeListingArtworkFromBuffer(params: {
   printAreaH: number | null;
   letterboxFill: ListingArtworkLetterboxFill | null;
   catalogImageRequirementLabel?: string | null;
+  maxDecodePixels?: number;
 }): Promise<ListingArtworkBakeResult> {
-  const { shopId, sourceBuffer, cropPayload, printAreaW, printAreaH, letterboxFill } = params;
+  const { shopId, sourceBuffer, cropPayload, printAreaW, printAreaH, letterboxFill, maxDecodePixels } =
+    params;
 
   let artwork: Awaited<ReturnType<typeof cropAndPrepareListingArtworkForStorage>>;
   try {
@@ -65,6 +67,7 @@ async function bakeListingArtworkFromBuffer(params: {
       printAreaW,
       printAreaH,
       letterboxFill,
+      maxDecodePixels,
     );
   } catch (e) {
     console.error("[bakeListingArtworkFromBuffer] crop failed", { shopId, e });
@@ -123,6 +126,8 @@ export async function bakeListingArtworkFromSource(params: {
   printAreaH: number | null;
   letterboxFill: ListingArtworkLetterboxFill | null;
   catalogImageRequirementLabel?: string | null;
+  maxDecodePixels?: number;
+  maxSourceBytes?: number;
 }): Promise<ListingArtworkBakeResult> {
   const { shopId, sourceKey } = params;
 
@@ -138,7 +143,11 @@ export async function bakeListingArtworkFromSource(params: {
       status: 400,
     };
   }
-  if (!listingArtworkV2SourceWithinCap(source.length)) {
+  const maxSourceBytes = params.maxSourceBytes;
+  if (maxSourceBytes != null && !listingArtworkV2SourceWithinCap(source.length, maxSourceBytes)) {
+    return { ok: false, error: listingArtworkV2SourceCapError(maxSourceBytes), status: 413 };
+  }
+  if (maxSourceBytes == null && !listingArtworkV2SourceWithinCap(source.length)) {
     return { ok: false, error: listingArtworkV2SourceCapError(), status: 413 };
   }
 
@@ -150,6 +159,7 @@ export async function bakeListingArtworkFromSource(params: {
     printAreaH: params.printAreaH,
     letterboxFill: params.letterboxFill,
     catalogImageRequirementLabel: params.catalogImageRequirementLabel,
+    maxDecodePixels: params.maxDecodePixels,
   });
 
   if (result.ok) {
@@ -174,6 +184,7 @@ export async function bakeListingArtworkFromStaging(params: {
   printAreaH: number | null;
   letterboxFill: ListingArtworkLetterboxFill | null;
   catalogImageRequirementLabel?: string | null;
+  maxDecodePixels?: number;
 }): Promise<ListingArtworkBakeResult> {
   const { shopId, stagingKey, cropPayload, printAreaW, printAreaH, letterboxFill } = params;
   const uploadMax = listingRequestArtworkUploadMaxBytes();
@@ -202,6 +213,7 @@ export async function bakeListingArtworkFromStaging(params: {
     printAreaH,
     letterboxFill,
     catalogImageRequirementLabel: params.catalogImageRequirementLabel,
+    maxDecodePixels: params.maxDecodePixels,
   });
 
   if (!result.ok) return result;

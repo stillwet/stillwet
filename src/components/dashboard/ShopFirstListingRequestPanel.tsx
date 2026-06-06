@@ -32,7 +32,7 @@ import {
   shopInReviewListingRequestLimitReached,
 } from "@/lib/listing-request-review-limit";
 import {
-  LISTING_ARTWORK_V2_SOURCE_MAX_MB,
+  listingArtworkSourceMaxBytesForPrintArea,
   listingArtworkUploadV2Enabled,
   listingArtworkV2SourceCapError,
   listingArtworkV2SourceWithinCap,
@@ -271,6 +271,11 @@ export function ShopFirstListingRequestPanel(props: {
 
   const printAreaW = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
   const printAreaH = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
+  const listingArtworkV2SourceMaxBytes = useMemo(
+    () => listingArtworkSourceMaxBytesForPrintArea(printAreaW, printAreaH),
+    [printAreaW, printAreaH],
+  );
+  const listingArtworkV2SourceMaxMb = listingArtworkV2SourceMaxBytes / (1024 * 1024);
 
   useEffect(() => {
     if (!listingArtworkPreviewUrl) {
@@ -337,13 +342,15 @@ export function ShopFirstListingRequestPanel(props: {
     setListingSourceKey(null);
     setListingArtworkMeasureError(null);
     const uploadCapOk = artworkUploadV2
-      ? listingArtworkV2SourceWithinCap(file.size)
+      ? listingArtworkV2SourceWithinCap(file.size, listingArtworkV2SourceMaxBytes)
       : listingArtworkFileWithinUploadCap(file.size);
     if (!uploadCapOk) {
       setListingHasFile(false);
       setListingArtworkPreviewUrl(null);
       setListingArtworkMeasureError(
-        artworkUploadV2 ? listingArtworkV2SourceCapError() : listingArtworkUploadCapError(),
+        artworkUploadV2
+          ? listingArtworkV2SourceCapError(listingArtworkV2SourceMaxBytes)
+          : listingArtworkUploadCapError(),
       );
       if (listingFileRef.current) listingFileRef.current.value = "";
       return;
@@ -363,9 +370,14 @@ export function ShopFirstListingRequestPanel(props: {
       setComposeImageUrl(null);
       setArtworkSourcePreparing(true);
       try {
-        const upload = await uploadListingArtworkSourceToR2(file, (loaded, total) => {
-          setArtworkUploadProgress({ current: loaded, total });
-        });
+        const upload = await uploadListingArtworkSourceToR2(
+          file,
+          listingProductId,
+          (loaded, total) => {
+            setArtworkUploadProgress({ current: loaded, total });
+          },
+          listingArtworkV2SourceMaxBytes,
+        );
         setArtworkUploadProgress(null);
         if (!upload.ok) {
           setListingArtworkMeasureError(upload.error);
@@ -983,7 +995,7 @@ export function ShopFirstListingRequestPanel(props: {
           ) : null}
           <label className="block text-xs text-zinc-500">
             Artwork file (PNG or JPEG — uploads capped at{" "}
-            {artworkUploadV2 ? LISTING_ARTWORK_V2_SOURCE_MAX_MB : listingArtworkUploadMaxMb} MB)
+            {artworkUploadV2 ? listingArtworkV2SourceMaxMb : listingArtworkUploadMaxMb} MB)
             <input
               ref={listingFileRef}
               type="file"
@@ -1000,14 +1012,16 @@ export function ShopFirstListingRequestPanel(props: {
                   return;
                 }
                 const withinUploadCap = artworkUploadV2
-                  ? listingArtworkV2SourceWithinCap(file.size)
+                  ? listingArtworkV2SourceWithinCap(file.size, listingArtworkV2SourceMaxBytes)
                   : listingArtworkFileWithinUploadCap(file.size);
                 if (!withinUploadCap) {
                   setListingSubmitArtworkFile(null);
                   setListingHasFile(false);
                   setListingArtworkPreviewUrl(null);
                   setListingArtworkMeasureError(
-                    artworkUploadV2 ? listingArtworkV2SourceCapError() : listingArtworkUploadCapError(),
+                    artworkUploadV2
+                      ? listingArtworkV2SourceCapError(listingArtworkV2SourceMaxBytes)
+                      : listingArtworkUploadCapError(),
                   );
                   if (listingFileRef.current) listingFileRef.current.value = "";
                   return;

@@ -1,4 +1,8 @@
 import { effectiveArtworkDpiFromCropAndPrint } from "@/lib/listing-artwork-print-area";
+import {
+  LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS,
+  LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS_HIGH_RES,
+} from "@/lib/listing-request-artwork-limits";
 
 /** Resolved tier shown in the shop catalog picker. */
 export type CatalogArtworkSourceTier = "phone_pic_safe" | "camera_or_vector_only";
@@ -97,4 +101,13 @@ export function parseCatalogArtworkSourceTierOverride(
   const t = raw.trim();
   if (t === "phone_pic_safe" || t === "camera_or_vector_only") return t;
   return "auto";
+}
+
+export function listingArtworkDecodeMaxPixelsForSourceTier(
+  tier: CatalogArtworkSourceTier,
+): number {
+  if (tier === "camera_or_vector_only") {
+    return LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS_HIGH_RES;
+  }
+  return LISTING_ARTWORK_SERVER_DECODE_MAX_PIXELS;
 }

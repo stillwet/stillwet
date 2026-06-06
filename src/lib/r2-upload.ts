@@ -354,7 +354,6 @@ function contentTypeFromR2ObjectKey(key: string): string {
   return "image/jpeg";
 }
 
-/** Fetch object bytes and content-type from R2 (private S3 API — works when public URL 404s). */
 export async function getR2ObjectWithContentType(
   key: string,
 ): Promise<{ body: Buffer; contentType: string } | null> {
@@ -374,6 +373,23 @@ export async function getR2ObjectWithContentType(
     const contentType =
       res.ContentType?.split(";")[0]?.trim() || contentTypeFromR2ObjectKey(key);
     return { body: Buffer.concat(chunks), contentType };
+  } catch {
+    return null;
+  }
+}
+
+/** Stream an object from R2 for same-origin browser compose (avoids presigned GET + CORS). */
+export async function openR2ObjectStream(
+  key: string,
+): Promise<{ body: ReadableStream<Uint8Array>; contentType: string } | null> {
+  const bucket = readR2BucketName();
+  if (!bucket) return null;
+  try {
+    const res = await r2S3Client().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    if (!res.Body) return null;
+    const contentType =
+      res.ContentType?.split(";")[0]?.trim() || contentTypeFromR2ObjectKey(key);
+    return { body: res.Body as ReadableStream<Uint8Array>, contentType };
   } catch {
     return null;
   }

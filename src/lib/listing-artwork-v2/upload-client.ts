@@ -15,13 +15,15 @@ export type ListingArtworkV2UploadInitResult =
 export async function initListingArtworkSourceUpload(
   contentType: string,
   byteSize: number,
+  productId: string,
+  maxSourceBytes?: number,
 ): Promise<ListingArtworkV2UploadInitResult> {
   let res: Response;
   try {
     res = await fetch("/api/dashboard/listing-artwork/upload/init", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contentType, byteSize }),
+      body: JSON.stringify({ contentType, byteSize, productId }),
     });
   } catch {
     return { ok: false, error: "Could not start upload (network). Check your connection and try again." };
@@ -61,9 +63,10 @@ export async function putFileToPresignedR2Url(
   presignedPutUrl: string,
   file: File,
   onProgress?: (loaded: number, total: number) => void,
+  maxSourceBytes?: number,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!listingArtworkV2SourceWithinCap(file.size)) {
-    return { ok: false, error: listingArtworkV2SourceCapError() };
+  if (!listingArtworkV2SourceWithinCap(file.size, maxSourceBytes)) {
+    return { ok: false, error: listingArtworkV2SourceCapError(maxSourceBytes) };
   }
 
   return new Promise((resolve) => {
@@ -102,13 +105,14 @@ export type ListingArtworkV2UploadCompleteResult =
 
 export async function completeListingArtworkSourceUpload(
   sourceKey: string,
+  productId: string,
 ): Promise<ListingArtworkV2UploadCompleteResult> {
   let res: Response;
   try {
     res = await fetch("/api/dashboard/listing-artwork/upload/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sourceKey }),
+      body: JSON.stringify({ sourceKey, productId }),
     });
   } catch {
     return { ok: false, error: "Could not verify upload (network). Try again." };
@@ -148,18 +152,20 @@ export async function completeListingArtworkSourceUpload(
 
 export async function uploadListingArtworkSourceToR2(
   file: File,
+  productId: string,
   onProgress?: (loaded: number, total: number) => void,
+  maxSourceBytes?: number,
 ): Promise<
   | { ok: true; sourceKey: string; previewGetUrl: string; width: number; height: number }
   | { ok: false; error: string }
 > {
-  const init = await initListingArtworkSourceUpload(file.type, file.size);
+  const init = await initListingArtworkSourceUpload(file.type, file.size, productId, maxSourceBytes);
   if (!init.ok) return init;
 
-  const put = await putFileToPresignedR2Url(init.presignedPutUrl, file, onProgress);
+  const put = await putFileToPresignedR2Url(init.presignedPutUrl, file, onProgress, maxSourceBytes);
   if (!put.ok) return put;
 
-  const complete = await completeListingArtworkSourceUpload(init.sourceKey);
+  const complete = await completeListingArtworkSourceUpload(init.sourceKey, productId);
   if (!complete.ok) return complete;
 
   return {
