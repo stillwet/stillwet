@@ -27,9 +27,9 @@ export const CATALOG_ARTWORK_SOURCE_TIER_LABELS: Record<CatalogArtworkSourceTier
 
 export const CATALOG_ARTWORK_SOURCE_TIER_GUIDANCE: Record<CatalogArtworkSourceTier, string> = {
   phone_pic_safe:
-    "Typical phone photos usually work for this print size. You can still use higher-resolution art if you have it.",
+    "Typical phone photos usually work for this print size.",
   camera_or_vector_only:
-    "Use a high-resolution camera photo, scan, or vector art. Phone photos may look soft when printed at this size.",
+    "Requires an extra-high resolution photo. Phone photos possible if you override default resolution (8k vs. 4K).",
 };
 
 /** Largest cover crop of print aspect ratio inside a source image (source pixels). */
