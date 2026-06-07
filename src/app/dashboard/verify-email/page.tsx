@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { verifyShopEmailFromRawToken } from "@/lib/shop-email-verification";
 import { isPrismaMissingRelationError } from "@/lib/prisma-missing-relation";
 import { getShopOwnerSessionReadonly } from "@/lib/session";
@@ -50,22 +51,18 @@ export default async function VerifyShopEmailPage({ searchParams }: PageProps) {
     if (result.ok) {
       scheduleDashboardRevalidationAfterEmailVerify();
       const owner = await getShopOwnerSessionReadonly();
-      const signedIn = Boolean(owner.shopUserId);
+      if (owner.shopUserId) {
+        redirect("/dashboard?dash=setup");
+      }
 
       return (
         <main className="mx-auto flex min-h-[60vh] max-w-md flex-col px-4 py-16">
           <h1 className="text-xl font-semibold text-zinc-50">Success! Email is verified</h1>
           <p className="mt-4 text-sm text-zinc-400">
-            Your shop dashboard email is confirmed.
-            {signedIn
-              ? " Return to your dashboard to continue setup."
-              : " Sign in to continue to your dashboard."}
+            Your shop dashboard email is confirmed. Sign in to continue to your dashboard.
           </p>
-          <Link
-            href={signedIn ? "/dashboard?dash=setup" : "/dashboard/login"}
-            className="mt-6 text-sm text-blue-400 hover:underline"
-          >
-            {signedIn ? "Go to dashboard" : "Go to login"}
+          <Link href="/dashboard/login" className="mt-6 text-sm text-blue-400 hover:underline">
+            Go to login
           </Link>
         </main>
       );

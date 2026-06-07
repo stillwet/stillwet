@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createShopFromSignup } from "@/actions/shop-auth";
 import { TermsConditionsDialog } from "@/components/TermsConditionsDialog";
+import { PasswordInput } from "@/components/PasswordInput";
 import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
 
 export function CreateShopForm() {
@@ -46,13 +47,12 @@ export function CreateShopForm() {
       </label>
       <label className="block text-sm text-zinc-400">
         Password
-        <input
-          type="password"
+        <PasswordInput
           name="password"
           required
           minLength={10}
           autoComplete="new-password"
-          className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
+          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
         />
       </label>
       <fieldset className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-4">

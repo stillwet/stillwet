@@ -1,6 +1,9 @@
 /** Canonical slug for the legacy / single-catalog shop (migration seed). */
 export const PLATFORM_SHOP_SLUG = "platform" as const;
 
+/** Official Still Wet creator shop — hot-items carousel fallback on `/shop/all`. */
+export const STILLWET_SHOP_SLUG = "stillwet" as const;
+
 /**
  * Founder’s creator shop — unlimited free publication slots (same fee logic as infinitely many free ordinals).
  */

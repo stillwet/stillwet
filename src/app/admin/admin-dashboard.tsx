@@ -31,6 +31,11 @@ import {
 } from "@/components/admin/AdminMainShellClient";
 import { AdminDatabaseConfigPanel } from "@/components/admin/AdminDatabaseConfigPanel";
 import { AdminPurgeListingRequestAvatarsR2Button } from "@/components/admin/AdminPurgeListingRequestAvatarsR2Button";
+import { AdminPullVercelProductionEnvButton } from "@/components/admin/AdminPullVercelProductionEnvButton";
+import {
+  isAdminVercelEnvPullAvailable,
+  isVercelProjectLinkedInRepo,
+} from "@/lib/admin-vercel-env-pull";
 import {
   productionLocalhostDatabaseUrlKeys,
   runtimeDatabaseUrlFromEnv,
@@ -46,7 +51,7 @@ type AdminDashboardProps = {
 
 function AdminDashboardPageSuspenseFallback(props: { adminSection: AdminDashboardSection }) {
   return (
-    <div className="mx-auto max-w-[1040px] px-4 py-10">
+    <div className="py-0">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-medium text-zinc-500">
@@ -96,6 +101,7 @@ async function AdminDashboardPageBody({
 
   const mainTabLiterals = [
     "support",
+    "returns",
     "admin-inbox",
     "requests",
     "custom-images",
@@ -251,6 +257,9 @@ async function AdminDashboardPageBody({
   const basePath =
     adminSection === "main" ? ADMIN_MAIN_BASE_PATH : ADMIN_BACKEND_BASE_PATH;
 
+  const showPullProdEnvButton = isAdminVercelEnvPullAvailable();
+  const vercelProjectLinked = showPullProdEnvButton && isVercelProjectLinkedInRepo();
+
   await baselinePromise;
 
   return (
@@ -280,6 +289,9 @@ async function AdminDashboardPageBody({
           )}
         </div>
         <div className="flex items-center gap-4">
+          {showPullProdEnvButton ? (
+            <AdminPullVercelProductionEnvButton vercelLinked={vercelProjectLinked} />
+          ) : null}
           <AdminPurgeListingRequestAvatarsR2Button />
           <form action={logoutAdmin}>
             <button
@@ -302,7 +314,7 @@ async function AdminDashboardPageBody({
           {adminSection === "main" ? (
             <div className="space-y-2 pb-2 pl-0 pr-2 pt-2">
               <div>
-                <div className="grid w-full grid-cols-6 gap-1">
+                <div className="grid w-full grid-cols-7 gap-1">
                   <Link
                     href={`${basePath}?tab=requests`}
                     role="tab"
@@ -342,6 +354,18 @@ async function AdminDashboardPageBody({
                   >
                     Support
                     <AdminMainNavCount field="supportUnresolved" />
+                  </Link>
+                  <Link
+                    href={`${basePath}?tab=returns`}
+                    role="tab"
+                    aria-selected={inventoryTab === "returns"}
+                    className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
+                      inventoryTab === "returns"
+                        ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                        : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+                    }`}
+                  >
+                    Returns
                   </Link>
                   <Link
                     href={`${basePath}?tab=admin-inbox`}

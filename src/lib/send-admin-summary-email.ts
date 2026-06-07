@@ -3,6 +3,7 @@ import {
   formatAdminSummaryEmailText,
   type AdminSummaryMetrics,
 } from "@/lib/admin-summary-metrics";
+import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
 
 export async function sendAdminSummaryEmail(params: {
   to: string[];
@@ -12,10 +13,14 @@ export async function sendAdminSummaryEmail(params: {
   if (!apiKey) {
     return { ok: false, error: "RESEND_API_KEY is not set." };
   }
-  const from =
-    process.env.ADMIN_SUMMARY_FROM_EMAIL?.trim() ||
-    process.env.CONTACT_QUOTE_FROM_EMAIL?.trim() ||
-    "onboarding@resend.dev";
+  const fromResult = resolveShopTransactionalEmailFrom([
+    process.env.ADMIN_SUMMARY_FROM_EMAIL,
+    process.env.CONTACT_QUOTE_FROM_EMAIL,
+  ]);
+  if (!fromResult.ok) {
+    return { ok: false, error: fromResult.error };
+  }
+  const from = fromResult.from;
   if (params.to.length === 0) {
     return { ok: false, error: "No recipient addresses." };
   }

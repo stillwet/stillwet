@@ -379,6 +379,7 @@ export type OrderWhereInput = {
   shop?: Prisma.XOR<Prisma.ShopNullableScalarRelationFilter, Prisma.ShopWhereInput> | null
   lines?: Prisma.OrderLineListRelationFilter
   fulfillmentJobs?: Prisma.FulfillmentJobListRelationFilter
+  returnClaims?: Prisma.OrderReturnClaimListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -408,6 +409,7 @@ export type OrderOrderByWithRelationInput = {
   shop?: Prisma.ShopOrderByWithRelationInput
   lines?: Prisma.OrderLineOrderByRelationAggregateInput
   fulfillmentJobs?: Prisma.FulfillmentJobOrderByRelationAggregateInput
+  returnClaims?: Prisma.OrderReturnClaimOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -440,6 +442,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   shop?: Prisma.XOR<Prisma.ShopNullableScalarRelationFilter, Prisma.ShopWhereInput> | null
   lines?: Prisma.OrderLineListRelationFilter
   fulfillmentJobs?: Prisma.FulfillmentJobListRelationFilter
+  returnClaims?: Prisma.OrderReturnClaimListRelationFilter
 }, "id" | "orderNumber" | "stripeSessionId" | "stripePaymentIntentId">
 
 export type OrderOrderByWithAggregationInput = {
@@ -528,6 +531,7 @@ export type OrderCreateInput = {
   shop?: Prisma.ShopCreateNestedOneWithoutOrdersInput
   lines?: Prisma.OrderLineCreateNestedManyWithoutOrderInput
   fulfillmentJobs?: Prisma.FulfillmentJobCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -556,6 +560,7 @@ export type OrderUncheckedCreateInput = {
   updatedAt?: Date | string
   lines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutOrderInput
   fulfillmentJobs?: Prisma.FulfillmentJobUncheckedCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -583,6 +588,7 @@ export type OrderUpdateInput = {
   shop?: Prisma.ShopUpdateOneWithoutOrdersNestedInput
   lines?: Prisma.OrderLineUpdateManyWithoutOrderNestedInput
   fulfillmentJobs?: Prisma.FulfillmentJobUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -611,6 +617,7 @@ export type OrderUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lines?: Prisma.OrderLineUncheckedUpdateManyWithoutOrderNestedInput
   fulfillmentJobs?: Prisma.FulfillmentJobUncheckedUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -848,6 +855,20 @@ export type EnumOrderProceedsRoutingFieldUpdateOperationsInput = {
   set?: $Enums.OrderProceedsRouting
 }
 
+export type OrderCreateNestedOneWithoutReturnClaimsInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReturnClaimsInput, Prisma.OrderUncheckedCreateWithoutReturnClaimsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReturnClaimsInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutReturnClaimsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReturnClaimsInput, Prisma.OrderUncheckedCreateWithoutReturnClaimsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReturnClaimsInput
+  upsert?: Prisma.OrderUpsertWithoutReturnClaimsInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutReturnClaimsInput, Prisma.OrderUpdateWithoutReturnClaimsInput>, Prisma.OrderUncheckedUpdateWithoutReturnClaimsInput>
+}
+
 export type OrderCreateNestedOneWithoutLinesInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutLinesInput, Prisma.OrderUncheckedCreateWithoutLinesInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutLinesInput
@@ -901,6 +922,7 @@ export type OrderCreateWithoutShopInput = {
   updatedAt?: Date | string
   lines?: Prisma.OrderLineCreateNestedManyWithoutOrderInput
   fulfillmentJobs?: Prisma.FulfillmentJobCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutShopInput = {
@@ -928,6 +950,7 @@ export type OrderUncheckedCreateWithoutShopInput = {
   updatedAt?: Date | string
   lines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutOrderInput
   fulfillmentJobs?: Prisma.FulfillmentJobUncheckedCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutShopInput = {
@@ -985,6 +1008,133 @@ export type OrderScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
 }
 
+export type OrderCreateWithoutReturnClaimsInput = {
+  id?: string
+  orderNumber?: number
+  stripeSessionId?: string | null
+  stripePaymentIntentId?: string | null
+  email?: string | null
+  status?: $Enums.OrderStatus
+  subtotalCents: number
+  tipCents?: number
+  shippingCents?: number
+  totalCents: number
+  currency?: string
+  proceedsRouting?: $Enums.OrderProceedsRouting
+  shippingName?: string | null
+  shippingLine1?: string | null
+  shippingLine2?: string | null
+  shippingCity?: string | null
+  shippingState?: string | null
+  shippingPostal?: string | null
+  shippingCountry?: string | null
+  shippingPhone?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shop?: Prisma.ShopCreateNestedOneWithoutOrdersInput
+  lines?: Prisma.OrderLineCreateNestedManyWithoutOrderInput
+  fulfillmentJobs?: Prisma.FulfillmentJobCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutReturnClaimsInput = {
+  id?: string
+  orderNumber?: number
+  shopId?: string | null
+  stripeSessionId?: string | null
+  stripePaymentIntentId?: string | null
+  email?: string | null
+  status?: $Enums.OrderStatus
+  subtotalCents: number
+  tipCents?: number
+  shippingCents?: number
+  totalCents: number
+  currency?: string
+  proceedsRouting?: $Enums.OrderProceedsRouting
+  shippingName?: string | null
+  shippingLine1?: string | null
+  shippingLine2?: string | null
+  shippingCity?: string | null
+  shippingState?: string | null
+  shippingPostal?: string | null
+  shippingCountry?: string | null
+  shippingPhone?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutOrderInput
+  fulfillmentJobs?: Prisma.FulfillmentJobUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutReturnClaimsInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReturnClaimsInput, Prisma.OrderUncheckedCreateWithoutReturnClaimsInput>
+}
+
+export type OrderUpsertWithoutReturnClaimsInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutReturnClaimsInput, Prisma.OrderUncheckedUpdateWithoutReturnClaimsInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReturnClaimsInput, Prisma.OrderUncheckedCreateWithoutReturnClaimsInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutReturnClaimsInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutReturnClaimsInput, Prisma.OrderUncheckedUpdateWithoutReturnClaimsInput>
+}
+
+export type OrderUpdateWithoutReturnClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  subtotalCents?: Prisma.IntFieldUpdateOperationsInput | number
+  tipCents?: Prisma.IntFieldUpdateOperationsInput | number
+  shippingCents?: Prisma.IntFieldUpdateOperationsInput | number
+  totalCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  proceedsRouting?: Prisma.EnumOrderProceedsRoutingFieldUpdateOperationsInput | $Enums.OrderProceedsRouting
+  shippingName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingPostal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shop?: Prisma.ShopUpdateOneWithoutOrdersNestedInput
+  lines?: Prisma.OrderLineUpdateManyWithoutOrderNestedInput
+  fulfillmentJobs?: Prisma.FulfillmentJobUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutReturnClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shopId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  subtotalCents?: Prisma.IntFieldUpdateOperationsInput | number
+  tipCents?: Prisma.IntFieldUpdateOperationsInput | number
+  shippingCents?: Prisma.IntFieldUpdateOperationsInput | number
+  totalCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  proceedsRouting?: Prisma.EnumOrderProceedsRoutingFieldUpdateOperationsInput | $Enums.OrderProceedsRouting
+  shippingName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingPostal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lines?: Prisma.OrderLineUncheckedUpdateManyWithoutOrderNestedInput
+  fulfillmentJobs?: Prisma.FulfillmentJobUncheckedUpdateManyWithoutOrderNestedInput
+}
+
 export type OrderCreateWithoutLinesInput = {
   id?: string
   orderNumber?: number
@@ -1010,6 +1160,7 @@ export type OrderCreateWithoutLinesInput = {
   updatedAt?: Date | string
   shop?: Prisma.ShopCreateNestedOneWithoutOrdersInput
   fulfillmentJobs?: Prisma.FulfillmentJobCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutLinesInput = {
@@ -1037,6 +1188,7 @@ export type OrderUncheckedCreateWithoutLinesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   fulfillmentJobs?: Prisma.FulfillmentJobUncheckedCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutLinesInput = {
@@ -1079,6 +1231,7 @@ export type OrderUpdateWithoutLinesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneWithoutOrdersNestedInput
   fulfillmentJobs?: Prisma.FulfillmentJobUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutLinesInput = {
@@ -1106,6 +1259,7 @@ export type OrderUncheckedUpdateWithoutLinesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fulfillmentJobs?: Prisma.FulfillmentJobUncheckedUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutFulfillmentJobsInput = {
@@ -1133,6 +1287,7 @@ export type OrderCreateWithoutFulfillmentJobsInput = {
   updatedAt?: Date | string
   shop?: Prisma.ShopCreateNestedOneWithoutOrdersInput
   lines?: Prisma.OrderLineCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutFulfillmentJobsInput = {
@@ -1160,6 +1315,7 @@ export type OrderUncheckedCreateWithoutFulfillmentJobsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutOrderInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutFulfillmentJobsInput = {
@@ -1202,6 +1358,7 @@ export type OrderUpdateWithoutFulfillmentJobsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneWithoutOrdersNestedInput
   lines?: Prisma.OrderLineUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutFulfillmentJobsInput = {
@@ -1229,6 +1386,7 @@ export type OrderUncheckedUpdateWithoutFulfillmentJobsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lines?: Prisma.OrderLineUncheckedUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyShopInput = {
@@ -1280,6 +1438,7 @@ export type OrderUpdateWithoutShopInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lines?: Prisma.OrderLineUpdateManyWithoutOrderNestedInput
   fulfillmentJobs?: Prisma.FulfillmentJobUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutShopInput = {
@@ -1307,6 +1466,7 @@ export type OrderUncheckedUpdateWithoutShopInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lines?: Prisma.OrderLineUncheckedUpdateManyWithoutOrderNestedInput
   fulfillmentJobs?: Prisma.FulfillmentJobUncheckedUpdateManyWithoutOrderNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutShopInput = {
@@ -1342,11 +1502,13 @@ export type OrderUncheckedUpdateManyWithoutShopInput = {
 export type OrderCountOutputType = {
   lines: number
   fulfillmentJobs: number
+  returnClaims: number
 }
 
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lines?: boolean | OrderCountOutputTypeCountLinesArgs
   fulfillmentJobs?: boolean | OrderCountOutputTypeCountFulfillmentJobsArgs
+  returnClaims?: boolean | OrderCountOutputTypeCountReturnClaimsArgs
 }
 
 /**
@@ -1371,6 +1533,13 @@ export type OrderCountOutputTypeCountLinesArgs<ExtArgs extends runtime.Types.Ext
  */
 export type OrderCountOutputTypeCountFulfillmentJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FulfillmentJobWhereInput
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountReturnClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderReturnClaimWhereInput
 }
 
 
@@ -1401,6 +1570,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   shop?: boolean | Prisma.Order$shopArgs<ExtArgs>
   lines?: boolean | Prisma.Order$linesArgs<ExtArgs>
   fulfillmentJobs?: boolean | Prisma.Order$fulfillmentJobsArgs<ExtArgs>
+  returnClaims?: boolean | Prisma.Order$returnClaimsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -1489,6 +1659,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   shop?: boolean | Prisma.Order$shopArgs<ExtArgs>
   lines?: boolean | Prisma.Order$linesArgs<ExtArgs>
   fulfillmentJobs?: boolean | Prisma.Order$fulfillmentJobsArgs<ExtArgs>
+  returnClaims?: boolean | Prisma.Order$returnClaimsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1504,6 +1675,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     shop: Prisma.$ShopPayload<ExtArgs> | null
     lines: Prisma.$OrderLinePayload<ExtArgs>[]
     fulfillmentJobs: Prisma.$FulfillmentJobPayload<ExtArgs>[]
+    returnClaims: Prisma.$OrderReturnClaimPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1926,6 +2098,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   shop<T extends Prisma.Order$shopArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$shopArgs<ExtArgs>>): Prisma.Prisma__ShopClient<runtime.Types.Result.GetResult<Prisma.$ShopPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   lines<T extends Prisma.Order$linesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$linesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fulfillmentJobs<T extends Prisma.Order$fulfillmentJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$fulfillmentJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FulfillmentJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  returnClaims<T extends Prisma.Order$returnClaimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$returnClaimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderReturnClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2443,6 +2616,30 @@ export type Order$fulfillmentJobsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.FulfillmentJobScalarFieldEnum | Prisma.FulfillmentJobScalarFieldEnum[]
+}
+
+/**
+ * Order.returnClaims
+ */
+export type Order$returnClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderReturnClaim
+   */
+  select?: Prisma.OrderReturnClaimSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderReturnClaim
+   */
+  omit?: Prisma.OrderReturnClaimOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderReturnClaimInclude<ExtArgs> | null
+  where?: Prisma.OrderReturnClaimWhereInput
+  orderBy?: Prisma.OrderReturnClaimOrderByWithRelationInput | Prisma.OrderReturnClaimOrderByWithRelationInput[]
+  cursor?: Prisma.OrderReturnClaimWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderReturnClaimScalarFieldEnum | Prisma.OrderReturnClaimScalarFieldEnum[]
 }
 
 /**

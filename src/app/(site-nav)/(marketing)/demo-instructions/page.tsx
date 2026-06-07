@@ -18,7 +18,7 @@ export default async function DemoInstructionsPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-6">
       <p className="store-kicker text-blue-300/80">Beta testing</p>
-      <h1 className="mt-2 text-3xl font-semibold text-zinc-50">Tester instructions</h1>
+      <h1 className="mt-2 text-3xl font-semibold text-zinc-50">Tester Instructions</h1>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
         Thank you for helping test {BRAND_NAME} before launch.
       </p>

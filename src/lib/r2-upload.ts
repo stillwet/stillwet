@@ -1048,7 +1048,7 @@ export async function deleteLegacyShopProfileAvatarKeys(shopId: string): Promise
   }
 }
 
-/** Best-effort delete by key. Only keys under `listing/` or `shops/` are removed (safety guard). */
+/** Best-effort delete by key. Only keys under `listing/`, `shops/`, or `returns/` are removed (safety guard). */
 export async function deleteR2ObjectsByKeys(keys: readonly string[]): Promise<number> {
   if (!isR2UploadConfigured() || keys.length === 0) return 0;
   const bucket = readR2BucketName();
@@ -1057,7 +1057,13 @@ export async function deleteR2ObjectsByKeys(keys: readonly string[]): Promise<nu
   const client = r2S3Client();
   let n = 0;
   for (const Key of keys) {
-    if (!Key.startsWith("listing/") && !Key.startsWith("shops/")) continue;
+    if (
+      !Key.startsWith("listing/") &&
+      !Key.startsWith("shops/") &&
+      !Key.startsWith("returns/")
+    ) {
+      continue;
+    }
     try {
       await client.send(new DeleteObjectCommand({ Bucket: bucket, Key }));
       n += 1;

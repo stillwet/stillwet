@@ -1,14 +1,17 @@
 import type { ProductCardProduct } from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
+import { STILLWET_SHOP_SLUG } from "@/lib/marketplace-constants";
 import {
   collectPlatformHotItemsListings,
-  getPlatformAllPageFeaturedProducts,
   hotItemsListingInclude,
   type HotItemListing,
 } from "@/lib/platform-all-page-featured";
 import { PLATFORM_ALL_PAGE_FEATURED_LIMIT } from "@/lib/platform-all-page-featured-constants";
 import { productCardProductFromListing } from "@/lib/shop-listing-product";
-import { marketplaceAggregatedListingWhere } from "@/lib/shop-listing-storefront-visibility";
+import {
+  marketplaceAggregatedListingWhere,
+  storefrontShopListingWhere,
+} from "@/lib/shop-listing-storefront-visibility";
 
 const SNAPSHOT_ID = "default";
 
@@ -19,6 +22,62 @@ function parseListingIdsOrdered(raw: unknown): string[] {
     if (typeof x === "string" && x.length > 0) out.push(x);
   }
   return out;
+}
+
+function hotItemsProductsFromListings(listings: HotItemListing[]): ProductCardProduct[] {
+  return listings.map((l) => productCardProductFromListing(l));
+}
+
+async function hydrateHotItemsFromSnapshotIds(
+  orderedIds: string[],
+): Promise<ProductCardProduct[]> {
+  if (orderedIds.length === 0) return [];
+
+  const listings = await prisma.shopListing.findMany({
+    where: {
+      id: { in: orderedIds },
+      ...marketplaceAggregatedListingWhere,
+      product: { active: true },
+    },
+    include: hotItemsListingInclude,
+  });
+
+  const byId = new Map<string, HotItemListing>();
+  for (const l of listings) {
+    byId.set(l.id, l);
+  }
+
+  const ordered: HotItemListing[] = [];
+  for (const id of orderedIds) {
+    const l = byId.get(id);
+    if (l) ordered.push(l);
+  }
+
+  return hotItemsProductsFromListings(ordered);
+}
+
+/** Live listings from the official Still Wet shop when snapshot ranking is empty. */
+export async function loadPlatformHotItemsStillwetShopFallback(): Promise<
+  ProductCardProduct[]
+> {
+  const shop = await prisma.shop.findFirst({
+    where: { slug: STILLWET_SHOP_SLUG, active: true },
+    select: { id: true },
+  });
+  if (!shop) return [];
+
+  const listings = await prisma.shopListing.findMany({
+    where: {
+      shopId: shop.id,
+      ...storefrontShopListingWhere,
+      product: { active: true },
+    },
+    orderBy: [{ updatedAt: "desc" }],
+    take: PLATFORM_ALL_PAGE_FEATURED_LIMIT,
+    include: hotItemsListingInclude,
+  });
+
+  return hotItemsProductsFromListings(listings);
 }
 
 /**
@@ -55,58 +114,36 @@ export async function rebuildPlatformBrowseHotItemsSnapshot(): Promise<
 }
 
 /**
- * Primary Hot items for `/shop/all`: hydrate snapshot ids with one `findMany`, preserve order.
- * Snapshot-only: this list is allowed to be stale; avoid live fallbacks that can hang `/shop/all`.
+ * Primary Hot items for `/shop/all`: daily snapshot first, then Still Wet shop listings.
  */
 export async function getPlatformHotItemsPrimaryProducts(): Promise<
   ProductCardProduct[]
 > {
   const snapshot = prisma.platformBrowseHotItemsSnapshot;
-  if (!snapshot?.findUnique) {
-    return [];
+  if (snapshot?.findUnique) {
+    try {
+      const row = await snapshot.findUnique({
+        where: { id: SNAPSHOT_ID },
+        select: { listingIdsOrdered: true },
+      });
+      const fromSnapshot = await hydrateHotItemsFromSnapshotIds(
+        parseListingIdsOrdered(row?.listingIdsOrdered),
+      );
+      if (fromSnapshot.length > 0) {
+        return fromSnapshot;
+      }
+    } catch (e) {
+      console.warn(
+        "[getPlatformHotItemsPrimaryProducts] snapshot unavailable; trying Still Wet fallback",
+        e,
+      );
+    }
   }
 
   try {
-    const row = await snapshot.findUnique({
-      where: { id: SNAPSHOT_ID },
-      select: { listingIdsOrdered: true },
-    });
-
-    const orderedIds = parseListingIdsOrdered(row?.listingIdsOrdered);
-    if (orderedIds.length === 0) {
-      return [];
-    }
-
-    const listings = await prisma.shopListing.findMany({
-      where: {
-        id: { in: orderedIds },
-        ...marketplaceAggregatedListingWhere,
-        product: { active: true },
-      },
-      include: hotItemsListingInclude,
-    });
-
-    const byId = new Map<string, HotItemListing>();
-    for (const l of listings) {
-      byId.set(l.id, l);
-    }
-
-    const ordered: HotItemListing[] = [];
-    for (const id of orderedIds) {
-      const l = byId.get(id);
-      if (l) ordered.push(l);
-    }
-
-    if (ordered.length === 0) {
-      return [];
-    }
-
-    return ordered.map((l) => productCardProductFromListing(l));
+    return await loadPlatformHotItemsStillwetShopFallback();
   } catch (e) {
-    console.warn(
-      "[getPlatformHotItemsPrimaryProducts] snapshot unavailable; returning empty",
-      e,
-    );
+    console.warn("[getPlatformHotItemsPrimaryProducts] Still Wet fallback failed", e);
     return [];
   }
 }

@@ -10,6 +10,7 @@ import {
 } from "@/actions/dashboard-shop-account";
 import { resendShopEmailVerification } from "@/actions/shop-email-verify";
 import { ShopDangerZonePanel } from "@/components/dashboard/ShopDangerZonePanel";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export type DashboardShopAccountPanelProps = {
   initialEmail: string;
@@ -219,13 +220,13 @@ export function DashboardShopAccountPanel({
           {emailPasswordRevealed ? (
             <label className="block text-xs text-zinc-400">
               Verify email change by entering current password
-              <input
+              <PasswordInput
                 ref={emailPasswordRef}
-                type="password"
                 name="currentPassword"
                 required
                 autoComplete="current-password"
-                className="mt-0.5 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
+                wrapperClassName="mt-0.5"
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
               />
             </label>
           ) : null}
@@ -282,13 +283,13 @@ export function DashboardShopAccountPanel({
         >
           <label className="block text-xs text-zinc-400">
             New password
-            <input
-              type="password"
+            <PasswordInput
               name="newPassword"
               required
               minLength={10}
               autoComplete="new-password"
-              className="mt-0.5 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
+              wrapperClassName="mt-0.5"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
               onChange={(e) => {
                 if (!e.target.value) setPasswordConfirmRevealed(false);
               }}
@@ -298,25 +299,25 @@ export function DashboardShopAccountPanel({
             <>
               <label className="block text-xs text-zinc-400">
                 Confirm new password
-                <input
+                <PasswordInput
                   ref={passwordConfirmRef}
-                  type="password"
                   name="confirmPassword"
                   required
                   minLength={10}
                   autoComplete="new-password"
-                  className="mt-0.5 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
+                  wrapperClassName="mt-0.5"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
                 />
               </label>
               <label className="block text-xs text-zinc-400">
                 Verify this change by entering your current password
-                <input
+                <PasswordInput
                   ref={passwordCurrentRef}
-                  type="password"
                   name="currentPassword"
                   required
                   autoComplete="current-password"
-                  className="mt-0.5 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
+                  wrapperClassName="mt-0.5"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100"
                 />
               </label>
             </>

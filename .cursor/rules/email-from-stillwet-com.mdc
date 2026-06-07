@@ -1,0 +1,23 @@
+---
+description: Automated email must send from info@stillwet.com on stillwet.com (not auto.stillwet.com).
+globs:
+  - src/lib/send-*.ts
+  - src/lib/*email*.ts
+  - src/actions/*email*.ts
+  - src/actions/contact-quote.ts
+  - src/lib/resend-shop-from.ts
+  - src/lib/site-brand.ts
+---
+
+# Transactional email From address
+
+Still Wet uses **one sending domain**: `stillwet.com` (verified in Resend). The legacy subdomain **`auto.stillwet.com` is retired** — do not reference or configure it.
+
+**Default From for all automated email:** `info@stillwet.com`
+
+- Use `SITE_TRANSACTIONAL_EMAIL_FROM` or `brandMerchEmailFrom()` from `@/lib/site-brand`.
+- Use `resolveShopTransactionalEmailFrom([...env overrides])` from `@/lib/resend-shop-from` — it always falls back to `SITE_TRANSACTIONAL_EMAIL_FROM` and **ignores** retired domains (`auto.stillwet.com`) and template placeholders.
+- Inbox reply/forward: `ADMIN_INBOX_REPLY_FROM` or `SITE_TRANSACTIONAL_EMAIL_FROM` (not `noreply@`).
+- Document env examples as `Still Wet Merch <info@stillwet.com>`.
+
+Do not default to `onboarding@resend.dev` or `noreply@auto.stillwet.com` in production paths.

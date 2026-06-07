@@ -11,6 +11,7 @@ export type PrismaShopPromotionCreditBalanceDelegate =
 export type PrismaShopAdminAwardGrantDelegate = PrismaClient["shopAdminAwardGrant"];
 export type PrismaAdminNexusRegistrationDatesDelegate =
   PrismaClient["adminNexusRegistrationDates"];
+export type PrismaOrderReturnClaimDelegate = PrismaClient["orderReturnClaim"];
 
 /**
  * Bump when the Prisma schema (or generated client shape) changes so the cached `globalThis` client
@@ -19,7 +20,7 @@ export type PrismaAdminNexusRegistrationDatesDelegate =
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v83-order-order-number";
+  "postgres-adapter-v89-order-return-claim-decision-email";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -205,4 +206,13 @@ export function prismaAdminNexusRegistrationDatesOrNull(): PrismaAdminNexusRegis
     }
   ).adminNexusRegistrationDates;
   return typeof delegate?.findUnique === "function" ? delegate : null;
+}
+
+/**
+ * Optional delegate — buyer return claims (migration `20260608120000_order_return_claim`).
+ */
+export function prismaOrderReturnClaimOrNull(): PrismaOrderReturnClaimDelegate | null {
+  const delegate = (prisma as PrismaClient & { orderReturnClaim?: PrismaOrderReturnClaimDelegate })
+    .orderReturnClaim;
+  return typeof delegate?.findMany === "function" ? delegate : null;
 }

@@ -38,6 +38,29 @@ import {
 } from "@/lib/shop-password-changed-email-html";
 import type { SiteEmailTemplateKey } from "@/lib/site-email-template-keys";
 import { applySiteEmailLogoToHtml, normalizeEmailLogoForAdminPreview } from "@/lib/site-email-logo-html";
+import {
+  ORDER_RETURN_CLAIM_CONFIRMATION_HTML_TEMPLATE,
+  ORDER_RETURN_CLAIM_CONFIRMATION_SUBJECT,
+  renderOrderReturnClaimConfirmationHtml,
+  sampleOrderReturnClaimEmailVars,
+} from "@/lib/order-return-claim-email-html";
+import {
+  ORDER_RETURN_CLAIM_REJECTED_HTML_TEMPLATE,
+  ORDER_RETURN_CLAIM_REJECTED_SUBJECT,
+  renderOrderReturnClaimRejectedHtml,
+  sampleOrderReturnClaimRejectedEmailVars,
+} from "@/lib/order-return-claim-rejected-email-html";
+import {
+  ORDER_RETURN_CLAIM_ACCEPTED_HTML_TEMPLATE,
+  ORDER_RETURN_CLAIM_ACCEPTED_SUBJECT,
+  renderOrderReturnClaimAcceptedHtml,
+  sampleOrderReturnClaimAcceptedEmailVars,
+} from "@/lib/order-return-claim-accepted-email-html";
+import type {
+  OrderReturnClaimAcceptedEmailVars,
+  OrderReturnClaimEmailVars,
+  OrderReturnClaimRejectedEmailVars,
+} from "@/lib/order-return-claim-email-placeholders";
 
 export type AdminEmailFormatEntry = {
   key: SiteEmailTemplateKey;
@@ -86,6 +109,9 @@ export function buildAdminEmailFormatEntries(
   const confirmDevice = pick("shop_dashboard_two_factor_confirm_device");
   const giftCodes = pick("gift_creator_redemption_codes");
   const inactivityWarning = pick("shop_inactivity_deactivation_warning");
+  const returnClaim = pick("order_return_claim_confirmation");
+  const returnClaimRejected = pick("order_return_claim_rejected");
+  const returnClaimAccepted = pick("order_return_claim_accepted");
   return [
     {
       key: "shop_dashboard_email_verification",
@@ -164,6 +190,39 @@ export function buildAdminEmailFormatEntries(
       body: inactivityWarning?.htmlBody?.trim() || SHOP_INACTIVITY_WARNING_HTML_TEMPLATE,
       sampleActionUrl: actionSamples.shop_inactivity_deactivation_warning,
     },
+    {
+      key: "order_return_claim_confirmation",
+      label: "Buyer — return claim received",
+      description:
+        "Sent when a buyer submits a return/defect claim. Full HTML document; use {{ORDER_NUMBER}} and {{CLAIM_ID}}.",
+      defaultSubject: ORDER_RETURN_CLAIM_CONFIRMATION_SUBJECT,
+      defaultBody: ORDER_RETURN_CLAIM_CONFIRMATION_HTML_TEMPLATE,
+      subject: returnClaim?.subject?.trim() || ORDER_RETURN_CLAIM_CONFIRMATION_SUBJECT,
+      body: returnClaim?.htmlBody?.trim() || ORDER_RETURN_CLAIM_CONFIRMATION_HTML_TEMPLATE,
+      sampleActionUrl: null,
+    },
+    {
+      key: "order_return_claim_rejected",
+      label: "Buyer — return claim rejected",
+      description:
+        "Sent when admin rejects a claim. Full HTML document; use {{ORDER_NUMBER}}, {{CLAIM_ID}}, {{REJECTION_REASON}}, and {{RETURNS_POLICY_URL}}.",
+      defaultSubject: ORDER_RETURN_CLAIM_REJECTED_SUBJECT,
+      defaultBody: ORDER_RETURN_CLAIM_REJECTED_HTML_TEMPLATE,
+      subject: returnClaimRejected?.subject?.trim() || ORDER_RETURN_CLAIM_REJECTED_SUBJECT,
+      body: returnClaimRejected?.htmlBody?.trim() || ORDER_RETURN_CLAIM_REJECTED_HTML_TEMPLATE,
+      sampleActionUrl: null,
+    },
+    {
+      key: "order_return_claim_accepted",
+      label: "Buyer — return claim approved",
+      description:
+        "Sent when admin marks a claim Accepted (Complete). Full HTML document; use {{ORDER_NUMBER}} and {{CLAIM_ID}}.",
+      defaultSubject: ORDER_RETURN_CLAIM_ACCEPTED_SUBJECT,
+      defaultBody: ORDER_RETURN_CLAIM_ACCEPTED_HTML_TEMPLATE,
+      subject: returnClaimAccepted?.subject?.trim() || ORDER_RETURN_CLAIM_ACCEPTED_SUBJECT,
+      body: returnClaimAccepted?.htmlBody?.trim() || ORDER_RETURN_CLAIM_ACCEPTED_HTML_TEMPLATE,
+      sampleActionUrl: null,
+    },
   ];
 }
 
@@ -177,7 +236,7 @@ export async function loadSiteEmailSendPreviewsForAdmin(
   origin: string,
 ): Promise<Record<SiteEmailTemplateKey, SiteEmailSendPreview>> {
   const samples = sampleActionUrlsForAdmin(origin);
-  const [verification, password, passwordChanged, deletion, twoFactor, giftCodes, inactivityWarning] =
+  const [verification, password, passwordChanged, deletion, twoFactor, giftCodes, inactivityWarning, returnClaim, returnClaimRejected, returnClaimAccepted] =
     await Promise.all([
     resolveShopEmailVerificationEmail(samples.shop_dashboard_email_verification),
     resolveShopPasswordResetEmail(samples.shop_dashboard_password_reset),
@@ -191,6 +250,9 @@ export async function loadSiteEmailSendPreviewsForAdmin(
       setupCode: "SETU-PABC-1234-DEMO",
     }),
     resolveShopInactivityWarningEmail(samples.shop_inactivity_deactivation_warning),
+    resolveOrderReturnClaimConfirmationEmail(sampleOrderReturnClaimEmailVars()),
+    resolveOrderReturnClaimRejectedEmail(sampleOrderReturnClaimRejectedEmailVars()),
+    resolveOrderReturnClaimAcceptedEmail(sampleOrderReturnClaimAcceptedEmailVars()),
   ]);
   return {
     shop_dashboard_email_verification: {
@@ -220,6 +282,18 @@ export async function loadSiteEmailSendPreviewsForAdmin(
     shop_inactivity_deactivation_warning: {
       ...inactivityWarning,
       html: normalizeEmailLogoForAdminPreview(inactivityWarning.html),
+    },
+    order_return_claim_confirmation: {
+      ...returnClaim,
+      html: normalizeEmailLogoForAdminPreview(returnClaim.html),
+    },
+    order_return_claim_rejected: {
+      ...returnClaimRejected,
+      html: normalizeEmailLogoForAdminPreview(returnClaimRejected.html),
+    },
+    order_return_claim_accepted: {
+      ...returnClaimAccepted,
+      html: normalizeEmailLogoForAdminPreview(returnClaimAccepted.html),
     },
   };
 }
@@ -335,6 +409,54 @@ export async function resolveShopInactivityWarningEmail(loginUrl: string): Promi
   return {
     subject,
     html: applySiteEmailLogoToHtml(renderShopInactivityWarningHtml(htmlTpl, loginUrl)),
+  };
+}
+
+export async function resolveOrderReturnClaimConfirmationEmail(
+  vars: OrderReturnClaimEmailVars,
+): Promise<{ subject: string; html: string }> {
+  const row = await prisma.siteEmailTemplate.findUnique({
+    where: { key: "order_return_claim_confirmation" },
+  });
+  const htmlTpl = row?.htmlBody?.trim()
+    ? row.htmlBody
+    : ORDER_RETURN_CLAIM_CONFIRMATION_HTML_TEMPLATE;
+  const subject = row?.subject?.trim() ? row.subject : ORDER_RETURN_CLAIM_CONFIRMATION_SUBJECT;
+  return {
+    subject,
+    html: applySiteEmailLogoToHtml(renderOrderReturnClaimConfirmationHtml(htmlTpl, vars)),
+  };
+}
+
+export async function resolveOrderReturnClaimRejectedEmail(
+  vars: OrderReturnClaimRejectedEmailVars,
+): Promise<{ subject: string; html: string }> {
+  const row = await prisma.siteEmailTemplate.findUnique({
+    where: { key: "order_return_claim_rejected" },
+  });
+  const htmlTpl = row?.htmlBody?.trim()
+    ? row.htmlBody
+    : ORDER_RETURN_CLAIM_REJECTED_HTML_TEMPLATE;
+  const subject = row?.subject?.trim() ? row.subject : ORDER_RETURN_CLAIM_REJECTED_SUBJECT;
+  return {
+    subject,
+    html: applySiteEmailLogoToHtml(renderOrderReturnClaimRejectedHtml(htmlTpl, vars)),
+  };
+}
+
+export async function resolveOrderReturnClaimAcceptedEmail(
+  vars: OrderReturnClaimAcceptedEmailVars,
+): Promise<{ subject: string; html: string }> {
+  const row = await prisma.siteEmailTemplate.findUnique({
+    where: { key: "order_return_claim_accepted" },
+  });
+  const htmlTpl = row?.htmlBody?.trim()
+    ? row.htmlBody
+    : ORDER_RETURN_CLAIM_ACCEPTED_HTML_TEMPLATE;
+  const subject = row?.subject?.trim() ? row.subject : ORDER_RETURN_CLAIM_ACCEPTED_SUBJECT;
+  return {
+    subject,
+    html: applySiteEmailLogoToHtml(renderOrderReturnClaimAcceptedHtml(htmlTpl, vars)),
   };
 }
 

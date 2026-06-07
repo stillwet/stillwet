@@ -10,6 +10,7 @@ import {
   loadSiteEmailSendPreviewsForAdmin,
 } from "@/lib/site-email-template-service";
 import { getSiteEmailTemplatesProdSyncAvailability } from "@/lib/site-email-templates-prod-sync";
+import { SITE_EMAIL_TEMPLATE_KEYS } from "@/lib/site-email-template-keys";
 import { PrintifyApiTab } from "./printify-api-tab";
 import { PrintifyInventoryTab } from "./printify-inventory-tab";
 import { loadAdminShopLeaderboardRows } from "@/lib/admin-shop-leaderboard-load";
@@ -20,6 +21,11 @@ import {
 } from "@/components/admin/AdminListingRequestsTab";
 import { AdminListingSupplementImageRequestsTab } from "@/components/admin/AdminListingSupplementImageRequestsTab";
 import { AdminBugFeedbackTab, type AdminBugFeedbackRow } from "@/components/admin/AdminBugFeedbackTab";
+import {
+  AdminOrderReturnClaimsTab,
+  type AdminOrderReturnClaimRow,
+} from "@/components/admin/AdminOrderReturnClaimsTab";
+import { loadAdminOrderReturnClaimRows } from "@/lib/admin-order-return-claims-load";
 import {
   AdminRemovedListingItemsTab,
   type RemovedListingRow,
@@ -217,17 +223,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
     adminSection === "backend" && inventoryTab === "email-format"
       ? await prisma.siteEmailTemplate.findMany({
           where: {
-            key: {
-              in: [
-                "shop_dashboard_email_verification",
-                "shop_dashboard_password_reset",
-                "shop_dashboard_password_changed",
-                "shop_dashboard_account_deletion_confirm",
-                "shop_dashboard_two_factor_confirm_device",
-                "gift_creator_redemption_codes",
-                "shop_inactivity_deactivation_warning",
-              ],
-            },
+            key: { in: [...SITE_EMAIL_TEMPLATE_KEYS] },
           },
         })
       : [];
@@ -272,6 +268,7 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
           textBody: r.textBody,
           htmlBody: r.htmlBody,
           receivedAt: r.receivedAt.toISOString(),
+          repliedAt: r.repliedAt?.toISOString() ?? null,
         }))
       : [];
 
@@ -323,6 +320,13 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
           adminNotes: r.adminNotes,
         }))
       : [];
+
+  const orderReturnClaimsLoad =
+    adminSection === "main" && inventoryTab === "returns"
+      ? await loadAdminOrderReturnClaimRows()
+      : null;
+  const orderReturnClaimRows: AdminOrderReturnClaimRow[] = orderReturnClaimsLoad?.rows ?? [];
+  const orderReturnClaimsSetupNotice = orderReturnClaimsLoad?.setupNotice ?? null;
 
   const sync = typeof sp.sync === "string" ? sp.sync : undefined;
   const syncUpdated = typeof sp.updated === "string" ? sp.updated : undefined;
@@ -810,6 +814,11 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
               threads={adminSupportThreads}
               detail={adminSupportDetail}
               selectedShopId={supportShopParam}
+            />
+          ) : inventoryTab === "returns" ? (
+            <AdminOrderReturnClaimsTab
+              rows={orderReturnClaimRows}
+              setupNotice={orderReturnClaimsSetupNotice}
             />
           ) : inventoryTab === "custom-images" ? (
             <AdminListingSupplementImageRequestsTab rows={supplementPendingTabRows} />

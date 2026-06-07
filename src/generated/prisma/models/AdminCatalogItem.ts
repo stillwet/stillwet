@@ -352,6 +352,7 @@ export type AdminCatalogItemWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   itemPlatformProduct?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
   catalogTags?: Prisma.AdminCatalogItemTagListRelationFilter
+  returnClaims?: Prisma.OrderReturnClaimListRelationFilter
 }
 
 export type AdminCatalogItemOrderByWithRelationInput = {
@@ -376,6 +377,7 @@ export type AdminCatalogItemOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   itemPlatformProduct?: Prisma.ProductOrderByWithRelationInput
   catalogTags?: Prisma.AdminCatalogItemTagOrderByRelationAggregateInput
+  returnClaims?: Prisma.OrderReturnClaimOrderByRelationAggregateInput
 }
 
 export type AdminCatalogItemWhereUniqueInput = Prisma.AtLeast<{
@@ -403,6 +405,7 @@ export type AdminCatalogItemWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   itemPlatformProduct?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
   catalogTags?: Prisma.AdminCatalogItemTagListRelationFilter
+  returnClaims?: Prisma.OrderReturnClaimListRelationFilter
 }, "id">
 
 export type AdminCatalogItemOrderByWithAggregationInput = {
@@ -478,6 +481,7 @@ export type AdminCatalogItemCreateInput = {
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
   catalogTags?: Prisma.AdminCatalogItemTagCreateNestedManyWithoutAdminCatalogItemInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutAdminCatalogItemInput
 }
 
 export type AdminCatalogItemUncheckedCreateInput = {
@@ -501,6 +505,7 @@ export type AdminCatalogItemUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutAdminCatalogItemInput
 }
 
 export type AdminCatalogItemUpdateInput = {
@@ -524,6 +529,7 @@ export type AdminCatalogItemUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
   catalogTags?: Prisma.AdminCatalogItemTagUpdateManyWithoutAdminCatalogItemNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutAdminCatalogItemNestedInput
 }
 
 export type AdminCatalogItemUncheckedUpdateInput = {
@@ -547,6 +553,7 @@ export type AdminCatalogItemUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
 }
 
 export type AdminCatalogItemCreateManyInput = {
@@ -622,6 +629,11 @@ export type AdminCatalogItemListRelationFilter = {
 
 export type AdminCatalogItemOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AdminCatalogItemScalarRelationFilter = {
+  is?: Prisma.AdminCatalogItemWhereInput
+  isNot?: Prisma.AdminCatalogItemWhereInput
 }
 
 export type AdminCatalogItemCountOrderByAggregateInput = {
@@ -708,11 +720,6 @@ export type AdminCatalogItemSumOrderByAggregateInput = {
   itemMinArtworkDpi?: Prisma.SortOrder
 }
 
-export type AdminCatalogItemScalarRelationFilter = {
-  is?: Prisma.AdminCatalogItemWhereInput
-  isNot?: Prisma.AdminCatalogItemWhereInput
-}
-
 export type AdminCatalogItemCreateNestedManyWithoutItemPlatformProductInput = {
   create?: Prisma.XOR<Prisma.AdminCatalogItemCreateWithoutItemPlatformProductInput, Prisma.AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput> | Prisma.AdminCatalogItemCreateWithoutItemPlatformProductInput[] | Prisma.AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput[]
   connectOrCreate?: Prisma.AdminCatalogItemCreateOrConnectWithoutItemPlatformProductInput | Prisma.AdminCatalogItemCreateOrConnectWithoutItemPlatformProductInput[]
@@ -753,6 +760,20 @@ export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductNestedI
   update?: Prisma.AdminCatalogItemUpdateWithWhereUniqueWithoutItemPlatformProductInput | Prisma.AdminCatalogItemUpdateWithWhereUniqueWithoutItemPlatformProductInput[]
   updateMany?: Prisma.AdminCatalogItemUpdateManyWithWhereWithoutItemPlatformProductInput | Prisma.AdminCatalogItemUpdateManyWithWhereWithoutItemPlatformProductInput[]
   deleteMany?: Prisma.AdminCatalogItemScalarWhereInput | Prisma.AdminCatalogItemScalarWhereInput[]
+}
+
+export type AdminCatalogItemCreateNestedOneWithoutReturnClaimsInput = {
+  create?: Prisma.XOR<Prisma.AdminCatalogItemCreateWithoutReturnClaimsInput, Prisma.AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput>
+  connectOrCreate?: Prisma.AdminCatalogItemCreateOrConnectWithoutReturnClaimsInput
+  connect?: Prisma.AdminCatalogItemWhereUniqueInput
+}
+
+export type AdminCatalogItemUpdateOneRequiredWithoutReturnClaimsNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminCatalogItemCreateWithoutReturnClaimsInput, Prisma.AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput>
+  connectOrCreate?: Prisma.AdminCatalogItemCreateOrConnectWithoutReturnClaimsInput
+  upsert?: Prisma.AdminCatalogItemUpsertWithoutReturnClaimsInput
+  connect?: Prisma.AdminCatalogItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminCatalogItemUpdateToOneWithWhereWithoutReturnClaimsInput, Prisma.AdminCatalogItemUpdateWithoutReturnClaimsInput>, Prisma.AdminCatalogItemUncheckedUpdateWithoutReturnClaimsInput>
 }
 
 export type EnumListingArtworkLetterboxFillFieldUpdateOperationsInput = {
@@ -797,6 +818,7 @@ export type AdminCatalogItemCreateWithoutItemPlatformProductInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagCreateNestedManyWithoutAdminCatalogItemInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutAdminCatalogItemInput
 }
 
 export type AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput = {
@@ -819,6 +841,7 @@ export type AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutAdminCatalogItemInput
 }
 
 export type AdminCatalogItemCreateOrConnectWithoutItemPlatformProductInput = {
@@ -872,6 +895,114 @@ export type AdminCatalogItemScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
 }
 
+export type AdminCatalogItemCreateWithoutReturnClaimsInput = {
+  id?: string
+  sortOrder?: number
+  name: string
+  storefrontDescription?: string | null
+  variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  itemExampleListingUrl?: string | null
+  itemMinPriceCents?: number
+  itemGoodsServicesCostCents?: number
+  itemImageRequirementLabel?: string | null
+  itemMinArtworkLongEdgePx?: number | null
+  itemPrintAreaWidthPx?: number | null
+  itemPrintAreaHeightPx?: number | null
+  itemMinArtworkDpi?: number | null
+  itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
+  itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
+  catalogTags?: Prisma.AdminCatalogItemTagCreateNestedManyWithoutAdminCatalogItemInput
+}
+
+export type AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput = {
+  id?: string
+  sortOrder?: number
+  name: string
+  storefrontDescription?: string | null
+  variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  itemPlatformProductId?: string | null
+  itemExampleListingUrl?: string | null
+  itemMinPriceCents?: number
+  itemGoodsServicesCostCents?: number
+  itemImageRequirementLabel?: string | null
+  itemMinArtworkLongEdgePx?: number | null
+  itemPrintAreaWidthPx?: number | null
+  itemPrintAreaHeightPx?: number | null
+  itemMinArtworkDpi?: number | null
+  itemLargeListingArtwork?: boolean
+  itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
+  itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
+}
+
+export type AdminCatalogItemCreateOrConnectWithoutReturnClaimsInput = {
+  where: Prisma.AdminCatalogItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminCatalogItemCreateWithoutReturnClaimsInput, Prisma.AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput>
+}
+
+export type AdminCatalogItemUpsertWithoutReturnClaimsInput = {
+  update: Prisma.XOR<Prisma.AdminCatalogItemUpdateWithoutReturnClaimsInput, Prisma.AdminCatalogItemUncheckedUpdateWithoutReturnClaimsInput>
+  create: Prisma.XOR<Prisma.AdminCatalogItemCreateWithoutReturnClaimsInput, Prisma.AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput>
+  where?: Prisma.AdminCatalogItemWhereInput
+}
+
+export type AdminCatalogItemUpdateToOneWithWhereWithoutReturnClaimsInput = {
+  where?: Prisma.AdminCatalogItemWhereInput
+  data: Prisma.XOR<Prisma.AdminCatalogItemUpdateWithoutReturnClaimsInput, Prisma.AdminCatalogItemUncheckedUpdateWithoutReturnClaimsInput>
+}
+
+export type AdminCatalogItemUpdateWithoutReturnClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
+  itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemMinArtworkLongEdgePx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemPrintAreaWidthPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
+  itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
+  catalogTags?: Prisma.AdminCatalogItemTagUpdateManyWithoutAdminCatalogItemNestedInput
+}
+
+export type AdminCatalogItemUncheckedUpdateWithoutReturnClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  itemPlatformProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
+  itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemMinArtworkLongEdgePx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemPrintAreaWidthPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemPrintAreaHeightPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMinArtworkDpi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
+  itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
+}
+
 export type AdminCatalogItemCreateWithoutCatalogTagsInput = {
   id?: string
   sortOrder?: number
@@ -892,6 +1023,7 @@ export type AdminCatalogItemCreateWithoutCatalogTagsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
+  returnClaims?: Prisma.OrderReturnClaimCreateNestedManyWithoutAdminCatalogItemInput
 }
 
 export type AdminCatalogItemUncheckedCreateWithoutCatalogTagsInput = {
@@ -914,6 +1046,7 @@ export type AdminCatalogItemUncheckedCreateWithoutCatalogTagsInput = {
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
   createdAt?: Date | string
   updatedAt?: Date | string
+  returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutAdminCatalogItemInput
 }
 
 export type AdminCatalogItemCreateOrConnectWithoutCatalogTagsInput = {
@@ -952,6 +1085,7 @@ export type AdminCatalogItemUpdateWithoutCatalogTagsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutAdminCatalogItemNestedInput
 }
 
 export type AdminCatalogItemUncheckedUpdateWithoutCatalogTagsInput = {
@@ -974,6 +1108,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutCatalogTagsInput = {
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
 }
 
 export type AdminCatalogItemCreateManyItemPlatformProductInput = {
@@ -1017,6 +1152,7 @@ export type AdminCatalogItemUpdateWithoutItemPlatformProductInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUpdateManyWithoutAdminCatalogItemNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUpdateManyWithoutAdminCatalogItemNestedInput
 }
 
 export type AdminCatalogItemUncheckedUpdateWithoutItemPlatformProductInput = {
@@ -1039,6 +1175,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutItemPlatformProductInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
+  returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
 }
 
 export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductInput = {
@@ -1069,10 +1206,12 @@ export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductInput =
 
 export type AdminCatalogItemCountOutputType = {
   catalogTags: number
+  returnClaims: number
 }
 
 export type AdminCatalogItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   catalogTags?: boolean | AdminCatalogItemCountOutputTypeCountCatalogTagsArgs
+  returnClaims?: boolean | AdminCatalogItemCountOutputTypeCountReturnClaimsArgs
 }
 
 /**
@@ -1090,6 +1229,13 @@ export type AdminCatalogItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.T
  */
 export type AdminCatalogItemCountOutputTypeCountCatalogTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AdminCatalogItemTagWhereInput
+}
+
+/**
+ * AdminCatalogItemCountOutputType without action
+ */
+export type AdminCatalogItemCountOutputTypeCountReturnClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderReturnClaimWhereInput
 }
 
 
@@ -1115,6 +1261,7 @@ export type AdminCatalogItemSelect<ExtArgs extends runtime.Types.Extensions.Inte
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
   catalogTags?: boolean | Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs>
+  returnClaims?: boolean | Prisma.AdminCatalogItem$returnClaimsArgs<ExtArgs>
   _count?: boolean | Prisma.AdminCatalogItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminCatalogItem"]>
 
@@ -1190,6 +1337,7 @@ export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.Intern
 export type AdminCatalogItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
   catalogTags?: boolean | Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs>
+  returnClaims?: boolean | Prisma.AdminCatalogItem$returnClaimsArgs<ExtArgs>
   _count?: boolean | Prisma.AdminCatalogItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdminCatalogItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1204,6 +1352,7 @@ export type $AdminCatalogItemPayload<ExtArgs extends runtime.Types.Extensions.In
   objects: {
     itemPlatformProduct: Prisma.$ProductPayload<ExtArgs> | null
     catalogTags: Prisma.$AdminCatalogItemTagPayload<ExtArgs>[]
+    returnClaims: Prisma.$OrderReturnClaimPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1674,6 +1823,7 @@ export interface Prisma__AdminCatalogItemClient<T, Null = never, ExtArgs extends
   readonly [Symbol.toStringTag]: "PrismaPromise"
   itemPlatformProduct<T extends Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   catalogTags<T extends Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminCatalogItemTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  returnClaims<T extends Prisma.AdminCatalogItem$returnClaimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminCatalogItem$returnClaimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderReturnClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2163,6 +2313,30 @@ export type AdminCatalogItem$catalogTagsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.AdminCatalogItemTagScalarFieldEnum | Prisma.AdminCatalogItemTagScalarFieldEnum[]
+}
+
+/**
+ * AdminCatalogItem.returnClaims
+ */
+export type AdminCatalogItem$returnClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderReturnClaim
+   */
+  select?: Prisma.OrderReturnClaimSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderReturnClaim
+   */
+  omit?: Prisma.OrderReturnClaimOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderReturnClaimInclude<ExtArgs> | null
+  where?: Prisma.OrderReturnClaimWhereInput
+  orderBy?: Prisma.OrderReturnClaimOrderByWithRelationInput | Prisma.OrderReturnClaimOrderByWithRelationInput[]
+  cursor?: Prisma.OrderReturnClaimWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderReturnClaimScalarFieldEnum | Prisma.OrderReturnClaimScalarFieldEnum[]
 }
 
 /**

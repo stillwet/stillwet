@@ -16,7 +16,7 @@ function resendUserFacingError(status: number, body: string, from: string): stri
   }
   const fromDomain = from.match(/@([^>\s]+)/)?.[1];
   const fromHint = fromDomain
-    ? ` (From: ${fromDomain} — set SHOP_PASSWORD_RESET_EMAIL_FROM to a verified Resend domain, e.g. noreply@auto.stillwet.com)`
+    ? ` (From: ${fromDomain} — set SHOP_PASSWORD_RESET_EMAIL_FROM to a verified Resend address, e.g. info@stillwet.com)`
     : "";
   if (msg) {
     return `Email could not be sent (${status}): ${msg}${fromHint}`;

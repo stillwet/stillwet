@@ -211,6 +211,32 @@ export const OrderStatus = {
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 
 
+export const OrderReturnClaimIssueType = {
+  misprint: 'misprint',
+  defective: 'defective'
+} as const
+
+export type OrderReturnClaimIssueType = (typeof OrderReturnClaimIssueType)[keyof typeof OrderReturnClaimIssueType]
+
+
+export const OrderReturnClaimStatus = {
+  new: 'new',
+  accepted_wip: 'accepted_wip',
+  accepted_complete: 'accepted_complete',
+  rejected: 'rejected'
+} as const
+
+export type OrderReturnClaimStatus = (typeof OrderReturnClaimStatus)[keyof typeof OrderReturnClaimStatus]
+
+
+export const OrderReturnClaimRejectionReason = {
+  past_claim_window: 'past_claim_window',
+  does_not_meet_policy: 'does_not_meet_policy'
+} as const
+
+export type OrderReturnClaimRejectionReason = (typeof OrderReturnClaimRejectionReason)[keyof typeof OrderReturnClaimRejectionReason]
+
+
 export const FulfillmentJobStatus = {
   pending: 'pending',
   processing: 'processing',

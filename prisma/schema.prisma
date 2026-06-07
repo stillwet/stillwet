@@ -967,11 +967,71 @@ model Order {
   shippingPhone         String?
   lines                 OrderLine[]
   fulfillmentJobs       FulfillmentJob[]
+  returnClaims          OrderReturnClaim[]
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
   @@index([shopId])
   @@index([status, createdAt(sort: Desc)], map: "Order_status_createdAt_idx")
+}
+
+enum OrderReturnClaimIssueType {
+  misprint
+  defective
+}
+
+enum OrderReturnClaimStatus {
+  new
+  accepted_wip
+  accepted_complete
+  rejected
+}
+
+enum OrderReturnClaimRejectionReason {
+  past_claim_window
+  does_not_meet_policy
+}
+
+/** Buyer-submitted production-error / defect claim (returns page). */
+model OrderReturnClaim {
+  id                     String                    @id @default(cuid())
+  orderId                String
+  order                  Order                     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderNumber            Int
+  email                  String
+  cardLast4              String                    @db.VarChar(4)
+  nameOnOrder            String
+  issueType              OrderReturnClaimIssueType
+  adminCatalogItemId     String
+  adminCatalogItem       AdminCatalogItem          @relation(fields: [adminCatalogItemId], references: [id], onDelete: Restrict)
+  catalogItemName        String
+  truthAcknowledged      Boolean
+  replacementPolicyAck   Boolean
+  status                 OrderReturnClaimStatus    @default(new)
+  rejectionReason        OrderReturnClaimRejectionReason?
+  confirmationEmailSentAt DateTime?
+  rejectionEmailSentAt   DateTime?
+  acceptedEmailSentAt    DateTime?
+  adminNotes             String?                   @db.Text
+  images                 OrderReturnClaimImage[]
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+
+  @@index([orderId])
+  @@index([orderNumber])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model OrderReturnClaimImage {
+  id         String           @id @default(cuid())
+  claimId    String
+  claim      OrderReturnClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  sortOrder  Int              @default(0)
+  imageUrl   String           @db.VarChar(2048)
+  imageR2Key String
+  uploadedAt DateTime         @default(now())
+
+  @@index([claimId])
 }
 
 model OrderLine {
@@ -1089,6 +1149,7 @@ model AdminCatalogItem {
    */
   itemArtworkSourceTierOverride AdminCatalogItemArtworkSourceTierOverride @default(auto)
   catalogTags           AdminCatalogItemTag[]
+  returnClaims          OrderReturnClaim[]
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
@@ -1117,6 +1178,8 @@ model AdminInboundEmail {
   textBody      String?  @db.Text
   htmlBody      String?  @db.Text
   receivedAt    DateTime
+  /** Set when an admin sends a reply from the inbox tab. */
+  repliedAt     DateTime?
   createdAt     DateTime @default(now())
 
   @@index([receivedAt(sort: Desc)])

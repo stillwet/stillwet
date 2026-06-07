@@ -728,11 +728,13 @@ function MerchandiseBreakdownCentsRow({
   saleCents,
   goodsServicesCostCents,
   platformCutCents,
+  shopTipCents = 0,
   className = "flex-col items-end gap-1",
 }: {
   saleCents: number;
   goodsServicesCostCents: number;
   platformCutCents: number;
+  shopTipCents?: number;
   className?: string;
 }) {
   return (
@@ -740,6 +742,9 @@ function MerchandiseBreakdownCentsRow({
       <span className="shrink-0">Sale {formatUsdFromCents(saleCents)}</span>
       <span className="shrink-0">Goods/services cost {formatUsdFromCents(goodsServicesCostCents)}</span>
       <span className="shrink-0">Platform fee {formatUsdFromCents(platformCutCents)}</span>
+      {shopTipCents > 0 ? (
+        <span className="shrink-0">Tip {formatUsdFromCents(shopTipCents)}</span>
+      ) : null}
     </div>
   );
 }
@@ -750,15 +755,17 @@ export function PaidOrderShopProfitHelp({
   saleCents,
   goodsServicesCostCents,
   platformCutCents,
+  shopTipCents = 0,
 }: {
   shopProfitCents: number;
   saleCents: number;
   goodsServicesCostCents: number;
   platformCutCents: number;
+  shopTipCents?: number;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const showHelp = saleCents > 0;
+  const showHelp = saleCents > 0 || shopTipCents > 0;
 
   useEffect(() => {
     if (!open) return;
@@ -786,7 +793,7 @@ export function PaidOrderShopProfitHelp({
         <div className="relative ml-1.5 inline-block shrink-0">
           <button
             type="button"
-            aria-label="Show order merchandise breakdown"
+            aria-label="Show order profit breakdown"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
             className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/80 text-[10px] font-semibold leading-none text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
@@ -802,6 +809,7 @@ export function PaidOrderShopProfitHelp({
                 saleCents={saleCents}
                 goodsServicesCostCents={goodsServicesCostCents}
                 platformCutCents={platformCutCents}
+                shopTipCents={shopTipCents}
               />
             </div>
           ) : null}

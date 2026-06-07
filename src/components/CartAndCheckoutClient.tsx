@@ -202,17 +202,15 @@ export function CartAndCheckoutClient({
         />
       </div>
 
-      {mode === "drawer" ? (
-        <p className="mt-6 text-center">
-          <Link
-            href={fullCartHref}
-            className="store-kicker text-zinc-500 hover:text-zinc-300"
-            onClick={onClose}
-          >
-            Open cart on full page
-          </Link>
-        </p>
-      ) : null}
+      <p className="mt-6 text-center">
+        <Link
+          href="/returns"
+          className="text-[11px] text-zinc-600 transition hover:text-zinc-500"
+          onClick={onClose}
+        >
+          Return &amp; refund policy
+        </Link>
+      </p>
     </>
   );
 

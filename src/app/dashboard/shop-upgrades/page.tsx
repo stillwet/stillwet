@@ -42,7 +42,11 @@ import {
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
 
-import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
+import {
+  requireShopDashboardUserWithShop,
+  signOutShopOwnerAndRedirectHome,
+  tryRedirectHomeOnDeletedShopAccountLoadError,
+} from "@/lib/shop-account-deleted-session";
 import { DASHBOARD_SHOP_UPGRADES_LABEL } from "@/lib/dashboard-promotions-path";
 import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 
@@ -148,37 +152,22 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
 
   try {
 
-    const user = await prisma.shopUser.findUnique({
-
-      where: { id: owner.shopUserId },
-
-      select: {
-
-        shop: {
-
-          select: {
-
-            id: true,
-
-            slug: true,
-
-            displayName: true,
-
-            listingFeeBonusFreeSlots: true,
-
-            inactivityDeactivatedAt: true,
-
+    const user = await requireShopDashboardUserWithShop(
+      await prisma.shopUser.findUnique({
+        where: { id: owner.shopUserId },
+        select: {
+          shop: {
+            select: {
+              id: true,
+              slug: true,
+              displayName: true,
+              listingFeeBonusFreeSlots: true,
+              inactivityDeactivatedAt: true,
+            },
           },
-
         },
-
-      },
-
-    });
-
-    if (!user) redirect("/dashboard/login");
-
-
+      }),
+    );
 
     const shop = user.shop;
 
@@ -341,7 +330,7 @@ export default async function DashboardShopUpgradesPage({ searchParams }: PagePr
 
   } catch (e) {
 
-    rethrowNextNavigationError(e);
+    await tryRedirectHomeOnDeletedShopAccountLoadError(e, owner.shopUserId);
 
     return <ShopDataLoadError cause={e} />;
 

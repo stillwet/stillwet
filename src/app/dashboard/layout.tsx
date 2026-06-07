@@ -37,7 +37,7 @@ export default async function DashboardSectionLayout({
         where: { id: owner.shopUserId },
         select: { shop: { select: { adminFrozenAt: true } } },
       });
-      showAdminFrozenBanner = shopIsAdminFrozen({ adminFrozenAt: row?.shop.adminFrozenAt ?? null });
+      showAdminFrozenBanner = shopIsAdminFrozen({ adminFrozenAt: row?.shop?.adminFrozenAt ?? null });
     } catch (e) {
       if (!isPrismaMissingRelationError(e)) throw e;
       console.error("[dashboard layout] adminFrozenAt read skipped — migration pending?", e);

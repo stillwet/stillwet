@@ -4,6 +4,12 @@ import { revalidateAdminViews } from "@/lib/revalidate-admin-views";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
+import {
+  ORDER_RETURN_CLAIM_ID_PLACEHOLDER,
+  ORDER_RETURN_CLAIM_ORDER_NUMBER_PLACEHOLDER,
+  ORDER_RETURN_CLAIM_REJECTION_REASON_PLACEHOLDER,
+  ORDER_RETURN_CLAIM_RETURNS_POLICY_URL_PLACEHOLDER,
+} from "@/lib/order-return-claim-email-placeholders";
 import { isSiteEmailTemplateKey } from "@/lib/site-email-template-keys";
 import {
   GIFT_SETUP_CODE_PLACEHOLDER,
@@ -74,6 +80,9 @@ export async function adminSaveSiteEmailTemplate(
   }
   if (
     keyRaw !== "gift_creator_redemption_codes" &&
+    keyRaw !== "order_return_claim_confirmation" &&
+    keyRaw !== "order_return_claim_rejected" &&
+    keyRaw !== "order_return_claim_accepted" &&
     !body.includes(SITE_EMAIL_ACTION_URL_PLACEHOLDER)
   ) {
     return {
@@ -109,6 +118,60 @@ export async function adminSaveSiteEmailTemplate(
       ok: false,
       error: "Gift code email HTML must include {{SETUP_CODE}}.",
     };
+  }
+  if (keyRaw === "order_return_claim_confirmation") {
+    if (!body.includes(ORDER_RETURN_CLAIM_ORDER_NUMBER_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim confirmation HTML must include {{ORDER_NUMBER}}.",
+      };
+    }
+    if (!body.includes(ORDER_RETURN_CLAIM_ID_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim confirmation HTML must include {{CLAIM_ID}}.",
+      };
+    }
+  }
+  if (keyRaw === "order_return_claim_rejected") {
+    if (!body.includes(ORDER_RETURN_CLAIM_ORDER_NUMBER_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim rejected HTML must include {{ORDER_NUMBER}}.",
+      };
+    }
+    if (!body.includes(ORDER_RETURN_CLAIM_ID_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim rejected HTML must include {{CLAIM_ID}}.",
+      };
+    }
+    if (!body.includes(ORDER_RETURN_CLAIM_REJECTION_REASON_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim rejected HTML must include {{REJECTION_REASON}}.",
+      };
+    }
+    if (!body.includes(ORDER_RETURN_CLAIM_RETURNS_POLICY_URL_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim rejected HTML must include {{RETURNS_POLICY_URL}}.",
+      };
+    }
+  }
+  if (keyRaw === "order_return_claim_accepted") {
+    if (!body.includes(ORDER_RETURN_CLAIM_ORDER_NUMBER_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim accepted HTML must include {{ORDER_NUMBER}}.",
+      };
+    }
+    if (!body.includes(ORDER_RETURN_CLAIM_ID_PLACEHOLDER)) {
+      return {
+        ok: false,
+        error: "Return claim accepted HTML must include {{CLAIM_ID}}.",
+      };
+    }
   }
   await prisma.siteEmailTemplate.upsert({
     where: { key: keyRaw },

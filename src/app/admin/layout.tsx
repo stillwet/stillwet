@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHeaderFallback } from "@/components/SiteHeaderFallback";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
+import { ADMIN_MAIN_FOOTER_CLASS, ADMIN_MAIN_SHELL_CLASS } from "@/lib/admin-layout";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +18,8 @@ export default function AdminRootLayout({
       <Suspense fallback={<SiteHeaderFallback />}>
         <SiteHeader />
       </Suspense>
-      <div className="relative mx-auto max-w-[996px] px-4 py-10">{children}</div>
-      <div className="mx-auto max-w-[996px] px-4 pb-10">
+      <div className={ADMIN_MAIN_SHELL_CLASS}>{children}</div>
+      <div className={ADMIN_MAIN_FOOTER_CLASS}>
         <SiteLegalFooter />
       </div>
     </div>

@@ -32,7 +32,7 @@ export const CRON_JOB_REFERENCE_ROWS: CronJobReferenceRow[] = [
     schedule: "0 16 1 * *",
     frequency: "Monthly on the 1st at 16:00 UTC",
     status: "scheduled",
-    notes: "Runs shop inactivity lifecycle and prunes old bug feedback images.",
+    notes: "Runs shop inactivity lifecycle, prunes old bug feedback images, and removes R2 photos for rejected return claims.",
   },
   {
     name: "Platform browse snapshots",
@@ -57,6 +57,15 @@ export const CRON_JOB_REFERENCE_ROWS: CronJobReferenceRow[] = [
     frequency: "Not scheduled directly",
     status: "manual",
     notes: "Kept as a manual endpoint; scheduled monthly through Monthly maintenance.",
+  },
+  {
+    name: "Rejected return claim image prune",
+    path: "/api/cron/prune-rejected-return-claim-images",
+    schedule: "Manual / legacy",
+    frequency: "Not scheduled directly",
+    status: "manual",
+    notes:
+      "Deletes R2 evidence photos for rejected buyer return claims. Scheduled monthly through Monthly maintenance (1st at 16:00 UTC).",
   },
   {
     name: "Admin summary email",

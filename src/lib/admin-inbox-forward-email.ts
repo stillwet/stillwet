@@ -1,6 +1,6 @@
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
 import { extractReplyToAddress } from "@/lib/admin-inbox-reply-email";
-import { BRAND_NAME } from "@/lib/site-brand";
+import { SITE_TRANSACTIONAL_EMAIL_FROM } from "@/lib/site-brand";
 
 export type AdminInboxForwardInput = {
   fromAddress: string;
@@ -68,10 +68,8 @@ export function formatAdminInboxForwardSubject(originalSubject: string): string 
 }
 
 function adminInboxForwardFromHeader(): string {
-  const inbox = adminInboxEmailAddress();
   return (
-    process.env.ADMIN_INBOX_REPLY_FROM?.trim() ||
-    `${BRAND_NAME} Inbox <${inbox}>`
+    process.env.ADMIN_INBOX_REPLY_FROM?.trim() || SITE_TRANSACTIONAL_EMAIL_FROM
   );
 }
 

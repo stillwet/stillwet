@@ -6,7 +6,8 @@ import {
 import { emailLinkOrigin, publicAppBaseUrl } from "@/lib/public-app-url";
 import { adminInboxForwardToEmail } from "@/lib/admin-inbox-forward-email";
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
-import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { resolveShopAutomatedTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import { loadResendSendingDomainDiagnostics } from "@/lib/resend-api-client";
 
 export const runtime = "nodejs";
 
@@ -88,6 +89,24 @@ export async function GET() {
   const accountDeletionFromDomain =
     accountDeletionFrom.ok ? emailFromDomain(accountDeletionFrom.from) : null;
 
+  const transactionalFrom = resolveShopAutomatedTransactionalEmailFrom();
+  let resendDiagnostics:
+    | Awaited<ReturnType<typeof loadResendSendingDomainDiagnostics>>
+    | { error: string }
+    | undefined;
+  if (hasResendApiKey && transactionalFrom.ok) {
+    try {
+      resendDiagnostics = await loadResendSendingDomainDiagnostics({
+        apiKey: process.env.RESEND_API_KEY,
+        resolvedFrom: transactionalFrom.from,
+      });
+    } catch (e) {
+      resendDiagnostics = {
+        error: e instanceof Error ? e.message.slice(0, 280) : "resend_api_failed",
+      };
+    }
+  }
+
   return Response.json(
     {
       ok: dbOk,
@@ -133,6 +152,7 @@ export async function GET() {
         hasForwardTo: hasAdminInboxForwardTo,
         replyFromConfigured: hasAdminInboxReplyFrom,
       },
+      resend: resendDiagnostics,
     },
     { status: 200, headers: { "Cache-Control": "no-store" } },
   );

@@ -2145,7 +2145,6 @@ export function DashboardMainTabs(props: {
                 <span className="w-14 shrink-0 text-center">Date</span>
                 <span className="min-w-0 flex-1 pl-4 text-left">Item</span>
               </div>
-              <span className="min-w-[4rem] shrink-0 text-center">Tip</span>
               <span className="min-w-[5.5rem] shrink-0 text-center text-blue-400">Shop profit</span>
             </div>
             <ul className="mt-2 space-y-3">
@@ -2167,9 +2166,6 @@ export function DashboardMainTabs(props: {
                         ))}
                       </ul>
                     </div>
-                    <span className="min-w-[4rem] shrink-0 text-center text-[11px] tabular-nums leading-snug text-zinc-300">
-                      {paidOrderShopTipCents(o) > 0 ? formatMoney(paidOrderShopTipCents(o)) : "—"}
-                    </span>
                     {(() => {
                       const merch = paidOrderMerchandiseTotals(o);
                       return (
@@ -2178,6 +2174,7 @@ export function DashboardMainTabs(props: {
                           saleCents={merch.saleCents}
                           goodsServicesCostCents={merch.goodsServicesCostCents}
                           platformCutCents={merch.platformCutCents}
+                          shopTipCents={paidOrderShopTipCents(o)}
                         />
                       );
                     })()}

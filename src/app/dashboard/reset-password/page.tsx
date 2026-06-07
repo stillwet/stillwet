@@ -6,6 +6,7 @@ import Link from "next/link";
 import { resetShopPasswordWithToken } from "@/actions/shop-password-reset";
 import { SHOP_PASSWORD_RESET_PREVIEW_DEMO_TOKEN } from "@/lib/shop-password-reset-email-html";
 import { StillWetLogo } from "@/components/StillWetLogo";
+import { PasswordInput } from "@/components/PasswordInput";
 
 function isNextRedirectError(e: unknown): boolean {
   if (typeof e !== "object" || e === null) return false;
@@ -106,24 +107,22 @@ function ResetPasswordContent() {
         <input type="hidden" name="token" value={token} />
         <label className="block text-sm text-zinc-400">
           New password
-          <input
-            type="password"
+          <PasswordInput
             name="password"
             required
             minLength={10}
             autoComplete="new-password"
-            className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-zinc-100 outline-none ring-blue-500/20 focus:border-blue-600 focus:ring-2"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-zinc-100 outline-none ring-blue-500/20 focus:border-blue-600 focus:ring-2"
           />
         </label>
         <label className="block text-sm text-zinc-400">
           Confirm password
-          <input
-            type="password"
+          <PasswordInput
             name="passwordConfirm"
             required
             minLength={10}
             autoComplete="new-password"
-            className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-zinc-100 outline-none ring-blue-500/20 focus:border-blue-600 focus:ring-2"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-zinc-100 outline-none ring-blue-500/20 focus:border-blue-600 focus:ring-2"
           />
         </label>
         {error ? (

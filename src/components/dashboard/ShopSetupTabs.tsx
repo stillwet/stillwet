@@ -83,6 +83,36 @@ function StripeConnectSubmitButton({
   );
 }
 
+const onboardingStepLinkClass =
+  "text-zinc-200 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100";
+
+function OnboardingVerifyEmailStep({ verified }: { verified: boolean }) {
+  const router = useRouter();
+
+  return (
+    <>
+      <p className="text-sm font-medium text-zinc-200">
+        {!verified ? (
+          <button
+            type="button"
+            onClick={() => router.refresh()}
+            className="font-inherit text-inherit hover:text-zinc-100"
+          >
+            Verify email
+          </button>
+        ) : (
+          "Verify email"
+        )}
+      </p>
+      {!verified ? (
+        <div className="mt-2">
+          <ShopEmailVerificationCallout verified={verified} />
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function ShopEmailVerificationCallout({ verified }: { verified: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -106,26 +136,29 @@ function ShopEmailVerificationCallout({ verified }: { verified: boolean }) {
     return null;
   }
 
+  const resendVerification = () => {
+    setMsg(null);
+    start(async () => {
+      const r = await resendShopEmailVerification();
+      if (r.ok) setMsg({ tone: "ok", text: r.message });
+      else setMsg({ tone: "err", text: r.error });
+    });
+  };
+
   return (
     <div className="space-y-2">
       <p className="text-xs italic text-zinc-500">
-        Check your inbox. Don&apos;t see it? Check spam or resend link.
+        Check your inbox. Don&apos;t see it? Check spam or{" "}
+        <button
+          type="button"
+          disabled={pending}
+          onClick={resendVerification}
+          className="italic text-zinc-400 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {pending ? "sending…" : "resend link"}
+        </button>
+        .
       </p>
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() => {
-          setMsg(null);
-          start(async () => {
-            const r = await resendShopEmailVerification();
-            if (r.ok) setMsg({ tone: "ok", text: r.message });
-            else setMsg({ tone: "err", text: r.error });
-          });
-        }}
-        className={btnChecklistAction}
-      >
-        {pending ? "Sending…" : "Resend"}
-      </button>
       {msg ? (
         <p
           className={
@@ -150,7 +183,7 @@ export function ShopSetupTabs(props: {
 }) {
   const { shop, steps, embedded = false } = props;
 
-  const stripeLabel = "Stripe Connect";
+  const stripeLabel = "Continue to Stripe Connect";
 
   return (
     <section
@@ -169,61 +202,75 @@ export function ShopSetupTabs(props: {
           <li className="flex gap-3">
             <StepIcon done={steps.profile} />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-zinc-200">Shop profile</p>
-            </div>
-          </li>
-          <li className="flex gap-3">
-            <StepIcon done={steps.guidelines} />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-zinc-200">Read shop regulations</p>
-              {!steps.guidelines ? (
-                <a
-                  href="/dashboard?dash=itemGuidelines"
-                  className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
-                >
-                  Open Shop regulations (next to Onboarding) →
-                </a>
-              ) : null}
+              <p className="text-sm font-medium text-zinc-200">
+                Setup your{" "}
+                {!steps.profile ? (
+                  <a
+                    href="/dashboard?dash=shopProfile"
+                    className="text-zinc-200 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
+                  >
+                    Shop Profile
+                  </a>
+                ) : (
+                  "Shop Profile"
+                )}
+              </p>
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.emailVerified} />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-zinc-200">Verify email</p>
-              {!steps.emailVerified ? (
-                <div className="mt-2">
-                  <ShopEmailVerificationCallout verified={steps.emailVerified} />
-                </div>
-              ) : null}
+              <OnboardingVerifyEmailStep verified={steps.emailVerified} />
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <StepIcon done={steps.guidelines} />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-zinc-200">
+                Read{" "}
+                {!steps.guidelines ? (
+                  <a
+                    href="/dashboard?dash=itemGuidelines"
+                    className="text-zinc-200 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
+                  >
+                    shop regulations
+                  </a>
+                ) : (
+                  "shop regulations"
+                )}
+              </p>
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.listing} />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-zinc-200">Request listing</p>
-              {!steps.listing ? (
-                <>
-                  <p className="mt-0.5 text-xs text-zinc-500">
-                    Submit at least one listing request from the Request listing tab.
-                  </p>
+              <p className="text-sm font-medium text-zinc-200">
+                {!steps.listing ? (
                   <a
                     href="/dashboard?dash=requestListing"
-                    className="mt-1.5 inline-block text-xs font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
+                    className="text-zinc-200 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-100"
                   >
-                    Open Request listing tab →
+                    Request listing
                   </a>
-                </>
+                ) : (
+                  "Request listing"
+                )}
+              </p>
+              {!steps.listing ? (
+                <p className="mt-0.5 text-xs text-zinc-500">
+                  Submit at least one listing request from the Request listing tab.
+                </p>
               ) : null}
             </div>
           </li>
           <li className="flex gap-3">
             <StepIcon done={steps.stripe} />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-zinc-200">Stripe Connect</p>
+              <p className="text-sm font-medium text-zinc-200">Setup Stripe Connect</p>
               {!steps.stripe ? (
                 <>
                   <p className="mt-0.5 text-xs italic text-zinc-500">
-                    Connect Stripe so you can get paid when you sell items.
+                    This is how you get paid when you sell an item.
                   </p>
                   {shop.stripeConnectPendingHint ? (
                     <p className="mt-2 rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200/90">

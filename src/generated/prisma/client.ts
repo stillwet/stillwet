@@ -219,6 +219,16 @@ export type CreatorGiftCode = Prisma.CreatorGiftCodeModel
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model OrderReturnClaim
+ * * Buyer-submitted production-error / defect claim (returns page).
+ */
+export type OrderReturnClaim = Prisma.OrderReturnClaimModel
+/**
+ * Model OrderReturnClaimImage
+ * 
+ */
+export type OrderReturnClaimImage = Prisma.OrderReturnClaimImageModel
+/**
  * Model OrderLine
  * 
  */

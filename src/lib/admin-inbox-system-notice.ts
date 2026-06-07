@@ -1,16 +1,12 @@
 import { revalidateAdminViews } from "@/lib/revalidate-admin-views";
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
+import { ADMIN_INBOX_PLATFORM_RESEND_ID_PREFIX } from "@/lib/admin-inbox-system-notice-shared";
 import { prismaAdminInboundEmailOrNull } from "@/lib/prisma";
 import { BRAND_NAME, SITE_CONTACT_EMAIL } from "@/lib/site-brand";
 
-/** Synthetic Resend ids for platform-generated inbox rows (not from Resend webhooks). */
-export const ADMIN_INBOX_PLATFORM_RESEND_ID_PREFIX = "platform:";
+export { ADMIN_INBOX_PLATFORM_RESEND_ID_PREFIX, isPlatformAdminInboxNotice } from "@/lib/admin-inbox-system-notice-shared";
 
-const PLATFORM_INBOX_FROM = `${BRAND_NAME} (automated) <noreply@${SITE_CONTACT_EMAIL.split("@")[1] ?? "stillwet.com"}>`;
-
-export function isPlatformAdminInboxNotice(resendEmailId: string): boolean {
-  return resendEmailId.startsWith(ADMIN_INBOX_PLATFORM_RESEND_ID_PREFIX);
-}
+const PLATFORM_INBOX_FROM = `${BRAND_NAME} (automated) <${SITE_CONTACT_EMAIL}>`;
 
 /**
  * Inserts a row into {@link AdminInboundEmail} so it appears on the admin Inbox tab.

@@ -8367,11 +8367,11 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      */
     accountDeletionEmailConfirmedAt: Date | null
     /**
-     * * Warning email sent after 60 days without a successful creator login.
+     * * Warning email sent after 30 days without a successful creator login.
      */
     inactivityWarningSentAt: Date | null
     /**
-     * * Shop is deactivated for creator access after 90 days without a successful creator login.
+     * * Shop is deactivated for creator access after 60 days without login.
      */
     inactivityDeactivatedAt: Date | null
     /**

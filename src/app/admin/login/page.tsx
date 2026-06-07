@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { loginAdmin } from "@/actions/admin";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -26,12 +27,11 @@ export default function AdminLoginPage() {
       >
         <label className="block text-sm text-zinc-400">
           Password
-          <input
-            type="password"
+          <PasswordInput
             name="password"
             required
             autoComplete="current-password"
-            className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
           />
         </label>
         {error && <p className="text-sm text-amber-400">{error}</p>}

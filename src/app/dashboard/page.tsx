@@ -42,7 +42,11 @@ import {
 import { shopStripeConnectReadyForListingCharges } from "@/lib/shop-stripe-connect-gate";
 import { shopDisplayNameForPublicLabel } from "@/lib/shop-display-name-uniqueness";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
-import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
+import {
+  requireShopDashboardUserWithShop,
+  signOutShopOwnerAndRedirectHome,
+  tryRedirectHomeOnDeletedShopAccountLoadError,
+} from "@/lib/shop-account-deleted-session";
 import {
   dashQueryParamForTabId,
   dashboardTabParamToId,
@@ -151,21 +155,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     listingFeeBonusFreeSlots: true,
   } as const;
 
-  const user = await prisma.shopUser.findUnique({
-    where: { id: owner.shopUserId },
-    select: {
-      id: true,
-      email: true,
-      emailVerifiedAt: true,
-      twoFactorEmailEnabled: true,
-      shop: { select: DASHBOARD_SHOP_SELECT },
-    },
-  });
-  if (!user) {
-    const session = await getShopOwnerSession();
-    session.destroy();
-    redirect("/?accountDeleted=1");
-  }
+  const user = await requireShopDashboardUserWithShop(
+    await prisma.shopUser.findUnique({
+      where: { id: owner.shopUserId },
+      select: {
+        id: true,
+        email: true,
+        emailVerifiedAt: true,
+        twoFactorEmailEnabled: true,
+        shop: { select: DASHBOARD_SHOP_SELECT },
+      },
+    }),
+  );
 
   let shop = user.shop;
   const isPlatform = shop.slug === PLATFORM_SHOP_SLUG;
@@ -389,9 +390,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   ) {
     const r = await dashboardTryCompleteAccountDeletion();
     if (r.ok) {
-      const session = await getShopOwnerSession();
-      session.destroy();
-      redirect("/?accountDeleted=1");
+      await signOutShopOwnerAndRedirectHome();
     }
   }
 
@@ -582,7 +581,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     </main>
   );
   } catch (e) {
-    rethrowNextNavigationError(e);
+    await tryRedirectHomeOnDeletedShopAccountLoadError(e, owner.shopUserId);
     return <ShopDataLoadError cause={e} />;
   }
 }

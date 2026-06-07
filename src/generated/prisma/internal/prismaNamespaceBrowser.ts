@@ -85,6 +85,8 @@ export const ModelName = {
   CreatorGiftPurchase: 'CreatorGiftPurchase',
   CreatorGiftCode: 'CreatorGiftCode',
   Order: 'Order',
+  OrderReturnClaim: 'OrderReturnClaim',
+  OrderReturnClaimImage: 'OrderReturnClaimImage',
   OrderLine: 'OrderLine',
   FulfillmentJob: 'FulfillmentJob',
   ProcessedStripeEvent: 'ProcessedStripeEvent',
@@ -693,6 +695,43 @@ export const OrderScalarFieldEnum = {
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
 
 
+export const OrderReturnClaimScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  orderNumber: 'orderNumber',
+  email: 'email',
+  cardLast4: 'cardLast4',
+  nameOnOrder: 'nameOnOrder',
+  issueType: 'issueType',
+  adminCatalogItemId: 'adminCatalogItemId',
+  catalogItemName: 'catalogItemName',
+  truthAcknowledged: 'truthAcknowledged',
+  replacementPolicyAck: 'replacementPolicyAck',
+  status: 'status',
+  rejectionReason: 'rejectionReason',
+  confirmationEmailSentAt: 'confirmationEmailSentAt',
+  rejectionEmailSentAt: 'rejectionEmailSentAt',
+  acceptedEmailSentAt: 'acceptedEmailSentAt',
+  adminNotes: 'adminNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderReturnClaimScalarFieldEnum = (typeof OrderReturnClaimScalarFieldEnum)[keyof typeof OrderReturnClaimScalarFieldEnum]
+
+
+export const OrderReturnClaimImageScalarFieldEnum = {
+  id: 'id',
+  claimId: 'claimId',
+  sortOrder: 'sortOrder',
+  imageUrl: 'imageUrl',
+  imageR2Key: 'imageR2Key',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type OrderReturnClaimImageScalarFieldEnum = (typeof OrderReturnClaimImageScalarFieldEnum)[keyof typeof OrderReturnClaimImageScalarFieldEnum]
+
+
 export const OrderLineScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
@@ -781,6 +820,7 @@ export const AdminInboundEmailScalarFieldEnum = {
   textBody: 'textBody',
   htmlBody: 'htmlBody',
   receivedAt: 'receivedAt',
+  repliedAt: 'repliedAt',
   createdAt: 'createdAt'
 } as const
 

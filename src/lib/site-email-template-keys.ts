@@ -6,6 +6,9 @@ export const SITE_EMAIL_TEMPLATE_KEYS = [
   "shop_dashboard_two_factor_confirm_device",
   "gift_creator_redemption_codes",
   "shop_inactivity_deactivation_warning",
+  "order_return_claim_confirmation",
+  "order_return_claim_rejected",
+  "order_return_claim_accepted",
 ] as const;
 
 export type SiteEmailTemplateKey = (typeof SITE_EMAIL_TEMPLATE_KEYS)[number];

@@ -418,6 +418,8 @@ export const ModelName = {
   CreatorGiftPurchase: 'CreatorGiftPurchase',
   CreatorGiftCode: 'CreatorGiftCode',
   Order: 'Order',
+  OrderReturnClaim: 'OrderReturnClaim',
+  OrderReturnClaimImage: 'OrderReturnClaimImage',
   OrderLine: 'OrderLine',
   FulfillmentJob: 'FulfillmentJob',
   ProcessedStripeEvent: 'ProcessedStripeEvent',
@@ -448,7 +450,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
+    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2968,6 +2970,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    OrderReturnClaim: {
+      payload: Prisma.$OrderReturnClaimPayload<ExtArgs>
+      fields: Prisma.OrderReturnClaimFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderReturnClaimFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderReturnClaimFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderReturnClaimFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderReturnClaimFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>
+        }
+        findMany: {
+          args: Prisma.OrderReturnClaimFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>[]
+        }
+        create: {
+          args: Prisma.OrderReturnClaimCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>
+        }
+        createMany: {
+          args: Prisma.OrderReturnClaimCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderReturnClaimCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderReturnClaimDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>
+        }
+        update: {
+          args: Prisma.OrderReturnClaimUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderReturnClaimDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderReturnClaimUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderReturnClaimUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderReturnClaimUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderReturnClaimAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderReturnClaim>
+        }
+        groupBy: {
+          args: Prisma.OrderReturnClaimGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderReturnClaimGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderReturnClaimCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderReturnClaimCountAggregateOutputType> | number
+        }
+      }
+    }
+    OrderReturnClaimImage: {
+      payload: Prisma.$OrderReturnClaimImagePayload<ExtArgs>
+      fields: Prisma.OrderReturnClaimImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderReturnClaimImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderReturnClaimImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>
+        }
+        findFirst: {
+          args: Prisma.OrderReturnClaimImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderReturnClaimImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>
+        }
+        findMany: {
+          args: Prisma.OrderReturnClaimImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>[]
+        }
+        create: {
+          args: Prisma.OrderReturnClaimImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>
+        }
+        createMany: {
+          args: Prisma.OrderReturnClaimImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderReturnClaimImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>[]
+        }
+        delete: {
+          args: Prisma.OrderReturnClaimImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>
+        }
+        update: {
+          args: Prisma.OrderReturnClaimImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderReturnClaimImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderReturnClaimImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderReturnClaimImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderReturnClaimImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReturnClaimImagePayload>
+        }
+        aggregate: {
+          args: Prisma.OrderReturnClaimImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderReturnClaimImage>
+        }
+        groupBy: {
+          args: Prisma.OrderReturnClaimImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderReturnClaimImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderReturnClaimImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderReturnClaimImageCountAggregateOutputType> | number
+        }
+      }
+    }
     OrderLine: {
       payload: Prisma.$OrderLinePayload<ExtArgs>
       fields: Prisma.OrderLineFieldRefs
@@ -4692,6 +4842,43 @@ export const OrderScalarFieldEnum = {
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
 
 
+export const OrderReturnClaimScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  orderNumber: 'orderNumber',
+  email: 'email',
+  cardLast4: 'cardLast4',
+  nameOnOrder: 'nameOnOrder',
+  issueType: 'issueType',
+  adminCatalogItemId: 'adminCatalogItemId',
+  catalogItemName: 'catalogItemName',
+  truthAcknowledged: 'truthAcknowledged',
+  replacementPolicyAck: 'replacementPolicyAck',
+  status: 'status',
+  rejectionReason: 'rejectionReason',
+  confirmationEmailSentAt: 'confirmationEmailSentAt',
+  rejectionEmailSentAt: 'rejectionEmailSentAt',
+  acceptedEmailSentAt: 'acceptedEmailSentAt',
+  adminNotes: 'adminNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderReturnClaimScalarFieldEnum = (typeof OrderReturnClaimScalarFieldEnum)[keyof typeof OrderReturnClaimScalarFieldEnum]
+
+
+export const OrderReturnClaimImageScalarFieldEnum = {
+  id: 'id',
+  claimId: 'claimId',
+  sortOrder: 'sortOrder',
+  imageUrl: 'imageUrl',
+  imageR2Key: 'imageR2Key',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type OrderReturnClaimImageScalarFieldEnum = (typeof OrderReturnClaimImageScalarFieldEnum)[keyof typeof OrderReturnClaimImageScalarFieldEnum]
+
+
 export const OrderLineScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
@@ -4780,6 +4967,7 @@ export const AdminInboundEmailScalarFieldEnum = {
   textBody: 'textBody',
   htmlBody: 'htmlBody',
   receivedAt: 'receivedAt',
+  repliedAt: 'repliedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -5265,6 +5453,48 @@ export type ListEnumOrderProceedsRoutingFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'OrderReturnClaimIssueType'
+ */
+export type EnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderReturnClaimIssueType'>
+    
+
+
+/**
+ * Reference to a field of type 'OrderReturnClaimIssueType[]'
+ */
+export type ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderReturnClaimIssueType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'OrderReturnClaimStatus'
+ */
+export type EnumOrderReturnClaimStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderReturnClaimStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'OrderReturnClaimStatus[]'
+ */
+export type ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderReturnClaimStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'OrderReturnClaimRejectionReason'
+ */
+export type EnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderReturnClaimRejectionReason'>
+    
+
+
+/**
+ * Reference to a field of type 'OrderReturnClaimRejectionReason[]'
+ */
+export type ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderReturnClaimRejectionReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'FulfillmentJobStatus'
  */
 export type EnumFulfillmentJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FulfillmentJobStatus'>
@@ -5476,6 +5706,8 @@ export type GlobalOmitConfig = {
   creatorGiftPurchase?: Prisma.CreatorGiftPurchaseOmit
   creatorGiftCode?: Prisma.CreatorGiftCodeOmit
   order?: Prisma.OrderOmit
+  orderReturnClaim?: Prisma.OrderReturnClaimOmit
+  orderReturnClaimImage?: Prisma.OrderReturnClaimImageOmit
   orderLine?: Prisma.OrderLineOmit
   fulfillmentJob?: Prisma.FulfillmentJobOmit
   processedStripeEvent?: Prisma.ProcessedStripeEventOmit

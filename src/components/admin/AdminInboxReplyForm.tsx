@@ -21,8 +21,12 @@ function SubmitButton() {
   );
 }
 
-export function AdminInboxReplyForm(props: { inboundId: string }) {
-  const { inboundId } = props;
+export function AdminInboxReplyForm(props: {
+  inboundId: string;
+  toEmail: string;
+  subject: string;
+}) {
+  const { inboundId, toEmail, subject } = props;
   const [state, action] = useActionState<AdminInboxReplyState, FormData>(sendAdminInboxReply, null);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,7 +37,7 @@ export function AdminInboxReplyForm(props: { inboundId: string }) {
   }, [state]);
 
   return (
-    <form action={action} className="space-y-2 border-t border-zinc-800/90 pt-3">
+    <form action={action} className="space-y-3">
       <input type="hidden" name="inboundId" value={inboundId} />
       {state?.status === "error" ? (
         <p className="text-xs text-red-300/90" role="alert">
@@ -45,8 +49,14 @@ export function AdminInboxReplyForm(props: { inboundId: string }) {
           Reply sent.
         </p>
       ) : null}
+      <dl className="grid gap-2 text-xs sm:grid-cols-[auto_1fr] sm:gap-x-4">
+        <dt className="font-medium text-zinc-500">To email</dt>
+        <dd className="break-all text-zinc-300">{toEmail}</dd>
+        <dt className="font-medium text-zinc-500">Subject</dt>
+        <dd className="break-words text-zinc-300">{subject}</dd>
+      </dl>
       <label className="block text-xs font-medium text-zinc-500" htmlFor={`inbox-reply-${inboundId}`}>
-        Reply by email
+        Message
       </label>
       <textarea
         ref={taRef}

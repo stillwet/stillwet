@@ -6,6 +6,7 @@ import {
   MERCH_QUOTE_DEFAULT_SUBJECT_TEMPLATE,
   MERCH_QUOTE_DEFAULT_TEXT_TEMPLATE,
 } from "@/lib/merch-quote-email-defaults";
+import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(200),
@@ -35,8 +36,13 @@ export async function submitMerchQuoteContact(
   const { name, email, message } = parsed.data;
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const to = process.env.CONTACT_QUOTE_TO_EMAIL?.trim();
-  const from =
-    process.env.CONTACT_QUOTE_FROM_EMAIL?.trim() ?? "onboarding@resend.dev";
+  const fromResult = resolveShopTransactionalEmailFrom([
+    process.env.CONTACT_QUOTE_FROM_EMAIL,
+  ]);
+  if (!fromResult.ok) {
+    return { ok: false, error: fromResult.error };
+  }
+  const from = fromResult.from;
 
   if (!apiKey || !to) {
     return {

@@ -125,9 +125,9 @@ export const loadAdminBadgeInboxCount = unstable_cache(
   async () => {
     const d = prismaAdminInboundEmailOrNull();
     if (!d) return 0;
-    return await d.count();
+    return await d.count({ where: { repliedAt: null } });
   },
-  ["admin-badge:admin-inbox:v1"],
+  ["admin-badge:admin-inbox:v2"],
   { revalidate: TWO_HOURS_S + 19 * 60 },
 );
 

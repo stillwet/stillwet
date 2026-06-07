@@ -644,6 +644,57 @@ export type EnumOrderProceedsRoutingWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumOrderProceedsRoutingFilter<$PrismaModel>
 }
 
+export type EnumOrderReturnClaimIssueTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimIssueType | Prisma.EnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel> | $Enums.OrderReturnClaimIssueType
+}
+
+export type EnumOrderReturnClaimStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimStatus | Prisma.EnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimStatusFilter<$PrismaModel> | $Enums.OrderReturnClaimStatus
+}
+
+export type EnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimRejectionReason | Prisma.EnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel> | $Enums.OrderReturnClaimRejectionReason | null
+}
+
+export type EnumOrderReturnClaimIssueTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimIssueType | Prisma.EnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimIssueTypeWithAggregatesFilter<$PrismaModel> | $Enums.OrderReturnClaimIssueType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel>
+}
+
+export type EnumOrderReturnClaimStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimStatus | Prisma.EnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimStatusWithAggregatesFilter<$PrismaModel> | $Enums.OrderReturnClaimStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrderReturnClaimStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrderReturnClaimStatusFilter<$PrismaModel>
+}
+
+export type EnumOrderReturnClaimRejectionReasonNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimRejectionReason | Prisma.EnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableWithAggregatesFilter<$PrismaModel> | $Enums.OrderReturnClaimRejectionReason | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel>
+}
+
 export type EnumFulfillmentJobStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.FulfillmentJobStatus | Prisma.EnumFulfillmentJobStatusFieldRefInput<$PrismaModel>
   in?: $Enums.FulfillmentJobStatus[] | Prisma.ListEnumFulfillmentJobStatusFieldRefInput<$PrismaModel>
@@ -1316,6 +1367,57 @@ export type NestedEnumOrderProceedsRoutingWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumOrderProceedsRoutingFilter<$PrismaModel>
   _max?: Prisma.NestedEnumOrderProceedsRoutingFilter<$PrismaModel>
+}
+
+export type NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimIssueType | Prisma.EnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel> | $Enums.OrderReturnClaimIssueType
+}
+
+export type NestedEnumOrderReturnClaimStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimStatus | Prisma.EnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimStatusFilter<$PrismaModel> | $Enums.OrderReturnClaimStatus
+}
+
+export type NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimRejectionReason | Prisma.EnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel> | $Enums.OrderReturnClaimRejectionReason | null
+}
+
+export type NestedEnumOrderReturnClaimIssueTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimIssueType | Prisma.EnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimIssueType[] | Prisma.ListEnumOrderReturnClaimIssueTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimIssueTypeWithAggregatesFilter<$PrismaModel> | $Enums.OrderReturnClaimIssueType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrderReturnClaimIssueTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumOrderReturnClaimStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimStatus | Prisma.EnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrderReturnClaimStatus[] | Prisma.ListEnumOrderReturnClaimStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrderReturnClaimStatusWithAggregatesFilter<$PrismaModel> | $Enums.OrderReturnClaimStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrderReturnClaimStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrderReturnClaimStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumOrderReturnClaimRejectionReasonNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrderReturnClaimRejectionReason | Prisma.EnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OrderReturnClaimRejectionReason[] | Prisma.ListEnumOrderReturnClaimRejectionReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableWithAggregatesFilter<$PrismaModel> | $Enums.OrderReturnClaimRejectionReason | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrderReturnClaimRejectionReasonNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumFulfillmentJobStatusFilter<$PrismaModel = never> = {

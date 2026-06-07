@@ -1,5 +1,5 @@
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
-import { BRAND_NAME } from "@/lib/site-brand";
+import { SITE_TRANSACTIONAL_EMAIL_FROM } from "@/lib/site-brand";
 
 export type AdminInboxSendResult = { ok: true } | { ok: false; error: string };
 
@@ -41,8 +41,7 @@ export async function sendOutboundAdminInboxReply(opts: {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const inbox = adminInboxEmailAddress();
   const from =
-    process.env.ADMIN_INBOX_REPLY_FROM?.trim() ||
-    `${BRAND_NAME} <${inbox}>`;
+    process.env.ADMIN_INBOX_REPLY_FROM?.trim() || SITE_TRANSACTIONAL_EMAIL_FROM;
 
   if (!apiKey) {
     return {

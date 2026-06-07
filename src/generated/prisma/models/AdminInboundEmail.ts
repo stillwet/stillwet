@@ -35,6 +35,7 @@ export type AdminInboundEmailMinAggregateOutputType = {
   textBody: string | null
   htmlBody: string | null
   receivedAt: Date | null
+  repliedAt: Date | null
   createdAt: Date | null
 }
 
@@ -47,6 +48,7 @@ export type AdminInboundEmailMaxAggregateOutputType = {
   textBody: string | null
   htmlBody: string | null
   receivedAt: Date | null
+  repliedAt: Date | null
   createdAt: Date | null
 }
 
@@ -59,6 +61,7 @@ export type AdminInboundEmailCountAggregateOutputType = {
   textBody: number
   htmlBody: number
   receivedAt: number
+  repliedAt: number
   createdAt: number
   _all: number
 }
@@ -73,6 +76,7 @@ export type AdminInboundEmailMinAggregateInputType = {
   textBody?: true
   htmlBody?: true
   receivedAt?: true
+  repliedAt?: true
   createdAt?: true
 }
 
@@ -85,6 +89,7 @@ export type AdminInboundEmailMaxAggregateInputType = {
   textBody?: true
   htmlBody?: true
   receivedAt?: true
+  repliedAt?: true
   createdAt?: true
 }
 
@@ -97,6 +102,7 @@ export type AdminInboundEmailCountAggregateInputType = {
   textBody?: true
   htmlBody?: true
   receivedAt?: true
+  repliedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -182,6 +188,7 @@ export type AdminInboundEmailGroupByOutputType = {
   textBody: string | null
   htmlBody: string | null
   receivedAt: Date
+  repliedAt: Date | null
   createdAt: Date
   _count: AdminInboundEmailCountAggregateOutputType | null
   _min: AdminInboundEmailMinAggregateOutputType | null
@@ -215,6 +222,7 @@ export type AdminInboundEmailWhereInput = {
   textBody?: Prisma.StringNullableFilter<"AdminInboundEmail"> | string | null
   htmlBody?: Prisma.StringNullableFilter<"AdminInboundEmail"> | string | null
   receivedAt?: Prisma.DateTimeFilter<"AdminInboundEmail"> | Date | string
+  repliedAt?: Prisma.DateTimeNullableFilter<"AdminInboundEmail"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminInboundEmail"> | Date | string
 }
 
@@ -227,6 +235,7 @@ export type AdminInboundEmailOrderByWithRelationInput = {
   textBody?: Prisma.SortOrderInput | Prisma.SortOrder
   htmlBody?: Prisma.SortOrderInput | Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
+  repliedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -242,6 +251,7 @@ export type AdminInboundEmailWhereUniqueInput = Prisma.AtLeast<{
   textBody?: Prisma.StringNullableFilter<"AdminInboundEmail"> | string | null
   htmlBody?: Prisma.StringNullableFilter<"AdminInboundEmail"> | string | null
   receivedAt?: Prisma.DateTimeFilter<"AdminInboundEmail"> | Date | string
+  repliedAt?: Prisma.DateTimeNullableFilter<"AdminInboundEmail"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminInboundEmail"> | Date | string
 }, "id" | "resendEmailId">
 
@@ -254,6 +264,7 @@ export type AdminInboundEmailOrderByWithAggregationInput = {
   textBody?: Prisma.SortOrderInput | Prisma.SortOrder
   htmlBody?: Prisma.SortOrderInput | Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
+  repliedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.AdminInboundEmailCountOrderByAggregateInput
   _max?: Prisma.AdminInboundEmailMaxOrderByAggregateInput
@@ -272,6 +283,7 @@ export type AdminInboundEmailScalarWhereWithAggregatesInput = {
   textBody?: Prisma.StringNullableWithAggregatesFilter<"AdminInboundEmail"> | string | null
   htmlBody?: Prisma.StringNullableWithAggregatesFilter<"AdminInboundEmail"> | string | null
   receivedAt?: Prisma.DateTimeWithAggregatesFilter<"AdminInboundEmail"> | Date | string
+  repliedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AdminInboundEmail"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminInboundEmail"> | Date | string
 }
 
@@ -284,6 +296,7 @@ export type AdminInboundEmailCreateInput = {
   textBody?: string | null
   htmlBody?: string | null
   receivedAt: Date | string
+  repliedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -296,6 +309,7 @@ export type AdminInboundEmailUncheckedCreateInput = {
   textBody?: string | null
   htmlBody?: string | null
   receivedAt: Date | string
+  repliedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -308,6 +322,7 @@ export type AdminInboundEmailUpdateInput = {
   textBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   htmlBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -320,6 +335,7 @@ export type AdminInboundEmailUncheckedUpdateInput = {
   textBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   htmlBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -332,6 +348,7 @@ export type AdminInboundEmailCreateManyInput = {
   textBody?: string | null
   htmlBody?: string | null
   receivedAt: Date | string
+  repliedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -344,6 +361,7 @@ export type AdminInboundEmailUpdateManyMutationInput = {
   textBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   htmlBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -356,6 +374,7 @@ export type AdminInboundEmailUncheckedUpdateManyInput = {
   textBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   htmlBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -368,6 +387,7 @@ export type AdminInboundEmailCountOrderByAggregateInput = {
   textBody?: Prisma.SortOrder
   htmlBody?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
+  repliedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -380,6 +400,7 @@ export type AdminInboundEmailMaxOrderByAggregateInput = {
   textBody?: Prisma.SortOrder
   htmlBody?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
+  repliedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -392,6 +413,7 @@ export type AdminInboundEmailMinOrderByAggregateInput = {
   textBody?: Prisma.SortOrder
   htmlBody?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
+  repliedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -406,6 +428,7 @@ export type AdminInboundEmailSelect<ExtArgs extends runtime.Types.Extensions.Int
   textBody?: boolean
   htmlBody?: boolean
   receivedAt?: boolean
+  repliedAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["adminInboundEmail"]>
 
@@ -418,6 +441,7 @@ export type AdminInboundEmailSelectCreateManyAndReturn<ExtArgs extends runtime.T
   textBody?: boolean
   htmlBody?: boolean
   receivedAt?: boolean
+  repliedAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["adminInboundEmail"]>
 
@@ -430,6 +454,7 @@ export type AdminInboundEmailSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   textBody?: boolean
   htmlBody?: boolean
   receivedAt?: boolean
+  repliedAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["adminInboundEmail"]>
 
@@ -442,10 +467,11 @@ export type AdminInboundEmailSelectScalar = {
   textBody?: boolean
   htmlBody?: boolean
   receivedAt?: boolean
+  repliedAt?: boolean
   createdAt?: boolean
 }
 
-export type AdminInboundEmailOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "resendEmailId" | "fromAddress" | "toAddress" | "subject" | "textBody" | "htmlBody" | "receivedAt" | "createdAt", ExtArgs["result"]["adminInboundEmail"]>
+export type AdminInboundEmailOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "resendEmailId" | "fromAddress" | "toAddress" | "subject" | "textBody" | "htmlBody" | "receivedAt" | "repliedAt" | "createdAt", ExtArgs["result"]["adminInboundEmail"]>
 
 export type $AdminInboundEmailPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AdminInboundEmail"
@@ -462,6 +488,10 @@ export type $AdminInboundEmailPayload<ExtArgs extends runtime.Types.Extensions.I
     textBody: string | null
     htmlBody: string | null
     receivedAt: Date
+    /**
+     * * Set when an admin sends a reply from the inbox tab.
+     */
+    repliedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["adminInboundEmail"]>
   composites: {}
@@ -894,6 +924,7 @@ export interface AdminInboundEmailFieldRefs {
   readonly textBody: Prisma.FieldRef<"AdminInboundEmail", 'String'>
   readonly htmlBody: Prisma.FieldRef<"AdminInboundEmail", 'String'>
   readonly receivedAt: Prisma.FieldRef<"AdminInboundEmail", 'DateTime'>
+  readonly repliedAt: Prisma.FieldRef<"AdminInboundEmail", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"AdminInboundEmail", 'DateTime'>
 }
     

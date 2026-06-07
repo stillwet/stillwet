@@ -27,7 +27,7 @@ export default function ReturnsPage() {
           <h2 className="text-base font-semibold text-zinc-200">Damaged, Defective, or Misprinted Items</h2>
           <p>
             If your item arrives with a printing error, defect, or damage, you may be eligible for a
-            replacement or refund.
+            replacement.
           </p>
           <p className="font-medium text-zinc-300">To qualify:</p>
           <ul className="list-inside list-disc space-y-1 pl-1">
@@ -36,8 +36,7 @@ export default function ReturnsPage() {
           </ul>
           <p className="font-medium text-zinc-300">Once reviewed and approved, we will:</p>
           <ul className="list-inside list-disc space-y-1 pl-1">
-            <li>Offer a free replacement, or</li>
-            <li>Issue a refund (at our discretion)</li>
+            <li>Offer a free replacement</li>
           </ul>
         </section>
 
@@ -73,6 +72,33 @@ export default function ReturnsPage() {
           <p>
             Orders are processed quickly after purchase. Once production has begun, orders cannot be canceled
             or modified.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-semibold text-zinc-200">Shop Purchases</h2>
+          <p>No refunds are supported for shop feature purchases, including:</p>
+          <ul className="list-inside list-disc space-y-1 pl-1">
+            <li>Shop setup</li>
+            <li>Shop upgrades</li>
+            <li>Shop promotions</li>
+            <li>Shop Listings</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-semibold text-zinc-200">Contact Support</h2>
+          <p>
+            For replacement inquiries,{" "}
+            <Link
+              href="/returns/claim"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400/90 underline underline-offset-2 hover:text-blue-300"
+            >
+              click here
+            </Link>
+            .
           </p>
         </section>
       </div>

@@ -19,11 +19,12 @@ export default function AdminError({
   /** Query uses a field the loaded Prisma Client was not generated with (stale `.next` / dev server / singleton). */
   const looksLikeStaleClient =
     /Unknown argument `/i.test(msg) ||
+    /Cannot read properties of undefined \(reading 'findMany'\)/i.test(msg) ||
     /Cannot read properties of undefined \(reading 'count'\)/i.test(msg);
   /** Postgres missing or Prisma not initialized (common when Neon is not linked on Vercel). */
   const looksLikeMissingPostgres =
     /No database URL|missing_database_url|POSTGRES_PRISMA_URL/i.test(msg) ||
-    /Cannot read properties of undefined \(reading '(?:findMany|count|adminCatalogItem)'\)/i.test(
+    /Cannot read properties of undefined \(reading '(?:count|adminCatalogItem)'\)/i.test(
       msg,
     );
   /** Postgres or migrations behind (missing column/table). */
@@ -42,7 +43,7 @@ export default function AdminError({
           : looksLikeMissingPostgres
             ? "This deployment has no Postgres URL (or Prisma could not connect). On Vercel → Production for stillwet.com: link Neon or set POSTGRES_PRISMA_URL, remove localhost DATABASE_URL/DIRECT_URL, redeploy, then confirm /api/health shows database.ok: true."
             : looksLikeDb
-            ? "The database does not match the current Prisma schema (for example migration `20260603120000_admin_catalog_large_listing_artwork` for large listing artwork, `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table). Apply pending migrations to that database, then reload."
+            ? "The database does not match the current Prisma schema (for example migration `20260608120000_order_return_claim` for buyer return claims, `20260603120000_admin_catalog_large_listing_artwork` for large listing artwork, `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table). Apply pending migrations to that database, then reload."
             : "Something went wrong while loading this page. Check the server log for the stack trace."}
       </p>
       {looksLikeStaleClient ? (

@@ -14,11 +14,7 @@ export default function DashboardForgotPasswordPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col px-4 py-16">
-      <h1 className="text-xl font-semibold text-zinc-50">Reset dashboard password</h1>
-      <p className="mt-2 text-sm text-zinc-500">
-        Enter the email you used when you created your shop. We will send a one-time link if that
-        account exists.
-      </p>
+      <h1 className="text-xl font-semibold text-zinc-50">Reset Password</h1>
       <form
         className="mt-8 space-y-4"
         onSubmit={async (e) => {

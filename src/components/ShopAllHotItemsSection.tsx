@@ -5,14 +5,13 @@ import { productsToFeaturedCarouselItems } from "@/lib/shop-featured-carousel";
 
 /**
  * Marketplace `/shop/all` “Hot items” strip — loaded inside {@link Suspense} so the browse grid can
- * render first (carousel queries are heavy).
+ * render first (carousel queries are heavy). Uses daily snapshot, then Still Wet shop fallback.
  */
 export async function ShopAllHotItemsSection({
   fullWhere,
 }: {
   fullWhere: Prisma.ShopListingWhereInput;
 }) {
-  // Snapshot-only: this carousel is allowed to be stale; avoid heavy live pool queries that can hang `/shop/all`.
   void fullWhere;
   const primary = await getPlatformHotItemsPrimaryProducts();
   const featuredCarouselItems = productsToFeaturedCarouselItems(primary);

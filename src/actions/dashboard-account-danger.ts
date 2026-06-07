@@ -25,7 +25,7 @@ async function requireShopOwnerRow() {
   });
   if (!user) {
     session.destroy();
-    redirect("/dashboard/login");
+    redirect("/?accountDeleted=1");
   }
   if (user.shop.slug === PLATFORM_SHOP_SLUG) {
     return null;

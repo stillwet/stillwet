@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin-inbox-reply-email";
 import {
   ADMIN_INBOX_REPLY_BODY_MAX,
+  adminInboxReplySubject,
   type AdminInboxReplyState,
 } from "@/lib/admin-inbox-reply-shared";
 
@@ -60,20 +61,63 @@ export async function sendAdminInboxReply(
     };
   }
 
-  const subj = row.subject.trim() || "(no subject)";
-  const replySubject = /^re:\s/i.test(subj) ? subj : `Re: ${subj}`;
-  const clippedSubject =
-    replySubject.length > 998 ? `${replySubject.slice(0, 995)}…` : replySubject;
-
   const sent = await sendOutboundAdminInboxReply({
     to,
-    subject: clippedSubject,
+    subject: adminInboxReplySubject(row.subject),
     text: body,
   });
   if (!sent.ok) {
     return { status: "error", message: sent.error };
   }
 
+  await delegate.update({
+    where: { id: inboundId },
+    data: { repliedAt: new Date() },
+  });
+
   revalidateAdminViews();
   return { status: "success" };
+}
+
+export type AdminInboxResolveResult = { ok: true } | { ok: false; error: string };
+
+/** Mark inbound as handled without sending an email (moves to Replied section). */
+export async function resolveAdminInboxMessage(
+  formData: FormData,
+): Promise<AdminInboxResolveResult> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) redirect("/admin/login");
+
+  const inboundId = String(formData.get("inboundId") ?? "").trim();
+  if (!inboundId) {
+    return { ok: false, error: "Missing message id." };
+  }
+
+  const delegate = prismaAdminInboundEmailOrNull();
+  if (!delegate) {
+    return {
+      ok: false,
+      error: "Inbox is unavailable in this process. Restart the server after `npx prisma generate`.",
+    };
+  }
+
+  const row = await delegate.findUnique({
+    where: { id: inboundId },
+    select: { id: true, repliedAt: true },
+  });
+  if (!row) {
+    return { ok: false, error: "That message no longer exists." };
+  }
+  if (row.repliedAt) {
+    revalidateAdminViews();
+    return { ok: true };
+  }
+
+  await delegate.update({
+    where: { id: inboundId },
+    data: { repliedAt: new Date() },
+  });
+
+  revalidateAdminViews();
+  return { ok: true };
 }

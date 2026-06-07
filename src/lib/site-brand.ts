@@ -12,9 +12,14 @@ export const BRAND_CMY = {
 export const SITE_CONTACT_EMAIL = "info@stillwet.com";
 /** Console / server log prefix, e.g. `[stillwet] …` */
 export const SITE_LOG_PREFIX = "stillwet";
-/** Example Resend sending subdomain (verify in Resend before production). */
-export const SITE_EMAIL_SUBDOMAIN_EXAMPLE = "auto.stillwet.com";
 
-export function brandMerchEmailFrom(localPart = "noreply", domain = SITE_EMAIL_SUBDOMAIN_EXAMPLE): string {
-  return `${BRAND_MERCH_NAME} <${localPart}@${domain}>`;
+/**
+ * Default Resend From for all automated / transactional email.
+ * Verify stillwet.com in Resend; override per-flow with env vars when needed.
+ */
+export const SITE_TRANSACTIONAL_EMAIL_FROM = `${BRAND_MERCH_NAME} <${SITE_CONTACT_EMAIL}>`;
+
+/** @deprecated Use SITE_TRANSACTIONAL_EMAIL_FROM — kept as alias for callers. */
+export function brandMerchEmailFrom(): string {
+  return SITE_TRANSACTIONAL_EMAIL_FROM;
 }

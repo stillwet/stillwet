@@ -416,11 +416,11 @@ export function AdminEmailFormatTab(props: {
   if (props.entries.length === 0) {
     return (
       <section aria-label="Email format" className="space-y-10">
-        <AdminSummaryEmailPanel initial={props.summaryEmail} />
         <div className="space-y-6">
           {props.children}
           <p className="text-sm text-zinc-500">No email templates configured.</p>
         </div>
+        <AdminSummaryEmailPanel initial={props.summaryEmail} />
       </section>
     );
   }
@@ -428,10 +428,9 @@ export function AdminEmailFormatTab(props: {
   if (isTemplateChoiceDigest(selectedChoice)) {
     return (
       <section aria-label="Email format" className="space-y-10">
-        <AdminSummaryEmailPanel initial={props.summaryEmail} />
         <div className="space-y-6">
           <div>
-            <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Email format</h2>
+            <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Shop email templates</h2>
             <p className="mt-1 max-w-2xl text-xs text-zinc-600">
               Choose a shop HTML template to edit, or Admin digest to preview the plain-text summary email (reporting
               window matches Send now).
@@ -457,11 +456,12 @@ export function AdminEmailFormatTab(props: {
           </div>
 
           <p className="text-xs text-zinc-500">
-            Scheduled admin summary: plain text only. Recipients and schedule are in the panel above; this preview is
+            Scheduled admin summary: plain text only. Recipients and schedule are in the panel below; this preview is
             read-only.
           </p>
           {props.children}
         </div>
+        <AdminSummaryEmailPanel initial={props.summaryEmail} />
       </section>
     );
   }
@@ -472,7 +472,6 @@ export function AdminEmailFormatTab(props: {
 
   return (
     <section aria-label="Email format" className="space-y-10">
-      <AdminSummaryEmailPanel initial={props.summaryEmail} />
       <div className="space-y-6">
       <div>
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Shop email templates</h2>
@@ -596,6 +595,7 @@ export function AdminEmailFormatTab(props: {
         </div>
       ) : null}
       </div>
+      <AdminSummaryEmailPanel initial={props.summaryEmail} />
     </section>
   );
 }
