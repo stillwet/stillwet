@@ -152,6 +152,8 @@ export function CheckoutForm({
               return;
             }
             setError(r.error);
+          } catch (e) {
+            setError(e instanceof Error ? e.message : "Checkout failed.");
           } finally {
             setPending(false);
           }

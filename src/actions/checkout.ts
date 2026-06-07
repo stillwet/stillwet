@@ -65,6 +65,23 @@ function appUrl() {
 }
 
 export async function startCheckout(formData: FormData): Promise<CheckoutResult> {
+  try {
+    return await startCheckoutInner(formData);
+  } catch (e) {
+    console.error("[startCheckout]", e);
+    const message = e instanceof Error ? e.message : "Checkout failed.";
+    if (/orderNumber|column.*Order/i.test(message)) {
+      return {
+        ok: false,
+        error:
+          "Checkout is temporarily unavailable (order setup failed). If you recently deployed, ensure database migrations have been applied, then restart the server.",
+      };
+    }
+    return { ok: false, error: message };
+  }
+}
+
+async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
   const base = appUrl();
   if (!base.ok) return base;
 
@@ -319,9 +336,19 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
           ),
         },
       },
+      select: { id: true, orderNumber: true },
     });
     return o;
   });
+
+  if (!Number.isFinite(order.orderNumber)) {
+    await prisma.order.delete({ where: { id: order.id } }).catch(() => {});
+    return {
+      ok: false,
+      error:
+        "Checkout could not assign an order number. Restart the dev server after migrations, then try again.",
+    };
+  }
 
   const mockSessionId = `${MOCK_SESSION_PREFIX}${order.id}`;
 
