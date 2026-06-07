@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { CartLine } from "@/lib/session";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
 
 /**
  * Cart keys are `ShopListing.id` (cuid). Legacy sessions used `Product.id` for the platform shop only;
@@ -17,7 +18,11 @@ export async function hydrateCartListingKeys(
     if (!line || (line.quantity ?? 0) <= 0) continue;
 
     const byListingId = await prisma.shopListing.findFirst({
-      where: { id: k, ...storefrontShopListingWhere },
+      where: {
+        id: k,
+        ...storefrontShopListingWhere,
+        shop: { active: true, ...buyerSalesShopConnectPrismaWhere() },
+      },
       select: { id: true },
     });
     if (byListingId) {

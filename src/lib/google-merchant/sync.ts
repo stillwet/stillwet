@@ -33,6 +33,8 @@ const enrollmentSelect = {
       slug: true,
       displayName: true,
       active: true,
+      stripeConnectAccountId: true,
+      connectChargesEnabled: true,
     },
   },
   shopListing: {
@@ -108,6 +110,8 @@ async function toListingSource(row: NonNullable<EnrollmentRow>): Promise<GoogleM
     shopSlug: row.shop.slug,
     shopDisplayName: row.shop.displayName,
     shopActive: row.shop.active,
+    shopStripeConnectAccountId: row.shop.stripeConnectAccountId,
+    shopConnectChargesEnabled: row.shop.connectChargesEnabled,
     listing: {
       priceCents: row.shopListing.priceCents,
       active: row.shopListing.active,

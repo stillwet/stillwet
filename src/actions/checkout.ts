@@ -38,6 +38,11 @@ import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
 import {
+  isMarketplaceStripeConnectRequired,
+  shopStripeConnectReadyForBuyerSales,
+  SHOP_NOT_LIVE_CONNECT_MESSAGE,
+} from "@/lib/shop-stripe-connect-gate";
+import {
   PLATFORM_CHECKOUT_SHIPPING_COUNTRIES,
   platformFlatShippingCents,
 } from "@/lib/platform-checkout-limits";
@@ -101,12 +106,27 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
     where: { id: { in: listingIds }, ...storefrontShopListingWhere },
     include: {
       product: { include: STOREFRONT_LISTING_PRODUCT_RELATION_INCLUDE },
-      shop: { select: { id: true, slug: true, inactivityDeactivatedAt: true } },
+      shop: {
+        select: {
+          id: true,
+          slug: true,
+          inactivityDeactivatedAt: true,
+          stripeConnectAccountId: true,
+          connectChargesEnabled: true,
+        },
+      },
     },
   });
 
   if (listings.length === 0) {
     return { ok: false, error: "Some products are no longer available. Refresh your cart." };
+  }
+
+  if (
+    isMarketplaceStripeConnectRequired() &&
+    listings.some((listing) => !shopStripeConnectReadyForBuyerSales(listing.shop))
+  ) {
+    return { ok: false, error: SHOP_NOT_LIVE_CONNECT_MESSAGE };
   }
 
   const shopIds = new Set(listings.map((l) => l.shopId));

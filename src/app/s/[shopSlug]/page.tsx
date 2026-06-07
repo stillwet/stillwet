@@ -13,13 +13,15 @@ import { ShopAllProductsPage } from "@/components/ShopAllProductsPage";
 import { parseShopAllPageParam } from "@/lib/shop-all-browse-query";
 import { ShopFlairBadge } from "@/components/ShopFlairBadge";
 import { STOREFRONT_LISTING_PRODUCT_RELATION_INCLUDE } from "@/lib/storefront-listing-product-include";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
+import { resolveShopStorefrontPreviewContext } from "@/lib/shop-storefront-owner-preview";
 
 type Props = {
   params: Promise<{ shopSlug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const loadCachedShopTenantHome = (shopSlug: string) =>
+const loadCachedShopTenantHomeMeta = (shopSlug: string) =>
   unstable_cache(
     async () => {
       const shop = await prisma.shop.findFirst({
@@ -36,28 +38,39 @@ const loadCachedShopTenantHome = (shopSlug: string) =>
         },
       });
       if (!shop) return null;
-
-      const listings = await prisma.shopListing.findMany({
-        where: {
-          shopId: shop.id,
-          ...storefrontShopListingWhere,
-          product: { active: true },
-        },
-        take: 12,
-        orderBy: [{ featuredOnShop: "desc" }, { updatedAt: "desc" }],
-        include: {
-          product: {
-            include: STOREFRONT_LISTING_PRODUCT_RELATION_INCLUDE,
-          },
-          shop: { select: { slug: true } },
-        },
-      });
-
-      return { shop, listings };
+      return { shop };
     },
-    ["shop-tenant-home-v1", shopSlug],
+    ["shop-tenant-home-meta-v1", shopSlug],
     { revalidate: 10 * 60 },
   )();
+
+async function loadShopTenantHomeListings(
+  shopSlug: string,
+  shopId: string,
+  ownerPreview: boolean,
+) {
+  const connectWhere = ownerPreview ? {} : buyerSalesShopConnectPrismaWhere();
+  return prisma.shopListing.findMany({
+    where: {
+      shopId,
+      ...storefrontShopListingWhere,
+      product: { active: true },
+      shop: {
+        slug: shopSlug,
+        active: true,
+        ...connectWhere,
+      },
+    },
+    take: 12,
+    orderBy: [{ featuredOnShop: "desc" }, { updatedAt: "desc" }],
+    include: {
+      product: {
+        include: STOREFRONT_LISTING_PRODUCT_RELATION_INCLUDE,
+      },
+      shop: { select: { slug: true } },
+    },
+  });
+}
 
 export default async function ShopTenantHomePage({ params, searchParams }: Props) {
   const { shopSlug } = await params;
@@ -68,14 +81,36 @@ export default async function ShopTenantHomePage({ params, searchParams }: Props
   const browsePage = parseShopAllPageParam(sp.page);
   let loaded;
   try {
-    loaded = await loadCachedShopTenantHome(shopSlug);
+    loaded = await loadCachedShopTenantHomeMeta(shopSlug);
   } catch (e) {
     return <ShopDataLoadError cause={e} />;
   }
   if (!loaded) notFound();
-  const { shop, listings } = loaded;
+  const { shop } = loaded;
 
+  const previewContext =
+    shop.slug === PLATFORM_SHOP_SLUG
+      ? { isOwnerPreview: false, connectReadyForBuyerSales: true, showConnectNotLiveBanner: false }
+      : await resolveShopStorefrontPreviewContext(shopSlug, shop);
+
+  let listings;
+  try {
+    listings =
+      previewContext.connectReadyForBuyerSales || previewContext.isOwnerPreview
+        ? await loadShopTenantHomeListings(
+            shopSlug,
+            shop.id,
+            previewContext.isOwnerPreview,
+          )
+        : [];
+  } catch (e) {
+    return <ShopDataLoadError cause={e} />;
+  }
+
+  const showFeaturedListing =
+    previewContext.connectReadyForBuyerSales || previewContext.isOwnerPreview;
   const featuredList =
+    showFeaturedListing &&
     shop.homeFeaturedListing?.product &&
     shop.homeFeaturedListing.active &&
     shop.homeFeaturedListing.creatorRemovedFromShopAt == null &&
@@ -174,6 +209,7 @@ export default async function ShopTenantHomePage({ params, searchParams }: Props
           tagSlug={tag}
           browseSort={sort}
           page={browsePage}
+          storefrontOwnerPreview={previewContext.isOwnerPreview}
         />
       ) : null}
     </div>

@@ -6,6 +6,7 @@ import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import {
   getShopsBrowsePageFeaturedCarouselShops,
 } from "@/lib/shops-browse-page-featured";
+import { shopsBrowseVisibleShopWhere } from "@/lib/shop-listing-storefront-visibility";
 import { SHOPS_BROWSE_PAGE_FEATURED_DEFAULT_DISPLAY } from "@/lib/platform-all-page-featured-constants";
 import { FeaturedProductsCarousel } from "@/components/FeaturedProductsCarousel";
 import { ShopBrowseGrid } from "@/components/ShopBrowseGrid";
@@ -29,9 +30,7 @@ const loadCachedShopFlairTypesForBrowse = unstable_cache(
         active: true,
         shops: {
           some: {
-            active: true,
-            listedOnShopsBrowse: true,
-            slug: { not: PLATFORM_SHOP_SLUG },
+            ...shopsBrowseVisibleShopWhere(),
             flairPurchasedAt: { not: null },
           },
         },
@@ -46,11 +45,7 @@ const loadCachedShopFlairTypesForBrowse = unstable_cache(
 const loadCachedShopsBrowseRows = unstable_cache(
   () =>
     prisma.shop.findMany({
-      where: {
-        active: true,
-        listedOnShopsBrowse: true,
-        slug: { not: PLATFORM_SHOP_SLUG },
-      },
+      where: shopsBrowseVisibleShopWhere(),
       select: {
         id: true,
         slug: true,
@@ -65,7 +60,7 @@ const loadCachedShopsBrowseRows = unstable_cache(
         createdAt: true,
       },
     }),
-  ["shops-browse-rows-v1"],
+  ["shops-browse-rows-v2"],
   { revalidate: 15 * 60 },
 );
 

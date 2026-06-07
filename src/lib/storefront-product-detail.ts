@@ -152,10 +152,13 @@ export function mapListingRowToProductDetail(row: StorefrontShopListing): Resolv
 export async function resolvePublicProductDetail(
   productSlug: string,
   shopSlug?: string | null,
+  options?: { ownerPreview?: boolean },
 ): Promise<ResolvedPublicProductDetail | null> {
   const shop = typeof shopSlug === "string" ? shopSlug.trim() : "";
   if (shop) {
-    const row = await loadStorefrontListingByShopAndProductSlug(shop, productSlug);
+    const row = await loadStorefrontListingByShopAndProductSlug(shop, productSlug, {
+      ownerPreview: options?.ownerPreview,
+    });
     if (row) return withAdminCatalogStorefrontDescription(mapListingRowToProductDetail(row), row);
   } else {
     const uniqueRow = await loadStorefrontListingForProductWhenExactlyOne(productSlug);
@@ -179,8 +182,12 @@ export async function resolvePublicProductDetail(
 export async function resolveCachedPublicProductDetail(
   productSlug: string,
   shopSlug?: string | null,
+  options?: { ownerPreview?: boolean },
 ): Promise<ResolvedPublicProductDetail | null> {
   const normalizedShop = typeof shopSlug === "string" ? shopSlug.trim() : "";
+  if (options?.ownerPreview) {
+    return resolvePublicProductDetail(productSlug, normalizedShop || null, options);
+  }
   return unstable_cache(
     () => resolvePublicProductDetail(productSlug, normalizedShop || null),
     ["public-product-detail-v1", productSlug, normalizedShop || "platform"],

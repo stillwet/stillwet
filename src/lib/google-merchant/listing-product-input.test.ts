@@ -29,6 +29,8 @@ describe("google merchant listing product input", () => {
       shopSlug: "xtina-test",
       shopDisplayName: "Xtina Test",
       shopActive: true,
+      shopStripeConnectAccountId: "acct_test",
+      shopConnectChargesEnabled: true,
       listing: {
         priceCents: 2499,
         active: true,
@@ -74,6 +76,8 @@ describe("google merchant listing product input", () => {
       shopSlug: "shop",
       shopDisplayName: "Shop",
       shopActive: true,
+      shopStripeConnectAccountId: "acct_test",
+      shopConnectChargesEnabled: true,
       listing: {
         priceCents: 1000,
         active: true,

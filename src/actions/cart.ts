@@ -7,14 +7,32 @@ import { getCartSession } from "@/lib/session";
 import { maxCartLineQty } from "@/lib/cart-limits";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
+import {
+  shopStripeConnectReadyForBuyerSales,
+} from "@/lib/shop-stripe-connect-gate";
 
 async function resolveActiveListing(
   productOrListingId: string,
   shopSlug?: string | null,
 ) {
+  const listingWhere = {
+    ...storefrontShopListingWhere,
+    shop: { active: true },
+  };
+
   const byId = await prisma.shopListing.findFirst({
-    where: { id: productOrListingId.trim(), ...storefrontShopListingWhere },
-    include: { product: true, shop: { select: { id: true, slug: true } } },
+    where: { id: productOrListingId.trim(), ...listingWhere },
+    include: {
+      product: true,
+      shop: {
+        select: {
+          id: true,
+          slug: true,
+          stripeConnectAccountId: true,
+          connectChargesEnabled: true,
+        },
+      },
+    },
   });
   if (byId) return byId;
 
@@ -22,10 +40,20 @@ async function resolveActiveListing(
   return prisma.shopListing.findFirst({
     where: {
       productId: productOrListingId,
-      shop: { slug },
+      shop: { slug, active: true },
       ...storefrontShopListingWhere,
     },
-    include: { product: true, shop: { select: { id: true, slug: true } } },
+    include: {
+      product: true,
+      shop: {
+        select: {
+          id: true,
+          slug: true,
+          stripeConnectAccountId: true,
+          connectChargesEnabled: true,
+        },
+      },
+    },
   });
 }
 
@@ -38,6 +66,7 @@ export async function addToCart(
   const session = await getCartSession();
   const listing = await resolveActiveListing(productOrListingId, shopSlug);
   if (!listing?.product.active) return { ok: false };
+  if (!shopStripeConnectReadyForBuyerSales(listing.shop)) return { ok: false };
 
   const product = listing.product;
   const lineMax = maxCartLineQty(product.fulfillmentType);

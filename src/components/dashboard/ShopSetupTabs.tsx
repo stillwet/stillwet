@@ -192,6 +192,15 @@ export function ShopSetupTabs(props: {
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
         Onboarding
       </h2>
+      <p className="mt-2 flex items-center gap-2 text-sm text-zinc-50">
+        <span
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-red-800 bg-black text-sm font-black leading-none text-white"
+          aria-hidden
+        >
+          !
+        </span>
+        <span>Onboarding must be completed before your shop goes live.</span>
+      </p>
 
       <nav
         className="mt-6 rounded-lg border border-zinc-800/80 bg-zinc-900/35 p-4"

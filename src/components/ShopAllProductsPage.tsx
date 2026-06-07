@@ -23,6 +23,8 @@ import {
   marketplaceAggregatedListingWhere,
   storefrontShopListingWhere,
 } from "@/lib/shop-listing-storefront-visibility";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
+import { isViewingOwnShopStorefront } from "@/lib/shop-storefront-owner-preview";
 import { shopListingPopularItemPromotionPurchasesArgs } from "@/lib/shop-listing-browse-promotion-sort";
 import {
   fetchPopularBrowsePageSlice,
@@ -275,6 +277,8 @@ export async function ShopAllProductsPage({
   /** 1-based; omit or 1 = first page. */
   page: pageParam = 1,
   embedded = false,
+  /** Owner preview on `/s/[shop]` before Stripe Connect is complete. */
+  storefrontOwnerPreview = false,
 }: {
   shopSlug?: string;
   /** From `?q=` on `/shop/all` or `/s/[shop]/all`. */
@@ -292,9 +296,13 @@ export async function ShopAllProductsPage({
   page?: number;
   /** Shop home only: skip “All Items” title and featured carousel; render browse toolbar + grid. */
   embedded?: boolean;
+  storefrontOwnerPreview?: boolean;
 } = {}) {
   try {
   const isPlatformCatalog = shopSlug === PLATFORM_SHOP_SLUG;
+  const ownerPreview =
+    storefrontOwnerPreview ||
+    (!isPlatformCatalog && (await isViewingOwnShopStorefront(shopSlug)));
   const shopPromise = loadCachedShopAllShop(shopSlug);
 
   let shop: { id: string };
@@ -346,6 +354,15 @@ export async function ShopAllProductsPage({
     shopId: shop.id,
     ...storefrontShopListingWhere,
     product: { active: true },
+    ...(ownerPreview || isPlatformCatalog
+      ? {}
+      : {
+          shop: {
+            slug: shopSlug,
+            active: true,
+            ...buyerSalesShopConnectPrismaWhere(),
+          },
+        }),
   };
 
   function withSearch(

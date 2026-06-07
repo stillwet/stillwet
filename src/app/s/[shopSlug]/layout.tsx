@@ -6,6 +6,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHeaderFallback } from "@/components/SiteHeaderFallback";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { GiftCreatorStorefrontLink } from "@/components/GiftCreatorStorefrontLink";
+import { ShopConnectNotLiveBanner } from "@/components/ShopConnectNotLiveBanner";
+import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
+import { resolveShopStorefrontPreviewContext } from "@/lib/shop-storefront-owner-preview";
 
 /** Tenant shop shell loads listings browse data + header — avoid Vercel default ~10s cutoff. */
 export const maxDuration = 300;
@@ -15,9 +18,14 @@ const cachedActiveShopExists = (shopSlug: string) =>
     () =>
       prisma.shop.findFirst({
         where: { slug: shopSlug, active: true },
-        select: { id: true },
+        select: {
+          id: true,
+          slug: true,
+          stripeConnectAccountId: true,
+          connectChargesEnabled: true,
+        },
       }),
-    ["active-shop-exists", shopSlug],
+    ["active-shop-exists-v2", shopSlug],
     { revalidate: 10 * 60 },
   )();
 
@@ -34,13 +42,21 @@ export default async function ShopTenantLayout({
   const shop = await cachedActiveShopExists(shopSlug);
   if (!shop) notFound();
 
+  const previewContext =
+    shop.slug === PLATFORM_SHOP_SLUG
+      ? null
+      : await resolveShopStorefrontPreviewContext(shopSlug, shop);
+
   return (
     <div className="store-dimension-bg">
       <Suspense fallback={<SiteHeaderFallback />}>
         <SiteHeader shopSlug={shopSlug} />
       </Suspense>
       <GiftCreatorStorefrontLink />
-      <div className="mx-auto max-w-[1124px] px-4 py-8 sm:px-6 sm:py-10">{children}</div>
+      <div className="mx-auto max-w-[1124px] px-4 py-8 sm:px-6 sm:py-10">
+        {previewContext?.showConnectNotLiveBanner ? <ShopConnectNotLiveBanner /> : null}
+        {children}
+      </div>
       <div className="mx-auto max-w-[1124px] px-4 pb-10 sm:px-6">
         <SiteLegalFooter />
       </div>

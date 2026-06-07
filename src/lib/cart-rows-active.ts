@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
 import type { Product, Tag } from "@/generated/prisma/client";
 import { getCartSessionReadonly } from "@/lib/session";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
@@ -34,7 +35,11 @@ export async function loadActiveCartRows(): Promise<{
   }
 
   const listings = await prisma.shopListing.findMany({
-    where: { id: { in: ids }, ...storefrontShopListingWhere },
+    where: {
+      id: { in: ids },
+      ...storefrontShopListingWhere,
+      shop: { active: true, ...buyerSalesShopConnectPrismaWhere() },
+    },
     include: {
       shop: { select: { slug: true } },
       product: {

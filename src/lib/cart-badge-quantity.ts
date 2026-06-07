@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
 import type { CartSession } from "@/lib/session";
 
 /** Units for active products only — matches cart view. */
@@ -10,7 +11,11 @@ export async function cartBadgeQuantity(
   if (ids.length === 0) return 0;
   try {
     const rows = await prisma.shopListing.findMany({
-      where: { id: { in: ids }, ...storefrontShopListingWhere },
+      where: {
+        id: { in: ids },
+        ...storefrontShopListingWhere,
+        shop: { active: true, ...buyerSalesShopConnectPrismaWhere() },
+      },
       select: { id: true },
     });
     const active = new Set(rows.map((r) => r.id));

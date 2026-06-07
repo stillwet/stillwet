@@ -3,6 +3,7 @@ import {
   PLATFORM_SHOP_SLUG,
   platformFeaturedShopPinSlugs,
 } from "@/lib/marketplace-constants";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
 import {
   PromotionKind,
   PromotionPurchaseStatus,
@@ -18,6 +19,7 @@ export const CREATOR_SHOP_BASE = {
   active: true,
   listedOnShopsBrowse: true,
   slug: { not: PLATFORM_SHOP_SLUG },
+  ...buyerSalesShopConnectPrismaWhere(),
 } as const;
 
 export type ShopBrowseFeaturedRow = {

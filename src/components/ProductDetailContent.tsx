@@ -38,6 +38,7 @@ export function ProductDetailContent({
   storefrontItemBlurb,
   /** Optional search hints (`ShopListing.listingSearchKeywords`). */
   listingSearchKeywords,
+  purchaseDisabled = false,
 }: {
   product: StorefrontProduct;
   variant: "page" | "modal";
@@ -58,6 +59,7 @@ export function ProductDetailContent({
   adminCatalogItemName?: string | null;
   storefrontItemBlurb?: string | null;
   listingSearchKeywords?: string | null;
+  purchaseDisabled?: boolean;
 }) {
   const shopSlug = tenant?.shopSlug ?? PLATFORM_SHOP_SLUG;
   const displayItemName = storefrontListingDisplayTitle({
@@ -104,10 +106,12 @@ export function ProductDetailContent({
     <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-8 xl:gap-x-10">
       <div className={PRODUCT_HERO_GALLERY_WRAP_CLASS}>
         <ProductImageGallery images={images} />
-        <ProductAddToCartForm
-          productId={product.id}
-          shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
-        />
+        {purchaseDisabled ? null : (
+          <ProductAddToCartForm
+            productId={product.id}
+            shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
+          />
+        )}
       </div>
       <div
         className={

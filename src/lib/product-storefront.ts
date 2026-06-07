@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
+import {
+  storefrontShopListingWhere,
+  tenantStorefrontListingWhereForBuyers,
+} from "@/lib/shop-listing-storefront-visibility";
+import { buyerSalesShopConnectPrismaWhere } from "@/lib/shop-stripe-connect-gate";
 import type { Prisma } from "@/generated/prisma/client";
 
 const include = {
@@ -26,13 +30,21 @@ export async function loadStorefrontProductBySlug(slug: string) {
 export async function loadStorefrontListingByShopAndProductSlug(
   shopSlug: string,
   productSlug: string,
+  options?: { ownerPreview?: boolean },
 ) {
+  const listingWhere: Prisma.ShopListingWhereInput = options?.ownerPreview
+    ? {
+        ...storefrontShopListingWhere,
+        shop: { slug: shopSlug, active: true },
+        product: { slug: productSlug, active: true },
+      }
+    : {
+        ...tenantStorefrontListingWhereForBuyers(shopSlug),
+        product: { slug: productSlug, active: true },
+      };
+
   return prisma.shopListing.findFirst({
-    where: {
-      ...storefrontShopListingWhere,
-      shop: { slug: shopSlug, active: true },
-      product: { slug: productSlug, active: true },
-    },
+    where: listingWhere,
     include: {
       product: { include },
       shop: { select: { id: true, slug: true, displayName: true } },
@@ -53,7 +65,7 @@ export async function loadStorefrontListingForProductWhenExactlyOne(productSlug:
   const rows = await prisma.shopListing.findMany({
     where: {
       ...storefrontShopListingWhere,
-      shop: { active: true },
+      shop: { active: true, ...buyerSalesShopConnectPrismaWhere() },
       product: { slug: productSlug, active: true },
     },
     take: 2,

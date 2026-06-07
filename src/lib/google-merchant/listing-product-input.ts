@@ -16,6 +16,8 @@ export type GoogleMerchantListingSource = {
   shopSlug: string;
   shopDisplayName: string;
   shopActive: boolean;
+  shopStripeConnectAccountId: string | null;
+  shopConnectChargesEnabled: boolean;
   listing: {
     priceCents: number;
     active: boolean;

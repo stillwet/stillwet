@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { ProductDetailContent } from "@/components/ProductDetailContent";
 import { ProductModalShell } from "@/components/ProductModalShell";
 import { resolveCachedPublicProductDetail } from "@/lib/storefront-product-detail";
+import { prisma } from "@/lib/prisma";
+import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
+import { resolveShopStorefrontPreviewContext } from "@/lib/shop-storefront-owner-preview";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -16,8 +19,31 @@ export async function ProductModalInterceptBody({
   productSlug: string;
   shopSlug?: string;
 }) {
-  const detail = await resolveCachedPublicProductDetail(productSlug, shopSlug);
+  const normalizedShop = shopSlug?.trim() ?? "";
+  const shop =
+    normalizedShop && normalizedShop !== PLATFORM_SHOP_SLUG
+      ? await prisma.shop.findFirst({
+          where: { slug: normalizedShop, active: true },
+          select: {
+            slug: true,
+            stripeConnectAccountId: true,
+            connectChargesEnabled: true,
+          },
+        })
+      : null;
+
+  const previewContext = shop
+    ? await resolveShopStorefrontPreviewContext(normalizedShop, shop)
+    : { isOwnerPreview: false, connectReadyForBuyerSales: true, showConnectNotLiveBanner: false };
+
+  const detail = await resolveCachedPublicProductDetail(productSlug, shopSlug, {
+    ownerPreview: previewContext.isOwnerPreview,
+  });
   if (!detail) notFound();
+
+  const purchaseDisabled =
+    !previewContext.connectReadyForBuyerSales && previewContext.isOwnerPreview;
+
   return (
     <ProductModalShell>
       <ProductDetailContent
@@ -32,6 +58,7 @@ export async function ProductModalInterceptBody({
         adminCatalogItemName={detail.adminCatalogItemName}
         storefrontItemBlurb={detail.storefrontItemBlurb}
         listingSearchKeywords={detail.listingSearchKeywords}
+        purchaseDisabled={purchaseDisabled}
       />
     </ProductModalShell>
   );
