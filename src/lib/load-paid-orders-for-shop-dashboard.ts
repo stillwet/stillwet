@@ -6,6 +6,7 @@ import {
   paidOrderLineGoodsServicesDisplayCents,
   type AdminCatalogRowForDisplay,
 } from "@/lib/dashboard-payload-helpers";
+import { splitCheckoutTipCents } from "@/lib/checkout-tip";
 import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
 import { pacificCalendarDateKey } from "@/lib/promotion-period-pacific";
 import { prisma } from "@/lib/prisma";
@@ -23,6 +24,7 @@ type OrderLineForDash = Prisma.OrderGetPayload<{
     id: true;
     orderNumber: true;
     createdAt: true;
+    tipCents: true;
     lines: {
       select: {
         productName: true;
@@ -60,6 +62,7 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
       id: true,
       orderNumber: true,
       createdAt: true,
+      tipCents: true,
       lines: {
         select: {
           productName: true,
@@ -90,6 +93,7 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
     id: o.id,
     orderNumber: o.orderNumber,
     createdAt: o.createdAt.toISOString(),
+    shopTipCents: splitCheckoutTipCents(o.tipCents).shopTipCents,
     lines: o.lines.map((l) => ({
       lineDisplayLabel: dashboardPaidOrderLineDisplayLabel(l),
       quantity: l.quantity,

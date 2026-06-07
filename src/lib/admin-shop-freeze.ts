@@ -9,14 +9,15 @@ function visibilityAfterAdminUnfreeze(shop: {
   inactivityDeactivatedAt: Date | null;
   accountDeletionRequestedAt: Date | null;
   ownerPausedShopAt: Date | null;
+  listedOnShopsBrowse: boolean;
 }): { active: boolean; listedOnShopsBrowse: boolean } {
-  if (shop.inactivityDeactivatedAt || shop.accountDeletionRequestedAt) {
+  if (shop.accountDeletionRequestedAt) {
     return { active: false, listedOnShopsBrowse: false };
   }
   if (shop.ownerPausedShopAt) {
     return { active: true, listedOnShopsBrowse: false };
   }
-  return { active: true, listedOnShopsBrowse: true };
+  return { active: true, listedOnShopsBrowse: shop.listedOnShopsBrowse };
 }
 
 export async function adminFreezeShopById(shopId: string): Promise<
@@ -60,6 +61,7 @@ export async function adminUnfreezeShopById(shopId: string): Promise<
       inactivityDeactivatedAt: true,
       accountDeletionRequestedAt: true,
       ownerPausedShopAt: true,
+      listedOnShopsBrowse: true,
     },
   });
   if (!shop) return { ok: false, error: "Shop not found." };

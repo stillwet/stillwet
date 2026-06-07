@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { AdminInboxReplyForm } from "@/components/admin/AdminInboxReplyForm";
 import { isPlatformAdminInboxNotice } from "@/lib/admin-inbox-system-notice";
-import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
 
 export type AdminInboxRow = {
   id: string;
@@ -14,98 +13,98 @@ export type AdminInboxRow = {
   receivedAt: string;
 };
 
-function formatWhen(iso: string): string {
-  const s = formatDisplayedDateTime(iso);
-  return s === "—" ? iso : s;
+const INBOX_COLUMN_COUNT = 4;
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatInboxReceived(iso: string): { dateLine: string; timeLine: string } {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    return { dateLine: "—", timeLine: "" };
+  }
+  const dateLine = `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, "0")}`;
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  return { dateLine, timeLine: `${hours}:${minutes}${ampm}` };
+}
+
+function inboxEmailBody(textBody: string | null, htmlBody: string | null): string {
+  const text = textBody?.trim();
+  if (text) return text;
+  const html = htmlBody?.trim();
+  if (html) return stripHtml(html);
+  return "—";
 }
 
 export function AdminInboxTab(props: {
   rows: AdminInboxRow[];
   inboxAddress: string;
-  webhookEndpoint: string | null;
 }) {
-  const { rows, inboxAddress, webhookEndpoint } = props;
+  const { rows, inboxAddress } = props;
 
   return (
     <section aria-label="Admin inbox">
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Inbox</h2>
-      <p className="mt-1 max-w-3xl text-xs text-zinc-600">
-        Messages to <strong className="font-medium text-zinc-400">{inboxAddress}</strong> appear here when
-        Resend <strong className="font-medium text-zinc-400">Inbound</strong> is enabled for that domain and an{" "}
-        <code className="rounded bg-zinc-900 px-1 py-0.5 font-mono text-[11px] text-zinc-400">email.received</code>{" "}
-        webhook posts to your deployment. Set{" "}
-        <code className="rounded bg-zinc-900 px-1 py-0.5 font-mono text-[11px] text-zinc-400">
-          RESEND_INBOUND_WEBHOOK_SECRET
-        </code>{" "}
-        (or <code className="font-mono text-[11px] text-zinc-400">RESEND_WEBHOOK_SECRET</code>) to the signing secret
-        from the Resend webhook, and keep <code className="font-mono text-[11px] text-zinc-400">RESEND_API_KEY</code>{" "}
-        for fetching message bodies and for <strong className="font-medium text-zinc-400">replies</strong> from this
-        tab (same key; your sending domain must be verified in Resend). Inbound copies can forward to Gmail when{" "}
-        <code className="rounded bg-zinc-900 px-1 py-0.5 font-mono text-[11px] text-zinc-400">
-          ADMIN_INBOX_FORWARD_TO_EMAIL
-        </code>{" "}
-        is set. Optional full{" "}
-        <code className="rounded bg-zinc-900 px-1 py-0.5 font-mono text-[11px] text-zinc-400">
-          ADMIN_INBOX_REPLY_FROM
-        </code>{" "}
-        overrides the default From line.
-      </p>
-      {webhookEndpoint ? (
-        <p className="mt-2 break-all font-mono text-[11px] text-zinc-500">
-          Webhook URL: <span className="text-zinc-400">{webhookEndpoint}</span>
-        </p>
-      ) : (
-        <p className="mt-2 text-xs text-amber-300/90">
-          Set <code className="font-mono">NEXT_PUBLIC_APP_URL</code> (or deploy to Vercel) so the webhook URL is
-          known.
-        </p>
-      )}
 
       <div className="mt-6 overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse text-left text-xs">
+        <table className="w-full min-w-[640px] table-fixed border-collapse text-left text-xs">
+          <colgroup>
+            <col className="w-[3.25rem]" />
+            <col className="w-[10.5rem]" />
+            <col className="w-[11rem]" />
+            <col />
+          </colgroup>
           <thead>
             <tr className="border-b border-zinc-800 text-zinc-500">
-              <th className="py-2 pr-3 font-medium">Received</th>
-              <th className="py-2 pr-3 font-medium">From</th>
-              <th className="py-2 pr-3 font-medium">To</th>
-              <th className="py-2 font-medium">Subject / preview</th>
+              <th className="py-2 pr-2 font-medium">Received</th>
+              <th className="py-2 pr-2 font-medium">From</th>
+              <th className="py-2 pr-2 font-medium">Subject</th>
+              <th className="py-2 font-medium">Email Body</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <Fragment key={r.id}>
-                <tr className="border-b border-zinc-900 align-top text-zinc-300">
-                  <td className="whitespace-nowrap py-2 pr-3 text-zinc-500">{formatWhen(r.receivedAt)}</td>
-                  <td className="max-w-[10rem] py-2 pr-3 break-all text-zinc-400">{r.fromAddress}</td>
-                  <td className="max-w-[10rem] py-2 pr-3 break-all text-zinc-500">{r.toAddress}</td>
-                  <td className="py-2">
-                    <p className="font-medium text-zinc-200">{r.subject}</p>
-                    {r.textBody ? (
-                      <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded border border-zinc-800/80 bg-zinc-950/60 p-2 font-sans text-[11px] leading-snug text-zinc-500">
-                        {r.textBody}
-                      </pre>
-                    ) : r.htmlBody ? (
-                      <p className="mt-1 text-[11px] text-zinc-600">HTML body only — open raw in Resend dashboard.</p>
-                    ) : (
-                      <p className="mt-1 text-[11px] text-zinc-600">No body text stored.</p>
-                    )}
-                  </td>
-                </tr>
-                {isPlatformAdminInboxNotice(r.resendEmailId) ? (
-                  <tr className="border-b border-zinc-900 bg-zinc-950/20 align-top text-zinc-500">
-                    <td colSpan={4} className="py-2 pr-2 pl-2 text-[11px] sm:pl-3">
-                      Platform notification — no reply.
+            {rows.map((r) => {
+              const received = formatInboxReceived(r.receivedAt);
+              const body = inboxEmailBody(r.textBody, r.htmlBody);
+              return (
+                <Fragment key={r.id}>
+                  <tr className="border-b border-zinc-900 align-top text-zinc-300">
+                    <td className="py-2 pr-2 tabular-nums leading-snug text-zinc-500">
+                      <span className="block">{received.dateLine}</span>
+                      {received.timeLine ? (
+                        <span className="block text-[10px] text-zinc-600">{received.timeLine}</span>
+                      ) : null}
                     </td>
+                    <td className="py-2 pr-2 break-words text-zinc-400">{r.fromAddress}</td>
+                    <td className="py-2 pr-2 break-words font-medium text-zinc-200">{r.subject}</td>
+                    <td className="py-2 break-words whitespace-pre-wrap text-zinc-400">{body}</td>
                   </tr>
-                ) : (
-                  <tr className="border-b border-zinc-900 bg-zinc-950/30 align-top text-zinc-300">
-                    <td colSpan={4} className="py-3 pr-2 pl-2 sm:pl-3">
-                      <AdminInboxReplyForm inboundId={r.id} />
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            ))}
+                  {isPlatformAdminInboxNotice(r.resendEmailId) ? (
+                    <tr className="border-b border-zinc-900 bg-zinc-950/20 align-top text-zinc-500">
+                      <td colSpan={INBOX_COLUMN_COUNT} className="py-2 pr-2 pl-2 text-[11px] sm:pl-3">
+                        Platform notification — no reply.
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr className="border-b border-zinc-900 bg-zinc-950/30 align-top text-zinc-300">
+                      <td colSpan={INBOX_COLUMN_COUNT} className="py-3 pr-2 pl-2 sm:pl-3">
+                        <AdminInboxReplyForm inboundId={r.id} />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -58,7 +58,7 @@ export default function DashboardLoginPage() {
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
             <p className="font-medium">This shop is deactivated for inactivity.</p>
             <p className="mt-2 text-amber-100/80">
-              Pay the one-time $5 reactivation fee to restore dashboard access.
+              Pay the one-time $5 reactivation fee within 30 days of deactivation to restore dashboard access.
             </p>
             <a
               href={reactivationUrl}

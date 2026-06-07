@@ -4,7 +4,7 @@ import { ListingRequestStatus } from "@/generated/prisma/enums";
 import { isR2UploadConfigured } from "@/lib/r2-upload";
 import { ConfirmDeleteForm } from "@/components/ConfirmDeleteForm";
 import { productHasTag } from "@/lib/product-tags";
-import { emailLinkOrigin, publicAppBaseUrl } from "@/lib/public-app-url";
+import { emailLinkOrigin } from "@/lib/public-app-url";
 import {
   buildAdminEmailFormatEntries,
   loadSiteEmailSendPreviewsForAdmin,
@@ -212,11 +212,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
 
   const supportShopParam =
     typeof sp.supportShop === "string" && sp.supportShop.trim() ? sp.supportShop.trim() : undefined;
-
-  const publicBaseTrim = publicAppBaseUrl()?.replace(/\/$/, "") ?? "";
-  const adminInboxWebhookEndpoint = publicBaseTrim
-    ? `${publicBaseTrim}/api/webhooks/resend-inbound`
-    : null;
 
   const siteEmailTemplateRows =
     adminSection === "backend" && inventoryTab === "email-format"
@@ -838,7 +833,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
             <AdminInboxTab
               rows={adminInboxRowsLoaded}
               inboxAddress={adminInboxEmailAddress()}
-              webhookEndpoint={adminInboxWebhookEndpoint}
             />
           ) : null)
           : (

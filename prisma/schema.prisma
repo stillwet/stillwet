@@ -233,9 +233,9 @@ model Shop {
   accountDeletionRequestedAt DateTime?
   /** Email link confirmed; final deletion runs only when Stripe Connect balance is zero. */
   accountDeletionEmailConfirmedAt DateTime?
-  /** Warning email sent after 60 days without a successful creator login. */
+  /** Warning email sent after 30 days without a successful creator login. */
   inactivityWarningSentAt DateTime?
-  /** Shop is deactivated for creator access after 90 days without a successful creator login. */
+  /** Shop is deactivated for creator access after 60 days without login. */
   inactivityDeactivatedAt DateTime?
   /** Admin froze the shop (hidden from site; owner sees dashboard banner). */
   adminFrozenAt            DateTime?

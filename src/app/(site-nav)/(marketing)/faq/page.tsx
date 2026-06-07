@@ -38,12 +38,13 @@ export default function FaqPage() {
         <section className="space-y-3">
           <h2 className="text-base font-semibold text-zinc-200">What happens if I stop logging in?</h2>
           <p>
-            If a creator does not log in for 60 days, we may send a warning email. At 90 days inactive, the shop account
-            can be deactivated and later reactivated with a one-time $5 fee.
+            If a creator does not log in for 30 days, we may send a warning email. At 60 days without login, the shop
+            account is deactivated. A deactivated shop may be reactivated within 30 days of deactivation by paying a
+            one-time $5 fee (90 days from the warning email).
           </p>
           <p>
-            Deactivated shops may stay available to buyers, but proceeds from sales while deactivated go 100% to the
-            platform. See the{" "}
+            Deactivated shops remain visible on marketplace browse pages, but proceeds from sales while deactivated go
+            100% to the platform. See the{" "}
             <Link href="/terms" className="text-blue-400/90 underline underline-offset-2 hover:text-blue-300">
               terms
             </Link>{" "}

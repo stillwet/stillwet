@@ -188,6 +188,8 @@ export type DashboardPaidOrderRow = {
   id: string;
   orderNumber: number;
   createdAt: string;
+  /** Shop share of optional cart tip (tip minus platform fee). */
+  shopTipCents?: number;
   lines: Array<{
     lineDisplayLabel: string;
     quantity: number;
@@ -249,10 +251,14 @@ function paidOrderMerchandiseTotals(o: DashboardPaidOrderRow) {
   );
 }
 
-/** Sum of (sale − goods/services − platform fee) per line. */
+function paidOrderShopTipCents(o: DashboardPaidOrderRow) {
+  return o.shopTipCents ?? 0;
+}
+
+/** Sum of (sale − goods/services − platform fee) per line, plus shop tip share. */
 function paidOrderShopProfitCents(o: DashboardPaidOrderRow) {
   const t = paidOrderMerchandiseTotals(o);
-  return t.saleCents - t.goodsServicesCostCents - t.platformCutCents;
+  return t.saleCents - t.goodsServicesCostCents - t.platformCutCents + paidOrderShopTipCents(o);
 }
 
 function formatMoney(cents: number) {
@@ -2139,6 +2145,7 @@ export function DashboardMainTabs(props: {
                 <span className="w-14 shrink-0 text-center">Date</span>
                 <span className="min-w-0 flex-1 pl-4 text-left">Item</span>
               </div>
+              <span className="min-w-[4rem] shrink-0 text-center">Tip</span>
               <span className="min-w-[5.5rem] shrink-0 text-center text-blue-400">Shop profit</span>
             </div>
             <ul className="mt-2 space-y-3">
@@ -2160,6 +2167,9 @@ export function DashboardMainTabs(props: {
                         ))}
                       </ul>
                     </div>
+                    <span className="min-w-[4rem] shrink-0 text-center text-[11px] tabular-nums leading-snug text-zinc-300">
+                      {paidOrderShopTipCents(o) > 0 ? formatMoney(paidOrderShopTipCents(o)) : "—"}
+                    </span>
                     {(() => {
                       const merch = paidOrderMerchandiseTotals(o);
                       return (

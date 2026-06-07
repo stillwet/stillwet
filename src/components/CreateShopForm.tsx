@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createShopFromSignup } from "@/actions/shop-auth";
+import { TermsConditionsDialog } from "@/components/TermsConditionsDialog";
 import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
 
 export function CreateShopForm() {
@@ -10,7 +11,11 @@ export function CreateShopForm() {
   const [pending, setPending] = useState(false);
   const [setupMethod, setSetupMethod] = useState<"pay" | "code" | "">("");
   const [setupCode, setSetupCode] = useState("");
-  const canSubmit = setupMethod === "pay" || (setupMethod === "code" && setupCode.trim().length > 0);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+  const canSubmit =
+    termsAccepted &&
+    (setupMethod === "pay" || (setupMethod === "code" && setupCode.trim().length > 0));
 
   return (
     <form
@@ -106,6 +111,28 @@ export function CreateShopForm() {
           </span>
         </label>
       </fieldset>
+      <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-zinc-400">
+        <input
+          type="checkbox"
+          name="termsAccepted"
+          value="yes"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-0.5 shrink-0"
+        />
+        <span>
+          By clicking this checkbox you agree to Still Wet&apos;s{" "}
+          <button
+            type="button"
+            onClick={() => setTermsDialogOpen(true)}
+            className="text-blue-400/90 underline-offset-2 hover:text-blue-300 hover:underline"
+          >
+            terms &amp; conditions
+          </button>
+          .
+        </span>
+      </label>
+      <TermsConditionsDialog open={termsDialogOpen} onClose={() => setTermsDialogOpen(false)} />
       {error ? (
         <p className="text-sm text-amber-400" role="alert">
           {error}

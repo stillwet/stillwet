@@ -157,7 +157,7 @@ export function buildAdminEmailFormatEntries(
       key: "shop_inactivity_deactivation_warning",
       label: "Shop dashboard — inactivity warning",
       description:
-        "Sent when a creator has not logged in for 60 days. Full HTML document; use {{ACTION_URL}} for the dashboard login link.",
+        "Sent when a creator has not logged in for 30 days. Full HTML document; use {{ACTION_URL}} for the dashboard login link.",
       defaultSubject: SHOP_INACTIVITY_WARNING_EMAIL_SUBJECT,
       defaultBody: SHOP_INACTIVITY_WARNING_HTML_TEMPLATE,
       subject: inactivityWarning?.subject?.trim() || SHOP_INACTIVITY_WARNING_EMAIL_SUBJECT,

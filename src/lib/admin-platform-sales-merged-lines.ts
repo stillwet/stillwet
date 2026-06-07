@@ -10,6 +10,7 @@ import {
 } from "@/generated/prisma/enums";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
 import { listingFeeCentsForOrdinal, productHref } from "@/lib/marketplace-constants";
+import { checkoutTipApplicationFeeCents } from "@/lib/checkout-tip";
 import { promotionKindLabel } from "@/lib/promotions";
 
 const orderLineInclude = {
@@ -205,7 +206,8 @@ export async function loadPlatformSalesNavBadgeCounts(
   prisma: PrismaClient,
   opts: { salesOrderCreatedAt?: { gte?: Date; lte?: Date } },
 ): Promise<{
-  orderLineCount: number;
+  /** Sum of paid merchandise `OrderLine.quantity` (units sold), not order or line row count. */
+  itemsSoldCount: number;
   publicationFeePaymentCount: number;
   promotionPurchaseCount: number;
 }> {
@@ -218,9 +220,12 @@ export async function loadPlatformSalesNavBadgeCounts(
   const listingFeePaidFilter = listingFeePaidAtWhere(opts.salesOrderCreatedAt);
   const promotionPaidFilter = promotionPaidAtWhere(opts.salesOrderCreatedAt);
 
-  const [orderLineCount, feeListings, promotionPurchaseCount, listingCreditPackPurchaseCount] =
+  const [itemsSoldAgg, feeListings, promotionPurchaseCount, listingCreditPackPurchaseCount] =
     await Promise.all([
-    prisma.orderLine.count({ where: orderWhere }),
+    prisma.orderLine.aggregate({
+      where: orderWhere,
+      _sum: { quantity: true },
+    }),
     prisma.shopListing.findMany({
       where: { listingFeePaidAt: listingFeePaidFilter },
       select: {
@@ -296,7 +301,7 @@ export async function loadPlatformSalesNavBadgeCounts(
   }
 
   return {
-    orderLineCount,
+    itemsSoldCount: itemsSoldAgg._sum.quantity ?? 0,
     publicationFeePaymentCount:
       publicationFeePaymentCount + listingCreditPackPurchaseCount,
     promotionPurchaseCount,
@@ -619,6 +624,8 @@ export type PlatformSalesPeriodTotals = {
   promotionPlatformCents: number;
   /** Sum of platform support tips (Stripe Checkout sessions). */
   supportPlatformCents: number;
+  /** Sum of cart tip platform fees (25¢ per tipped order). */
+  cartTipPlatformCents: number;
 };
 
 export type PlatformSalesYtdTotals = PlatformSalesPeriodTotals & {
@@ -720,11 +727,25 @@ export async function aggregatePlatformRevenueForUtcWindow(
     _sum: { amountCents: true },
   });
 
+  const tippedOrders = await prisma.order.findMany({
+    where: {
+      status: OrderStatus.paid,
+      tipCents: { gt: 0 },
+      createdAt: { gte, lte },
+    },
+    select: { tipCents: true },
+  });
+  const cartTipPlatformCents = tippedOrders.reduce(
+    (sum, o) => sum + checkoutTipApplicationFeeCents(o.tipCents),
+    0,
+  );
+
   return {
     itemPlatformCents: orderLineSum._sum.platformCutCents ?? 0,
     listingPlatformCents: listingPlatformCents + (listingCreditPackSum._sum.amountCents ?? 0),
     promotionPlatformCents: promotionPurchaseSum._sum.amountCents ?? 0,
     supportPlatformCents: supportTipSum._sum.amountCents ?? 0,
+    cartTipPlatformCents,
   };
 }
 
@@ -783,6 +804,7 @@ function sumPlatformSalesPeriodTotals(
     listingPlatformCents: a.listingPlatformCents + b.listingPlatformCents,
     promotionPlatformCents: a.promotionPlatformCents + b.promotionPlatformCents,
     supportPlatformCents: a.supportPlatformCents + b.supportPlatformCents,
+    cartTipPlatformCents: a.cartTipPlatformCents + b.cartTipPlatformCents,
   };
 }
 
@@ -859,6 +881,7 @@ async function loadPlatformSalesYtdPriorMonthsUncached(
       listingPlatformCents: 0,
       promotionPlatformCents: 0,
       supportPlatformCents: 0,
+      cartTipPlatformCents: 0,
     };
   }
   return aggregatePlatformRevenueForUtcWindow(prisma, range.gte, range.lte);

@@ -34,7 +34,11 @@ import {
   buyerCheckoutTotalCents,
   stripeCheckoutPaymentProcessingLineItem,
 } from "@/lib/stripe-card-processing-fee";
-import { SHOP_REACTIVATION_FEE_CENTS, SHOP_REACTIVATION_FEE_LABEL } from "@/lib/shop-inactivity-policy";
+import {
+  SHOP_REACTIVATION_FEE_CENTS,
+  SHOP_REACTIVATION_FEE_LABEL,
+  shopInactivityReactivationWindowExpired,
+} from "@/lib/shop-inactivity-policy";
 
 export type ShopAuthError = { error: string; redirectTo?: never } | { redirectTo: string; error?: never };
 
@@ -42,12 +46,23 @@ async function startReactivationCheckoutForUser(user: {
   id: string;
   email: string;
   shopId: string;
-  shop: { displayName: string; accountDeletionRequestedAt: Date | null; inactivityDeletionTriggeredAt: Date | null };
+  shop: {
+    displayName: string;
+    accountDeletionRequestedAt: Date | null;
+    inactivityDeletionTriggeredAt: Date | null;
+    inactivityDeactivatedAt: Date | null;
+  };
 }): Promise<ShopAuthError> {
   if (user.shop.accountDeletionRequestedAt || user.shop.inactivityDeletionTriggeredAt) {
     return {
       error:
         "This shop has entered the account deletion process and cannot be reactivated from login. Contact support if you think this is a mistake.",
+    };
+  }
+  if (shopInactivityReactivationWindowExpired(user.shop.inactivityDeactivatedAt)) {
+    return {
+      error:
+        "The reactivation window for this shop has expired. Contact support if you need help with an abandoned or closed account.",
     };
   }
   const base = publicAppBaseUrl();
@@ -129,7 +144,11 @@ export async function createShopFromSignup(
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const setupCodeRaw = String(formData.get("setupCode") ?? "").trim();
+  const termsAccepted = formData.get("termsAccepted") === "yes";
 
+  if (!termsAccepted) {
+    return { error: "You must agree to the terms and conditions." };
+  }
   if (!email || !email.includes("@")) {
     return { error: "Enter a valid email." };
   }
@@ -425,6 +444,7 @@ export async function loginShopOwner(
         displayName: user.shop.displayName,
         accountDeletionRequestedAt: user.shop.accountDeletionRequestedAt,
         inactivityDeletionTriggeredAt: user.shop.inactivityDeletionTriggeredAt,
+        inactivityDeactivatedAt: user.shop.inactivityDeactivatedAt,
       },
     });
   }

@@ -90,6 +90,7 @@ export async function processShopInactivityLifecycle(
       inactivityDeactivatedAt: null,
       ...noLoginSince(deactivateCutoff),
     },
+    // Dashboard access is blocked via `inactivityDeactivatedAt`; public shop/listings stay visible.
     data: { inactivityDeactivatedAt: now },
   });
   result.deactivated = deactivated.count;

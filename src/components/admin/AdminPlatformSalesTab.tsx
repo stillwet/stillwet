@@ -28,7 +28,8 @@ function PlatformRevenueTotalsCard({
     totals.listingPlatformCents +
     totals.promotionPlatformCents +
     totals.itemPlatformCents +
-    totals.supportPlatformCents;
+    totals.supportPlatformCents +
+    totals.cartTipPlatformCents;
   const subtle = tone === "subtle";
   const cardClass = subtle
     ? "rounded-lg border border-zinc-800/35 bg-zinc-950/15 px-3 py-3 text-xs"
@@ -53,7 +54,7 @@ function PlatformRevenueTotalsCard({
   return (
     <div className={cardClass}>
       <p className={titleClass}>{title}</p>
-      <dl className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+      <dl className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <div className={metricOutline}>
           <dt className={dtClass}>Listing fees</dt>
           <dd className={ddClass}>{formatPrice(totals.listingPlatformCents)}</dd>
@@ -65,6 +66,10 @@ function PlatformRevenueTotalsCard({
         <div className={metricOutline}>
           <dt className={dtClass}>Merchandise (platform fee)</dt>
           <dd className={ddClass}>{formatPrice(totals.itemPlatformCents)}</dd>
+        </div>
+        <div className={metricOutline}>
+          <dt className={dtClass}>Cart tip fees</dt>
+          <dd className={ddClass}>{formatPrice(totals.cartTipPlatformCents)}</dd>
         </div>
         <div className={metricOutline}>
           <dt className={dtClass}>Support tips</dt>

@@ -138,7 +138,7 @@ export const loadAdminBadgePlatformSales = unstable_cache(
       salesOrderCreatedAt: { gte: platformSalesBadgeSince },
     });
     return (
-      salesBadgeCounts.orderLineCount +
+      salesBadgeCounts.itemsSoldCount +
       salesBadgeCounts.publicationFeePaymentCount +
       salesBadgeCounts.promotionPurchaseCount
     );

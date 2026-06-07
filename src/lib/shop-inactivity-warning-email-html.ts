@@ -17,10 +17,10 @@ export const SHOP_INACTIVITY_WARNING_HTML_TEMPLATE = `<!DOCTYPE html>
             ${SITE_EMAIL_LOGO_PLACEHOLDER}
             <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#fafafa;">Shop inactivity warning</p>
             <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#a1a1aa;">
-              We have not seen a creator dashboard login for this shop in at least 60 days. If you do not log in within the next 30 days, your shop account will be deactivated.
+              We have not seen a creator dashboard login for this shop in at least 30 days. If you do not log in within the next 30 days, your shop account will be deactivated.
             </p>
             <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#a1a1aa;">
-              Deactivated shops can stay available to buyers, but sales proceeds while deactivated go 100% to the platform. Reactivating later requires a one-time $5 fee.
+              Deactivated shops can stay visible to buyers on the marketplace, but sales proceeds while deactivated go 100% to the platform. You may reactivate within 30 days of deactivation by paying a one-time $5 fee.
             </p>
             <p style="margin:0 0 20px;">
               <a href="${SITE_EMAIL_ACTION_URL_PLACEHOLDER}" style="display:inline-block;background:#e4e4e7;color:#18181b;text-decoration:none;font-weight:600;font-size:13px;padding:10px 16px;border-radius:8px;">

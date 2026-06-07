@@ -452,7 +452,7 @@ async function AdminDashboardPageBody({
                   <Link
                     href={`${basePath}?tab=sales`}
                     role="tab"
-                    title="Badge count is new platform sales in the last 24 hours: paid orders, publication fees, and paid promotions. The sales tab can filter by date separately."
+                    title="Badge count is new platform sales in the last 24 hours: items sold (merchandise qty), publication fees, and paid promotions. The sales tab can filter by date separately."
                     aria-selected={inventoryTab === "sales"}
                     className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "sales"
