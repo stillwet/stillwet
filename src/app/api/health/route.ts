@@ -4,6 +4,8 @@ import {
   runtimeDatabaseUrlSourceKey,
 } from "@/lib/env-postgres-url";
 import { emailLinkOrigin, publicAppBaseUrl } from "@/lib/public-app-url";
+import { adminInboxForwardToEmail } from "@/lib/admin-inbox-forward-email";
+import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
 import { resolveShopTransactionalEmailFrom } from "@/lib/resend-shop-from";
 
 export const runtime = "nodejs";
@@ -40,6 +42,13 @@ export async function GET() {
   }
 
   const hasResendApiKey = Boolean(process.env.RESEND_API_KEY?.trim());
+  const hasInboundWebhookSecret = Boolean(
+    process.env.RESEND_INBOUND_WEBHOOK_SECRET?.trim() ||
+      process.env.RESEND_WEBHOOK_SECRET?.trim(),
+  );
+  const adminInboxAddress = adminInboxEmailAddress();
+  const hasAdminInboxForwardTo = Boolean(adminInboxForwardToEmail());
+  const hasAdminInboxReplyFrom = Boolean(process.env.ADMIN_INBOX_REPLY_FROM?.trim());
   const hasShopPasswordResetFrom = Boolean(process.env.SHOP_PASSWORD_RESET_EMAIL_FROM?.trim());
   const hasShopAccountDeletionFrom = Boolean(process.env.SHOP_ACCOUNT_DELETION_EMAIL_FROM?.trim());
   const hasVerifiedTransactionalFrom =
@@ -116,6 +125,13 @@ export async function GET() {
         hasVerifiedTransactionalFrom,
         resolvedFromDomain: accountDeletionFromDomain,
         linkOrigin: passwordResetLinkOrigin,
+      },
+      adminInbox: {
+        address: adminInboxAddress,
+        hasResendApiKey,
+        hasInboundWebhookSecret,
+        hasForwardTo: hasAdminInboxForwardTo,
+        replyFromConfigured: hasAdminInboxReplyFrom,
       },
     },
     { status: 200, headers: { "Cache-Control": "no-store" } },

@@ -6,6 +6,7 @@ import type {
   PlatformSalesYtdTotals,
 } from "@/lib/admin-platform-sales-merged-lines";
 import { AdminClearPlatformSalesForm } from "@/components/admin/AdminClearPlatformSalesForm";
+import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -111,7 +112,6 @@ function formatBuyerCell(l: AdminPlatformSalesMergedLine, field: keyof AdminPlat
   return v || "—";
 }
 
-/** US → state code; otherwise country code. */
 function formatBuyerShipTo(l: AdminPlatformSalesMergedLine): string {
   if (l.kind !== "merchandise") return "—";
   const country = l.buyer.shippingCountry?.trim().toUpperCase() ?? "";
@@ -119,6 +119,11 @@ function formatBuyerShipTo(l: AdminPlatformSalesMergedLine): string {
   const isUs = country === "US" || country === "USA" || (!country && state.length > 0);
   if (isUs) return state || "—";
   return country || "—";
+}
+
+function formatMerchandiseOrderNumber(l: AdminPlatformSalesMergedLine): string {
+  if (l.kind !== "merchandise") return "—";
+  return formatBuyerOrderNumberShort(l.order.orderNumber);
 }
 
 export function AdminPlatformSalesTab(props: {
@@ -152,8 +157,10 @@ export function AdminPlatformSalesTab(props: {
       const buyerEmail = l.kind === "merchandise" ? l.buyer.email ?? "" : "";
       const buyerShipTo = l.kind === "merchandise" ? formatBuyerShipTo(l) : "";
       const buyerShipToCsv = buyerShipTo === "—" ? "" : buyerShipTo;
+      const orderNumber = l.kind === "merchandise" ? String(l.order.orderNumber) : "";
       return [
         l.order.createdAt.toISOString(),
+        orderNumber,
         l.order.id,
         l.productName,
         String(l.quantity),
@@ -171,7 +178,7 @@ export function AdminPlatformSalesTab(props: {
     })
     .join("\n");
   const csv =
-    "date,order_id,item,qty,merchandise_cents,goods_services_cents,platform_fee_cents,shop_cut_cents,shop_name,shop_slug,buyer_email,buyer_ship_to\n" +
+    "date,order_number,order_id,item,qty,merchandise_cents,goods_services_cents,platform_fee_cents,shop_cut_cents,shop_name,shop_slug,buyer_email,buyer_ship_to\n" +
     csvBody;
   const csvHref = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
 
@@ -284,10 +291,11 @@ export function AdminPlatformSalesTab(props: {
       </p>
 
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[760px] border-collapse text-left text-xs">
+        <table className="w-full min-w-[840px] border-collapse text-left text-xs">
           <thead>
             <tr className="border-b border-zinc-800 text-zinc-500">
               <th className="py-2 pr-2 font-medium">Date</th>
+              <th className="py-2 pr-2 font-medium">Order</th>
               <th className="py-2 pr-2 font-medium">Item</th>
               <th className="py-2 pr-2 font-medium">Qty</th>
               <th className="py-2 pr-2 font-medium">Merch</th>
@@ -307,6 +315,9 @@ export function AdminPlatformSalesTab(props: {
                 <tr key={l.id} className="border-b border-zinc-900 text-zinc-300">
                   <td className="py-2 pr-2 font-mono text-[10px] text-zinc-500">
                     {formatDateMMDDYY(l.order.createdAt)}
+                  </td>
+                  <td className="py-2 pr-2 font-mono tabular-nums text-zinc-400">
+                    {formatMerchandiseOrderNumber(l)}
                   </td>
                   <td className="py-2 pr-2">
                     {l.itemHref ? (

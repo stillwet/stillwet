@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { prismaAdminInboundEmailOrNull } from "@/lib/prisma";
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
+import { forwardInboundEmailToGmail } from "@/lib/admin-inbox-forward-email";
 import { resendFetchReceivedEmail } from "@/lib/resend-fetch-received-email";
 import { revalidatePath } from "next/cache";
 import { ADMIN_BACKEND_BASE_PATH, ADMIN_MAIN_BASE_PATH } from "@/lib/admin-dashboard-urls";
@@ -108,6 +109,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Inbound storage not available" }, { status: 503 });
     }
 
+    const existing = await inbound.findUnique({
+      where: { resendEmailId: emailId },
+      select: { id: true },
+    });
+
     await inbound.upsert({
       where: { resendEmailId: emailId },
       create: {
@@ -128,6 +134,22 @@ export async function POST(req: Request) {
         receivedAt: mail.receivedAt,
       },
     });
+
+    if (!existing) {
+      const forwarded = await forwardInboundEmailToGmail({
+        fromAddress: mail.fromAddress,
+        toAddress: mail.toAddress,
+        subject: mail.subject,
+        textBody: mail.textBody,
+        htmlBody: mail.htmlBody,
+        receivedAt: mail.receivedAt,
+      });
+      if (!forwarded.ok) {
+        console.error("[resend-inbound] Gmail forward failed", forwarded.error);
+      } else if (!forwarded.skipped) {
+        console.info("[resend-inbound] Gmail forward sent");
+      }
+    }
 
     revalidatePath(ADMIN_MAIN_BASE_PATH);
     revalidatePath(ADMIN_BACKEND_BASE_PATH);

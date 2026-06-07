@@ -16,6 +16,7 @@ const orderLineInclude = {
   order: {
     select: {
       id: true,
+      orderNumber: true,
       createdAt: true,
       email: true,
       shippingState: true,
@@ -57,7 +58,7 @@ export type AdminPlatformSalesMergedLine =
       goodsServicesCostCents: number;
       platformCutCents: number;
       shopCutCents: number;
-      order: { id: string; createdAt: Date };
+      order: { id: string; createdAt: Date; orderNumber: number };
       shop: { displayName: string; slug: string } | null;
       buyer: AdminPlatformSalesBuyer;
       itemHref: string | null;
@@ -478,7 +479,7 @@ export async function loadMergedPlatformSalesLines(
     goodsServicesCostCents: l.goodsServicesCostCents,
     platformCutCents: l.platformCutCents,
     shopCutCents: l.shopCutCents,
-    order: { id: l.order.id, createdAt: l.order.createdAt },
+    order: { id: l.order.id, createdAt: l.order.createdAt, orderNumber: l.order.orderNumber },
     shop: l.shop,
     buyer: {
       email: l.order.email,

@@ -40,7 +40,11 @@ export function AdminInboxTab(props: {
         (or <code className="font-mono text-[11px] text-zinc-400">RESEND_WEBHOOK_SECRET</code>) to the signing secret
         from the Resend webhook, and keep <code className="font-mono text-[11px] text-zinc-400">RESEND_API_KEY</code>{" "}
         for fetching message bodies and for <strong className="font-medium text-zinc-400">replies</strong> from this
-        tab (same key; your sending domain must be verified in Resend). Optional full{" "}
+        tab (same key; your sending domain must be verified in Resend). Inbound copies can forward to Gmail when{" "}
+        <code className="rounded bg-zinc-900 px-1 py-0.5 font-mono text-[11px] text-zinc-400">
+          ADMIN_INBOX_FORWARD_TO_EMAIL
+        </code>{" "}
+        is set. Optional full{" "}
         <code className="rounded bg-zinc-900 px-1 py-0.5 font-mono text-[11px] text-zinc-400">
           ADMIN_INBOX_REPLY_FROM
         </code>{" "}
