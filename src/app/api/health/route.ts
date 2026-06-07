@@ -6,7 +6,10 @@ import {
 import { emailLinkOrigin, publicAppBaseUrl } from "@/lib/public-app-url";
 import { adminInboxForwardToEmail } from "@/lib/admin-inbox-forward-email";
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
-import { resolveShopAutomatedTransactionalEmailFrom } from "@/lib/resend-shop-from";
+import {
+  resolveShopAutomatedTransactionalEmailFrom,
+  resolveShopTransactionalEmailFrom,
+} from "@/lib/resend-shop-from";
 import { loadResendSendingDomainDiagnostics } from "@/lib/resend-api-client";
 
 export const runtime = "nodejs";
