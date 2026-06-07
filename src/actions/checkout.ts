@@ -28,6 +28,7 @@ import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
 import { listingStripeProductName } from "@/lib/listing-cart-stripe-name";
 import { baselineGoodsServicesUnitCents } from "@/lib/baseline-goods-services-unit-cents";
+import { formatBuyerOrderNumber } from "@/lib/buyer-order-number";
 import { splitMerchandiseLineForCheckoutCents } from "@/lib/marketplace-fee";
 import {
   shopIsInactivityDeactivated,
@@ -367,6 +368,32 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
       tipCents,
     }) + (useStripeConnect ? paymentProcessingCents : 0);
   const connectAccountId = useStripeConnect ? shopRecord!.stripeConnectAccountId! : null;
+  const orderNumberMeta = String(order.orderNumber);
+  const paymentIntentData: {
+    description: string;
+    metadata: Record<string, string>;
+    application_fee_amount?: number;
+    transfer_data?: { destination: string };
+  } = {
+    description: formatBuyerOrderNumber(order.orderNumber),
+    metadata: {
+      orderId: order.id,
+      orderNumber: orderNumberMeta,
+      ...(useStripeConnect
+        ? {
+            tipCents: String(tipCents),
+            platformTipFeeCents: String(platformTipFeeCents),
+            paymentProcessingCents: String(paymentProcessingCents),
+          }
+        : {}),
+    },
+  };
+  if (useStripeConnect) {
+    paymentIntentData.application_fee_amount = applicationFeeCents;
+    paymentIntentData.transfer_data = {
+      destination: shopRecord!.stripeConnectAccountId!,
+    };
+  }
 
   let checkoutSession;
   try {
@@ -392,25 +419,10 @@ export async function startCheckout(formData: FormData): Promise<CheckoutResult>
           },
         },
       ],
-      metadata: { orderId: order.id, shopId },
+      metadata: { orderId: order.id, shopId, orderNumber: orderNumberMeta },
       client_reference_id: order.id,
       return_url: `${base.url}/order/success?session_id={CHECKOUT_SESSION_ID}`,
-      ...(useStripeConnect
-        ? {
-            payment_intent_data: {
-              application_fee_amount: applicationFeeCents,
-              metadata: {
-                orderId: order.id,
-                tipCents: String(tipCents),
-                platformTipFeeCents: String(platformTipFeeCents),
-                paymentProcessingCents: String(paymentProcessingCents),
-              },
-              transfer_data: {
-                destination: shopRecord.stripeConnectAccountId!,
-              },
-            },
-          }
-        : {}),
+      payment_intent_data: paymentIntentData,
     });
   } catch (e) {
     await prisma.order.delete({ where: { id: order.id } });

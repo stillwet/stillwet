@@ -76,6 +76,13 @@ export default function FaqPage() {
         </section>
 
         <section className="space-y-3">
+          <h2 className="text-base font-semibold text-zinc-200">
+            Can shop owners see my name / address when I purchase an item?
+          </h2>
+          <p>No, shop owners only see that an item has been purchased.</p>
+        </section>
+
+        <section className="space-y-3">
           <h2 className="text-base font-semibold text-zinc-200">Returns, privacy, and support</h2>
           <ul className="list-inside list-disc space-y-2 pl-1">
             <li>

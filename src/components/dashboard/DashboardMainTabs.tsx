@@ -56,6 +56,7 @@ import { DashboardNoticeMarkReadForm } from "@/components/dashboard/DashboardNot
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
 import { dashboardListingMinPriceHintCents } from "@/lib/listing-cart-price";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
+import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
 import {
   type ShopSalesProfitSummary,
 } from "@/lib/shop-sales-profit-summary";
@@ -186,6 +187,7 @@ export type DashboardListingRow = {
 
 export type DashboardPaidOrderRow = {
   id: string;
+  orderNumber: number;
   createdAt: string;
   lines: Array<{
     lineDisplayLabel: string;
@@ -2136,6 +2138,7 @@ export function DashboardMainTabs(props: {
             >
               <div className="flex min-w-0 flex-1 items-baseline gap-3">
                 <span className="w-14 shrink-0 text-center">Date</span>
+                <span className="w-16 shrink-0 text-center">Order</span>
                 <span className="min-w-0 flex-1 pl-4 text-left">Item</span>
               </div>
               <span className="min-w-[5.5rem] shrink-0 text-center text-blue-400">Shop profit</span>
@@ -2151,6 +2154,9 @@ export function DashboardMainTabs(props: {
                       >
                         {formatPaidOrderDate(o.createdAt)}
                       </time>
+                      <span className="w-16 shrink-0 text-center font-medium tabular-nums text-zinc-200">
+                        {formatBuyerOrderNumberShort(o.orderNumber)}
+                      </span>
                       <ul className="min-w-0 flex-1 space-y-2 text-zinc-400">
                         {o.lines.map((l, i) => (
                           <li key={i} className="leading-snug text-zinc-300">

@@ -19,7 +19,7 @@ export type PrismaAdminNexusRegistrationDatesDelegate =
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v82-admin-catalog-artwork-source-tier";
+  "postgres-adapter-v83-order-order-number";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

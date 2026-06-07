@@ -666,6 +666,7 @@ export type CreatorGiftCodeScalarFieldEnum = (typeof CreatorGiftCodeScalarFieldE
 
 export const OrderScalarFieldEnum = {
   id: 'id',
+  orderNumber: 'orderNumber',
   shopId: 'shopId',
   stripeSessionId: 'stripeSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',

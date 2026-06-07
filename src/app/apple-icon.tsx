@@ -20,7 +20,7 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#09090b",
+          background: "transparent",
         }}
       >
         <svg viewBox={STILL_WET_LOGO_VIEW_BOX} width={152} height={152}>

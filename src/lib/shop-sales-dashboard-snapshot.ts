@@ -8,7 +8,12 @@ function isObject(x: unknown): x is Record<string, unknown> {
 function parseSnapshotPayload(raw: unknown): DashboardPaidOrderRow[] | null {
   if (!Array.isArray(raw)) return null;
   for (const row of raw) {
-    if (!isObject(row) || typeof row.id !== "string" || typeof row.createdAt !== "string") {
+    if (
+      !isObject(row) ||
+      typeof row.id !== "string" ||
+      typeof row.orderNumber !== "number" ||
+      typeof row.createdAt !== "string"
+    ) {
       return null;
     }
   }

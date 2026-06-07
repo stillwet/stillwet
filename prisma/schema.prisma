@@ -944,6 +944,7 @@ enum OrderStatus {
 
 model Order {
   id                    String            @id @default(cuid())
+  orderNumber           Int               @unique @default(autoincrement())
   shopId                String?
   shop                  Shop?             @relation(fields: [shopId], references: [id], onDelete: SetNull)
   stripeSessionId       String?           @unique

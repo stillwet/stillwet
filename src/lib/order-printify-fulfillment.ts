@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { BRAND_NAME } from "@/lib/site-brand";
 import { coercePrintifyOrderVariantId, createPrintifyOrder } from "@/lib/printify";
+import {
+  printifyOrderExternalId,
+  printifyOrderLabel,
+} from "@/lib/printify-order-label";
 import { FulfillmentType, FulfillmentJobStatus, OrderStatus } from "@/generated/prisma/enums";
 
 function splitName(full: string | null | undefined): { first: string; last: string } {
@@ -17,7 +20,11 @@ function splitName(full: string | null | undefined): { first: string; last: stri
 export async function fulfillPaidOrderPrintify(orderId: string): Promise<void> {
   const paid = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { lines: true, fulfillmentJobs: true },
+    include: {
+      lines: true,
+      fulfillmentJobs: true,
+      shop: { select: { displayName: true } },
+    },
   });
   if (!paid || paid.status !== OrderStatus.paid) return;
 
@@ -90,8 +97,8 @@ export async function fulfillPaidOrderPrintify(orderId: string): Promise<void> {
 
   try {
     const { id: externalId, raw } = await createPrintifyOrder({
-      externalId: paid.id,
-      label: `${BRAND_NAME} ${paid.id.slice(0, 8)}`,
+      externalId: printifyOrderExternalId(paid.orderNumber),
+      label: printifyOrderLabel(paid.shop?.displayName ?? "", paid.orderNumber),
       lineItems: variantItems,
       addressTo: {
         first_name: firstName,
