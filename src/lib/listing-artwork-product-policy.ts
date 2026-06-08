@@ -11,6 +11,10 @@ import {
 } from "@/lib/listing-artwork-source-tier";
 import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 import { prisma } from "@/lib/prisma";
+import {
+  catalogItemIsPillow,
+  pillowPerSidePrintAreaDimensions,
+} from "@/lib/listing-artwork-pillow-listing";
 
 export type ListingArtworkProductPolicy = {
   printAreaW: number | null;
@@ -42,8 +46,11 @@ export async function resolveListingArtworkProductPolicy(
     const pw = adminItem.itemPrintAreaWidthPx ?? null;
     const ph = adminItem.itemPrintAreaHeightPx ?? null;
     if (pw != null && ph != null && pw > 0 && ph > 0) {
-      printAreaW = pw;
-      printAreaH = ph;
+      const dims = catalogItemIsPillow({ catalogItemName: adminItem.name })
+        ? pillowPerSidePrintAreaDimensions({ printAreaWidthPx: pw, printAreaHeightPx: ph })
+        : { printAreaWidthPx: pw, printAreaHeightPx: ph };
+      printAreaW = dims.printAreaWidthPx;
+      printAreaH = dims.printAreaHeightPx;
     }
     letterboxFill = resolveListingArtworkLetterboxFill({
       itemArtworkLetterboxFill: adminItem.itemArtworkLetterboxFill,

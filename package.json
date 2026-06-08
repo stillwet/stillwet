@@ -24,6 +24,7 @@
     "db:migrate": "prisma migrate deploy --schema prisma/schema.prisma",
     "db:migrate:dev": "prisma migrate dev --schema prisma/schema.prisma",
     "db:migrate:prod": "node scripts/migrate-production.cjs",
+    "db:migrate:vercel-dev": "node scripts/migrate-vercel-dev-env.cjs",
     "env:pull:prod": "node scripts/pull-vercel-production-env.cjs",
     "db:verify-neon": "node scripts/verify-neon.cjs",
     "db:seed": "prisma db seed --schema prisma/schema.prisma",

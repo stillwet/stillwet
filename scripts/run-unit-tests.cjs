@@ -38,6 +38,7 @@ const tests = [
   "src/lib/listing-artwork-v2/limits.test.ts",
   "src/lib/listing-request-review-limit.test.ts",
   "src/lib/admin-catalog-upload-policy.test.ts",
+  "src/lib/admin-catalog-canvas-presentation.test.ts",
 ];
 
 const cwd = path.join(__dirname, "..");

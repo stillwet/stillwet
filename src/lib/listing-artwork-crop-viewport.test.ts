@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeListingArtworkCropViewportSize, listingArtworkComposeCropSize } from "@/lib/listing-artwork-crop-viewport";
+import {
+  computeListingArtworkCropViewportSize,
+  listingArtworkComposeCropSize,
+} from "@/lib/listing-artwork-crop-viewport";
 
 describe("computeListingArtworkCropViewportSize", () => {
   it("fills a wide container height for portrait print aspect", () => {
@@ -15,6 +18,14 @@ describe("computeListingArtworkCropViewportSize", () => {
     assert.ok(size);
     assert.equal(Math.round(size.width), 400);
     assert.ok(Math.abs(size.width / size.height - 16 / 9) < 0.001);
+  });
+
+  it("fits portrait playing cards within a bounded viewport height", () => {
+    const aspect = 775 / 1125;
+    const size = computeListingArtworkCropViewportSize(655, 420, aspect);
+    assert.ok(size);
+    assert.equal(Math.round(size.height), 420);
+    assert.ok(Math.abs(size.width / size.height - aspect) < 0.001);
   });
 
   it("skips viewport cropSize override for phone-sized sources", () => {

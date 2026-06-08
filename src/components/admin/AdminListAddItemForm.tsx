@@ -1,12 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, startTransition, useState } from "react";
 import {
   adminAddCatalogItemFormAction,
   type AdminCatalogItemSaveResult,
 } from "@/actions/admin-catalog-items";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
+import {
+  AdminCatalogCanvasPresentationFields,
+  type CatalogArtworkTemplatePresetId,
+} from "@/components/admin/AdminCatalogCanvasPresentationFields";
+import type { CatalogCanvasPresentationPresetId } from "@/lib/admin-catalog-canvas-presentation";
 import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
@@ -28,7 +33,12 @@ export function AdminListAddItemForm() {
   );
   const [itemArtworkSourceTierOverride, setItemArtworkSourceTierOverride] =
     useState<CatalogArtworkSourceTierOverride>(AdminCatalogItemArtworkSourceTierOverride.auto);
+  const [itemCanvasPresentationPreset, setItemCanvasPresentationPreset] =
+    useState<CatalogCanvasPresentationPresetId>("flat");
+  const [itemArtworkTemplatePreset, setItemArtworkTemplatePreset] =
+    useState<CatalogArtworkTemplatePresetId>("single");
   const [clientError, setClientError] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   const [saveState, saveAction, savePending] = useActionState<
     AdminCatalogItemSaveResult | null,
@@ -48,7 +58,10 @@ export function AdminListAddItemForm() {
     setItemMinArtworkDpi("");
     setItemArtworkLetterboxFill(ListingArtworkLetterboxFill.transparent);
     setItemArtworkSourceTierOverride(AdminCatalogItemArtworkSourceTierOverride.auto);
+    setItemCanvasPresentationPreset("flat");
+    setItemArtworkTemplatePreset("single");
     setClientError(null);
+    setFormOpen(false);
     router.refresh();
   }, [saveState, router]);
 
@@ -94,7 +107,11 @@ export function AdminListAddItemForm() {
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
     fd.set("itemArtworkLetterboxFill", itemArtworkLetterboxFill);
     fd.set("itemArtworkSourceTierOverride", itemArtworkSourceTierOverride);
-    saveAction(fd);
+    fd.set("itemCanvasPresentationPreset", itemCanvasPresentationPreset);
+    fd.set("itemArtworkTemplatePreset", itemArtworkTemplatePreset);
+    startTransition(() => {
+      saveAction(fd);
+    });
   }
 
   const serverError = saveState?.ok === false ? saveState.error : null;
@@ -102,8 +119,30 @@ export function AdminListAddItemForm() {
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
-      <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">List item</h3>
-      <form onSubmit={submit} className="mt-4 space-y-4">
+      {!formOpen ? (
+        <button
+          type="button"
+          onClick={() => setFormOpen(true)}
+          className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
+        >
+          Add new catalogue item
+        </button>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">List item</h3>
+            <button
+              type="button"
+              onClick={() => {
+                setFormOpen(false);
+                setClientError(null);
+              }}
+              className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-300 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+          <form onSubmit={submit} className="mt-4 space-y-4">
         <label className="block text-xs text-zinc-500">
           Item name
           <input
@@ -142,6 +181,13 @@ export function AdminListAddItemForm() {
           onChangeArtworkSourceTierOverride={setItemArtworkSourceTierOverride}
         />
 
+        <AdminCatalogCanvasPresentationFields
+          canvasPresentationPreset={itemCanvasPresentationPreset}
+          artworkTemplatePreset={itemArtworkTemplatePreset}
+          onChangeCanvasPresentationPreset={setItemCanvasPresentationPreset}
+          onChangeArtworkTemplatePreset={setItemArtworkTemplatePreset}
+        />
+
         {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">
             {displayError}
@@ -156,6 +202,8 @@ export function AdminListAddItemForm() {
           {savePending ? "Saving…" : "Save item"}
         </button>
       </form>
+        </>
+      )}
     </div>
   );
 }

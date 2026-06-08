@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { adminDeleteCatalogItem } from "@/actions/admin-catalog-items";
@@ -47,27 +46,31 @@ function AdminCatalogItemTagsDisplayCell({ tags }: { tags: AdminListItemTag[] })
   );
 }
 
-function exampleLink(url: string) {
+function itemImageCell(url: string) {
   const t = url.trim();
   if (!t) return null;
-  const href = t.startsWith("/") ? t : t;
-  const isAbsolute = /^https?:\/\//i.test(t);
-  if (isAbsolute) {
-    return (
-      <a
-        href={t}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="break-all text-blue-400/90 hover:underline"
-      >
-        {t.length > 48 ? `${t.slice(0, 46)}…` : t}
-      </a>
-    );
-  }
+  const href = t;
+  const path = t.split(/[?#]/)[0] ?? t;
+  const looksLikeImage = /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+
   return (
-    <Link href={href} className="break-all text-blue-400/90 hover:underline">
-      {t}
-    </Link>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Open item image"
+      className="inline-flex items-center gap-2 text-blue-400/90 hover:underline"
+    >
+      {looksLikeImage ? (
+        /* eslint-disable-next-line @next/next/no-img-element -- admin catalog reference URL */
+        <img
+          src={t}
+          alt=""
+          className="size-10 shrink-0 rounded border border-zinc-700 bg-zinc-900 object-contain"
+        />
+      ) : null}
+      <span className="break-all text-[11px]">{looksLikeImage ? "Open" : t.length > 40 ? `${t.slice(0, 38)}…` : t}</span>
+    </a>
   );
 }
 
@@ -149,7 +152,7 @@ export function AdminListItemsPanel({
             <tr>
               <th className="p-3 font-medium">Item name</th>
               <th className="p-3 font-medium">Tags</th>
-              <th className="p-3 font-medium">Example listing</th>
+              <th className="p-3 font-medium">Item image</th>
               <th className="p-3 font-medium whitespace-nowrap" title="Goods/services fulfillment cost per unit">
                 G/S cost
               </th>
@@ -184,7 +187,7 @@ export function AdminListItemsPanel({
                 <AdminCatalogItemTagsDisplayCell tags={item.tags} />
                 <td className="p-3 text-zinc-400">
                   {item.itemExampleListingUrl ? (
-                    exampleLink(item.itemExampleListingUrl)
+                    itemImageCell(item.itemExampleListingUrl)
                   ) : (
                     <span className="text-zinc-600">—</span>
                   )}

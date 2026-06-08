@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import {
   abandonUnconfirmedListingRequestSubmit,
   submitFirstListingSetup,
@@ -11,7 +12,22 @@ import { ItemGuidelinesPopup } from "@/components/ItemGuidelinesPopup";
 import { ListingSearchKeywordsChipInput } from "@/components/dashboard/ListingSearchKeywordsChipInput";
 import { ListingArtworkCropDialog } from "@/components/dashboard/ListingArtworkCropDialog";
 import { ListingArtworkComposeDialog } from "@/components/dashboard/ListingArtworkComposeDialog";
-import { listingArtworkLetterboxPreviewStyle } from "@/lib/listing-artwork-letterbox-fill";
+import { ListingArtworkSurfaceTabs } from "@/components/dashboard/ListingArtworkSurfaceTabs";
+import { ListingPillowDoubleSidedFields } from "@/components/dashboard/ListingPillowDoubleSidedFields";
+import { CATALOG_CANVAS_PRESENTATION_FLAT } from "@/lib/admin-catalog-canvas-presentation";
+import {
+  catalogItemIsCanvasPrint,
+  catalogItemIsBlackMug,
+  catalogItemIsWhiteMug,
+  listingArtworkLetterboxPreviewStyle,
+} from "@/lib/listing-artwork-letterbox-fill";
+import { catalogItemUsesRoundedCornerCropGuide } from "@/lib/listing-artwork-playing-card-crop";
+import {
+  buildListingArtworkBakedSubmitEntries,
+  catalogItemIsPillow,
+  resolvePillowListingArtworkSurfaces,
+  type PillowSidesArtworkMode,
+} from "@/lib/listing-artwork-pillow-listing";
 import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import { flattenShopBaselineCatalogGroups, partitionShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import {
@@ -62,6 +78,8 @@ import type { FreeListingRequestSlotsSummary } from "@/lib/marketplace-constants
 
 const STOREFRONT_ITEM_BLURB_MAX = 280;
 
+type SurfaceArtworkEntry = { requestImageKey: string; publicUrl: string };
+
 const btnPrimary =
   "rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed";
 const btnPrimaryDisabled = "rounded-lg bg-zinc-900/50 px-4 py-2 text-sm font-medium text-zinc-500 ring-1 ring-zinc-800";
@@ -93,37 +111,94 @@ function listingProfitHint(
   return `Est. profit: ${formatUsdFromCents(profit)}`;
 }
 
-function CatalogExampleLink({ href }: { href: string }) {
-  const className =
-    "shrink-0 text-[11px] text-zinc-600 underline-offset-2 hover:text-zinc-400 hover:underline";
-  const external = /^https?:\/\//i.test(href);
-  if (external) {
-    return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Open example reference"
-        className={className}
-        onClick={(e) => e.stopPropagation()}
-      >
-        Example
-      </a>
-    );
-  }
+function CatalogItemPhotoLink({ href }: { href: string }) {
+  const [open, setOpen] = useState(false);
+  const titleId = useId();
+  const linkClassName =
+    "text-[11px] text-blue-400/90 underline underline-offset-2 hover:text-blue-300";
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Open example reference"
-      className={className}
-      onClick={(e) => e.stopPropagation()}
-    >
-      Example
-    </Link>
+    <>
+      <span className="flex w-full items-center justify-center">
+        <button
+          type="button"
+          title="View item photo"
+          className={linkClassName}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
+        >
+          Photo
+        </button>
+      </span>
+      {open && typeof document !== "undefined"
+        ? createPortal(
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+              <button
+                type="button"
+                aria-label="Close item photo preview"
+                className="fixed inset-0 bg-black/70"
+                onClick={() => setOpen(false)}
+              />
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                className="relative z-[61] max-h-[min(85vh,720px)] max-w-[min(92vw,640px)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  aria-label="Close"
+                  className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700/80 bg-zinc-950/90 text-lg leading-none text-zinc-400 shadow-sm backdrop-blur-sm transition hover:border-zinc-600 hover:bg-zinc-900 hover:text-zinc-100"
+                  onClick={() => setOpen(false)}
+                >
+                  ×
+                </button>
+                <h3 id={titleId} className="sr-only">
+                  Item photo
+                </h3>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={href}
+                  alt="Item photo preview"
+                  className="max-h-[min(85vh,720px)] w-full bg-zinc-900 object-contain"
+                />
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }
+
+/** Shared row: item name (left) | item photo + sale price (right-aligned group) */
+const CATALOG_PICKER_ROW = "flex items-center gap-x-4";
+const CATALOG_PICKER_ITEM_COL = "min-w-0 max-w-[20rem] sm:max-w-[24rem]";
+const CATALOG_PICKER_ITEM_HEADER_COL = `${CATALOG_PICKER_ITEM_COL} pl-7`;
+const CATALOG_PICKER_TRAILING_COLS =
+  "ml-auto grid shrink-0 grid-cols-[7rem_8rem] items-center gap-x-4 sm:grid-cols-[7.5rem_8.5rem]";
+const CATALOG_PICKER_PHOTO_COL = "text-center text-[11px] leading-tight";
+const CATALOG_PICKER_PRICE_COL = "text-center text-[11px] tabular-nums leading-tight";
+const CATALOG_PICKER_HEADER_ROW = `${CATALOG_PICKER_ROW} sticky top-0 z-20 border-b border-zinc-800 bg-zinc-900 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-zinc-100`;
+const CATALOG_PICKER_SECTION_ROW = `${CATALOG_PICKER_ROW} sticky top-8 z-10 border-b border-zinc-800/80 bg-zinc-900 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500`;
+const catalogPickerHeaderMutedClass = (muted: boolean) => (muted ? " opacity-45" : "");
 
 async function probeDashboardListingCount(): Promise<number | null> {
   for (const delayMs of [0, 400, 1200]) {
@@ -201,10 +276,10 @@ export function ShopFirstListingRequestPanel(props: {
   const [listingRequestItemName, setListingRequestItemName] = useState("");
   const [listingHasFile, setListingHasFile] = useState(false);
   const [listingSubmitArtworkFile, setListingSubmitArtworkFile] = useState<File | null>(null);
-  const [listingPreparedArtwork, setListingPreparedArtwork] = useState<{
-    requestImageKey: string;
-    publicUrl: string;
-  } | null>(null);
+  const [surfaceArtwork, setSurfaceArtwork] = useState<Record<string, SurfaceArtworkEntry>>({});
+  const [activeSurfaceId, setActiveSurfaceId] = useState("front");
+  const [pillowDoubleSided, setPillowDoubleSided] = useState(false);
+  const [pillowSidesMode, setPillowSidesMode] = useState<PillowSidesArtworkMode>("same");
   const [listingSourceKey, setListingSourceKey] = useState<string | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [composeDialogOpen, setComposeDialogOpen] = useState(false);
@@ -226,8 +301,10 @@ export function ShopFirstListingRequestPanel(props: {
   const [keywordDraft, setKeywordDraft] = useState("");
   const [keywordDuplicateHint, setKeywordDuplicateHint] = useState<string | null>(null);
   const listingFileRef = useRef<HTMLInputElement>(null);
-  const listingPreparedArtworkRef = useRef(listingPreparedArtwork);
-  listingPreparedArtworkRef.current = listingPreparedArtwork;
+  const surfaceArtworkRef = useRef(surfaceArtwork);
+  surfaceArtworkRef.current = surfaceArtwork;
+  const activeSurfaceIdRef = useRef(activeSurfaceId);
+  activeSurfaceIdRef.current = activeSurfaceId;
   const listingSourceKeyRef = useRef(listingSourceKey);
   listingSourceKeyRef.current = listingSourceKey;
   const artworkUploadV2 = listingArtworkUploadV2Enabled();
@@ -271,8 +348,68 @@ export function ShopFirstListingRequestPanel(props: {
     return null;
   }, [catalogGroups, listingProductId]);
 
-  const printAreaW = selectedCatalogGroup?.option.printAreaWidthPx ?? null;
-  const printAreaH = selectedCatalogGroup?.option.printAreaHeightPx ?? null;
+  const catalogArtworkSurfaces = selectedCatalogGroup?.option.artworkSurfaces ?? [];
+  const isPillowItem = useMemo(
+    () =>
+      catalogItemIsPillow({
+        catalogItemName: selectedCatalogGroup?.itemName,
+        categoryTagSlug: selectedCatalogGroup?.categoryTag?.slug,
+      }),
+    [selectedCatalogGroup?.itemName, selectedCatalogGroup?.categoryTag?.slug],
+  );
+  const adminPillowDualSided = isPillowItem && catalogArtworkSurfaces.length > 1;
+  const pillowDoubleSidedEffective = isPillowItem && (adminPillowDualSided || pillowDoubleSided);
+  const { surfaces: artworkSurfaces, duplicateFrontToBackOnSubmit } = useMemo(() => {
+    if (!isPillowItem) {
+      return { surfaces: catalogArtworkSurfaces, duplicateFrontToBackOnSubmit: false };
+    }
+    return resolvePillowListingArtworkSurfaces({
+      catalogSurfaces: catalogArtworkSurfaces,
+      pillowDoubleSided: pillowDoubleSidedEffective,
+      pillowSidesMode,
+    });
+  }, [
+    isPillowItem,
+    catalogArtworkSurfaces,
+    pillowDoubleSidedEffective,
+    pillowSidesMode,
+  ]);
+  const activeSurface = useMemo(() => {
+    return artworkSurfaces.find((s) => s.id === activeSurfaceId) ?? artworkSurfaces[0] ?? null;
+  }, [artworkSurfaces, activeSurfaceId]);
+  const activeSurfaceArtwork = activeSurface ? surfaceArtwork[activeSurface.id] ?? null : null;
+  const isMultiSurfaceArtwork = artworkSurfaces.length > 1;
+
+  const printAreaW = activeSurface?.printAreaWidthPx ?? selectedCatalogGroup?.option.printAreaWidthPx ?? null;
+  const printAreaH = activeSurface?.printAreaHeightPx ?? selectedCatalogGroup?.option.printAreaHeightPx ?? null;
+  const canvasPresentation = activeSurface?.canvasPresentation ?? CATALOG_CANVAS_PRESENTATION_FLAT;
+  const isCanvasPrintItem = useMemo(
+    () =>
+      catalogItemIsCanvasPrint({
+        catalogItemName: selectedCatalogGroup?.itemName,
+        categoryTagSlug: selectedCatalogGroup?.categoryTag?.slug,
+      }),
+    [selectedCatalogGroup?.itemName, selectedCatalogGroup?.categoryTag?.slug],
+  );
+  const showBlackMugBackgroundTip = useMemo(
+    () => catalogItemIsBlackMug({ catalogItemName: selectedCatalogGroup?.itemName }),
+    [selectedCatalogGroup?.itemName],
+  );
+  const showWhiteMugBackgroundTip = useMemo(
+    () => catalogItemIsWhiteMug({ catalogItemName: selectedCatalogGroup?.itemName }),
+    [selectedCatalogGroup?.itemName],
+  );
+  const showRoundedCornerCropGuide = useMemo(
+    () =>
+      catalogItemUsesRoundedCornerCropGuide({
+        catalogItemName: selectedCatalogGroup?.itemName,
+        categoryTagSlug: selectedCatalogGroup?.categoryTag?.slug,
+        printAreaWidthPx: printAreaW,
+        printAreaHeightPx: printAreaH,
+      }),
+    [selectedCatalogGroup?.itemName, selectedCatalogGroup?.categoryTag?.slug, printAreaW, printAreaH],
+  );
+  const surfaceLabelForDialog = isMultiSurfaceArtwork ? activeSurface?.label : undefined;
   const listingArtworkV2SourceMaxBytes = useMemo(
     () =>
       listingArtworkSourceMaxBytesForPrintArea(
@@ -293,6 +430,51 @@ export function ShopFirstListingRequestPanel(props: {
     });
   }
 
+  function handlePillowDoubleSidedChange(next: boolean) {
+    setPillowDoubleSided(next);
+    if (!next) {
+      setSurfaceArtworkForId("back", null);
+      if (activeSurfaceIdRef.current === "back") {
+        selectArtworkSurface("front");
+      }
+    }
+  }
+
+  function handlePillowSidesModeChange(next: PillowSidesArtworkMode) {
+    setPillowSidesMode(next);
+    if (next === "same") {
+      setSurfaceArtworkForId("back", null);
+      if (activeSurfaceIdRef.current === "back") {
+        selectArtworkSurface("front");
+      }
+    }
+  }
+
+  function setSurfaceArtworkForId(surfaceId: string, entry: SurfaceArtworkEntry | null) {
+    setSurfaceArtwork((prev) => {
+      if (!entry) {
+        if (!prev[surfaceId]) return prev;
+        const next = { ...prev };
+        delete next[surfaceId];
+        return next;
+      }
+      return { ...prev, [surfaceId]: entry };
+    });
+  }
+
+  function selectArtworkSurface(surfaceId: string) {
+    setActiveSurfaceId(surfaceId);
+    const entry = surfaceArtworkRef.current[surfaceId];
+    if (entry) {
+      replaceListingArtworkPreviewUrl(listingArtworkBakedPreviewApiUrl(entry.requestImageKey));
+      setListingHasFile(true);
+    } else {
+      replaceListingArtworkPreviewUrl(null);
+      setListingHasFile(false);
+    }
+    if (listingFileRef.current) listingFileRef.current.value = "";
+  }
+
   useEffect(() => {
     if (!listingArtworkPreviewUrl) {
       setListingArtworkPixels(null);
@@ -300,7 +482,7 @@ export function ShopFirstListingRequestPanel(props: {
     }
     setListingArtworkMeasureError(null);
 
-    if (listingPreparedArtwork && printAreaW != null && printAreaH != null) {
+    if (activeSurfaceArtwork && printAreaW != null && printAreaH != null) {
       setListingArtworkPixels({ w: printAreaW, h: printAreaH });
       return;
     }
@@ -321,7 +503,15 @@ export function ShopFirstListingRequestPanel(props: {
       img.onload = null;
       img.onerror = null;
     };
-  }, [listingArtworkPreviewUrl, listingPreparedArtwork, printAreaW, printAreaH]);
+  }, [listingArtworkPreviewUrl, activeSurfaceArtwork, printAreaW, printAreaH]);
+
+  const surfaceArtworkReady = useMemo(() => {
+    const out: Record<string, boolean> = {};
+    for (const surface of artworkSurfaces) {
+      out[surface.id] = surfaceArtwork[surface.id] != null;
+    }
+    return out;
+  }, [artworkSurfaces, surfaceArtwork]);
 
   useEffect(() => {
     if (
@@ -350,7 +540,8 @@ export function ShopFirstListingRequestPanel(props: {
 
   async function applyListingArtworkPickedFile(file: File) {
     setListingSubmitArtworkFile(null);
-    setListingPreparedArtwork(null);
+    const surfaceId = activeSurfaceIdRef.current;
+    setSurfaceArtworkForId(surfaceId, null);
     setListingSourceKey(null);
     setListingArtworkMeasureError(null);
     const uploadCapOk = artworkUploadV2
@@ -377,7 +568,7 @@ export function ShopFirstListingRequestPanel(props: {
         if (listingFileRef.current) listingFileRef.current.value = "";
         return;
       }
-      setListingPreparedArtwork(null);
+      setSurfaceArtworkForId(surfaceId, null);
       setListingSourceKey(null);
       setComposeImageUrl(null);
       setArtworkSourcePreparing(true);
@@ -410,7 +601,7 @@ export function ShopFirstListingRequestPanel(props: {
     }
 
     if (needCrop) {
-      setListingPreparedArtwork(null);
+      setSurfaceArtworkForId(surfaceId, null);
       setArtworkSourcePreparing(true);
       try {
         const normalized = await normalizeListingArtworkSourceFileForCrop(file);
@@ -454,13 +645,24 @@ export function ShopFirstListingRequestPanel(props: {
   }
 
   useEffect(() => {
-    const staleBakedKey = listingPreparedArtworkRef.current?.requestImageKey;
+    const staleEntries = Object.values(surfaceArtworkRef.current);
     const staleSourceKey = listingSourceKeyRef.current;
-    if (staleBakedKey || staleSourceKey) {
-      void abandonUnconfirmedListingRequestSubmit(null, staleBakedKey, staleSourceKey);
+    for (const entry of staleEntries) {
+      void abandonUnconfirmedListingRequestSubmit(null, entry.requestImageKey, staleSourceKey);
+    }
+    if (staleSourceKey && staleEntries.length === 0) {
+      void abandonUnconfirmedListingRequestSubmit(null, null, staleSourceKey);
     }
     setListingSubmitArtworkFile(null);
-    setListingPreparedArtwork(null);
+    setSurfaceArtwork({});
+    setActiveSurfaceId(() => {
+      for (const g of catalogGroups) {
+        if (g.option.productId === listingProductId) {
+          return g.option.artworkSurfaces[0]?.id ?? "front";
+        }
+      }
+      return "front";
+    });
     setListingSourceKey(null);
     setListingHasFile(false);
     setListingArtworkPreviewUrl(null);
@@ -480,7 +682,15 @@ export function ShopFirstListingRequestPanel(props: {
     setListingItemNameModerationBlurError(null);
     setListingBlurbModerationBlurError(null);
     setListingKeywordsModerationBlurError(null);
-  }, [listingProductId]);
+    setPillowDoubleSided(false);
+    setPillowSidesMode("same");
+  }, [listingProductId, catalogGroups]);
+
+  useEffect(() => {
+    if (adminPillowDualSided) {
+      setPillowDoubleSided(true);
+    }
+  }, [listingProductId, adminPillowDualSided]);
 
   useEffect(() => {
     if (!listingProductId) {
@@ -540,7 +750,7 @@ export function ShopFirstListingRequestPanel(props: {
   async function prepareListingArtworkFormData(
     fd: FormData,
   ): Promise<{ ok: true } | { ok: false; error: string }> {
-    if (fd.get("listingArtworkBakedKey")) {
+    if (fd.get("listingArtworkBakedKey") || fd.get("listingArtworkBakedEntriesJson")) {
       return { ok: true };
     }
 
@@ -586,7 +796,8 @@ export function ShopFirstListingRequestPanel(props: {
         setKeywordDuplicateHint(null);
         setListingHasFile(false);
         setListingSubmitArtworkFile(null);
-        setListingPreparedArtwork(null);
+        setSurfaceArtwork({});
+        setActiveSurfaceId("front");
         setListingSourceKey(null);
         setComposeDialogOpen(false);
         setComposeImageUrl(null);
@@ -705,7 +916,7 @@ export function ShopFirstListingRequestPanel(props: {
   })();
   const printExportDimensionsError = (() => {
     if (!requiresPrintCrop || !listingArtworkPixels) return null;
-    if (listingPreparedArtwork != null) return null;
+    if (activeSurfaceArtwork != null) return null;
     if (listingSubmitArtworkFile == null) return null;
     if (printAreaW == null || printAreaH == null) return null;
     if (!exportedImageMeetsPrintDimensions(listingArtworkPixels.w, listingArtworkPixels.h, printAreaW, printAreaH)) {
@@ -719,7 +930,14 @@ export function ShopFirstListingRequestPanel(props: {
     listingArtworkPreviewUrl && !listingArtworkPixels && !listingArtworkMeasureError,
   );
 
-  const hasArtworkReady = listingSubmitArtworkFile != null || listingPreparedArtwork != null;
+  const hasArtworkReady = useMemo(() => {
+    if (artworkSurfaces.length === 0) {
+      return listingSubmitArtworkFile != null;
+    }
+    return artworkSurfaces.every(
+      (surface) => !surface.required || surfaceArtwork[surface.id] != null,
+    );
+  }, [artworkSurfaces, surfaceArtwork, listingSubmitArtworkFile]);
 
   const listingCanSubmit =
     Boolean(listingProductId) &&
@@ -819,9 +1037,22 @@ export function ShopFirstListingRequestPanel(props: {
               fd.set("requestItemName", listingRequestItemName.trim());
               fd.set("storefrontItemBlurb", listingStorefrontBlurb.trim());
               fd.set("listingSearchKeywords", keywordsJoined.trim());
-              if (listingPreparedArtwork) {
-                fd.set("listingArtworkBakedKey", listingPreparedArtwork.requestImageKey);
-                fd.set("listingArtworkBakedUrl", listingPreparedArtwork.publicUrl);
+              if (isPillowItem) {
+                fd.set("pillowDoubleSided", pillowDoubleSidedEffective ? "1" : "0");
+                fd.set("pillowSidesMode", pillowSidesMode);
+              }
+              if (duplicateFrontToBackOnSubmit || isMultiSurfaceArtwork) {
+                const entries = buildListingArtworkBakedSubmitEntries({
+                  surfaces: artworkSurfaces,
+                  surfaceArtwork,
+                  duplicateFrontToBackOnSubmit,
+                });
+                if (entries.length > 0) {
+                  fd.set("listingArtworkBakedEntriesJson", JSON.stringify(entries));
+                }
+              } else if (activeSurfaceArtwork) {
+                fd.set("listingArtworkBakedKey", activeSurfaceArtwork.requestImageKey);
+                fd.set("listingArtworkBakedUrl", activeSurfaceArtwork.publicUrl);
               } else {
                 const art = listingSubmitArtworkFile ?? listingFileRef.current?.files?.[0];
                 if (art) fd.set("listingArtwork", art);
@@ -842,20 +1073,22 @@ export function ShopFirstListingRequestPanel(props: {
               Select a base item your design will be printed on. Items are grouped by typical phone photo suitability.
             </p>
             <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/40">
-              <div
-                className={`flex items-center gap-x-3 border-b border-zinc-800 bg-zinc-900/60 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                aria-hidden
-              >
-                <span className="min-w-0 flex-1 pl-7">Item</span>
-                <span className="w-20 shrink-0 text-right">Sale Price</span>
-                <span className="w-14 shrink-0" />
-              </div>
-              <ul
-                className="h-[350px] divide-y divide-zinc-800/80 overflow-y-auto"
-                role="listbox"
-                aria-label="Items from admin catalog"
-                aria-disabled={shopAtInReviewListingLimit ? true : undefined}
-              >
+              <div className="h-[350px] overflow-y-auto [scrollbar-gutter:stable]">
+                <div className={CATALOG_PICKER_HEADER_ROW} aria-hidden>
+                  <span className={`${CATALOG_PICKER_ITEM_HEADER_COL}${catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}`}>
+                    Item
+                  </span>
+                  <div className={`${CATALOG_PICKER_TRAILING_COLS}${catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}`}>
+                    <span className={CATALOG_PICKER_PHOTO_COL}>Item Photo</span>
+                    <span className={CATALOG_PICKER_PRICE_COL}>Sale Price</span>
+                  </div>
+                </div>
+                <ul
+                  className="divide-y divide-zinc-800/80"
+                  role="listbox"
+                  aria-label="Items from admin catalog"
+                  aria-disabled={shopAtInReviewListingLimit ? true : undefined}
+                >
                 {(
                   [
                     {
@@ -872,11 +1105,10 @@ export function ShopFirstListingRequestPanel(props: {
                 ).map((section) =>
                   section.groups.length === 0 ? null : (
                     <li key={section.key} className="list-none">
-                      <div
-                        className={`sticky top-0 z-[1] border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                        aria-hidden
-                      >
-                        {section.title}
+                      <div className={CATALOG_PICKER_SECTION_ROW} aria-hidden>
+                        <span className={catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}>
+                          {section.title}
+                        </span>
                       </div>
                       <ul className="divide-y divide-zinc-800/80" role="group" aria-label={section.title}>
                         {section.groups.map((g) => {
@@ -884,9 +1116,9 @@ export function ShopFirstListingRequestPanel(props: {
                           const catalogPickDisabled = listingRequestFieldsDisabled;
                           return (
                             <li key={g.itemId}>
-                              <div className="flex items-center gap-x-3 px-3 py-2.5">
+                              <div className={`${CATALOG_PICKER_ROW} relative z-0 px-3 py-2.5`}>
                                 <label
-                                  className={`flex min-w-0 flex-1 items-center gap-2.5 text-sm text-zinc-200 ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                                  className={`${CATALOG_PICKER_ITEM_COL} flex items-center gap-2.5 text-sm text-zinc-200 ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
                                 >
                                   <input
                                     type="radio"
@@ -899,16 +1131,18 @@ export function ShopFirstListingRequestPanel(props: {
                                   />
                                   <span className="min-w-0 truncate">{g.itemName}</span>
                                 </label>
-                                <span
-                                  className={`w-20 shrink-0 text-right text-xs tabular-nums text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                                >
-                                  {formatUsdFromCents(g.option.minPriceCents)}
-                                </span>
-                                {g.option.exampleHref ? (
-                                  <CatalogExampleLink href={g.option.exampleHref} />
-                                ) : (
-                                  <span className="w-14 shrink-0 text-center text-[11px] text-zinc-700">—</span>
-                                )}
+                                <div className={CATALOG_PICKER_TRAILING_COLS}>
+                                  {g.option.exampleHref ? (
+                                    <CatalogItemPhotoLink href={g.option.exampleHref} />
+                                  ) : (
+                                    <span className={`${CATALOG_PICKER_PHOTO_COL} text-zinc-700`}>—</span>
+                                  )}
+                                  <span
+                                    className={`${CATALOG_PICKER_PRICE_COL} text-xs text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                                  >
+                                    {formatUsdFromCents(g.option.minPriceCents)}
+                                  </span>
+                                </div>
                               </div>
                             </li>
                           );
@@ -918,6 +1152,7 @@ export function ShopFirstListingRequestPanel(props: {
                   ),
                 )}
               </ul>
+              </div>
             </div>
             {selectedCatalogGroup ? (
               <div
@@ -1016,8 +1251,31 @@ export function ShopFirstListingRequestPanel(props: {
               </p>
             </div>
           ) : null}
+          {isPillowItem ? (
+            <ListingPillowDoubleSidedFields
+              doubleSided={pillowDoubleSidedEffective}
+              sidesMode={pillowSidesMode}
+              adminDualSidedLocked={adminPillowDualSided}
+              disabled={listingRequestFieldsDisabled}
+              onDoubleSidedChange={handlePillowDoubleSidedChange}
+              onSidesModeChange={handlePillowSidesModeChange}
+            />
+          ) : null}
+          {isMultiSurfaceArtwork ? (
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500">Print surfaces — upload artwork for each required side.</p>
+              <ListingArtworkSurfaceTabs
+                surfaces={artworkSurfaces}
+                activeSurfaceId={activeSurfaceId}
+                surfaceArtworkReady={surfaceArtworkReady}
+                onSelect={selectArtworkSurface}
+              />
+            </div>
+          ) : null}
           <label className="block text-xs text-zinc-500">
-            Artwork file (PNG or JPEG — uploads capped at{" "}
+            {isMultiSurfaceArtwork && activeSurface
+              ? `Artwork file — ${activeSurface.label} (PNG or JPEG — uploads capped at `
+              : "Artwork file (PNG or JPEG — uploads capped at "}
             {artworkUploadV2 ? listingArtworkV2SourceMaxMb : listingArtworkUploadMaxMb} MB)
             <input
               ref={listingFileRef}
@@ -1068,12 +1326,6 @@ export function ShopFirstListingRequestPanel(props: {
                 {listingArtworkResolutionError}
               </p>
             ) : null}
-            {requiresPrintCrop && !listingSubmitArtworkFile && !listingPreparedArtwork ? (
-              <p className="mt-2 text-[11px] text-zinc-500">
-                After you choose an image, a {artworkUploadV2 ? "placement" : "crop"} window opens. You must complete{" "}
-                {artworkUploadV2 ? "placement and print preparation" : "cropping"} before you can submit.
-              </p>
-            ) : null}
             {message ? (
               <p
                 className={
@@ -1099,7 +1351,7 @@ export function ShopFirstListingRequestPanel(props: {
                     alt=""
                     className="max-h-40 max-w-full object-contain"
                     onError={() => {
-                      const bakedKey = listingPreparedArtwork?.requestImageKey;
+                      const bakedKey = activeSurfaceArtwork?.requestImageKey;
                       if (!bakedKey || listingArtworkPreviewUrl.startsWith("/api/dashboard/listing-artwork/baked")) {
                         return;
                       }
@@ -1350,6 +1602,14 @@ export function ShopFirstListingRequestPanel(props: {
           printHeightPx={printAreaH}
           minArtworkDpi={minArtworkDpi}
           artworkLetterboxFill={artworkLetterboxFill ?? ListingArtworkLetterboxFill.transparent}
+          isCanvasPrintItem={isCanvasPrintItem}
+          showBlackMugBackgroundTip={showBlackMugBackgroundTip}
+          showWhiteMugBackgroundTip={showWhiteMugBackgroundTip}
+          showRoundedCornerCropGuide={showRoundedCornerCropGuide}
+          catalogItemName={selectedCatalogGroup?.itemName}
+          categoryTagSlug={selectedCatalogGroup?.categoryTag?.slug}
+          canvasPresentation={canvasPresentation}
+          surfaceLabel={surfaceLabelForDialog}
           onClose={() => {
             setComposeDialogOpen(false);
             setComposeImageUrl(null);
@@ -1367,7 +1627,8 @@ export function ShopFirstListingRequestPanel(props: {
               }
               setArtworkBaking(true);
               const sourceKey = listingSourceKey;
-              const previousBakedKey = listingPreparedArtwork?.requestImageKey ?? null;
+              const surfaceId = activeSurfaceIdRef.current;
+              const previousBakedKey = surfaceArtworkRef.current[surfaceId]?.requestImageKey ?? null;
               try {
                 const baked = await bakeListingArtworkV2Client({
                   sourceKey,
@@ -1377,7 +1638,7 @@ export function ShopFirstListingRequestPanel(props: {
                 if (!baked.ok) {
                   setListingArtworkMeasureError(baked.error);
                   setListingHasFile(false);
-                  setListingPreparedArtwork(null);
+                  setSurfaceArtworkForId(surfaceId, null);
                   return;
                 }
 
@@ -1388,7 +1649,7 @@ export function ShopFirstListingRequestPanel(props: {
                 setListingSourceKey(null);
                 setComposeImageUrl(null);
                 setListingSubmitArtworkFile(null);
-                setListingPreparedArtwork({
+                setSurfaceArtworkForId(surfaceId, {
                   requestImageKey: baked.requestImageKey,
                   publicUrl: baked.publicUrl,
                 });
@@ -1414,6 +1675,14 @@ export function ShopFirstListingRequestPanel(props: {
           printHeightPx={printAreaH}
           minArtworkDpi={minArtworkDpi}
           artworkLetterboxFill={artworkLetterboxFill ?? ListingArtworkLetterboxFill.transparent}
+          isCanvasPrintItem={isCanvasPrintItem}
+          showBlackMugBackgroundTip={showBlackMugBackgroundTip}
+          showWhiteMugBackgroundTip={showWhiteMugBackgroundTip}
+          showRoundedCornerCropGuide={showRoundedCornerCropGuide}
+          catalogItemName={selectedCatalogGroup?.itemName}
+          categoryTagSlug={selectedCatalogGroup?.categoryTag?.slug}
+          canvasPresentation={canvasPresentation}
+          surfaceLabel={surfaceLabelForDialog}
           onClose={() => {
             setCropDialogOpen(false);
             setCropSourceFile(null);
@@ -1432,7 +1701,7 @@ export function ShopFirstListingRequestPanel(props: {
                   if (prev) URL.revokeObjectURL(prev);
                   return null;
                 });
-                setListingPreparedArtwork(null);
+                setSurfaceArtworkForId(activeSurfaceIdRef.current, null);
                 setListingSubmitArtworkFile(result.file);
                 setListingHasFile(true);
                 replaceListingArtworkPreviewUrl(URL.createObjectURL(result.file));
@@ -1443,7 +1712,8 @@ export function ShopFirstListingRequestPanel(props: {
                 }
                 setArtworkSourcePreparing(true);
                 const sourceUrl = cropSourceObjectUrl;
-                const previousBakedKey = listingPreparedArtwork?.requestImageKey ?? null;
+                const surfaceId = activeSurfaceIdRef.current;
+                const previousBakedKey = surfaceArtworkRef.current[surfaceId]?.requestImageKey ?? null;
                 try {
                   const compressed = await compressListingArtworkSourceForStagingUpload(result.sourceFile, {
                     crop: result.crop.pixelCrop,
@@ -1454,14 +1724,14 @@ export function ShopFirstListingRequestPanel(props: {
                   if (!compressed.ok) {
                     setListingArtworkMeasureError(compressed.error);
                     setListingHasFile(false);
-                    setListingPreparedArtwork(null);
+                    setSurfaceArtworkForId(surfaceId, null);
                     return;
                   }
                   const stagingFile = compressed.file;
                   if (!listingArtworkFileWithinUploadCap(stagingFile.size)) {
                     setListingArtworkMeasureError(listingArtworkUploadCapError());
                     setListingHasFile(false);
-                    setListingPreparedArtwork(null);
+                    setSurfaceArtworkForId(surfaceId, null);
                     return;
                   }
 
@@ -1471,7 +1741,7 @@ export function ShopFirstListingRequestPanel(props: {
                   if (!upload.ok) {
                     setListingArtworkMeasureError(upload.error);
                     setListingHasFile(false);
-                    setListingPreparedArtwork(null);
+                    setSurfaceArtworkForId(surfaceId, null);
                     return;
                   }
 
@@ -1485,7 +1755,7 @@ export function ShopFirstListingRequestPanel(props: {
                   if (!baked.ok) {
                     setListingArtworkMeasureError(baked.error);
                     setListingHasFile(false);
-                    setListingPreparedArtwork(null);
+                    setSurfaceArtworkForId(surfaceId, null);
                     void abandonUnconfirmedListingRequestSubmit(upload.stagingKey);
                     return;
                   }
@@ -1498,7 +1768,7 @@ export function ShopFirstListingRequestPanel(props: {
                   setCropSourceObjectUrl(null);
                   setCropSourceFile(null);
                   setListingSubmitArtworkFile(null);
-                  setListingPreparedArtwork({
+                  setSurfaceArtworkForId(surfaceId, {
                     requestImageKey: baked.requestImageKey,
                     publicUrl: baked.publicUrl,
                   });

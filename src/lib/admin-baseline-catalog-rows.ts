@@ -16,6 +16,8 @@ const adminCatalogSelect = {
   itemArtworkLetterboxFill: true,
   itemLargeListingArtwork: true,
   itemArtworkSourceTierOverride: true,
+  itemCanvasPresentation: true,
+  itemArtworkTemplate: true,
   catalogTags: {
     select: {
       tag: { select: { id: true, name: true, slug: true, sortOrder: true } },
@@ -36,9 +38,12 @@ export type AdminCatalogItemArtworkPolicyRow = {
   itemImageRequirementLabel: string | null;
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
+  itemMinArtworkDpi: number | null;
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   itemLargeListingArtwork: boolean;
   itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
+  itemCanvasPresentation: unknown;
+  itemArtworkTemplate: unknown;
 };
 
 /** Print-area metadata for listing submit validation. */
@@ -52,9 +57,12 @@ export async function loadAdminCatalogItemArtworkPolicy(
       itemImageRequirementLabel: true,
       itemPrintAreaWidthPx: true,
       itemPrintAreaHeightPx: true,
+      itemMinArtworkDpi: true,
       itemArtworkLetterboxFill: true,
       itemLargeListingArtwork: true,
       itemArtworkSourceTierOverride: true,
+      itemCanvasPresentation: true,
+      itemArtworkTemplate: true,
     },
   });
 }
@@ -73,6 +81,8 @@ const adminListItemSelect = {
   itemMinArtworkDpi: true,
   itemArtworkLetterboxFill: true,
   itemArtworkSourceTierOverride: true,
+  itemCanvasPresentation: true,
+  itemArtworkTemplate: true,
   catalogTags: {
     select: {
       tag: { select: { id: true, name: true, slug: true } },

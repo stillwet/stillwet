@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" fill="none">
+  <path
+    d="M80 80 L320 80 Q360 80 360 120 L360 360 Q360 400 320 400 L80 400 Q40 400 40 360 L40 120 Q40 80 80 80 Z"
+    stroke="#71717a"
+    stroke-width="2"
+    stroke-dasharray="6 4"
+    fill="none"
+  />
+  <path
+    d="M120 100 L280 100 Q300 100 300 120 L300 340 Q300 360 280 360 L120 360 Q100 360 100 340 L100 120 Q100 100 120 100 Z"
+    stroke="#52525b"
+    stroke-width="1"
+    fill="none"
+    opacity="0.6"
+  />
+</svg>

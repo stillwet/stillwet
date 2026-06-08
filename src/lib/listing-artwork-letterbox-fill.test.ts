@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import {
+  catalogItemIsBlackMug,
+  catalogItemIsWhiteMug,
+  catalogItemIsCanvasPrint,
   catalogItemNameSuggestsWhiteLetterbox,
   printAreaSuggestsWhiteLetterbox,
   resolveListingArtworkLetterboxFill,
@@ -55,6 +58,55 @@ describe("catalogItemNameSuggestsWhiteLetterbox", () => {
     assert.equal(catalogItemNameSuggestsWhiteLetterbox("Fleece blanket"), true);
     assert.equal(catalogItemNameSuggestsWhiteLetterbox("Wall tapestry"), true);
     assert.equal(catalogItemNameSuggestsWhiteLetterbox("Ceramic mug"), false);
+  });
+});
+
+describe("catalogItemIsCanvasPrint", () => {
+  it("matches canvas print category and names, not mugs", () => {
+    assert.equal(
+      catalogItemIsCanvasPrint({
+        catalogItemName: 'Canvas Print (12")',
+        categoryTagSlug: "canvas-print",
+      }),
+      true,
+    );
+    assert.equal(
+      catalogItemIsCanvasPrint({
+        catalogItemName: 'Gallery canvas wrap 24x16',
+        categoryTagSlug: "wall-art",
+      }),
+      true,
+    );
+    assert.equal(
+      catalogItemIsCanvasPrint({
+        catalogItemName: "Ceramic Mug (white, 11 oz)",
+        categoryTagSlug: "mugs",
+      }),
+      false,
+    );
+    assert.equal(
+      catalogItemIsCanvasPrint({
+        catalogItemName: "Sherpa blanket",
+        categoryTagSlug: "blankets",
+      }),
+      false,
+    );
+  });
+});
+
+describe("catalogItemIsBlackMug", () => {
+  it("matches black mug catalog items only", () => {
+    assert.equal(catalogItemIsBlackMug({ catalogItemName: "Ceramic Mug (Black, 11 oz)" }), true);
+    assert.equal(catalogItemIsBlackMug({ catalogItemName: "Ceramic Mug (white, 11 oz)" }), false);
+    assert.equal(catalogItemIsBlackMug({ catalogItemName: "Gloss Poster (16.5 x 11.7)" }), false);
+  });
+});
+
+describe("catalogItemIsWhiteMug", () => {
+  it("matches white mug catalog items only", () => {
+    assert.equal(catalogItemIsWhiteMug({ catalogItemName: "Ceramic Mug (white, 11 oz)" }), true);
+    assert.equal(catalogItemIsWhiteMug({ catalogItemName: "Ceramic Mug (Black, 11 oz)" }), false);
+    assert.equal(catalogItemIsWhiteMug({ catalogItemName: "Gloss Poster (16.5 x 11.7)" }), false);
   });
 });
 

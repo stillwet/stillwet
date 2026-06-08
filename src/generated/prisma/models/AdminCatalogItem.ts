@@ -108,6 +108,8 @@ export type AdminCatalogItemCountAggregateOutputType = {
   itemLargeListingArtwork: number
   itemArtworkLetterboxFill: number
   itemArtworkSourceTierOverride: number
+  itemCanvasPresentation: number
+  itemArtworkTemplate: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -194,6 +196,8 @@ export type AdminCatalogItemCountAggregateInputType = {
   itemLargeListingArtwork?: true
   itemArtworkLetterboxFill?: true
   itemArtworkSourceTierOverride?: true
+  itemCanvasPresentation?: true
+  itemArtworkTemplate?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -303,6 +307,8 @@ export type AdminCatalogItemGroupByOutputType = {
   itemLargeListingArtwork: boolean
   itemArtworkLetterboxFill: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation: runtime.JsonValue | null
+  itemArtworkTemplate: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: AdminCatalogItemCountAggregateOutputType | null
@@ -348,6 +354,8 @@ export type AdminCatalogItemWhereInput = {
   itemLargeListingArtwork?: Prisma.BoolFilter<"AdminCatalogItem"> | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFilter<"AdminCatalogItem"> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.JsonNullableFilter<"AdminCatalogItem">
+  itemArtworkTemplate?: Prisma.JsonNullableFilter<"AdminCatalogItem">
   createdAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   itemPlatformProduct?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
@@ -373,6 +381,8 @@ export type AdminCatalogItemOrderByWithRelationInput = {
   itemLargeListingArtwork?: Prisma.SortOrder
   itemArtworkLetterboxFill?: Prisma.SortOrder
   itemArtworkSourceTierOverride?: Prisma.SortOrder
+  itemCanvasPresentation?: Prisma.SortOrderInput | Prisma.SortOrder
+  itemArtworkTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   itemPlatformProduct?: Prisma.ProductOrderByWithRelationInput
@@ -401,6 +411,8 @@ export type AdminCatalogItemWhereUniqueInput = Prisma.AtLeast<{
   itemLargeListingArtwork?: Prisma.BoolFilter<"AdminCatalogItem"> | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFilter<"AdminCatalogItem"> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.JsonNullableFilter<"AdminCatalogItem">
+  itemArtworkTemplate?: Prisma.JsonNullableFilter<"AdminCatalogItem">
   createdAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   itemPlatformProduct?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
@@ -426,6 +438,8 @@ export type AdminCatalogItemOrderByWithAggregationInput = {
   itemLargeListingArtwork?: Prisma.SortOrder
   itemArtworkLetterboxFill?: Prisma.SortOrder
   itemArtworkSourceTierOverride?: Prisma.SortOrder
+  itemCanvasPresentation?: Prisma.SortOrderInput | Prisma.SortOrder
+  itemArtworkTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AdminCatalogItemCountOrderByAggregateInput
@@ -456,6 +470,8 @@ export type AdminCatalogItemScalarWhereWithAggregatesInput = {
   itemLargeListingArtwork?: Prisma.BoolWithAggregatesFilter<"AdminCatalogItem"> | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillWithAggregatesFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideWithAggregatesFilter<"AdminCatalogItem"> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.JsonNullableWithAggregatesFilter<"AdminCatalogItem">
+  itemArtworkTemplate?: Prisma.JsonNullableWithAggregatesFilter<"AdminCatalogItem">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AdminCatalogItem"> | Date | string
 }
@@ -477,6 +493,8 @@ export type AdminCatalogItemCreateInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
@@ -502,6 +520,8 @@ export type AdminCatalogItemUncheckedCreateInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
@@ -525,6 +545,8 @@ export type AdminCatalogItemUpdateInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
@@ -550,6 +572,8 @@ export type AdminCatalogItemUncheckedUpdateInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
@@ -574,6 +598,8 @@ export type AdminCatalogItemCreateManyInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -595,6 +621,8 @@ export type AdminCatalogItemUpdateManyMutationInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -617,6 +645,8 @@ export type AdminCatalogItemUncheckedUpdateManyInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -654,6 +684,8 @@ export type AdminCatalogItemCountOrderByAggregateInput = {
   itemLargeListingArtwork?: Prisma.SortOrder
   itemArtworkLetterboxFill?: Prisma.SortOrder
   itemArtworkSourceTierOverride?: Prisma.SortOrder
+  itemCanvasPresentation?: Prisma.SortOrder
+  itemArtworkTemplate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -815,6 +847,8 @@ export type AdminCatalogItemCreateWithoutItemPlatformProductInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagCreateNestedManyWithoutAdminCatalogItemInput
@@ -838,6 +872,8 @@ export type AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
@@ -891,6 +927,8 @@ export type AdminCatalogItemScalarWhereInput = {
   itemLargeListingArtwork?: Prisma.BoolFilter<"AdminCatalogItem"> | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFilter<"AdminCatalogItem"> | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFilter<"AdminCatalogItem"> | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.JsonNullableFilter<"AdminCatalogItem">
+  itemArtworkTemplate?: Prisma.JsonNullableFilter<"AdminCatalogItem">
   createdAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminCatalogItem"> | Date | string
 }
@@ -912,6 +950,8 @@ export type AdminCatalogItemCreateWithoutReturnClaimsInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
@@ -936,6 +976,8 @@ export type AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedCreateNestedManyWithoutAdminCatalogItemInput
@@ -974,6 +1016,8 @@ export type AdminCatalogItemUpdateWithoutReturnClaimsInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
@@ -998,6 +1042,8 @@ export type AdminCatalogItemUncheckedUpdateWithoutReturnClaimsInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
@@ -1020,6 +1066,8 @@ export type AdminCatalogItemCreateWithoutCatalogTagsInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   itemPlatformProduct?: Prisma.ProductCreateNestedOneWithoutAdminCatalogItemPlatformLinksInput
@@ -1044,6 +1092,8 @@ export type AdminCatalogItemUncheckedCreateWithoutCatalogTagsInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   returnClaims?: Prisma.OrderReturnClaimUncheckedCreateNestedManyWithoutAdminCatalogItemInput
@@ -1082,6 +1132,8 @@ export type AdminCatalogItemUpdateWithoutCatalogTagsInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemPlatformProduct?: Prisma.ProductUpdateOneWithoutAdminCatalogItemPlatformLinksNestedInput
@@ -1106,6 +1158,8 @@ export type AdminCatalogItemUncheckedUpdateWithoutCatalogTagsInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   returnClaims?: Prisma.OrderReturnClaimUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
@@ -1128,6 +1182,8 @@ export type AdminCatalogItemCreateManyItemPlatformProductInput = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1149,6 +1205,8 @@ export type AdminCatalogItemUpdateWithoutItemPlatformProductInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUpdateManyWithoutAdminCatalogItemNestedInput
@@ -1172,6 +1230,8 @@ export type AdminCatalogItemUncheckedUpdateWithoutItemPlatformProductInput = {
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catalogTags?: Prisma.AdminCatalogItemTagUncheckedUpdateManyWithoutAdminCatalogItemNestedInput
@@ -1195,6 +1255,8 @@ export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductInput =
   itemLargeListingArtwork?: Prisma.BoolFieldUpdateOperationsInput | boolean
   itemArtworkLetterboxFill?: Prisma.EnumListingArtworkLetterboxFillFieldUpdateOperationsInput | $Enums.ListingArtworkLetterboxFill
   itemArtworkSourceTierOverride?: Prisma.EnumAdminCatalogItemArtworkSourceTierOverrideFieldUpdateOperationsInput | $Enums.AdminCatalogItemArtworkSourceTierOverride
+  itemCanvasPresentation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  itemArtworkTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1257,6 +1319,8 @@ export type AdminCatalogItemSelect<ExtArgs extends runtime.Types.Extensions.Inte
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: boolean
   itemArtworkSourceTierOverride?: boolean
+  itemCanvasPresentation?: boolean
+  itemArtworkTemplate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
@@ -1283,6 +1347,8 @@ export type AdminCatalogItemSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: boolean
   itemArtworkSourceTierOverride?: boolean
+  itemCanvasPresentation?: boolean
+  itemArtworkTemplate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
@@ -1306,6 +1372,8 @@ export type AdminCatalogItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: boolean
   itemArtworkSourceTierOverride?: boolean
+  itemCanvasPresentation?: boolean
+  itemArtworkTemplate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
@@ -1329,11 +1397,13 @@ export type AdminCatalogItemSelectScalar = {
   itemLargeListingArtwork?: boolean
   itemArtworkLetterboxFill?: boolean
   itemArtworkSourceTierOverride?: boolean
+  itemCanvasPresentation?: boolean
+  itemArtworkTemplate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sortOrder" | "name" | "storefrontDescription" | "variants" | "itemPlatformProductId" | "itemExampleListingUrl" | "itemMinPriceCents" | "itemGoodsServicesCostCents" | "itemImageRequirementLabel" | "itemMinArtworkLongEdgePx" | "itemPrintAreaWidthPx" | "itemPrintAreaHeightPx" | "itemMinArtworkDpi" | "itemLargeListingArtwork" | "itemArtworkLetterboxFill" | "itemArtworkSourceTierOverride" | "createdAt" | "updatedAt", ExtArgs["result"]["adminCatalogItem"]>
+export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sortOrder" | "name" | "storefrontDescription" | "variants" | "itemPlatformProductId" | "itemExampleListingUrl" | "itemMinPriceCents" | "itemGoodsServicesCostCents" | "itemImageRequirementLabel" | "itemMinArtworkLongEdgePx" | "itemPrintAreaWidthPx" | "itemPrintAreaHeightPx" | "itemMinArtworkDpi" | "itemLargeListingArtwork" | "itemArtworkLetterboxFill" | "itemArtworkSourceTierOverride" | "itemCanvasPresentation" | "itemArtworkTemplate" | "createdAt" | "updatedAt", ExtArgs["result"]["adminCatalogItem"]>
 export type AdminCatalogItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
   catalogTags?: boolean | Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs>
@@ -1425,6 +1495,18 @@ export type $AdminCatalogItemPayload<ExtArgs extends runtime.Types.Extensions.In
      *    * (see listing-artwork-source-tier).
      */
     itemArtworkSourceTierOverride: $Enums.AdminCatalogItemArtworkSourceTierOverride
+    /**
+     * *
+     *    * Optional UI-only hints for the listing artwork crop/compose canvas (wrap guides, mug previews,
+     *    * shape outlines). Does not affect export dimensions or bake math.
+     */
+    itemCanvasPresentation: runtime.JsonValue | null
+    /**
+     * *
+     *    * Optional multi-surface artwork template (front required, back optional). When set, listing
+     *    * requests may require one baked file per required surface.
+     */
+    itemArtworkTemplate: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["adminCatalogItem"]>
@@ -1870,6 +1952,8 @@ export interface AdminCatalogItemFieldRefs {
   readonly itemLargeListingArtwork: Prisma.FieldRef<"AdminCatalogItem", 'Boolean'>
   readonly itemArtworkLetterboxFill: Prisma.FieldRef<"AdminCatalogItem", 'ListingArtworkLetterboxFill'>
   readonly itemArtworkSourceTierOverride: Prisma.FieldRef<"AdminCatalogItem", 'AdminCatalogItemArtworkSourceTierOverride'>
+  readonly itemCanvasPresentation: Prisma.FieldRef<"AdminCatalogItem", 'Json'>
+  readonly itemArtworkTemplate: Prisma.FieldRef<"AdminCatalogItem", 'Json'>
   readonly createdAt: Prisma.FieldRef<"AdminCatalogItem", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AdminCatalogItem", 'DateTime'>
 }

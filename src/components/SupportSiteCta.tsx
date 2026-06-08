@@ -92,8 +92,8 @@ export function SupportSiteCta({
                   inputMode="decimal"
                   min={1}
                   step={0.01}
-                  defaultValue={5}
                   required
+                  placeholder="Enter amount"
                   autoComplete="transaction-amount"
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none ring-blue-500/0 transition placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-blue-500/30"
                 />

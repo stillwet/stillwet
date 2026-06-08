@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, startTransition, useState } from "react";
 import {
   adminUpdateCatalogItemFormAction,
   type AdminCatalogItemSaveResult,
@@ -11,6 +11,16 @@ import {
   parseAdminCatalogItemArtworkForm,
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
+import {
+  catalogArtworkTemplatePresetFromJson,
+  catalogCanvasPresentationPresetIdFromPresentation,
+  parseCatalogCanvasPresentation,
+} from "@/lib/admin-catalog-canvas-presentation";
+import {
+  AdminCatalogCanvasPresentationFields,
+  type CatalogArtworkTemplatePresetId,
+} from "@/components/admin/AdminCatalogCanvasPresentationFields";
+import type { CatalogCanvasPresentationPresetId } from "@/lib/admin-catalog-canvas-presentation";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
 import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
@@ -35,6 +45,8 @@ export type AdminListItemSerializable = {
   itemMinArtworkDpi: number | null;
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
+  itemCanvasPresentation: unknown;
+  itemArtworkTemplate: unknown;
   tags: AdminListItemTag[];
 };
 
@@ -79,6 +91,16 @@ export function AdminListItemEditForm({
   const [editItemArtworkSourceTierOverride, setEditItemArtworkSourceTierOverride] = useState(
     item.itemArtworkSourceTierOverride,
   );
+  const [editCanvasPresentationPreset, setEditCanvasPresentationPreset] =
+    useState<CatalogCanvasPresentationPresetId>(() =>
+      catalogCanvasPresentationPresetIdFromPresentation(
+        parseCatalogCanvasPresentation(item.itemCanvasPresentation),
+      ),
+    );
+  const [editArtworkTemplatePreset, setEditArtworkTemplatePreset] =
+    useState<CatalogArtworkTemplatePresetId>(() =>
+      catalogArtworkTemplatePresetFromJson(item.itemArtworkTemplate),
+    );
   const [clientError, setClientError] = useState<string | null>(null);
 
   const [saveState, saveAction, savePending] = useActionState<
@@ -135,7 +157,11 @@ export function AdminListItemEditForm({
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
     fd.set("itemArtworkLetterboxFill", editItemArtworkLetterboxFill);
     fd.set("itemArtworkSourceTierOverride", editItemArtworkSourceTierOverride);
-    saveAction(fd);
+    fd.set("itemCanvasPresentationPreset", editCanvasPresentationPreset);
+    fd.set("itemArtworkTemplatePreset", editArtworkTemplatePreset);
+    startTransition(() => {
+      saveAction(fd);
+    });
   }
 
   const serverError = saveState?.ok === false ? saveState.error : null;
@@ -180,6 +206,12 @@ export function AdminListItemEditForm({
           onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
           onChangeArtworkLetterboxFill={setEditItemArtworkLetterboxFill}
           onChangeArtworkSourceTierOverride={setEditItemArtworkSourceTierOverride}
+        />
+        <AdminCatalogCanvasPresentationFields
+          canvasPresentationPreset={editCanvasPresentationPreset}
+          artworkTemplatePreset={editArtworkTemplatePreset}
+          onChangeCanvasPresentationPreset={setEditCanvasPresentationPreset}
+          onChangeArtworkTemplatePreset={setEditArtworkTemplatePreset}
         />
         {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">

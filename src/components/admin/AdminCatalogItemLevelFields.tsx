@@ -32,14 +32,14 @@ export function AdminCatalogItemLevelFields({
         />
       </label>
       <label className="block min-w-0 text-[11px] text-zinc-500">
-        Example listing (optional)
+        Item image URL (optional)
         <input
-          type="text"
+          type="url"
           value={exampleListingUrl}
           onChange={(e) => onChangeExampleListingUrl(e.target.value)}
           maxLength={2048}
           className="mt-0.5 block w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 font-mono text-[11px] text-zinc-200"
-          placeholder="https://… or /path…"
+          placeholder="https://…/item-photo.webp (Printify or R2 URL)"
         />
       </label>
       <label className="block max-w-[10rem] text-[11px] text-zinc-500">

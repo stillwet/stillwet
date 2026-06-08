@@ -28,6 +28,10 @@ import {
   AdminFreezeSubmitButton,
 } from "@/components/admin/AdminListingRequestActionButtons";
 import { formatDisplayedDate, formatDisplayedDateTime } from "@/lib/format-display-datetime";
+import {
+  parseShopListingRequestImages,
+  shopListingRequestImageLabel,
+} from "@/lib/shop-listing-request-images";
 import { listingRequestArtworkAdminViewUrl } from "@/lib/listing-request-artwork-admin-url";
 
 export type ListingRequestTabRow = {
@@ -464,16 +468,22 @@ const imageOkPassedBadgeStatic =
   "inline-flex min-h-[2rem] min-w-[9.5rem] items-center justify-center gap-1 rounded-full bg-emerald-600/40 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-50 ring-2 ring-emerald-400/90 shadow-[0_0_20px_-6px_rgba(52,211,153,0.75)] select-none";
 
 /** Dedupe repeated URLs in `requestImages` JSON (avoids stacked identical links / duplicate opens). */
-function dedupeRequestImageUrls(requestImages: unknown): string[] {
-  if (!Array.isArray(requestImages)) return [];
+function dedupeRequestImageEntries(requestImages: unknown): {
+  surfaceId: string;
+  url: string;
+  label: string;
+}[] {
+  const entries = parseShopListingRequestImages(requestImages);
   const seen = new Set<string>();
-  const out: string[] = [];
-  for (const x of requestImages) {
-    if (typeof x !== "string") continue;
-    const u = x.trim();
-    if (!u || seen.has(u)) continue;
-    seen.add(u);
-    out.push(u);
+  const out: { surfaceId: string; url: string; label: string }[] = [];
+  for (const entry of entries) {
+    if (seen.has(entry.url)) continue;
+    seen.add(entry.url);
+    out.push({
+      surfaceId: entry.surfaceId,
+      url: entry.url,
+      label: shopListingRequestImageLabel(entry.surfaceId),
+    });
   }
   return out;
 }
@@ -644,7 +654,7 @@ function ListingRequestCard({
   /** When true, Step 2 Printify mapping is on the group card (not repeated per size row). */
   suppressLegacyGroupPrintifyStep2Block?: boolean;
 }) {
-  const imgs = useMemo(() => dedupeRequestImageUrls(r.requestImages), [r.requestImages]);
+  const imageEntries = useMemo(() => dedupeRequestImageEntries(r.requestImages), [r.requestImages]);
   const isAwaitingImageReview = r.requestStatus === ListingRequestStatus.submitted;
   const isImagesOkStep = r.requestStatus === ListingRequestStatus.images_ok;
   const isPrintifyReady = r.requestStatus === ListingRequestStatus.printify_item_created;
@@ -759,12 +769,16 @@ function ListingRequestCard({
           </div>
           {!isPrintifyReady && !isApproved ? <ListingRequestCopySummary r={r} /> : null}
           {!hideRequestImageUrlList ? (
-            imgs.length > 0 ? (
+            imageEntries.length > 0 ? (
               <ul className="mt-2 list-inside list-disc text-xs text-zinc-500">
-                {imgs.map((u, imageIndex) => {
+                {imageEntries.map((entry, imageIndex) => {
                   const viewHref = listingRequestArtworkAdminViewUrl(r.id, imageIndex);
+                  const linkLabel =
+                    imageEntries.length > 1 || entry.surfaceId !== "front"
+                      ? `${entry.label}: ${entry.url}`
+                      : entry.url;
                   return (
-                    <li key={u} className="break-all">
+                    <li key={`${entry.surfaceId}:${entry.url}`} className="break-all">
                       <a
                         href={viewHref}
                         target="_blank"
@@ -772,7 +786,7 @@ function ListingRequestCard({
                         className="text-blue-400/90 underline decoration-blue-500/40 underline-offset-2 hover:text-blue-300"
                         onClick={(e) => openRequestImageInNewTab(e, viewHref)}
                       >
-                        {u}
+                        {linkLabel}
                       </a>
                     </li>
                   );

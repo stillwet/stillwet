@@ -8,6 +8,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { shopListingRequestImageUrlStrings as parseShopListingRequestImageUrls } from "@/lib/shop-listing-request-images";
 
 /**
  * Read `process.env` case-insensitively for `NAME` (e.g. `r2_Bucket` matches `R2_BUCKET`).
@@ -546,12 +547,7 @@ export function listingRequestArtworkUrlToObjectKey(
 
 /** String URLs from `ShopListing.requestImages` JSON (for R2 cleanup). */
 export function shopListingRequestImageUrlStrings(requestImages: unknown): string[] {
-  if (!Array.isArray(requestImages)) return [];
-  const out: string[] = [];
-  for (const x of requestImages) {
-    if (typeof x === "string" && x.trim()) out.push(x.trim());
-  }
-  return out;
+  return parseShopListingRequestImageUrls(requestImages);
 }
 
 /**

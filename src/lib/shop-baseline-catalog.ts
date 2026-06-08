@@ -7,6 +7,12 @@ import {
   type CatalogArtworkSourceTier,
   type CatalogArtworkSourceTierOverride,
 } from "@/lib/listing-artwork-source-tier";
+import type { CatalogArtworkSurface } from "@/lib/admin-catalog-artwork-template";
+import { resolveCatalogArtworkSurfaces } from "@/lib/admin-catalog-artwork-template";
+import {
+  catalogItemIsPillow,
+  normalizePillowCatalogArtworkSurfaces,
+} from "@/lib/listing-artwork-pillow-listing";
 
 /** Picker / form value: opaque token, not a storefront Product id until submit. */
 const PICK_PREFIX = "ab|";
@@ -40,6 +46,8 @@ export type ShopSetupCatalogOption = {
   artworkLetterboxFill: ListingArtworkLetterboxFill;
   /** Phone pic safe vs camera/vector guidance for creators. */
   artworkSourceTier: CatalogArtworkSourceTier;
+  /** Resolved print surfaces (front-only or multi-surface template). */
+  artworkSurfaces: CatalogArtworkSurface[];
 };
 
 /** One admin catalog item as a single selectable row. */
@@ -76,6 +84,7 @@ export function flattenShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup[]
     minArtworkDpi: g.option.minArtworkDpi,
     artworkLetterboxFill: g.option.artworkLetterboxFill,
     artworkSourceTier: g.option.artworkSourceTier,
+    artworkSurfaces: g.option.artworkSurfaces,
   }));
 }
 
@@ -94,6 +103,8 @@ export type AdminBaselineRow = {
   itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
   itemLargeListingArtwork: boolean;
   itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
+  itemCanvasPresentation?: unknown;
+  itemArtworkTemplate?: unknown;
   catalogTags?: Array<{ tag: ShopSetupCatalogCategoryTag }>;
 };
 
@@ -248,6 +259,21 @@ export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopS
   const out: ShopSetupCatalogGroup[] = [];
   for (const item of items) {
     const categoryTag = primaryCategoryTagForItem(item.catalogTags);
+    const resolvedSurfaces = resolveCatalogArtworkSurfaces({
+      itemArtworkTemplate: item.itemArtworkTemplate,
+      itemPrintAreaWidthPx: item.itemPrintAreaWidthPx,
+      itemPrintAreaHeightPx: item.itemPrintAreaHeightPx,
+      itemMinArtworkDpi: item.itemMinArtworkDpi,
+      itemCanvasPresentation: item.itemCanvasPresentation,
+    });
+    const artworkSurfaces =
+      catalogItemIsPillow({
+        catalogItemName: item.name,
+        categoryTagSlug: categoryTag?.slug,
+      })
+        ? normalizePillowCatalogArtworkSurfaces(resolvedSurfaces.surfaces)
+        : resolvedSurfaces.surfaces;
+    const primarySurface = artworkSurfaces[0];
     out.push({
       itemId: item.id,
       itemName: item.name,
@@ -259,34 +285,24 @@ export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopS
         exampleHref: exampleHrefFromAdminUrl(item.itemExampleListingUrl),
         goodsServicesCostCents: Math.max(0, item.itemGoodsServicesCostCents),
         imageRequirementLabel: item.itemImageRequirementLabel?.trim() || null,
-        printAreaWidthPx:
-          item.itemPrintAreaWidthPx != null &&
-          item.itemPrintAreaHeightPx != null &&
-          item.itemPrintAreaWidthPx > 0 &&
-          item.itemPrintAreaHeightPx > 0
-            ? item.itemPrintAreaWidthPx
-            : null,
-        printAreaHeightPx:
-          item.itemPrintAreaWidthPx != null &&
-          item.itemPrintAreaHeightPx != null &&
-          item.itemPrintAreaWidthPx > 0 &&
-          item.itemPrintAreaHeightPx > 0
-            ? item.itemPrintAreaHeightPx
-            : null,
+        printAreaWidthPx: primarySurface?.printAreaWidthPx ?? null,
+        printAreaHeightPx: primarySurface?.printAreaHeightPx ?? null,
         minArtworkDpi:
-          item.itemMinArtworkDpi != null && item.itemMinArtworkDpi > 0 ? item.itemMinArtworkDpi : null,
+          primarySurface?.minArtworkDpi ??
+          (item.itemMinArtworkDpi != null && item.itemMinArtworkDpi > 0 ? item.itemMinArtworkDpi : null),
         artworkLetterboxFill: resolveListingArtworkLetterboxFill({
-          itemArtworkLetterboxFill: item.itemArtworkLetterboxFill,
+          itemArtworkLetterboxFill: primarySurface?.letterboxFill ?? item.itemArtworkLetterboxFill,
           itemLargeListingArtwork: item.itemLargeListingArtwork,
           catalogItemName: item.name,
-          printAreaWidthPx: item.itemPrintAreaWidthPx,
-          printAreaHeightPx: item.itemPrintAreaHeightPx,
+          printAreaWidthPx: primarySurface?.printAreaWidthPx ?? item.itemPrintAreaWidthPx,
+          printAreaHeightPx: primarySurface?.printAreaHeightPx ?? item.itemPrintAreaHeightPx,
         }),
         artworkSourceTier: resolveCatalogArtworkSourceTier({
           itemArtworkSourceTierOverride: item.itemArtworkSourceTierOverride,
-          printAreaWidthPx: item.itemPrintAreaWidthPx,
-          printAreaHeightPx: item.itemPrintAreaHeightPx,
+          printAreaWidthPx: primarySurface?.printAreaWidthPx ?? item.itemPrintAreaWidthPx,
+          printAreaHeightPx: primarySurface?.printAreaHeightPx ?? item.itemPrintAreaHeightPx,
         }),
+        artworkSurfaces,
       },
     });
   }

@@ -1148,6 +1148,16 @@ model AdminCatalogItem {
    * (see listing-artwork-source-tier).
    */
   itemArtworkSourceTierOverride AdminCatalogItemArtworkSourceTierOverride @default(auto)
+  /**
+   * Optional UI-only hints for the listing artwork crop/compose canvas (wrap guides, mug previews,
+   * shape outlines). Does not affect export dimensions or bake math.
+   */
+  itemCanvasPresentation Json?
+  /**
+   * Optional multi-surface artwork template (front required, back optional). When set, listing
+   * requests may require one baked file per required surface.
+   */
+  itemArtworkTemplate Json?
   catalogTags           AdminCatalogItemTag[]
   returnClaims          OrderReturnClaim[]
   createdAt             DateTime @default(now())

@@ -14,6 +14,7 @@ import {
   listingArtworkLetterboxPreviewStyle,
   type ListingArtworkLetterboxFill,
 } from "@/lib/listing-artwork-letterbox-fill";
+import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import {
   LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM,
   LISTING_ARTWORK_V2_COMPOSE_MIN_ZOOM,
@@ -21,7 +22,30 @@ import {
 import { buildListingArtworkV2PreviewObjectUrl } from "@/lib/listing-artwork-v2/preview-client";
 import type { ListingArtworkTransformV2 } from "@/lib/listing-artwork-v2/transform";
 import { listingArtworkCropPayloadToTransformV2 } from "@/lib/listing-artwork-v2/transform";
-import { useListingArtworkCropViewportSize, listingArtworkComposeCropSize } from "@/lib/listing-artwork-crop-viewport";
+import { useListingArtworkCropViewportSize } from "@/hooks/useListingArtworkCropViewportSize";
+import type { CatalogCanvasPresentation } from "@/lib/admin-catalog-canvas-presentation";
+import { CATALOG_CANVAS_PRESENTATION_FLAT } from "@/lib/admin-catalog-canvas-presentation";
+import {
+  listingArtworkComposeCropSize,
+  LISTING_ARTWORK_CROP_PREVIEW_BAND_CLASS,
+  LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS,
+  LISTING_ARTWORK_CROP_PRINT_WINDOW_CLASS,
+} from "@/lib/listing-artwork-crop-viewport";
+import { ListingArtworkCanvasGuideOverlay } from "@/components/dashboard/ListingArtworkCanvasGuideOverlay";
+import { ListingArtworkCanvasColorPickOverlay } from "@/components/dashboard/ListingArtworkCanvasColorPickOverlay";
+import { ListingArtworkRoundedCornerCropGuideOverlay } from "@/components/dashboard/ListingArtworkRoundedCornerCropGuideOverlay";
+import {
+  CANVAS_SOLID_SIDE_DEFAULT_HEX,
+  canvasWrapBleedPreviewStyleVars,
+} from "@/lib/listing-artwork-canvas-wrap-bleed";
+import {
+  canvasSideTreatmentShowsWrapMarginPreview,
+  ListingCanvasSideTreatmentFields,
+  type CanvasSideTreatment,
+} from "@/components/dashboard/ListingCanvasSideTreatmentFields";
+import { ListingArtworkWraparoundPreviews } from "@/components/dashboard/ListingArtworkWraparoundPreviews";
+import { useListingArtworkCropFrameRect } from "@/hooks/useListingArtworkCropFrameRect";
+import { listingArtworkCropShowsRoundedCornerGuide } from "@/lib/listing-artwork-playing-card-crop";
 
 export type ListingArtworkComposeCompleteResult = {
   transform: ListingArtworkTransformV2;
@@ -35,6 +59,14 @@ export function ListingArtworkComposeDialog({
   printHeightPx,
   minArtworkDpi,
   artworkLetterboxFill,
+  isCanvasPrintItem = false,
+  showBlackMugBackgroundTip = false,
+  showWhiteMugBackgroundTip = false,
+  showRoundedCornerCropGuide = false,
+  catalogItemName = null,
+  categoryTagSlug = null,
+  canvasPresentation = CATALOG_CANVAS_PRESENTATION_FLAT,
+  surfaceLabel,
   onClose,
   onComplete,
 }: {
@@ -44,25 +76,56 @@ export function ListingArtworkComposeDialog({
   printHeightPx: number;
   minArtworkDpi: number | null;
   artworkLetterboxFill: ListingArtworkLetterboxFill;
+  /** Stretched canvas print — shows wrap-bleed frame + helper copy under zoom. */
+  isCanvasPrintItem?: boolean;
+  /** Black mug — transparent PNG guidance under the crop preview. */
+  showBlackMugBackgroundTip?: boolean;
+  /** White mug — white is not printed; white backgrounds are OK. */
+  showWhiteMugBackgroundTip?: boolean;
+  /** Playing cards, mousepads, desk mats — darkens rounded corners to show visible print face. */
+  showRoundedCornerCropGuide?: boolean;
+  catalogItemName?: string | null;
+  categoryTagSlug?: string | null;
+  canvasPresentation?: CatalogCanvasPresentation;
+  surfaceLabel?: string;
   onClose: () => void;
   onComplete: (result: ListingArtworkComposeCompleteResult) => void;
 }) {
   const aspect = printWidthPx / printHeightPx;
+  const isWraparound = canvasPresentation.type === "wraparound";
   const letterboxPreviewStyle = useMemo(
     () => listingArtworkLetterboxPreviewStyle(artworkLetterboxFill),
     [artworkLetterboxFill],
   );
-  const { containerRef, cropSize } = useListingArtworkCropViewportSize(aspect);
+  const cropPreviewLetterboxStyle = useMemo(
+    () =>
+      isCanvasPrintItem
+        ? listingArtworkLetterboxPreviewStyle(ListingArtworkLetterboxFill.white)
+        : letterboxPreviewStyle,
+    [isCanvasPrintItem, letterboxPreviewStyle],
+  );
+  const { previewAreaRef, containerRef, cropSize } = useListingArtworkCropViewportSize(aspect);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setContainerWidth(el.getBoundingClientRect().width);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [containerRef, open]);
   const cropperContainerStyle = useMemo(
     () => ({
-      ...letterboxPreviewStyle,
+      ...cropPreviewLetterboxStyle,
       position: "absolute" as const,
       top: 0,
       left: 0,
       width: "100%",
       height: "100%",
     }),
-    [letterboxPreviewStyle],
+    [cropPreviewLetterboxStyle],
   );
 
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -74,6 +137,40 @@ export function ListingArtworkComposeDialog({
   const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null);
   const [imageLoadError, setImageLoadError] = useState<string | null>(null);
   const [mediaNatural, setMediaNatural] = useState<{ width: number; height: number } | null>(null);
+  const [sideTreatment, setSideTreatment] = useState<CanvasSideTreatment>("image");
+  const [solidSideColorHex, setSolidSideColorHex] = useState(CANVAS_SOLID_SIDE_DEFAULT_HEX);
+  const [canvasSideColorPickActive, setCanvasSideColorPickActive] = useState(false);
+  const showCanvasWrapMarginPreview =
+    isCanvasPrintItem && canvasSideTreatmentShowsWrapMarginPreview(sideTreatment);
+
+  const cropHostStyle = useMemo(() => {
+    const base = cropSize
+      ? {
+          ...cropPreviewLetterboxStyle,
+          width: cropSize.width,
+          height: cropSize.height,
+          maxWidth: "100%",
+          maxHeight: "100%",
+        }
+      : { ...cropPreviewLetterboxStyle, width: "100%", minHeight: 280 };
+    if (!showCanvasWrapMarginPreview) return base;
+    return {
+      ...base,
+      ...canvasWrapBleedPreviewStyleVars(
+        sideTreatment,
+        solidSideColorHex,
+        cropSize?.width,
+        cropSize?.height,
+      ),
+    };
+  }, [
+    cropSize,
+    cropPreviewLetterboxStyle,
+    showCanvasWrapMarginPreview,
+    sideTreatment,
+    solidSideColorHex,
+  ]);
+
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const livePreviewUrlRef = useRef<string | null>(null);
 
@@ -103,6 +200,9 @@ export function ListingArtworkComposeDialog({
       setApplyError(null);
       setLivePreviewUrl(null);
       setMediaNatural(null);
+      setSideTreatment("image");
+      setSolidSideColorHex(CANVAS_SOLID_SIDE_DEFAULT_HEX);
+      setCanvasSideColorPickActive(false);
       livePreviewUrlRef.current = null;
     }
   }, [open, imageUrl]);
@@ -115,6 +215,37 @@ export function ListingArtworkComposeDialog({
       naturalHeight: mediaNatural.height,
     });
   }, [cropSize, mediaNatural]);
+
+  const cropperCropSize = composeCropSize ?? cropSize ?? undefined;
+
+  const { cropFrame } = useListingArtworkCropFrameRect(containerRef, aspect, [
+    open,
+    crop,
+    zoom,
+    rotation,
+    cropSize,
+    composeCropSize,
+    cropperCropSize,
+    mediaNatural,
+    imageUrl,
+  ]);
+  const showRoundedCornerGuide = useMemo(
+    () =>
+      listingArtworkCropShowsRoundedCornerGuide({
+        showRoundedCornerCropGuide,
+        catalogItemName,
+        categoryTagSlug,
+        printWidthPx,
+        printHeightPx,
+      }),
+    [
+      showRoundedCornerCropGuide,
+      catalogItemName,
+      categoryTagSlug,
+      printWidthPx,
+      printHeightPx,
+    ],
+  );
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixelsInner: Area) => {
     setCroppedAreaPixels(croppedAreaPixelsInner);
@@ -259,29 +390,37 @@ export function ListingArtworkComposeDialog({
       aria-modal="true"
       aria-labelledby="listing-artwork-compose-title"
     >
-      <div className="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-xl">
-        <div className="border-b border-zinc-800 px-4 py-3">
+      <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-xl">
+        <div className="shrink-0 border-b border-zinc-800 px-4 py-3">
           <h3 id="listing-artwork-compose-title" className="text-sm font-semibold text-zinc-100">
-            Place artwork on print canvas
+            {surfaceLabel ? `Place artwork — ${surfaceLabel}` : "Place artwork on print canvas"}
           </h3>
           <p className="mt-1 text-[11px] text-zinc-500">
             Print size {printWidthPx}×{printHeightPx}px — drag to move, zoom to scale.
           </p>
         </div>
-        <div className="grid gap-0 md:grid-cols-[1fr_min(200px,35%)]">
-          <div
-            ref={containerRef}
-            className="relative h-[min(60vh,520px)] min-h-[280px] w-full"
-            style={letterboxPreviewStyle}
-          >
-            <Cropper
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="grid min-h-0 flex-1 gap-0 md:grid-cols-[1fr_min(200px,35%)]">
+            <div className="flex min-h-0 shrink-0 flex-col">
+              <div ref={previewAreaRef} className={LISTING_ARTWORK_CROP_PREVIEW_BAND_CLASS}>
+                <div
+                  className="flex max-w-full shrink-0 flex-col"
+                  style={cropSize ? { width: cropSize.width, maxWidth: "100%" } : undefined}
+                >
+                  <div
+                    ref={containerRef}
+                    className={`${LISTING_ARTWORK_CROP_PRINT_WINDOW_CLASS}${showCanvasWrapMarginPreview ? ` ${LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS}` : ""} relative shrink-0 overflow-hidden`}
+                    style={cropHostStyle}
+                  >
+              <Cropper
                 key={imageUrl}
                 image={imageUrl}
                 crop={crop}
                 zoom={zoom}
                 rotation={rotation}
                 aspect={aspect}
-                {...(composeCropSize ? { cropSize: composeCropSize } : {})}
+                {...(cropperCropSize ? { cropSize: cropperCropSize } : {})}
+                showGrid={!showCanvasWrapMarginPreview}
                 onCropChange={setCrop}
                 onZoomChange={(z) =>
                   setZoom(
@@ -302,12 +441,53 @@ export function ListingArtworkComposeDialog({
                 maxZoom={LISTING_ARTWORK_V2_COMPOSE_MAX_ZOOM}
                 style={{ containerStyle: cropperContainerStyle }}
               />
-            {imageLoadError ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/80 px-4 text-center text-xs text-amber-200/90">
-                {imageLoadError}
+              <ListingArtworkCanvasGuideOverlay
+                canvasPresentation={canvasPresentation}
+                cropFrame={cropFrame}
+              />
+              {canvasSideColorPickActive && sideTreatment === "solid" ? (
+                <ListingArtworkCanvasColorPickOverlay
+                  containerRef={containerRef}
+                  onPick={(hex) => {
+                    setSolidSideColorHex(hex);
+                    setCanvasSideColorPickActive(false);
+                  }}
+                  onCancel={() => setCanvasSideColorPickActive(false)}
+                />
+              ) : null}
+              {showRoundedCornerGuide ? (
+                <ListingArtworkRoundedCornerCropGuideOverlay
+                  containerRef={containerRef}
+                  fallbackSize={cropSize}
+                />
+              ) : null}
+              {imageLoadError ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/80 px-4 text-center text-xs text-amber-200/90">
+                  {imageLoadError}
+                </div>
+              ) : null}
+                  </div>
+                  {isWraparound ? (
+                    <ListingArtworkWraparoundPreviews
+                      presentation={canvasPresentation}
+                      cropFrame={cropFrame}
+                      containerWidth={containerWidth}
+                    />
+                  ) : null}
+                  {showBlackMugBackgroundTip ? (
+                    <p className="mt-2 text-center text-xs leading-snug text-zinc-400">
+                      If you print a black background on a black mug, it will be noticeable. Use a PNG
+                      with a transparent background instead.
+                    </p>
+                  ) : showWhiteMugBackgroundTip ? (
+                    <p className="mt-2 text-center text-xs leading-snug text-zinc-400">
+                      White in your design is not printed on a white mug. A white background on your
+                      image is OK.
+                    </p>
+                  ) : null}
+                </div>
               </div>
-            ) : null}
-          </div>
+            </div>
           {livePreviewUrl ? (
             <div className="hidden border-l border-zinc-800 p-3 md:block">
               <p className="mb-2 text-[10px] font-medium uppercase tracking-wide text-zinc-600">Preview</p>
@@ -321,9 +501,10 @@ export function ListingArtworkComposeDialog({
             </div>
           ) : null}
         </div>
-        <div className="space-y-2 border-t border-zinc-800 px-4 py-3">
+        </div>
+        <div className="shrink-0 space-y-2 border-t border-zinc-800 px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-600">Rotate</span>
+            <span className="w-10 shrink-0 text-xs text-zinc-400">Rotate</span>
             <button
               type="button"
               disabled={busy}
@@ -347,6 +528,20 @@ export function ListingArtworkComposeDialog({
               ⟳ 90°
             </button>
           </div>
+          {isCanvasPrintItem ? (
+            <ListingCanvasSideTreatmentFields
+              sideTreatment={sideTreatment}
+              onSideTreatmentChange={(next) => {
+                setSideTreatment(next);
+                if (next !== "solid") setCanvasSideColorPickActive(false);
+              }}
+              solidSideColorHex={solidSideColorHex}
+              onSolidSideColorHexChange={setSolidSideColorHex}
+              colorPickActive={canvasSideColorPickActive}
+              onColorPickActiveChange={setCanvasSideColorPickActive}
+              disabled={busy}
+            />
+          ) : null}
           <label className="flex items-center gap-2 text-xs text-zinc-400">
             <span className="w-10 shrink-0">Zoom</span>
             <input

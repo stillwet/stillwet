@@ -4943,6 +4943,8 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemLargeListingArtwork: 'itemLargeListingArtwork',
   itemArtworkLetterboxFill: 'itemArtworkLetterboxFill',
   itemArtworkSourceTierOverride: 'itemArtworkSourceTierOverride',
+  itemCanvasPresentation: 'itemCanvasPresentation',
+  itemArtworkTemplate: 'itemArtworkTemplate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

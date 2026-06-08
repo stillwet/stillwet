@@ -2,6 +2,7 @@
  * Print-area templates for admin catalog items (synced from production).
  * Used to regression-test upload/crop policy — update when Admin → List print sizes change.
  */
+/** Printify combined front+back file sizes (shop upload uses per-side via normalizePillowCatalogArtworkSurfaces). */
 export const ADMIN_CATALOG_PRINT_AREA_FIXTURES: ReadonlyArray<{
   name: string;
   printWidthPx: number;

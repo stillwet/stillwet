@@ -108,6 +108,38 @@ export function catalogItemNameSuggestsWhiteLetterbox(name: string | null | unde
   return catalogNameIncludesKeyword(n, WHITE_LETTERBOX_CATALOG_NAME_KEYWORDS);
 }
 
+/** Stretched canvas prints (wrap bleed UI), not mugs/apparel or other white-letterbox substrates. */
+export function catalogItemIsCanvasPrint(params: {
+  catalogItemName?: string | null;
+  categoryTagSlug?: string | null;
+}): boolean {
+  const slug = String(params.categoryTagSlug ?? "").trim().toLowerCase();
+  if (slug === "canvas-print") return true;
+  const n = normalizedCatalogName(params.catalogItemName);
+  if (!n) return false;
+  if (catalogItemNameSuggestsTransparentLetterbox(n)) return false;
+  return /\bcanvas\b/.test(n);
+}
+
+/** Black ceramic mugs — show transparent-PNG guidance in the crop dialog. */
+export function catalogItemIsBlackMug(params: {
+  catalogItemName?: string | null;
+}): boolean {
+  const n = normalizedCatalogName(params.catalogItemName);
+  if (!n) return false;
+  return n.includes("mug") && n.includes("black");
+}
+
+/** White ceramic mugs — white areas are not printed; white backgrounds are fine. */
+export function catalogItemIsWhiteMug(params: {
+  catalogItemName?: string | null;
+}): boolean {
+  const n = normalizedCatalogName(params.catalogItemName);
+  if (!n) return false;
+  if (!n.includes("mug") || n.includes("black")) return false;
+  return n.includes("white");
+}
+
 export function printAreaSuggestsWhiteLetterbox(
   printAreaWidthPx: number | null | undefined,
   printAreaHeightPx: number | null | undefined,

@@ -20,7 +20,7 @@ export type PrismaOrderReturnClaimDelegate = PrismaClient["orderReturnClaim"];
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v89-order-return-claim-decision-email";
+  "postgres-adapter-v90-admin-catalog-canvas-presentation";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

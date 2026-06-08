@@ -12,6 +12,15 @@ import {
 import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
 import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
+import type { CatalogArtworkTemplate } from "@/lib/admin-catalog-artwork-template";
+import type { CatalogCanvasPresentation } from "@/lib/admin-catalog-canvas-presentation";
+import {
+  catalogArtworkTemplateToDbJsonFromPresets,
+  catalogCanvasPresentationFromPreset,
+  catalogCanvasPresentationToDbJson,
+  parseAdminCatalogArtworkTemplatePreset,
+  parseAdminCatalogCanvasPresentationPreset,
+} from "@/lib/admin-catalog-canvas-presentation";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -61,6 +70,8 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemMinArtworkDpi: number | null;
       itemArtworkLetterboxFill: ListingArtworkLetterboxFill;
       itemArtworkSourceTierOverride: CatalogArtworkSourceTierOverride;
+      itemCanvasPresentation: CatalogCanvasPresentation | null;
+      itemArtworkTemplate: CatalogArtworkTemplate | null;
     }
   | { ok: false; error: string } {
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
@@ -77,6 +88,13 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     String(formData.get("itemArtworkSourceTierOverride") ?? ""),
   );
   if (!ar.ok) return { ok: false, error: ar.error };
+  const canvasPreset = parseAdminCatalogCanvasPresentationPreset(
+    String(formData.get("itemCanvasPresentationPreset") ?? ""),
+  );
+  const templatePreset = parseAdminCatalogArtworkTemplatePreset(
+    String(formData.get("itemArtworkTemplatePreset") ?? ""),
+  );
+  const canvasPresentation = catalogCanvasPresentationFromPreset(canvasPreset);
   return {
     ok: true,
     itemExampleListingUrl: v.exampleListingUrl,
@@ -88,6 +106,13 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     itemMinArtworkDpi: ar.itemMinArtworkDpi,
     itemArtworkLetterboxFill: ar.itemArtworkLetterboxFill,
     itemArtworkSourceTierOverride: ar.itemArtworkSourceTierOverride,
+    itemCanvasPresentation: catalogCanvasPresentationToDbJson(canvasPresentation),
+    itemArtworkTemplate: catalogArtworkTemplateToDbJsonFromPresets({
+      templatePreset,
+      printAreaWidthPx: ar.itemPrintAreaWidthPx,
+      printAreaHeightPx: ar.itemPrintAreaHeightPx,
+      canvasPresentation,
+    }),
   };
 }
 
@@ -123,6 +148,14 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
         itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
         itemArtworkLetterboxFill: itemLevel.itemArtworkLetterboxFill,
         itemArtworkSourceTierOverride: itemLevel.itemArtworkSourceTierOverride,
+        itemCanvasPresentation:
+          itemLevel.itemCanvasPresentation === null
+            ? Prisma.JsonNull
+            : (itemLevel.itemCanvasPresentation as Prisma.InputJsonValue),
+        itemArtworkTemplate:
+          itemLevel.itemArtworkTemplate === null
+            ? Prisma.JsonNull
+            : (itemLevel.itemArtworkTemplate as Prisma.InputJsonValue),
       },
     });
   } catch (e) {
@@ -164,6 +197,14 @@ export async function adminUpdateCatalogItem(
         itemMinArtworkDpi: itemLevel.itemMinArtworkDpi,
         itemArtworkLetterboxFill: itemLevel.itemArtworkLetterboxFill,
         itemArtworkSourceTierOverride: itemLevel.itemArtworkSourceTierOverride,
+        itemCanvasPresentation:
+          itemLevel.itemCanvasPresentation === null
+            ? Prisma.JsonNull
+            : (itemLevel.itemCanvasPresentation as Prisma.InputJsonValue),
+        itemArtworkTemplate:
+          itemLevel.itemArtworkTemplate === null
+            ? Prisma.JsonNull
+            : (itemLevel.itemArtworkTemplate as Prisma.InputJsonValue),
       },
     });
   } catch (e) {

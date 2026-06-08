@@ -333,3 +333,44 @@ h6 {
   max-width: 100%;
   overflow: visible;
 }
+
+/* Crop UI: only show photo inside the print crop box; hide the rest. */
+.listing-artwork-crop-print-window {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.listing-artwork-crop-print-window .reactEasyCrop_Container {
+  overflow: hidden;
+  z-index: 0;
+}
+
+.listing-artwork-crop-print-window .reactEasyCrop_CropArea {
+  z-index: 1;
+  /* Override react-easy-crop default semi-transparent outside mask (color: rgba(0,0,0,0.5)). */
+  color: rgb(9 9 11);
+  box-shadow: 0 0 0 100vmax rgb(9 9 11);
+}
+
+/* Canvas wrap preview — crop box fills the print window; only inset bands darken wrap edges. */
+.listing-artwork-crop-print-window.listing-artwork-crop-canvas-wrap-preview .reactEasyCrop_CropArea {
+  left: 0 !important;
+  top: 0 !important;
+  transform: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  color: transparent !important;
+  /* Kill react-easy-crop / print-window outer masks — they leave solid black side bars. */
+  box-shadow: inset 0 0 0 var(--listing-artwork-canvas-wrap-inset, 20px)
+    var(--listing-artwork-canvas-wrap-edge-fill, rgba(0, 0, 0, 0.55)) !important;
+}
+
+.listing-artwork-crop-print-window.listing-artwork-crop-canvas-wrap-preview
+  .reactEasyCrop_CropArea::after {
+  content: "";
+  position: absolute;
+  inset: var(--listing-artwork-canvas-wrap-inset, 20px);
+  border: 1px dashed rgba(250, 250, 250, 0.45);
+  pointer-events: none;
+  z-index: 1;
+}

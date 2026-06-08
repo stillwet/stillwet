@@ -28,6 +28,8 @@ export async function AdminListTab() {
       itemMinArtworkDpi: item.itemMinArtworkDpi,
       itemArtworkLetterboxFill: item.itemArtworkLetterboxFill,
       itemArtworkSourceTierOverride: item.itemArtworkSourceTierOverride,
+      itemCanvasPresentation: item.itemCanvasPresentation,
+      itemArtworkTemplate: item.itemArtworkTemplate,
       tags: item.catalogTags.map((ct) => ({
         id: ct.tag.id,
         name: ct.tag.name,

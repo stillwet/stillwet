@@ -44,6 +44,19 @@ import {
   listingRequestArtworkUploadMaxMb,
 } from "@/lib/listing-request-artwork-limits";
 import { loadAdminCatalogItemArtworkPolicy } from "@/lib/admin-baseline-catalog-rows";
+import { resolveCatalogArtworkSurfaces } from "@/lib/admin-catalog-artwork-template";
+import {
+  catalogItemIsPillow,
+  normalizePillowCatalogArtworkSurfaces,
+  parsePillowListingArtworkFormFields,
+  pillowPerSidePrintAreaDimensions,
+  resolvePillowListingArtworkSurfaces,
+} from "@/lib/listing-artwork-pillow-listing";
+import {
+  parseListingArtworkBakedEntriesFromForm,
+  shopListingRequestImagesToDbJson,
+  type ShopListingRequestImageEntry,
+} from "@/lib/shop-listing-request-images";
 import { resolveListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 import {
   cropAndPrepareListingArtworkForStorage,
@@ -606,15 +619,20 @@ export async function submitFirstListingSetup(
   let printAreaH: number | null = null;
   let catalogImageRequirementLabel: string | null = null;
   let letterboxFill = null as ReturnType<typeof resolveListingArtworkLetterboxFill> | null;
+  let adminItem: Awaited<ReturnType<typeof loadAdminCatalogItemArtworkPolicy>> = null;
 
   if (baselinePick) {
-    const adminItem = await loadAdminCatalogItemArtworkPolicy(baselinePick.itemId);
+    adminItem = await loadAdminCatalogItemArtworkPolicy(baselinePick.itemId);
     catalogImageRequirementLabel = adminItem?.itemImageRequirementLabel?.trim() || null;
     const pw = adminItem?.itemPrintAreaWidthPx ?? null;
     const ph = adminItem?.itemPrintAreaHeightPx ?? null;
     if (pw != null && ph != null && pw > 0 && ph > 0) {
-      printAreaW = pw;
-      printAreaH = ph;
+      const dims =
+        adminItem && catalogItemIsPillow({ catalogItemName: adminItem.name })
+          ? pillowPerSidePrintAreaDimensions({ printAreaWidthPx: pw, printAreaHeightPx: ph })
+          : { printAreaWidthPx: pw, printAreaHeightPx: ph };
+      printAreaW = dims.printAreaWidthPx;
+      printAreaH = dims.printAreaHeightPx;
     }
     if (adminItem) {
       letterboxFill = resolveListingArtworkLetterboxFill({
@@ -631,15 +649,125 @@ export async function submitFirstListingSetup(
   const artworkUploadMaxMb = listingRequestArtworkUploadMaxMb();
   const artworkStoredMaxMb = listingRequestArtworkStoredMaxMb();
 
+  const bakedEntriesJson = String(formData.get("listingArtworkBakedEntriesJson") ?? "").trim();
+  const bakedEntriesForm = bakedEntriesJson
+    ? parseListingArtworkBakedEntriesFromForm(bakedEntriesJson)
+    : [];
   const bakedKeyRaw = String(formData.get("listingArtworkBakedKey") ?? "").trim();
   const bakedUrlRaw = String(formData.get("listingArtworkBakedUrl") ?? "").trim();
   const stagingKeyRaw = String(formData.get("listingArtworkStagingKey") ?? "").trim();
   let stagingKeyToDelete: string | null = null;
   let uploadedRequestImageKey: string | null = null;
   let uploadedRequestImageUrl: string | null = null;
+  let uploadedRequestImageKeys: string[] = [];
+  let requestImagesForDb: unknown = [];
 
   try {
-  if (bakedKeyRaw) {
+  if (bakedEntriesForm.length > 0) {
+    if (!baselinePick || !adminItem) {
+      return { ok: false, error: "Invalid artwork reference. Crop and upload again." };
+    }
+    const resolvedSurfaces = resolveCatalogArtworkSurfaces({
+      itemArtworkTemplate: adminItem.itemArtworkTemplate,
+      itemPrintAreaWidthPx: adminItem.itemPrintAreaWidthPx,
+      itemPrintAreaHeightPx: adminItem.itemPrintAreaHeightPx,
+      itemMinArtworkDpi: adminItem.itemMinArtworkDpi,
+      itemCanvasPresentation: adminItem.itemCanvasPresentation,
+    });
+    const catalogSurfaces = catalogItemIsPillow({ catalogItemName: adminItem.name })
+      ? normalizePillowCatalogArtworkSurfaces(resolvedSurfaces.surfaces)
+      : resolvedSurfaces.surfaces;
+    const pillowForm = parsePillowListingArtworkFormFields(formData);
+    const listingArtworkSurfaces = catalogItemIsPillow({ catalogItemName: adminItem.name })
+      ? resolvePillowListingArtworkSurfaces({
+          catalogSurfaces,
+          pillowDoubleSided: pillowForm.pillowDoubleSided,
+          pillowSidesMode: pillowForm.pillowSidesMode,
+        }).surfaces
+      : catalogSurfaces;
+    const surfacesById = new Map(listingArtworkSurfaces.map((s) => [s.id, s]));
+    for (const requiredSurface of listingArtworkSurfaces.filter((s) => s.required)) {
+      if (!bakedEntriesForm.some((e) => e.surfaceId === requiredSurface.id)) {
+        return {
+          ok: false,
+          error: `Upload artwork for ${requiredSurface.label} before submitting.`,
+        };
+      }
+    }
+
+    const dbEntries: ShopListingRequestImageEntry[] = [];
+    const seenSurfaceIds = new Set<string>();
+    for (const entry of bakedEntriesForm) {
+      if (seenSurfaceIds.has(entry.surfaceId)) continue;
+      const surface = surfacesById.get(entry.surfaceId);
+      if (!surface) {
+        return { ok: false, error: "Invalid artwork surface. Crop and upload again." };
+      }
+      if (!isListingRequestArtworkKeyForShop(entry.requestImageKey, shop.id)) {
+        return { ok: false, error: "Invalid artwork reference. Crop and upload again." };
+      }
+      if (
+        await listingRequestArtworkKeyStillReferenced(
+          shop.id,
+          entry.requestImageKey,
+          entry.publicUrl || undefined,
+        )
+      ) {
+        return { ok: false, error: "That artwork is already used on a listing." };
+      }
+
+      const bakedBuf = await getR2ObjectBuffer(entry.requestImageKey);
+      if (!bakedBuf || bakedBuf.length === 0) {
+        return {
+          ok: false,
+          error: "Prepared artwork was not found. Open the crop dialog and try again.",
+        };
+      }
+      if (bakedBuf.length > listingRequestArtworkStoredMaxBytes()) {
+        return {
+          ok: false,
+          error: `Prepared artwork exceeds the ${artworkStoredMaxMb} MB stored limit. Re-crop with a simpler design.`,
+        };
+      }
+
+      const outDims = await widthHeightPxFromImageBuffer(bakedBuf);
+      if (
+        !outDims ||
+        !exportedImageMeetsPrintDimensions(
+          outDims.w,
+          outDims.h,
+          surface.printAreaWidthPx,
+          surface.printAreaHeightPx,
+        )
+      ) {
+        return {
+          ok: false,
+          error: catalogImageRequirementLabel
+            ? `Artwork for ${surface.label} must be exactly ${surface.printAreaWidthPx}×${surface.printAreaHeightPx}px (${catalogImageRequirementLabel}). Re-crop and try again.`
+            : `Artwork for ${surface.label} must be exactly ${surface.printAreaWidthPx}×${surface.printAreaHeightPx}px. Re-crop and try again.`,
+        };
+      }
+
+      const url = entry.publicUrl.trim() || publicHttpsUrlForR2ObjectKey(entry.requestImageKey);
+      if (!url.trim()) {
+        return {
+          ok: false,
+          error: "Prepared artwork URL is missing. Crop and upload again.",
+        };
+      }
+      dbEntries.push({ surfaceId: entry.surfaceId, url });
+      uploadedRequestImageKeys.push(entry.requestImageKey);
+      seenSurfaceIds.add(entry.surfaceId);
+    }
+
+    if (dbEntries.length === 0) {
+      return { ok: false, error: "Upload artwork before submitting." };
+    }
+
+    requestImagesForDb = shopListingRequestImagesToDbJson(dbEntries);
+    uploadedRequestImageKey = uploadedRequestImageKeys[0] ?? null;
+    uploadedRequestImageUrl = dbEntries[0]?.url ?? null;
+  } else if (bakedKeyRaw) {
     if (!isListingRequestArtworkKeyForShop(bakedKeyRaw, shop.id)) {
       return { ok: false, error: "Invalid artwork reference. Crop and upload again." };
     }
@@ -675,6 +803,8 @@ export async function submitFirstListingSetup(
 
     uploadedRequestImageKey = bakedKeyRaw;
     uploadedRequestImageUrl = bakedUrlRaw || publicHttpsUrlForR2ObjectKey(bakedKeyRaw);
+    uploadedRequestImageKeys = [bakedKeyRaw];
+    requestImagesForDb = [uploadedRequestImageUrl];
     if (!uploadedRequestImageUrl.trim()) {
       return {
         ok: false,
@@ -799,6 +929,8 @@ export async function submitFirstListingSetup(
     body: artwork.body,
     contentType: artwork.contentType,
   });
+  uploadedRequestImageKeys = [key];
+  requestImagesForDb = [uploadedRequestImageUrl];
   }
 
   if (stagingKeyToDelete) {
@@ -867,7 +999,7 @@ export async function submitFirstListingSetup(
     requestItemName,
     storefrontItemBlurb,
     listingSearchKeywords,
-    requestImages: [uploadedRequestImageUrl],
+    requestImages: requestImagesForDb as Prisma.InputJsonValue,
     requestStatus: ListingRequestStatus.submitted,
     active: false,
     ...(baselinePick ? { baselineCatalogPickEncoded: pickRaw } : {}),
@@ -883,7 +1015,7 @@ export async function submitFirstListingSetup(
           requestItemName,
           storefrontItemBlurb,
           listingSearchKeywords,
-          requestImages: [uploadedRequestImageUrl],
+          requestImages: requestImagesForDb as Prisma.InputJsonValue,
           requestStatus: ListingRequestStatus.submitted,
           active: false,
         },
@@ -918,10 +1050,17 @@ export async function submitFirstListingSetup(
   }
   uploadedRequestImageKey = null;
   uploadedRequestImageUrl = null;
+  uploadedRequestImageKeys = [];
   return { ok: true };
   } catch (e) {
     rethrowNextNavigationError(e);
     console.error("[submitFirstListingSetup]", e);
+    for (const bakedKey of uploadedRequestImageKeys) {
+      await cleanupUnconfirmedListingRequestUpload({
+        shopId: shop.id,
+        bakedRequestImageKey: bakedKey,
+      });
+    }
     await cleanupUnconfirmedListingRequestUpload({
       shopId: shop.id,
       stagingKey: stagingKeyToDelete,

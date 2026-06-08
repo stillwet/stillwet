@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-
 /** Crop frame size that fills a container at a fixed aspect (ignores source image dimensions). */
 export function computeListingArtworkCropViewportSize(
   containerWidth: number,
@@ -12,34 +10,6 @@ export function computeListingArtworkCropViewportSize(
     return { width: containerHeight * aspect, height: containerHeight };
   }
   return { width: containerWidth, height: containerWidth / aspect };
-}
-
-/** Measure crop viewport from a container ref; keeps print canvas large even for tiny uploads. */
-export function useListingArtworkCropViewportSize(aspect: number) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const update = () => {
-      const rect = el.getBoundingClientRect();
-      const next = computeListingArtworkCropViewportSize(rect.width, rect.height, aspect);
-      setCropSize((prev) => {
-        if (!next) return prev;
-        if (prev?.width === next.width && prev?.height === next.height) return prev;
-        return next;
-      });
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [aspect]);
-
-  return { containerRef, cropSize };
 }
 
 /** Only very small sources get a viewport-sized crop frame; phone photos use react-easy-crop defaults. */
@@ -57,3 +27,19 @@ export function listingArtworkComposeCropSize(params: {
   }
   return params.viewportCropSize;
 }
+
+/** Host fills a flex parent; crop frame size comes from {@link computeListingArtworkCropViewportSize}. */
+export const LISTING_ARTWORK_CROP_PRINT_WINDOW_CLASS = "listing-artwork-crop-print-window";
+
+/** Bounded measure band for crop viewport sizing (avoids flex-1 preview eating the dialog). */
+export const LISTING_ARTWORK_CROP_PREVIEW_BAND_CLASS =
+  "flex h-[min(52vh,460px)] w-full shrink-0 items-center justify-center overflow-hidden px-4 pt-3 pb-2";
+
+/** Canvas wrap margin preview — semi-transparent crop mask + SVG bleed overlay. */
+export const LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS = "listing-artwork-crop-canvas-wrap-preview";
+
+/** @deprecated Use {@link LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS}. */
+export const LISTING_ARTWORK_CROP_CANVAS_BLEED_FRAME_CLASS = "listing-artwork-crop-canvas-bleed-frame";
+
+/** Topmost crop preview layer — rounded corner darkening (above crop box + mug guides). */
+export const LISTING_ARTWORK_ROUNDED_CORNER_CROP_GUIDE_CLASS = "listing-artwork-rounded-corner-crop-guide";
