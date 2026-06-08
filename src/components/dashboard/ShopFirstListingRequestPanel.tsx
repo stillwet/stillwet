@@ -159,13 +159,13 @@ function CatalogItemPhotoLink({ href }: { href: string }) {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={titleId}
-                className="relative z-[61] max-h-[min(85vh,720px)] max-w-[min(92vw,640px)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-xl"
+                className="relative z-[61] max-w-[min(80vw,480px)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 p-2 shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
                   type="button"
                   aria-label="Close"
-                  className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700/80 bg-zinc-950/90 text-lg leading-none text-zinc-400 shadow-sm backdrop-blur-sm transition hover:border-zinc-600 hover:bg-zinc-900 hover:text-zinc-100"
+                  className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-md bg-black/70 text-lg leading-none text-zinc-100 hover:bg-black/85"
                   onClick={() => setOpen(false)}
                 >
                   ×
@@ -177,7 +177,7 @@ function CatalogItemPhotoLink({ href }: { href: string }) {
                 <img
                   src={href}
                   alt="Item photo preview"
-                  className="max-h-[min(85vh,720px)] w-full bg-zinc-900 object-contain"
+                  className="mx-auto max-h-[min(60vh,360px)] w-full bg-zinc-900 object-contain"
                 />
               </div>
             </div>,

@@ -46,30 +46,81 @@ function AdminCatalogItemTagsDisplayCell({ tags }: { tags: AdminListItemTag[] })
   );
 }
 
-function itemImageCell(url: string) {
+function AdminCatalogItemImageCell({ url }: { url: string }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const t = url.trim();
-  if (!t) return null;
-  const href = t;
   const path = t.split(/[?#]/)[0] ?? t;
-  const looksLikeImage = /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+  const looksLikeImage = t.length > 0 && /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
+
+  if (!t) return null;
+
+  if (looksLikeImage) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(true)}
+          title="View item image"
+          className="rounded border border-transparent p-0 hover:border-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- admin catalog reference URL */}
+          <img
+            src={t}
+            alt=""
+            className="size-10 shrink-0 rounded border border-zinc-700 bg-zinc-900 object-contain"
+          />
+        </button>
+        {lightboxOpen ? (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Item image preview"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <div
+              className="relative max-w-[min(80vw,560px)] rounded-xl border border-zinc-700 bg-zinc-950 p-3 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                aria-label="Close image preview"
+                className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-md text-lg leading-none text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+                onClick={() => setLightboxOpen(false)}
+              >
+                ×
+              </button>
+              {/* eslint-disable-next-line @next/next/no-img-element -- admin catalog reference URL */}
+              <img
+                src={t}
+                alt=""
+                className="mx-auto max-h-[min(65vh,420px)] w-full object-contain"
+              />
+            </div>
+          </div>
+        ) : null}
+      </>
+    );
+  }
 
   return (
     <a
-      href={href}
+      href={t}
       target="_blank"
       rel="noopener noreferrer"
-      title="Open item image"
-      className="inline-flex items-center gap-2 text-blue-400/90 hover:underline"
+      title="Open item image URL"
+      className="break-all text-[11px] text-blue-400/90 hover:underline"
     >
-      {looksLikeImage ? (
-        /* eslint-disable-next-line @next/next/no-img-element -- admin catalog reference URL */
-        <img
-          src={t}
-          alt=""
-          className="size-10 shrink-0 rounded border border-zinc-700 bg-zinc-900 object-contain"
-        />
-      ) : null}
-      <span className="break-all text-[11px]">{looksLikeImage ? "Open" : t.length > 40 ? `${t.slice(0, 38)}…` : t}</span>
+      {t.length > 40 ? `${t.slice(0, 38)}…` : t}
     </a>
   );
 }
@@ -187,7 +238,7 @@ export function AdminListItemsPanel({
                 <AdminCatalogItemTagsDisplayCell tags={item.tags} />
                 <td className="p-3 text-zinc-400">
                   {item.itemExampleListingUrl ? (
-                    itemImageCell(item.itemExampleListingUrl)
+                    <AdminCatalogItemImageCell url={item.itemExampleListingUrl} />
                   ) : (
                     <span className="text-zinc-600">—</span>
                   )}
