@@ -7,7 +7,6 @@ import { renderListingArtworkCropCanvas } from "@/lib/listing-artwork-crop-canva
 import {
   listingArtworkLetterboxFillUsesWhite,
   listingArtworkLetterboxPreviewStyle,
-  type ListingArtworkLetterboxFill,
 } from "@/lib/listing-artwork-letterbox-fill";
 import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import {

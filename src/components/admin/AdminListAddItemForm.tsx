@@ -36,7 +36,7 @@ export function AdminListAddItemForm() {
   const [itemCanvasPresentationPreset, setItemCanvasPresentationPreset] =
     useState<CatalogCanvasPresentationPresetId>("flat");
   const [itemArtworkTemplatePreset, setItemArtworkTemplatePreset] =
-    useState<CatalogArtworkTemplatePresetId>("single");
+    useState<CatalogArtworkTemplatePresetId>("none");
   const [clientError, setClientError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
@@ -59,7 +59,7 @@ export function AdminListAddItemForm() {
     setItemArtworkLetterboxFill(ListingArtworkLetterboxFill.transparent);
     setItemArtworkSourceTierOverride(AdminCatalogItemArtworkSourceTierOverride.auto);
     setItemCanvasPresentationPreset("flat");
-    setItemArtworkTemplatePreset("single");
+    setItemArtworkTemplatePreset("none");
     setClientError(null);
     setFormOpen(false);
     router.refresh();

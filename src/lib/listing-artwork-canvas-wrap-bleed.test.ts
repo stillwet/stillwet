@@ -60,13 +60,19 @@ describe("canvasWrapBleedPreviewFill", () => {
 
 describe("canvasWrapBleedPreviewStyleVars", () => {
   it("sets 20px inset and fill for image-on-sides", () => {
-    const vars = canvasWrapBleedPreviewStyleVars("image", "#000000", 671, 447);
+    const vars = canvasWrapBleedPreviewStyleVars("image", "#000000", 671, 447) as Record<
+      string,
+      string
+    >;
     assert.equal(vars["--listing-artwork-canvas-wrap-inset"], "20px");
     assert.equal(vars["--listing-artwork-canvas-wrap-edge-fill"], CANVAS_WRAP_BLEED_OVERLAY_FILL);
   });
 
   it("clamps inset on tiny hosts", () => {
-    const vars = canvasWrapBleedPreviewStyleVars("image", "#000000", 30, 30);
+    const vars = canvasWrapBleedPreviewStyleVars("image", "#000000", 30, 30) as Record<
+      string,
+      string
+    >;
     assert.equal(vars["--listing-artwork-canvas-wrap-inset"], "14px");
   });
 });

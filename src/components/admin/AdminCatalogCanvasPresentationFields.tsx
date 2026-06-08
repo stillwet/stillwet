@@ -6,13 +6,13 @@ import type {
 } from "@/lib/admin-catalog-canvas-presentation";
 import { catalogArtworkTemplatePresetFromJson } from "@/lib/admin-catalog-canvas-presentation";
 
+export type { CatalogArtworkTemplatePresetId };
+
 const PRESET_OPTIONS: { id: CatalogCanvasPresentationPresetId; label: string }[] = [
   { id: "flat", label: "None (flat canvas)" },
   { id: "wraparound_mug_3view", label: "Wraparound mug (3 views)" },
   { id: "shape_outline_tee", label: "T-shirt outline (preview)" },
 ];
-
-export type CatalogArtworkTemplatePresetId = "none" | "dual_sided";
 
 const TEMPLATE_PRESET_OPTIONS: { id: CatalogArtworkTemplatePresetId; label: string }[] = [
   { id: "none", label: "Single surface" },

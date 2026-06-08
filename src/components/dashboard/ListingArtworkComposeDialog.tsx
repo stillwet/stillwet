@@ -12,7 +12,6 @@ import {
 } from "@/lib/listing-artwork-print-area";
 import {
   listingArtworkLetterboxPreviewStyle,
-  type ListingArtworkLetterboxFill,
 } from "@/lib/listing-artwork-letterbox-fill";
 import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import {
