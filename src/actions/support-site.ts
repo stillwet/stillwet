@@ -1,6 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import {
+  PLATFORM_TRANSACTION_PRODUCT,
+  allocatePlatformTransactionNumber,
+  stripePlatformTransactionReferenceFields,
+} from "@/lib/platform-transaction-reference";
 import { getStripe } from "@/lib/stripe";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { normalizeSupportTipUsdToCents } from "@/lib/support-site";
@@ -29,6 +35,26 @@ export async function startSupportSiteCheckout(formData: FormData) {
 
   const processingLine = stripeCheckoutPaymentProcessingLineItem({ subtotalCents: cents });
 
+  const { tipId, refFields } = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.support_platform,
+    );
+    const fields = stripePlatformTransactionReferenceFields(
+      PLATFORM_TRANSACTION_PRODUCT.support_platform,
+      transactionNumber,
+    );
+    const tip = await tx.supportTip.create({
+      data: {
+        transactionNumber,
+        amountCents: cents,
+        currency: "usd",
+      },
+      select: { id: true },
+    });
+    return { tipId: tip.id, refFields: fields };
+  });
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -39,7 +65,7 @@ export async function startSupportSiteCheckout(formData: FormData) {
           currency: "usd",
           unit_amount: cents,
           product_data: {
-            name: "Support the site",
+            name: refFields.lineItemName,
             description: "Voluntary tip — thank you for helping keep this marketplace running.",
           },
         },
@@ -48,13 +74,25 @@ export async function startSupportSiteCheckout(formData: FormData) {
     ],
     metadata: {
       kind: "support_tip",
+      supportTipId: tipId,
       subtotalCents: String(cents),
       paymentProcessingCents: String(buyerPaymentProcessingFeeCents({ subtotalCents: cents })),
+      ...refFields.metadata,
+    },
+    payment_intent_data: {
+      description: refFields.description,
+      metadata: refFields.metadata,
     },
     success_url: `${base.replace(/\/$/, "")}/support-thanks`,
     cancel_url: `${base.replace(/\/$/, "")}/?support=cancelled`,
   });
 
   if (!session.url) redirect("/?support=unavailable");
+
+  await prisma.supportTip.update({
+    where: { id: tipId },
+    data: { stripeCheckoutSessionId: session.id },
+  });
+
   redirect(session.url);
 }

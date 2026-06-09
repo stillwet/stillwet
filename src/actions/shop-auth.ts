@@ -11,7 +11,6 @@ import {
 import {
   normalizeCreatorGiftCode,
   SHOP_SETUP_FEE_CENTS,
-  SHOP_SETUP_FEE_LABEL,
 } from "@/lib/creator-gift-codes";
 import { isPurchasedShopSetupGiftCodeExpired } from "@/lib/creator-gift-code-expiration";
 import { prisma } from "@/lib/prisma";
@@ -36,9 +35,13 @@ import {
 } from "@/lib/stripe-card-processing-fee";
 import {
   SHOP_REACTIVATION_FEE_CENTS,
-  SHOP_REACTIVATION_FEE_LABEL,
   shopInactivityReactivationWindowExpired,
 } from "@/lib/shop-inactivity-policy";
+import {
+  PLATFORM_TRANSACTION_PRODUCT,
+  allocatePlatformTransactionNumber,
+  stripePlatformTransactionReferenceFields,
+} from "@/lib/platform-transaction-reference";
 
 export type ShopAuthError = { error: string; redirectTo?: never } | { redirectTo: string; error?: never };
 
@@ -74,16 +77,27 @@ async function startReactivationCheckoutForUser(user: {
   const processingLine = stripeCheckoutPaymentProcessingLineItem({
     subtotalCents: reactivationSubtotalCents,
   });
-  const purchase = await prisma.shopReactivationPurchase.create({
-    data: {
-      shopId: user.shopId,
-      shopUserId: user.id,
-      amountCents: checkoutTotalCents,
-      currency: "usd",
-      status: ShopReactivationPurchaseStatus.pending,
-    },
-    select: { id: true },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.shop_reactivation_fee,
+    );
+    return tx.shopReactivationPurchase.create({
+      data: {
+        shopId: user.shopId,
+        shopUserId: user.id,
+        amountCents: checkoutTotalCents,
+        currency: "usd",
+        status: ShopReactivationPurchaseStatus.pending,
+        transactionNumber,
+      },
+      select: { id: true, transactionNumber: true },
+    });
   });
+  const refFields = stripePlatformTransactionReferenceFields(
+    PLATFORM_TRANSACTION_PRODUCT.shop_reactivation_fee,
+    purchase.transactionNumber!,
+  );
   try {
     const appBase = base.replace(/\/$/, "");
     const checkout = await getStripe().checkout.sessions.create({
@@ -96,7 +110,7 @@ async function startReactivationCheckoutForUser(user: {
             currency: "usd",
             unit_amount: SHOP_REACTIVATION_FEE_CENTS,
             product_data: {
-              name: SHOP_REACTIVATION_FEE_LABEL,
+              name: refFields.lineItemName,
               description: `One-time reactivation fee for ${user.shop.displayName}.`,
             },
           },
@@ -110,6 +124,11 @@ async function startReactivationCheckoutForUser(user: {
         shopUserId: user.id,
         subtotalCents: String(reactivationSubtotalCents),
         amountCents: String(checkoutTotalCents),
+        ...refFields.metadata,
+      },
+      payment_intent_data: {
+        description: refFields.description,
+        metadata: refFields.metadata,
       },
       success_url: `${appBase}/dashboard/reactivate/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBase}/dashboard/login?reactivate=cancel`,
@@ -343,15 +362,26 @@ export async function createShopFromSignup(
   const checkoutTotalCents = buyerCheckoutTotalCents(setupSubtotalCents);
   const processingLine = stripeCheckoutPaymentProcessingLineItem({ subtotalCents: setupSubtotalCents });
 
-  const purchase = await prisma.shopSetupFeePurchase.create({
-    data: {
-      pendingSignupId: pending.id,
-      amountCents: checkoutTotalCents,
-      currency: "usd",
-      status: ShopSetupFeePurchaseStatus.pending,
-    },
-    select: { id: true },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.shop_creation_fee,
+    );
+    return tx.shopSetupFeePurchase.create({
+      data: {
+        pendingSignupId: pending.id,
+        amountCents: checkoutTotalCents,
+        currency: "usd",
+        status: ShopSetupFeePurchaseStatus.pending,
+        transactionNumber,
+      },
+      select: { id: true, transactionNumber: true },
+    });
   });
+  const refFields = stripePlatformTransactionReferenceFields(
+    PLATFORM_TRANSACTION_PRODUCT.shop_creation_fee,
+    purchase.transactionNumber!,
+  );
 
   try {
     const appBase = base.replace(/\/$/, "");
@@ -365,7 +395,7 @@ export async function createShopFromSignup(
             currency: "usd",
             unit_amount: SHOP_SETUP_FEE_CENTS,
             product_data: {
-              name: SHOP_SETUP_FEE_LABEL,
+              name: refFields.lineItemName,
               description: "One-time account fee to open a creator shop.",
             },
           },
@@ -379,6 +409,11 @@ export async function createShopFromSignup(
         email,
         subtotalCents: String(setupSubtotalCents),
         amountCents: String(checkoutTotalCents),
+        ...refFields.metadata,
+      },
+      payment_intent_data: {
+        description: refFields.description,
+        metadata: refFields.metadata,
       },
       success_url: `${appBase}/create-shop/setup/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBase}/create-shop?setup=cancel`,

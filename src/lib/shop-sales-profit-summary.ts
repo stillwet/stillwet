@@ -27,7 +27,7 @@ function pacificMonthTitle(instant: Date): { monthTitle: string; ytdYear: number
   return { monthTitle, ytdYear: y, y, m };
 }
 
-/** Merchandise shop profit (sum of order line `shopCutCents`) for Pacific calendar month and YTD. */
+/** Shop profit (Σ shopCutCents + shop tip share) for Pacific calendar month and YTD. */
 export async function loadShopSalesProfitSummary(
   shopId: string,
   now: Date = new Date(),
@@ -39,8 +39,36 @@ export async function loadShopSalesProfitSummary(
   const rows = await prisma.$queryRaw<{ monthProfitCents: bigint; ytdProfitCents: bigint }[]>(
     Prisma.sql`
       SELECT
-        COALESCE(SUM(CASE WHEN o."createdAt" >= ${monthStart} THEN ol."shopCutCents" ELSE 0 END), 0)::bigint AS "monthProfitCents",
-        COALESCE(SUM(CASE WHEN o."createdAt" >= ${ytdStart} THEN ol."shopCutCents" ELSE 0 END), 0)::bigint AS "ytdProfitCents"
+        (
+          COALESCE(SUM(CASE WHEN o."createdAt" >= ${monthStart} THEN ol."shopCutCents" ELSE 0 END), 0)
+          + COALESCE((
+              SELECT SUM(
+                CASE
+                  WHEN o2."tipCents" > 0 THEN o2."tipCents"
+                  ELSE 0
+                END
+              )
+              FROM "Order" o2
+              WHERE o2."shopId" = ${shopId}
+                AND o2.status = 'paid'
+                AND o2."createdAt" >= ${monthStart}
+            ), 0)
+        )::bigint AS "monthProfitCents",
+        (
+          COALESCE(SUM(CASE WHEN o."createdAt" >= ${ytdStart} THEN ol."shopCutCents" ELSE 0 END), 0)
+          + COALESCE((
+              SELECT SUM(
+                CASE
+                  WHEN o2."tipCents" > 0 THEN o2."tipCents"
+                  ELSE 0
+                END
+              )
+              FROM "Order" o2
+              WHERE o2."shopId" = ${shopId}
+                AND o2.status = 'paid'
+                AND o2."createdAt" >= ${ytdStart}
+            ), 0)
+        )::bigint AS "ytdProfitCents"
       FROM "OrderLine" ol
       INNER JOIN "Order" o ON o.id = ol."orderId"
       WHERE o."shopId" = ${shopId}

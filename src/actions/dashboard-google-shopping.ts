@@ -7,6 +7,11 @@ import { ShopGoogleShoppingPurchaseStatus } from "@/generated/prisma/enums";
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
 import { prisma } from "@/lib/prisma";
+import {
+  PLATFORM_TRANSACTION_PRODUCT,
+  allocatePlatformTransactionNumber,
+  stripePlatformTransactionReferenceFields,
+} from "@/lib/platform-transaction-reference";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { fulfillShopGoogleShoppingPurchaseIfPending } from "@/lib/shop-google-shopping-fulfillment";
 import { assignGoogleShoppingCreditsToListings, loadGoogleShoppingListingPicklistForShop } from "@/lib/shop-google-shopping-enrollment";
@@ -60,17 +65,29 @@ export async function startShopGoogleShoppingPackPaymentIntent(
   const paymentProcessingCents = buyerPaymentProcessingFeeCents({ subtotalCents });
   const chargeCents = subtotalCents + paymentProcessingCents;
 
-  const purchase = await prisma.shopGoogleShoppingPurchase.create({
-    data: {
-      shopId: shop.id,
-      shopUserId: user.id,
-      packId: pack.id,
-      creditsGranted: pack.credits,
-      amountCents: chargeCents,
-      currency: "usd",
-      status: ShopGoogleShoppingPurchaseStatus.pending,
-    },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.gshop_listing_upgrade,
+    );
+    return tx.shopGoogleShoppingPurchase.create({
+      data: {
+        shopId: shop.id,
+        shopUserId: user.id,
+        packId: pack.id,
+        creditsGranted: pack.credits,
+        amountCents: chargeCents,
+        currency: "usd",
+        status: ShopGoogleShoppingPurchaseStatus.pending,
+        transactionNumber,
+      },
+    });
   });
+
+  const refFields = stripePlatformTransactionReferenceFields(
+    PLATFORM_TRANSACTION_PRODUCT.gshop_listing_upgrade,
+    purchase.transactionNumber!,
+  );
 
   try {
     const stripe = getStripe();
@@ -78,6 +95,7 @@ export async function startShopGoogleShoppingPackPaymentIntent(
       amount: chargeCents,
       currency: "usd",
       payment_method_types: ["card"],
+      description: refFields.description,
       metadata: {
         kind: "shop_google_shopping_pack",
         purchaseId: purchase.id,
@@ -87,6 +105,7 @@ export async function startShopGoogleShoppingPackPaymentIntent(
         subtotalCents: String(subtotalCents),
         paymentProcessingCents: String(paymentProcessingCents),
         amountCents: String(chargeCents),
+        ...refFields.metadata,
       },
     });
 

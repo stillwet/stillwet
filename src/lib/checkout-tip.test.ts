@@ -6,23 +6,24 @@ import {
   PLATFORM_TIP_FEE_CENTS,
   checkoutApplicationFeeCents,
   checkoutTipApplicationFeeCents,
+  checkoutTipProcessingSurchargeCents,
   clampCheckoutTipCents,
   splitCheckoutTipCents,
   validateCheckoutTipCents,
 } from "@/lib/checkout-tip";
 
 describe("splitCheckoutTipCents", () => {
-  it("splits platform fee and shop share", () => {
+  it("gives full tip to shop", () => {
     assert.deepEqual(splitCheckoutTipCents(500), {
-      platformTipFeeCents: 25,
-      shopTipCents: 475,
+      platformTipFeeCents: 0,
+      shopTipCents: 500,
     });
   });
 
-  it("caps platform fee when tip is smaller than fee", () => {
+  it("gives full tip to shop when tip is minimum", () => {
     assert.deepEqual(splitCheckoutTipCents(50), {
-      platformTipFeeCents: 25,
-      shopTipCents: 25,
+      platformTipFeeCents: 0,
+      shopTipCents: 50,
     });
   });
 
@@ -59,10 +60,10 @@ describe("clampCheckoutTipCents", () => {
 });
 
 describe("checkoutApplicationFeeCents", () => {
-  it("adds 25 cent platform tip fee to merchandise application fee", () => {
+  it("does not add tip fee to merchandise application fee", () => {
     assert.equal(
       checkoutApplicationFeeCents({ merchandiseApplicationFeeCents: 400, tipCents: 200 }),
-      425,
+      400,
     );
   });
 
@@ -75,13 +76,24 @@ describe("checkoutApplicationFeeCents", () => {
 });
 
 describe("checkoutTipApplicationFeeCents", () => {
-  it("returns platform tip fee constant for paid tips", () => {
-    assert.equal(checkoutTipApplicationFeeCents(50), PLATFORM_TIP_FEE_CENTS);
-    assert.equal(checkoutTipApplicationFeeCents(1000), PLATFORM_TIP_FEE_CENTS);
+  it("returns zero (tip revenue is via Payment Processing surcharge)", () => {
+    assert.equal(checkoutTipApplicationFeeCents(50), 0);
+    assert.equal(checkoutTipApplicationFeeCents(1000), 0);
   });
 
   it("returns zero when there is no tip", () => {
     assert.equal(checkoutTipApplicationFeeCents(0), 0);
+  });
+});
+
+describe("checkoutTipProcessingSurchargeCents", () => {
+  it("returns platform tip fee constant for paid tips", () => {
+    assert.equal(checkoutTipProcessingSurchargeCents(50), PLATFORM_TIP_FEE_CENTS);
+    assert.equal(checkoutTipProcessingSurchargeCents(1000), PLATFORM_TIP_FEE_CENTS);
+  });
+
+  it("returns zero when there is no tip", () => {
+    assert.equal(checkoutTipProcessingSurchargeCents(0), 0);
   });
 });
 

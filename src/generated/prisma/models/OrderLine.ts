@@ -30,6 +30,7 @@ export type OrderLineAvgAggregateOutputType = {
   quantity: number | null
   unitPriceCents: number | null
   goodsServicesCostCents: number | null
+  productionFeeCents: number | null
   platformCutCents: number | null
   shopCutCents: number | null
 }
@@ -38,6 +39,7 @@ export type OrderLineSumAggregateOutputType = {
   quantity: number | null
   unitPriceCents: number | null
   goodsServicesCostCents: number | null
+  productionFeeCents: number | null
   platformCutCents: number | null
   shopCutCents: number | null
 }
@@ -55,6 +57,7 @@ export type OrderLineMinAggregateOutputType = {
   printifyProductId: string | null
   printifyVariantId: string | null
   goodsServicesCostCents: number | null
+  productionFeeCents: number | null
   platformCutCents: number | null
   shopCutCents: number | null
   createdAt: Date | null
@@ -73,6 +76,7 @@ export type OrderLineMaxAggregateOutputType = {
   printifyProductId: string | null
   printifyVariantId: string | null
   goodsServicesCostCents: number | null
+  productionFeeCents: number | null
   platformCutCents: number | null
   shopCutCents: number | null
   createdAt: Date | null
@@ -91,6 +95,7 @@ export type OrderLineCountAggregateOutputType = {
   printifyProductId: number
   printifyVariantId: number
   goodsServicesCostCents: number
+  productionFeeCents: number
   platformCutCents: number
   shopCutCents: number
   createdAt: number
@@ -102,6 +107,7 @@ export type OrderLineAvgAggregateInputType = {
   quantity?: true
   unitPriceCents?: true
   goodsServicesCostCents?: true
+  productionFeeCents?: true
   platformCutCents?: true
   shopCutCents?: true
 }
@@ -110,6 +116,7 @@ export type OrderLineSumAggregateInputType = {
   quantity?: true
   unitPriceCents?: true
   goodsServicesCostCents?: true
+  productionFeeCents?: true
   platformCutCents?: true
   shopCutCents?: true
 }
@@ -127,6 +134,7 @@ export type OrderLineMinAggregateInputType = {
   printifyProductId?: true
   printifyVariantId?: true
   goodsServicesCostCents?: true
+  productionFeeCents?: true
   platformCutCents?: true
   shopCutCents?: true
   createdAt?: true
@@ -145,6 +153,7 @@ export type OrderLineMaxAggregateInputType = {
   printifyProductId?: true
   printifyVariantId?: true
   goodsServicesCostCents?: true
+  productionFeeCents?: true
   platformCutCents?: true
   shopCutCents?: true
   createdAt?: true
@@ -163,6 +172,7 @@ export type OrderLineCountAggregateInputType = {
   printifyProductId?: true
   printifyVariantId?: true
   goodsServicesCostCents?: true
+  productionFeeCents?: true
   platformCutCents?: true
   shopCutCents?: true
   createdAt?: true
@@ -268,6 +278,7 @@ export type OrderLineGroupByOutputType = {
   printifyProductId: string | null
   printifyVariantId: string | null
   goodsServicesCostCents: number
+  productionFeeCents: number
   platformCutCents: number
   shopCutCents: number
   createdAt: Date
@@ -309,6 +320,7 @@ export type OrderLineWhereInput = {
   printifyProductId?: Prisma.StringNullableFilter<"OrderLine"> | string | null
   printifyVariantId?: Prisma.StringNullableFilter<"OrderLine"> | string | null
   goodsServicesCostCents?: Prisma.IntFilter<"OrderLine"> | number
+  productionFeeCents?: Prisma.IntFilter<"OrderLine"> | number
   platformCutCents?: Prisma.IntFilter<"OrderLine"> | number
   shopCutCents?: Prisma.IntFilter<"OrderLine"> | number
   createdAt?: Prisma.DateTimeFilter<"OrderLine"> | Date | string
@@ -331,6 +343,7 @@ export type OrderLineOrderByWithRelationInput = {
   printifyProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrderInput | Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -356,6 +369,7 @@ export type OrderLineWhereUniqueInput = Prisma.AtLeast<{
   printifyProductId?: Prisma.StringNullableFilter<"OrderLine"> | string | null
   printifyVariantId?: Prisma.StringNullableFilter<"OrderLine"> | string | null
   goodsServicesCostCents?: Prisma.IntFilter<"OrderLine"> | number
+  productionFeeCents?: Prisma.IntFilter<"OrderLine"> | number
   platformCutCents?: Prisma.IntFilter<"OrderLine"> | number
   shopCutCents?: Prisma.IntFilter<"OrderLine"> | number
   createdAt?: Prisma.DateTimeFilter<"OrderLine"> | Date | string
@@ -378,6 +392,7 @@ export type OrderLineOrderByWithAggregationInput = {
   printifyProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrderInput | Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -404,6 +419,7 @@ export type OrderLineScalarWhereWithAggregatesInput = {
   printifyProductId?: Prisma.StringNullableWithAggregatesFilter<"OrderLine"> | string | null
   printifyVariantId?: Prisma.StringNullableWithAggregatesFilter<"OrderLine"> | string | null
   goodsServicesCostCents?: Prisma.IntWithAggregatesFilter<"OrderLine"> | number
+  productionFeeCents?: Prisma.IntWithAggregatesFilter<"OrderLine"> | number
   platformCutCents?: Prisma.IntWithAggregatesFilter<"OrderLine"> | number
   shopCutCents?: Prisma.IntWithAggregatesFilter<"OrderLine"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OrderLine"> | Date | string
@@ -418,6 +434,7 @@ export type OrderLineCreateInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -440,6 +457,7 @@ export type OrderLineUncheckedCreateInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -454,6 +472,7 @@ export type OrderLineUpdateInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -476,6 +495,7 @@ export type OrderLineUncheckedUpdateInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -494,6 +514,7 @@ export type OrderLineCreateManyInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -508,6 +529,7 @@ export type OrderLineUpdateManyMutationInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -526,6 +548,7 @@ export type OrderLineUncheckedUpdateManyInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -554,6 +577,7 @@ export type OrderLineCountOrderByAggregateInput = {
   printifyProductId?: Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -563,6 +587,7 @@ export type OrderLineAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   unitPriceCents?: Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
 }
@@ -580,6 +605,7 @@ export type OrderLineMaxOrderByAggregateInput = {
   printifyProductId?: Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -598,6 +624,7 @@ export type OrderLineMinOrderByAggregateInput = {
   printifyProductId?: Prisma.SortOrder
   printifyVariantId?: Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -607,6 +634,7 @@ export type OrderLineSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   unitPriceCents?: Prisma.SortOrder
   goodsServicesCostCents?: Prisma.SortOrder
+  productionFeeCents?: Prisma.SortOrder
   platformCutCents?: Prisma.SortOrder
   shopCutCents?: Prisma.SortOrder
 }
@@ -788,6 +816,7 @@ export type OrderLineCreateWithoutProductInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -808,6 +837,7 @@ export type OrderLineUncheckedCreateWithoutProductInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -855,6 +885,7 @@ export type OrderLineScalarWhereInput = {
   printifyProductId?: Prisma.StringNullableFilter<"OrderLine"> | string | null
   printifyVariantId?: Prisma.StringNullableFilter<"OrderLine"> | string | null
   goodsServicesCostCents?: Prisma.IntFilter<"OrderLine"> | number
+  productionFeeCents?: Prisma.IntFilter<"OrderLine"> | number
   platformCutCents?: Prisma.IntFilter<"OrderLine"> | number
   shopCutCents?: Prisma.IntFilter<"OrderLine"> | number
   createdAt?: Prisma.DateTimeFilter<"OrderLine"> | Date | string
@@ -869,6 +900,7 @@ export type OrderLineCreateWithoutShopInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -889,6 +921,7 @@ export type OrderLineUncheckedCreateWithoutShopInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -929,6 +962,7 @@ export type OrderLineCreateWithoutShopListingInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -949,6 +983,7 @@ export type OrderLineUncheckedCreateWithoutShopListingInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -989,6 +1024,7 @@ export type OrderLineCreateWithoutOrderInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -1009,6 +1045,7 @@ export type OrderLineUncheckedCreateWithoutOrderInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -1052,6 +1089,7 @@ export type OrderLineCreateManyProductInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -1066,6 +1104,7 @@ export type OrderLineUpdateWithoutProductInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1086,6 +1125,7 @@ export type OrderLineUncheckedUpdateWithoutProductInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1103,6 +1143,7 @@ export type OrderLineUncheckedUpdateManyWithoutProductInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1120,6 +1161,7 @@ export type OrderLineCreateManyShopInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -1134,6 +1176,7 @@ export type OrderLineUpdateWithoutShopInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1154,6 +1197,7 @@ export type OrderLineUncheckedUpdateWithoutShopInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1171,6 +1215,7 @@ export type OrderLineUncheckedUpdateManyWithoutShopInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1188,6 +1233,7 @@ export type OrderLineCreateManyShopListingInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -1202,6 +1248,7 @@ export type OrderLineUpdateWithoutShopListingInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1222,6 +1269,7 @@ export type OrderLineUncheckedUpdateWithoutShopListingInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1239,6 +1287,7 @@ export type OrderLineUncheckedUpdateManyWithoutShopListingInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1256,6 +1305,7 @@ export type OrderLineCreateManyOrderInput = {
   printifyProductId?: string | null
   printifyVariantId?: string | null
   goodsServicesCostCents?: number
+  productionFeeCents?: number
   platformCutCents?: number
   shopCutCents?: number
   createdAt?: Date | string
@@ -1270,6 +1320,7 @@ export type OrderLineUpdateWithoutOrderInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1290,6 +1341,7 @@ export type OrderLineUncheckedUpdateWithoutOrderInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1307,6 +1359,7 @@ export type OrderLineUncheckedUpdateManyWithoutOrderInput = {
   printifyProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   printifyVariantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
+  productionFeeCents?: Prisma.IntFieldUpdateOperationsInput | number
   platformCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   shopCutCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1327,6 +1380,7 @@ export type OrderLineSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   printifyProductId?: boolean
   printifyVariantId?: boolean
   goodsServicesCostCents?: boolean
+  productionFeeCents?: boolean
   platformCutCents?: boolean
   shopCutCents?: boolean
   createdAt?: boolean
@@ -1349,6 +1403,7 @@ export type OrderLineSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   printifyProductId?: boolean
   printifyVariantId?: boolean
   goodsServicesCostCents?: boolean
+  productionFeeCents?: boolean
   platformCutCents?: boolean
   shopCutCents?: boolean
   createdAt?: boolean
@@ -1371,6 +1426,7 @@ export type OrderLineSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   printifyProductId?: boolean
   printifyVariantId?: boolean
   goodsServicesCostCents?: boolean
+  productionFeeCents?: boolean
   platformCutCents?: boolean
   shopCutCents?: boolean
   createdAt?: boolean
@@ -1393,12 +1449,13 @@ export type OrderLineSelectScalar = {
   printifyProductId?: boolean
   printifyVariantId?: boolean
   goodsServicesCostCents?: boolean
+  productionFeeCents?: boolean
   platformCutCents?: boolean
   shopCutCents?: boolean
   createdAt?: boolean
 }
 
-export type OrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "shopId" | "shopListingId" | "productId" | "quantity" | "unitPriceCents" | "productName" | "fulfillmentType" | "printifyProductId" | "printifyVariantId" | "goodsServicesCostCents" | "platformCutCents" | "shopCutCents" | "createdAt", ExtArgs["result"]["orderLine"]>
+export type OrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "shopId" | "shopListingId" | "productId" | "quantity" | "unitPriceCents" | "productName" | "fulfillmentType" | "printifyProductId" | "printifyVariantId" | "goodsServicesCostCents" | "productionFeeCents" | "platformCutCents" | "shopCutCents" | "createdAt", ExtArgs["result"]["orderLine"]>
 export type OrderLineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   shop?: boolean | Prisma.OrderLine$shopArgs<ExtArgs>
@@ -1439,11 +1496,17 @@ export type $OrderLinePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     printifyProductId: string | null
     printifyVariantId: string | null
     /**
-     * * Fulfillment / COGS for this line (total cents), deducted before marketplace fee; retained by platform.
+     * *
+     *    * COGS for this line (total cents), deducted before marketplace fee; retained by platform.
+     *    * See also {@link productionFeeCents}.
      */
     goodsServicesCostCents: number
     /**
-     * * Marketplace fee (cents) on merchandise after goods/services cost.
+     * * Production fee for this line (total cents); retained by platform with COGS.
+     */
+    productionFeeCents: number
+    /**
+     * * Marketplace fee (cents) on merchandise after item cost (COGS + production fee).
      */
     platformCutCents: number
     shopCutCents: number
@@ -1887,6 +1950,7 @@ export interface OrderLineFieldRefs {
   readonly printifyProductId: Prisma.FieldRef<"OrderLine", 'String'>
   readonly printifyVariantId: Prisma.FieldRef<"OrderLine", 'String'>
   readonly goodsServicesCostCents: Prisma.FieldRef<"OrderLine", 'Int'>
+  readonly productionFeeCents: Prisma.FieldRef<"OrderLine", 'Int'>
   readonly platformCutCents: Prisma.FieldRef<"OrderLine", 'Int'>
   readonly shopCutCents: Prisma.FieldRef<"OrderLine", 'Int'>
   readonly createdAt: Prisma.FieldRef<"OrderLine", 'DateTime'>

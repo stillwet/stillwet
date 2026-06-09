@@ -4,6 +4,8 @@ import {
   buyerCardProcessingFeeCents,
   buyerCheckoutTotalCents,
   buyerPaymentProcessingFeeCents,
+  checkoutProcessingFeeFromTotal,
+  merchandiseSubtotalFromCheckoutTotalCents,
   stripeCheckoutPaymentProcessingLineItem,
   PAYMENT_PROCESSING_LABEL,
 } from "@/lib/stripe-card-processing-fee";
@@ -25,15 +27,26 @@ describe("stripe card processing fee", () => {
       buyerPaymentProcessingFeeCents({ subtotalCents: SHOP_SETUP_FEE_CENTS }),
       fee,
     );
+    assert.equal(merchandiseSubtotalFromCheckoutTotalCents(1576), SHOP_SETUP_FEE_CENTS);
+    assert.equal(checkoutProcessingFeeFromTotal(1576, SHOP_SETUP_FEE_CENTS), fee);
   });
 
-  it("includes shipping and tip in cart-style gross-up", () => {
+  it("includes shipping and tip in cart-style gross-up plus flat surcharge", () => {
     const fee = buyerPaymentProcessingFeeCents({
       subtotalCents: 2000,
       shippingCents: 500,
       tipCents: 100,
     });
-    assert.equal(fee, buyerCardProcessingFeeCents(2600));
+    assert.equal(fee, buyerCardProcessingFeeCents(2600) + 25);
+  });
+
+  it("adds no flat surcharge when tip is zero", () => {
+    const fee = buyerPaymentProcessingFeeCents({
+      subtotalCents: 2000,
+      shippingCents: 500,
+      tipCents: 0,
+    });
+    assert.equal(fee, buyerCardProcessingFeeCents(2500));
   });
 
   it("adds tax-service into gross-up base when includeTaxService is true", () => {

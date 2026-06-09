@@ -1,9 +1,13 @@
 import type { PlacementCheckoutPromotionKind } from "@/lib/promotion-placement-ui-pure";
 
-/** Creator shop upgrades page (flair, Google Shopping, paid placements). */
+/** Creator shop upgrades page ({@link DASHBOARD_PROMOTIONS_PATH}). */
 export const DASHBOARD_SHOP_UPGRADES_LABEL = "Shop Upgrades";
 
-/** Standalone dashboard page for shop upgrades (not a `?dash=` tab). */
+/**
+ * Standalone dashboard page for shop upgrades (not a `?dash=` tab).
+ * Paid checkouts roll into admin Platform sales Listings or Promotions
+ * ({@link aggregateShopUpgradesPlatformRevenue}).
+ */
 export const DASHBOARD_PROMOTIONS_PATH = "/dashboard/shop-upgrades";
 
 /** Permanent redirect target for bookmarks to `/dashboard/promotions`. */

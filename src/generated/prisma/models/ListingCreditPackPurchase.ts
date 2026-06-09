@@ -29,11 +29,13 @@ export type AggregateListingCreditPackPurchase = {
 export type ListingCreditPackPurchaseAvgAggregateOutputType = {
   creditsGranted: number | null
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ListingCreditPackPurchaseSumAggregateOutputType = {
   creditsGranted: number | null
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ListingCreditPackPurchaseMinAggregateOutputType = {
@@ -45,6 +47,7 @@ export type ListingCreditPackPurchaseMinAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ListingCreditPackPurchaseStatus | null
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date | null
@@ -60,6 +63,7 @@ export type ListingCreditPackPurchaseMaxAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ListingCreditPackPurchaseStatus | null
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date | null
@@ -75,6 +79,7 @@ export type ListingCreditPackPurchaseCountAggregateOutputType = {
   amountCents: number
   currency: number
   status: number
+  transactionNumber: number
   stripePaymentIntentId: number
   paidAt: number
   createdAt: number
@@ -86,11 +91,13 @@ export type ListingCreditPackPurchaseCountAggregateOutputType = {
 export type ListingCreditPackPurchaseAvgAggregateInputType = {
   creditsGranted?: true
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ListingCreditPackPurchaseSumAggregateInputType = {
   creditsGranted?: true
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ListingCreditPackPurchaseMinAggregateInputType = {
@@ -102,6 +109,7 @@ export type ListingCreditPackPurchaseMinAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -117,6 +125,7 @@ export type ListingCreditPackPurchaseMaxAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -132,6 +141,7 @@ export type ListingCreditPackPurchaseCountAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -234,6 +244,7 @@ export type ListingCreditPackPurchaseGroupByOutputType = {
   amountCents: number
   currency: string
   status: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date
@@ -272,6 +283,7 @@ export type ListingCreditPackPurchaseWhereInput = {
   amountCents?: Prisma.IntFilter<"ListingCreditPackPurchase"> | number
   currency?: Prisma.StringFilter<"ListingCreditPackPurchase"> | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFilter<"ListingCreditPackPurchase"> | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ListingCreditPackPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ListingCreditPackPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ListingCreditPackPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ListingCreditPackPurchase"> | Date | string
@@ -289,6 +301,7 @@ export type ListingCreditPackPurchaseOrderByWithRelationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -310,6 +323,7 @@ export type ListingCreditPackPurchaseWhereUniqueInput = Prisma.AtLeast<{
   amountCents?: Prisma.IntFilter<"ListingCreditPackPurchase"> | number
   currency?: Prisma.StringFilter<"ListingCreditPackPurchase"> | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFilter<"ListingCreditPackPurchase"> | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ListingCreditPackPurchase"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"ListingCreditPackPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ListingCreditPackPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ListingCreditPackPurchase"> | Date | string
@@ -326,6 +340,7 @@ export type ListingCreditPackPurchaseOrderByWithAggregationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -349,6 +364,7 @@ export type ListingCreditPackPurchaseScalarWhereWithAggregatesInput = {
   amountCents?: Prisma.IntWithAggregatesFilter<"ListingCreditPackPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"ListingCreditPackPurchase"> | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusWithAggregatesFilter<"ListingCreditPackPurchase"> | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"ListingCreditPackPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"ListingCreditPackPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ListingCreditPackPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ListingCreditPackPurchase"> | Date | string
@@ -362,6 +378,7 @@ export type ListingCreditPackPurchaseCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -379,6 +396,7 @@ export type ListingCreditPackPurchaseUncheckedCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -392,6 +410,7 @@ export type ListingCreditPackPurchaseUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -409,6 +428,7 @@ export type ListingCreditPackPurchaseUncheckedUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -424,6 +444,7 @@ export type ListingCreditPackPurchaseCreateManyInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -437,6 +458,7 @@ export type ListingCreditPackPurchaseUpdateManyMutationInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -452,6 +474,7 @@ export type ListingCreditPackPurchaseUncheckedUpdateManyInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -477,6 +500,7 @@ export type ListingCreditPackPurchaseCountOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -486,6 +510,7 @@ export type ListingCreditPackPurchaseCountOrderByAggregateInput = {
 export type ListingCreditPackPurchaseAvgOrderByAggregateInput = {
   creditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ListingCreditPackPurchaseMaxOrderByAggregateInput = {
@@ -497,6 +522,7 @@ export type ListingCreditPackPurchaseMaxOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -512,6 +538,7 @@ export type ListingCreditPackPurchaseMinOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -521,6 +548,7 @@ export type ListingCreditPackPurchaseMinOrderByAggregateInput = {
 export type ListingCreditPackPurchaseSumOrderByAggregateInput = {
   creditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ListingCreditPackPurchaseCreateNestedManyWithoutShopInput = {
@@ -618,6 +646,7 @@ export type ListingCreditPackPurchaseCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -633,6 +662,7 @@ export type ListingCreditPackPurchaseUncheckedCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -677,6 +707,7 @@ export type ListingCreditPackPurchaseScalarWhereInput = {
   amountCents?: Prisma.IntFilter<"ListingCreditPackPurchase"> | number
   currency?: Prisma.StringFilter<"ListingCreditPackPurchase"> | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFilter<"ListingCreditPackPurchase"> | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ListingCreditPackPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ListingCreditPackPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ListingCreditPackPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ListingCreditPackPurchase"> | Date | string
@@ -690,6 +721,7 @@ export type ListingCreditPackPurchaseCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -705,6 +737,7 @@ export type ListingCreditPackPurchaseUncheckedCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -745,6 +778,7 @@ export type ListingCreditPackPurchaseCreateManyShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -758,6 +792,7 @@ export type ListingCreditPackPurchaseUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -773,6 +808,7 @@ export type ListingCreditPackPurchaseUncheckedUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -787,6 +823,7 @@ export type ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -801,6 +838,7 @@ export type ListingCreditPackPurchaseCreateManyShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -814,6 +852,7 @@ export type ListingCreditPackPurchaseUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -829,6 +868,7 @@ export type ListingCreditPackPurchaseUncheckedUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -843,6 +883,7 @@ export type ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumListingCreditPackPurchaseStatusFieldUpdateOperationsInput | $Enums.ListingCreditPackPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -860,6 +901,7 @@ export type ListingCreditPackPurchaseSelect<ExtArgs extends runtime.Types.Extens
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -877,6 +919,7 @@ export type ListingCreditPackPurchaseSelectCreateManyAndReturn<ExtArgs extends r
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -894,6 +937,7 @@ export type ListingCreditPackPurchaseSelectUpdateManyAndReturn<ExtArgs extends r
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -911,13 +955,14 @@ export type ListingCreditPackPurchaseSelectScalar = {
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ListingCreditPackPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "packId" | "creditsGranted" | "amountCents" | "currency" | "status" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["listingCreditPackPurchase"]>
+export type ListingCreditPackPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "packId" | "creditsGranted" | "amountCents" | "currency" | "status" | "transactionNumber" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["listingCreditPackPurchase"]>
 export type ListingCreditPackPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -949,6 +994,10 @@ export type $ListingCreditPackPurchasePayload<ExtArgs extends runtime.Types.Exte
     amountCents: number
     currency: string
     status: $Enums.ListingCreditPackPurchaseStatus
+    /**
+     * * Platform-wide Listing Credits sequence number for Stripe labels.
+     */
+    transactionNumber: number | null
     stripePaymentIntentId: string | null
     paidAt: Date | null
     createdAt: Date
@@ -1386,6 +1435,7 @@ export interface ListingCreditPackPurchaseFieldRefs {
   readonly amountCents: Prisma.FieldRef<"ListingCreditPackPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"ListingCreditPackPurchase", 'String'>
   readonly status: Prisma.FieldRef<"ListingCreditPackPurchase", 'ListingCreditPackPurchaseStatus'>
+  readonly transactionNumber: Prisma.FieldRef<"ListingCreditPackPurchase", 'Int'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"ListingCreditPackPurchase", 'String'>
   readonly paidAt: Prisma.FieldRef<"ListingCreditPackPurchase", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ListingCreditPackPurchase", 'DateTime'>

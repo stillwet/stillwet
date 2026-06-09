@@ -8,6 +8,11 @@ import { fulfillListingCreditPackPurchaseIfPending } from "@/lib/listing-credit-
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { prisma } from "@/lib/prisma";
+import {
+  PLATFORM_TRANSACTION_PRODUCT,
+  allocatePlatformTransactionNumber,
+  stripePlatformTransactionReferenceFields,
+} from "@/lib/platform-transaction-reference";
 import { getShopOwnerSession } from "@/lib/session";
 import { getStripe } from "@/lib/stripe";
 import {
@@ -55,17 +60,29 @@ export async function startListingCreditPackPaymentIntent(
   const paymentProcessingCents = buyerPaymentProcessingFeeCents({ subtotalCents });
   const chargeCents = subtotalCents + paymentProcessingCents;
 
-  const purchase = await prisma.listingCreditPackPurchase.create({
-    data: {
-      shopId: shop.id,
-      shopUserId: user.id,
-      packId: pack.id,
-      creditsGranted: pack.credits,
-      amountCents: chargeCents,
-      currency: "usd",
-      status: ListingCreditPackPurchaseStatus.pending,
-    },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.listing_credits,
+    );
+    return tx.listingCreditPackPurchase.create({
+      data: {
+        shopId: shop.id,
+        shopUserId: user.id,
+        packId: pack.id,
+        creditsGranted: pack.credits,
+        amountCents: chargeCents,
+        currency: "usd",
+        status: ListingCreditPackPurchaseStatus.pending,
+        transactionNumber,
+      },
+    });
   });
+
+  const refFields = stripePlatformTransactionReferenceFields(
+    PLATFORM_TRANSACTION_PRODUCT.listing_credits,
+    purchase.transactionNumber!,
+  );
 
   try {
     const stripe = getStripe();
@@ -73,6 +90,7 @@ export async function startListingCreditPackPaymentIntent(
       amount: chargeCents,
       currency: "usd",
       payment_method_types: ["card"],
+      description: refFields.description,
       metadata: {
         kind: "listing_credit_pack",
         purchaseId: purchase.id,
@@ -82,6 +100,7 @@ export async function startListingCreditPackPaymentIntent(
         subtotalCents: String(subtotalCents),
         paymentProcessingCents: String(paymentProcessingCents),
         amountCents: String(chargeCents),
+        ...refFields.metadata,
       },
     });
 

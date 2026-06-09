@@ -1,3 +1,4 @@
+import { checkoutTipProcessingSurchargeCents } from "@/lib/checkout-tip";
 import {
   buyerStripeTaxServiceFeeCents,
   STRIPE_TAX_SERVICE_FEE_TAX_CODE,
@@ -44,7 +45,9 @@ export function buyerPaymentProcessingFeeCents(input: {
       })
     : 0;
   const baseBeforeProcessing = subtotalCents + shippingCents + tipCents + taxServiceCents;
-  return grossUpCardProcessingFeeCents(baseBeforeProcessing);
+  const grossUp = grossUpCardProcessingFeeCents(baseBeforeProcessing);
+  const tipSurcharge = checkoutTipProcessingSurchargeCents(tipCents);
+  return grossUp + tipSurcharge;
 }
 
 export function buyerCheckoutTotalCents(
@@ -89,4 +92,32 @@ export function stripeCheckoutPaymentProcessingLineItem(input: {
 /** @deprecated Use {@link stripeCheckoutPaymentProcessingLineItem}. */
 export function stripeCheckoutProcessingFeeLineItem(subtotalCents: number) {
   return stripeCheckoutPaymentProcessingLineItem({ subtotalCents });
+}
+
+/** Inverts {@link buyerCheckoutTotalCents} for platform checkouts (no cart tax/tip). */
+export function merchandiseSubtotalFromCheckoutTotalCents(checkoutTotalCents: number): number {
+  const total = Math.max(0, Math.round(checkoutTotalCents));
+  if (total <= 0) return 0;
+  let lo = 0;
+  let hi = total;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (buyerCheckoutTotalCents(mid) <= total) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
+/** Buyer-paid Stripe pass-through on a checkout total (merchandise subtotal when known). */
+export function checkoutProcessingFeeFromTotal(
+  checkoutTotalCents: number,
+  merchandiseSubtotalCents?: number,
+): number {
+  const total = Math.max(0, Math.round(checkoutTotalCents));
+  if (total <= 0) return 0;
+  const merchandise =
+    merchandiseSubtotalCents != null
+      ? Math.max(0, Math.min(Math.round(merchandiseSubtotalCents), total))
+      : merchandiseSubtotalFromCheckoutTotalCents(total);
+  return Math.max(0, total - merchandise);
 }

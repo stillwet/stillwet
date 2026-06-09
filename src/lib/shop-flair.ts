@@ -1,3 +1,8 @@
+import {
+  platformTransactionReferenceLabel,
+  PLATFORM_TRANSACTION_PRODUCT,
+} from "@/lib/platform-transaction-reference";
+
 /** One-time shop flair access purchase (badge type picker on storefront). */
 export const SHOP_FLAIR_ACCESS_PRICE_CENTS = 500;
 
@@ -22,7 +27,14 @@ export function shopFlairAccessBuyButtonLabel(): string {
 /** Synthetic `kind` on dashboard purchase-history rows for flair access payments. */
 export const SHOP_FLAIR_PURCHASE_HISTORY_KIND = "SHOP_FLAIR_ACCESS";
 
-export function shopFlairPurchaseHistoryLabel(): string {
+export function shopFlairPurchaseHistoryLabel(row?: {
+  transactionNumber?: number | null;
+}): string {
+  const ref = platformTransactionReferenceLabel(
+    PLATFORM_TRANSACTION_PRODUCT.shop_flair,
+    row?.transactionNumber,
+  );
+  if (ref) return ref;
   return "Shop flair access";
 }
 

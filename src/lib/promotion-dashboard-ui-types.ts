@@ -30,4 +30,6 @@ export type DashboardPromotionPurchaseRow = {
   eligibleFromIso: string | null;
   activeWindowPacificRange: string | null;
   listingLabel: string | null;
+  /** Platform-wide product sequence number when allocated at payment time. */
+  transactionNumber?: number | null;
 };

@@ -20,6 +20,7 @@ import {
   isShopGoogleShoppingPurchaseHistoryRow,
   shopGoogleShoppingPurchaseHistoryLabel,
 } from "@/lib/shop-google-shopping";
+import { promotionPurchaseReferenceLabel } from "@/lib/platform-transaction-reference";
 import type { PromotionPurchaseSummaryRow } from "@/lib/dashboard-promotions-tab-types";
 
 function lifecycleShortLabel(l: PromotionPurchaseLifecycle): string {
@@ -77,13 +78,21 @@ function formatExpiresLabel(p: {
 }
 
 function purchaseHistoryTitle(p: PromotionPurchaseSummaryRow): string {
-  if (isShopFlairPurchaseHistoryRow(p)) return shopFlairPurchaseHistoryLabel();
+  if (isShopFlairPurchaseHistoryRow(p)) {
+    return shopFlairPurchaseHistoryLabel({ transactionNumber: p.transactionNumber });
+  }
   if (isShopGoogleShoppingPurchaseHistoryRow(p)) {
     return shopGoogleShoppingPurchaseHistoryLabel({
       packId: p.googleShoppingPackId,
       creditsGranted: p.googleShoppingCreditsGranted,
+      transactionNumber: p.transactionNumber,
     });
   }
+  const refLabel = promotionPurchaseReferenceLabel({
+    kind: p.kind,
+    transactionNumber: p.transactionNumber,
+  });
+  if (refLabel) return refLabel;
   const ke = parsePromotionKind(p.kind) ?? PromotionKind.FRONT_PAGE_ITEM;
   return promotionKindLabel(ke);
 }

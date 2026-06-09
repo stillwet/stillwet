@@ -28,10 +28,12 @@ export type AggregateShopReactivationPurchase = {
 
 export type ShopReactivationPurchaseAvgAggregateOutputType = {
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ShopReactivationPurchaseSumAggregateOutputType = {
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ShopReactivationPurchaseMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type ShopReactivationPurchaseMinAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ShopReactivationPurchaseStatus | null
+  transactionNumber: number | null
   stripeCheckoutSessionId: string | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
@@ -55,6 +58,7 @@ export type ShopReactivationPurchaseMaxAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ShopReactivationPurchaseStatus | null
+  transactionNumber: number | null
   stripeCheckoutSessionId: string | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
@@ -69,6 +73,7 @@ export type ShopReactivationPurchaseCountAggregateOutputType = {
   amountCents: number
   currency: number
   status: number
+  transactionNumber: number
   stripeCheckoutSessionId: number
   stripePaymentIntentId: number
   paidAt: number
@@ -80,10 +85,12 @@ export type ShopReactivationPurchaseCountAggregateOutputType = {
 
 export type ShopReactivationPurchaseAvgAggregateInputType = {
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ShopReactivationPurchaseSumAggregateInputType = {
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ShopReactivationPurchaseMinAggregateInputType = {
@@ -93,6 +100,7 @@ export type ShopReactivationPurchaseMinAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripeCheckoutSessionId?: true
   stripePaymentIntentId?: true
   paidAt?: true
@@ -107,6 +115,7 @@ export type ShopReactivationPurchaseMaxAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripeCheckoutSessionId?: true
   stripePaymentIntentId?: true
   paidAt?: true
@@ -121,6 +130,7 @@ export type ShopReactivationPurchaseCountAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripeCheckoutSessionId?: true
   stripePaymentIntentId?: true
   paidAt?: true
@@ -222,6 +232,7 @@ export type ShopReactivationPurchaseGroupByOutputType = {
   amountCents: number
   currency: string
   status: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber: number | null
   stripeCheckoutSessionId: string | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
@@ -259,6 +270,7 @@ export type ShopReactivationPurchaseWhereInput = {
   amountCents?: Prisma.IntFilter<"ShopReactivationPurchase"> | number
   currency?: Prisma.StringFilter<"ShopReactivationPurchase"> | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFilter<"ShopReactivationPurchase"> | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopReactivationPurchase"> | number | null
   stripeCheckoutSessionId?: Prisma.StringNullableFilter<"ShopReactivationPurchase"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ShopReactivationPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopReactivationPurchase"> | Date | string | null
@@ -275,6 +287,7 @@ export type ShopReactivationPurchaseOrderByWithRelationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -296,6 +309,7 @@ export type ShopReactivationPurchaseWhereUniqueInput = Prisma.AtLeast<{
   amountCents?: Prisma.IntFilter<"ShopReactivationPurchase"> | number
   currency?: Prisma.StringFilter<"ShopReactivationPurchase"> | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFilter<"ShopReactivationPurchase"> | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopReactivationPurchase"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopReactivationPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopReactivationPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ShopReactivationPurchase"> | Date | string
@@ -310,6 +324,7 @@ export type ShopReactivationPurchaseOrderByWithAggregationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -332,6 +347,7 @@ export type ShopReactivationPurchaseScalarWhereWithAggregatesInput = {
   amountCents?: Prisma.IntWithAggregatesFilter<"ShopReactivationPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"ShopReactivationPurchase"> | string
   status?: Prisma.EnumShopReactivationPurchaseStatusWithAggregatesFilter<"ShopReactivationPurchase"> | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"ShopReactivationPurchase"> | number | null
   stripeCheckoutSessionId?: Prisma.StringNullableWithAggregatesFilter<"ShopReactivationPurchase"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"ShopReactivationPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShopReactivationPurchase"> | Date | string | null
@@ -344,6 +360,7 @@ export type ShopReactivationPurchaseCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -360,6 +377,7 @@ export type ShopReactivationPurchaseUncheckedCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -372,6 +390,7 @@ export type ShopReactivationPurchaseUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -388,6 +407,7 @@ export type ShopReactivationPurchaseUncheckedUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -402,6 +422,7 @@ export type ShopReactivationPurchaseCreateManyInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -414,6 +435,7 @@ export type ShopReactivationPurchaseUpdateManyMutationInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -428,6 +450,7 @@ export type ShopReactivationPurchaseUncheckedUpdateManyInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -452,6 +475,7 @@ export type ShopReactivationPurchaseCountOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -461,6 +485,7 @@ export type ShopReactivationPurchaseCountOrderByAggregateInput = {
 
 export type ShopReactivationPurchaseAvgOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ShopReactivationPurchaseMaxOrderByAggregateInput = {
@@ -470,6 +495,7 @@ export type ShopReactivationPurchaseMaxOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -484,6 +510,7 @@ export type ShopReactivationPurchaseMinOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -493,6 +520,7 @@ export type ShopReactivationPurchaseMinOrderByAggregateInput = {
 
 export type ShopReactivationPurchaseSumOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ShopReactivationPurchaseCreateNestedManyWithoutShopInput = {
@@ -588,6 +616,7 @@ export type ShopReactivationPurchaseCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -602,6 +631,7 @@ export type ShopReactivationPurchaseUncheckedCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -645,6 +675,7 @@ export type ShopReactivationPurchaseScalarWhereInput = {
   amountCents?: Prisma.IntFilter<"ShopReactivationPurchase"> | number
   currency?: Prisma.StringFilter<"ShopReactivationPurchase"> | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFilter<"ShopReactivationPurchase"> | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopReactivationPurchase"> | number | null
   stripeCheckoutSessionId?: Prisma.StringNullableFilter<"ShopReactivationPurchase"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ShopReactivationPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopReactivationPurchase"> | Date | string | null
@@ -657,6 +688,7 @@ export type ShopReactivationPurchaseCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -671,6 +703,7 @@ export type ShopReactivationPurchaseUncheckedCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -710,6 +743,7 @@ export type ShopReactivationPurchaseCreateManyShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -722,6 +756,7 @@ export type ShopReactivationPurchaseUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -736,6 +771,7 @@ export type ShopReactivationPurchaseUncheckedUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -749,6 +785,7 @@ export type ShopReactivationPurchaseUncheckedUpdateManyWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -762,6 +799,7 @@ export type ShopReactivationPurchaseCreateManyShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -774,6 +812,7 @@ export type ShopReactivationPurchaseUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -788,6 +827,7 @@ export type ShopReactivationPurchaseUncheckedUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -801,6 +841,7 @@ export type ShopReactivationPurchaseUncheckedUpdateManyWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopReactivationPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopReactivationPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -817,6 +858,7 @@ export type ShopReactivationPurchaseSelect<ExtArgs extends runtime.Types.Extensi
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -833,6 +875,7 @@ export type ShopReactivationPurchaseSelectCreateManyAndReturn<ExtArgs extends ru
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -849,6 +892,7 @@ export type ShopReactivationPurchaseSelectUpdateManyAndReturn<ExtArgs extends ru
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -865,6 +909,7 @@ export type ShopReactivationPurchaseSelectScalar = {
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -872,7 +917,7 @@ export type ShopReactivationPurchaseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ShopReactivationPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "amountCents" | "currency" | "status" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shopReactivationPurchase"]>
+export type ShopReactivationPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "amountCents" | "currency" | "status" | "transactionNumber" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shopReactivationPurchase"]>
 export type ShopReactivationPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -899,6 +944,10 @@ export type $ShopReactivationPurchasePayload<ExtArgs extends runtime.Types.Exten
     amountCents: number
     currency: string
     status: $Enums.ShopReactivationPurchaseStatus
+    /**
+     * * Platform-wide Shop Reactivation Fee sequence number for Stripe labels.
+     */
+    transactionNumber: number | null
     stripeCheckoutSessionId: string | null
     stripePaymentIntentId: string | null
     paidAt: Date | null
@@ -1335,6 +1384,7 @@ export interface ShopReactivationPurchaseFieldRefs {
   readonly amountCents: Prisma.FieldRef<"ShopReactivationPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"ShopReactivationPurchase", 'String'>
   readonly status: Prisma.FieldRef<"ShopReactivationPurchase", 'ShopReactivationPurchaseStatus'>
+  readonly transactionNumber: Prisma.FieldRef<"ShopReactivationPurchase", 'Int'>
   readonly stripeCheckoutSessionId: Prisma.FieldRef<"ShopReactivationPurchase", 'String'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"ShopReactivationPurchase", 'String'>
   readonly paidAt: Prisma.FieldRef<"ShopReactivationPurchase", 'DateTime'>

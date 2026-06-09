@@ -2,8 +2,8 @@ import { AdminPlatformSalesTab } from "@/components/admin/AdminPlatformSalesTab"
 import {
   loadMergedPlatformSalesLines,
   loadPlatformSalesCurrentMonthTotals,
-  loadPlatformSalesPreviousMonthTotalsCached,
-  loadPlatformSalesPriorCalendarYearTotalsCached,
+  loadPlatformSalesCurrentQuarterTotals,
+  loadPlatformSalesMonthlyAverageTotals,
   loadPlatformSalesYtdTotalsHybrid,
   platformSalesUtcMonthTitles,
 } from "@/lib/admin-platform-sales-merged-lines";
@@ -55,11 +55,11 @@ export async function AdminPlatformSalesTabLoader(props: {
 
   const salesClock = new Date();
   const titles = platformSalesUtcMonthTitles(salesClock);
-  const [currentTotals, previousTotals, ytdTotals, priorCalendarYearTotals] = await Promise.all([
+  const [currentTotals, currentQuarterTotals, ytdTotals, monthlyAverage] = await Promise.all([
     loadPlatformSalesCurrentMonthTotals(prisma, salesClock),
-    loadPlatformSalesPreviousMonthTotalsCached(salesClock),
+    loadPlatformSalesCurrentQuarterTotals(prisma, salesClock),
     loadPlatformSalesYtdTotalsHybrid(salesClock),
-    loadPlatformSalesPriorCalendarYearTotalsCached(salesClock),
+    loadPlatformSalesMonthlyAverageTotals(prisma, salesClock),
   ]);
 
   return (
@@ -71,9 +71,9 @@ export async function AdminPlatformSalesTabLoader(props: {
       monthSummaries={{
         ...titles,
         currentTotals,
-        previousTotals,
+        currentQuarterTotals,
         ytdTotals,
-        priorCalendarYearTotals,
+        monthlyAverage,
       }}
       clearSalesHistoryEnabled={clearSalesHistoryEnabled}
     />

@@ -76,7 +76,7 @@ export function AdminShopLeaderboardTab(props: {
               <th className="py-2 px-2 text-center font-medium">Merchandise</th>
               <th className="py-2 px-2 text-center font-medium">Shop cut</th>
               <th className="py-2 px-2 text-center font-medium whitespace-nowrap text-blue-400/90">
-                Platform profit
+                Platform take (G/S + fee)
               </th>
               <th
                 className="py-2 px-2 text-center font-medium"

@@ -33,8 +33,10 @@ export type ShopSetupCatalogOption = {
   minPriceCents: number;
   priceCents: number;
   exampleHref: string | null;
-  /** Unit goods/services (COGS) from admin baseline — used for estimated shop profit at list price. */
+  /** Unit COGS from admin baseline — used for estimated shop profit at list price. */
   goodsServicesCostCents: number;
+  /** Unit production fee from admin baseline. */
+  productionFeeCents: number;
   /** Admin copy for print/DPI expectations. */
   imageRequirementLabel: string | null;
   /** When both print dimensions set, listing artwork uses fixed-aspect crop and exact export size (px). */
@@ -78,6 +80,7 @@ export function flattenShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup[]
     priceCents: g.option.priceCents,
     exampleHref: g.option.exampleHref,
     goodsServicesCostCents: g.option.goodsServicesCostCents,
+    productionFeeCents: g.option.productionFeeCents,
     imageRequirementLabel: g.option.imageRequirementLabel,
     printAreaWidthPx: g.option.printAreaWidthPx,
     printAreaHeightPx: g.option.printAreaHeightPx,
@@ -96,6 +99,7 @@ export type AdminBaselineRow = {
   itemExampleListingUrl: string | null;
   itemMinPriceCents: number;
   itemGoodsServicesCostCents: number;
+  itemProductionFeeCents?: number;
   itemImageRequirementLabel: string | null;
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
@@ -295,6 +299,7 @@ export function buildShopBaselineCatalogGroups(items: AdminBaselineRow[]): ShopS
         priceCents: Math.max(0, item.itemMinPriceCents),
         exampleHref: exampleHrefFromAdminUrl(item.itemExampleListingUrl),
         goodsServicesCostCents: Math.max(0, item.itemGoodsServicesCostCents),
+        productionFeeCents: Math.max(0, item.itemProductionFeeCents ?? 0),
         imageRequirementLabel: item.itemImageRequirementLabel?.trim() || null,
         printAreaWidthPx: primarySurface?.printAreaWidthPx ?? null,
         printAreaHeightPx: primarySurface?.printAreaHeightPx ?? null,

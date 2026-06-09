@@ -57,7 +57,7 @@ export function AdminInboxUnrepliedSection(props: { rows: AdminInboxRow[] }) {
           <thead>
             <tr className="border-b border-zinc-800 text-zinc-500">
               <th className="py-2 pr-2 font-medium">Received</th>
-              <th className="py-2 pr-2 font-medium">Reply / Resolved</th>
+              <th className="py-2 pr-2 font-medium">Reply / Resolve</th>
               <th className="py-2 pr-2 font-medium">From</th>
               <th className="py-2 pr-2 font-medium">Subject</th>
               <th className="py-2 font-medium">Email Body</th>
@@ -84,33 +84,30 @@ export function AdminInboxUnrepliedSection(props: { rows: AdminInboxRow[] }) {
                     ) : null}
                   </td>
                   <td className="py-2 pr-2">
-                    {isNotice ? (
-                      <span className="text-zinc-600">—</span>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <button
-                          type="button"
-                          disabled={isResolving}
-                          onClick={() => setSelectedId(isSelected ? null : r.id)}
-                          aria-pressed={isSelected}
-                          className={`rounded border px-2 py-0.5 text-[11px] font-medium transition disabled:opacity-60 ${
-                            isSelected
-                              ? "border-sky-800/60 bg-sky-950/50 text-sky-100"
-                              : "border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900"
-                          }`}
-                        >
-                          Reply
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isResolving}
-                          onClick={() => void handleResolve(r.id)}
-                          className="rounded border border-zinc-700 bg-zinc-900/50 px-2 py-0.5 text-[11px] font-medium text-zinc-400 transition hover:border-zinc-600 hover:bg-zinc-900 hover:text-zinc-300 disabled:opacity-60"
-                        >
-                          {isResolving ? "…" : "Resolve"}
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        disabled={isResolving || isNotice}
+                        onClick={() => setSelectedId(isSelected ? null : r.id)}
+                        aria-pressed={isSelected}
+                        title={isNotice ? "System notices cannot be replied to." : undefined}
+                        className={`rounded border px-2 py-0.5 text-[11px] font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                          isSelected
+                            ? "border-sky-800/60 bg-sky-950/50 text-sky-100"
+                            : "border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900"
+                        }`}
+                      >
+                        Reply
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isResolving}
+                        onClick={() => void handleResolve(r.id)}
+                        className="rounded border border-zinc-700 bg-zinc-900/50 px-2 py-0.5 text-[11px] font-medium text-zinc-400 transition hover:border-zinc-600 hover:bg-zinc-900 hover:text-zinc-300 disabled:opacity-60"
+                      >
+                        {isResolving ? "…" : "Resolve"}
+                      </button>
+                    </div>
                   </td>
                   <td className="py-2 pr-2 break-words text-zinc-400">{r.fromAddress}</td>
                   <td className="py-2 pr-2 break-words font-medium text-zinc-200">{r.subject}</td>

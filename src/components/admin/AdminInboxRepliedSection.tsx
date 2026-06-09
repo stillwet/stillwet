@@ -32,7 +32,7 @@ export function AdminInboxRepliedSection(props: { rows: AdminInboxRow[] }) {
           <thead>
             <tr className="border-b border-zinc-800 text-zinc-500">
               <th className="py-2 pr-2 font-medium">Received</th>
-              <th className="py-2 pr-2 font-medium">Reply / Resolved</th>
+              <th className="py-2 pr-2 font-medium">Reply</th>
               <th className="py-2 pr-2 font-medium">From</th>
               <th className="py-2 pr-2 font-medium">Subject</th>
               <th className="py-2 font-medium">Email Body</th>

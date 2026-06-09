@@ -42,6 +42,11 @@ import {
   stripeCheckoutPaymentProcessingLineItem,
 } from "@/lib/stripe-card-processing-fee";
 import {
+  allocatePlatformTransactionNumber,
+  promotionKindToPlatformTransactionProduct,
+  stripePlatformTransactionReferenceFields,
+} from "@/lib/platform-transaction-reference";
+import {
   countPromotionKindPaidSlotsThreePeriodsCached,
   purchaseOfferForChosenPlacementOffset,
   resolveHotItemPlacementOfferWithCounts,
@@ -245,18 +250,30 @@ export async function startPromotionCheckoutSession(input: {
   const base = publicAppBaseUrl();
   if (!base) return { ok: false, error: "App URL is not configured." };
 
-  const purchase = await prisma.promotionPurchase.create({
-    data: {
-      shopId: shop.id,
-      shopUserId: user.id,
-      kind,
-      shopListingId: null,
-      amountCents: checkoutTotalCents,
-      currency: "usd",
-      status: PromotionPurchaseStatus.pending,
-      eligibleFrom,
-    },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      promotionKindToPlatformTransactionProduct(kind),
+    );
+    return tx.promotionPurchase.create({
+      data: {
+        shopId: shop.id,
+        shopUserId: user.id,
+        kind,
+        shopListingId: null,
+        amountCents: checkoutTotalCents,
+        currency: "usd",
+        status: PromotionPurchaseStatus.pending,
+        eligibleFrom,
+        transactionNumber,
+      },
+    });
   });
+
+  const refFields = stripePlatformTransactionReferenceFields(
+    promotionKindToPlatformTransactionProduct(kind),
+    purchase.transactionNumber!,
+  );
 
   try {
     const stripe = getStripe();
@@ -271,7 +288,7 @@ export async function startPromotionCheckoutSession(input: {
             currency: "usd",
             unit_amount: merchandiseSubtotalCents,
             product_data: {
-              name: promotionKindLabel(kind),
+              name: refFields.lineItemName,
               description: "Shop promotion credit (Pacific placement period).",
             },
           },
@@ -287,6 +304,11 @@ export async function startPromotionCheckoutSession(input: {
         subtotalCents: String(merchandiseSubtotalCents),
         amountCents: String(checkoutTotalCents),
         ...(eligibleFrom ? { eligibleFromIso: eligibleFrom.toISOString() } : {}),
+        ...refFields.metadata,
+      },
+      payment_intent_data: {
+        description: refFields.description,
+        metadata: refFields.metadata,
       },
       success_url: `${appBase}${dashboardPromotionsUrl({ promo: "ok" })}`,
       cancel_url: `${appBase}${dashboardPromotionsUrl({ promo: "cancel" })}`,
@@ -365,18 +387,30 @@ export async function startPromotionPurchaseIntent(input: {
     };
   }
 
-  const purchase = await prisma.promotionPurchase.create({
-    data: {
-      shopId: shop.id,
-      shopUserId: user.id,
-      kind,
-      shopListingId,
-      amountCents: checkoutTotalCents,
-      currency: "usd",
-      status: PromotionPurchaseStatus.pending,
-      eligibleFrom,
-    },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      promotionKindToPlatformTransactionProduct(kind),
+    );
+    return tx.promotionPurchase.create({
+      data: {
+        shopId: shop.id,
+        shopUserId: user.id,
+        kind,
+        shopListingId,
+        amountCents: checkoutTotalCents,
+        currency: "usd",
+        status: PromotionPurchaseStatus.pending,
+        eligibleFrom,
+        transactionNumber,
+      },
+    });
   });
+
+  const refFields = stripePlatformTransactionReferenceFields(
+    promotionKindToPlatformTransactionProduct(kind),
+    purchase.transactionNumber!,
+  );
 
   try {
     const stripe = getStripe();
@@ -384,6 +418,7 @@ export async function startPromotionPurchaseIntent(input: {
       amount: checkoutTotalCents,
       currency: "usd",
       payment_method_types: ["card"],
+      description: refFields.description,
       metadata: {
         kind: "promotion",
         promotionPurchaseId: purchase.id,
@@ -394,6 +429,7 @@ export async function startPromotionPurchaseIntent(input: {
         paymentProcessingCents: String(paymentProcessingCents),
         amountCents: String(checkoutTotalCents),
         ...(eligibleFrom ? { eligibleFromIso: eligibleFrom.toISOString() } : {}),
+        ...refFields.metadata,
       },
     });
 

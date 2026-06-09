@@ -425,7 +425,6 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Shop Data
-                    <AdminMainNavCount field="shopWatch" variant="muted" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=beta-testers`}
@@ -454,7 +453,6 @@ async function AdminDashboardPageBody({
                   <Link
                     href={`${basePath}?tab=promotion-lists`}
                     role="tab"
-                    title="Count is paid merchant placements currently in their active window (Hot item, Featured shop home, Popular item, Front page)."
                     aria-selected={inventoryTab === "promotion-lists"}
                     className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "promotion-lists"
@@ -463,7 +461,6 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Promotion Rank
-                    <AdminMainNavCount field="promotionLists" variant="muted" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=shop-leaderboard`}
@@ -476,12 +473,10 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Shop leaderboard
-                    <AdminMainNavCount field="shopLeaderboard" variant="muted" />
                   </Link>
                   <Link
                     href={`${basePath}?tab=sales`}
                     role="tab"
-                    title="Badge count is new platform sales in the last 24 hours: items sold (merchandise qty), publication fees, and paid promotions. The sales tab can filter by date separately."
                     aria-selected={inventoryTab === "sales"}
                     className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "sales"
@@ -490,7 +485,6 @@ async function AdminDashboardPageBody({
                     }`}
                   >
                     Platform sales
-                    <AdminMainNavCount field="platformSales" variant="muted" />
                   </Link>
                 </div>
               </div>

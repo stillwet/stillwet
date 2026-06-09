@@ -31,6 +31,7 @@ export type CreatorGiftPurchaseAvgAggregateOutputType = {
   googleShoppingCreditsGranted: number | null
   promotionCreditsGranted: number | null
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type CreatorGiftPurchaseSumAggregateOutputType = {
@@ -38,6 +39,7 @@ export type CreatorGiftPurchaseSumAggregateOutputType = {
   googleShoppingCreditsGranted: number | null
   promotionCreditsGranted: number | null
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type CreatorGiftPurchaseMinAggregateOutputType = {
@@ -59,6 +61,7 @@ export type CreatorGiftPurchaseMinAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.CreatorGiftPurchaseStatus | null
+  transactionNumber: number | null
   stripeCheckoutSessionId: string | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
@@ -86,6 +89,7 @@ export type CreatorGiftPurchaseMaxAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.CreatorGiftPurchaseStatus | null
+  transactionNumber: number | null
   stripeCheckoutSessionId: string | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
@@ -113,6 +117,7 @@ export type CreatorGiftPurchaseCountAggregateOutputType = {
   amountCents: number
   currency: number
   status: number
+  transactionNumber: number
   stripeCheckoutSessionId: number
   stripePaymentIntentId: number
   paidAt: number
@@ -128,6 +133,7 @@ export type CreatorGiftPurchaseAvgAggregateInputType = {
   googleShoppingCreditsGranted?: true
   promotionCreditsGranted?: true
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type CreatorGiftPurchaseSumAggregateInputType = {
@@ -135,6 +141,7 @@ export type CreatorGiftPurchaseSumAggregateInputType = {
   googleShoppingCreditsGranted?: true
   promotionCreditsGranted?: true
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type CreatorGiftPurchaseMinAggregateInputType = {
@@ -156,6 +163,7 @@ export type CreatorGiftPurchaseMinAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripeCheckoutSessionId?: true
   stripePaymentIntentId?: true
   paidAt?: true
@@ -183,6 +191,7 @@ export type CreatorGiftPurchaseMaxAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripeCheckoutSessionId?: true
   stripePaymentIntentId?: true
   paidAt?: true
@@ -210,6 +219,7 @@ export type CreatorGiftPurchaseCountAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripeCheckoutSessionId?: true
   stripePaymentIntentId?: true
   paidAt?: true
@@ -324,6 +334,7 @@ export type CreatorGiftPurchaseGroupByOutputType = {
   amountCents: number
   currency: string
   status: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber: number | null
   stripeCheckoutSessionId: string | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
@@ -374,6 +385,7 @@ export type CreatorGiftPurchaseWhereInput = {
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"CreatorGiftPurchase"> | number | null
   stripeCheckoutSessionId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
@@ -403,6 +415,7 @@ export type CreatorGiftPurchaseOrderByWithRelationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -437,6 +450,7 @@ export type CreatorGiftPurchaseWhereUniqueInput = Prisma.AtLeast<{
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"CreatorGiftPurchase"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
   emailedAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CreatorGiftPurchase"> | Date | string
@@ -464,6 +478,7 @@ export type CreatorGiftPurchaseOrderByWithAggregationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -499,6 +514,7 @@ export type CreatorGiftPurchaseScalarWhereWithAggregatesInput = {
   amountCents?: Prisma.IntWithAggregatesFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusWithAggregatesFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"CreatorGiftPurchase"> | number | null
   stripeCheckoutSessionId?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"CreatorGiftPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CreatorGiftPurchase"> | Date | string | null
@@ -525,6 +541,7 @@ export type CreatorGiftPurchaseCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -554,6 +571,7 @@ export type CreatorGiftPurchaseUncheckedCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -581,6 +599,7 @@ export type CreatorGiftPurchaseUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -610,6 +629,7 @@ export type CreatorGiftPurchaseUncheckedUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -638,6 +658,7 @@ export type CreatorGiftPurchaseCreateManyInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -664,6 +685,7 @@ export type CreatorGiftPurchaseUpdateManyMutationInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -691,6 +713,7 @@ export type CreatorGiftPurchaseUncheckedUpdateManyInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -728,6 +751,7 @@ export type CreatorGiftPurchaseCountOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -741,6 +765,7 @@ export type CreatorGiftPurchaseAvgOrderByAggregateInput = {
   googleShoppingCreditsGranted?: Prisma.SortOrder
   promotionCreditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type CreatorGiftPurchaseMaxOrderByAggregateInput = {
@@ -762,6 +787,7 @@ export type CreatorGiftPurchaseMaxOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -789,6 +815,7 @@ export type CreatorGiftPurchaseMinOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
@@ -802,6 +829,7 @@ export type CreatorGiftPurchaseSumOrderByAggregateInput = {
   googleShoppingCreditsGranted?: Prisma.SortOrder
   promotionCreditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type CreatorGiftPurchaseScalarRelationFilter = {
@@ -895,6 +923,7 @@ export type CreatorGiftPurchaseCreateWithoutRecipientShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -922,6 +951,7 @@ export type CreatorGiftPurchaseUncheckedCreateWithoutRecipientShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -979,6 +1009,7 @@ export type CreatorGiftPurchaseScalarWhereInput = {
   amountCents?: Prisma.IntFilter<"CreatorGiftPurchase"> | number
   currency?: Prisma.StringFilter<"CreatorGiftPurchase"> | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFilter<"CreatorGiftPurchase"> | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"CreatorGiftPurchase"> | number | null
   stripeCheckoutSessionId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"CreatorGiftPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"CreatorGiftPurchase"> | Date | string | null
@@ -1005,6 +1036,7 @@ export type CreatorGiftPurchaseCreateWithoutCodesInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -1033,6 +1065,7 @@ export type CreatorGiftPurchaseUncheckedCreateWithoutCodesInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -1075,6 +1108,7 @@ export type CreatorGiftPurchaseUpdateWithoutCodesInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1103,6 +1137,7 @@ export type CreatorGiftPurchaseUncheckedUpdateWithoutCodesInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1129,6 +1164,7 @@ export type CreatorGiftPurchaseCreateManyRecipientShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: number | null
   stripeCheckoutSessionId?: string | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
@@ -1155,6 +1191,7 @@ export type CreatorGiftPurchaseUpdateWithoutRecipientShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1182,6 +1219,7 @@ export type CreatorGiftPurchaseUncheckedUpdateWithoutRecipientShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1209,6 +1247,7 @@ export type CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCreatorGiftPurchaseStatusFieldUpdateOperationsInput | $Enums.CreatorGiftPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1267,6 +1306,7 @@ export type CreatorGiftPurchaseSelect<ExtArgs extends runtime.Types.Extensions.I
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -1297,6 +1337,7 @@ export type CreatorGiftPurchaseSelectCreateManyAndReturn<ExtArgs extends runtime
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -1325,6 +1366,7 @@ export type CreatorGiftPurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -1353,6 +1395,7 @@ export type CreatorGiftPurchaseSelectScalar = {
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripeCheckoutSessionId?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
@@ -1361,7 +1404,7 @@ export type CreatorGiftPurchaseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CreatorGiftPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaserEmail" | "fulfillmentMode" | "recipientShopId" | "giftFromName" | "setupFeeIncluded" | "listingCreditPackId" | "listingCreditsGranted" | "googleShoppingCreditPackId" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "shopFlairIncluded" | "isBetaTesterBatch" | "isWaivedShopFeeBatch" | "amountCents" | "currency" | "status" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "emailedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["creatorGiftPurchase"]>
+export type CreatorGiftPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaserEmail" | "fulfillmentMode" | "recipientShopId" | "giftFromName" | "setupFeeIncluded" | "listingCreditPackId" | "listingCreditsGranted" | "googleShoppingCreditPackId" | "googleShoppingCreditsGranted" | "promotionKind" | "promotionCreditsGranted" | "shopFlairIncluded" | "isBetaTesterBatch" | "isWaivedShopFeeBatch" | "amountCents" | "currency" | "status" | "transactionNumber" | "stripeCheckoutSessionId" | "stripePaymentIntentId" | "paidAt" | "emailedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["creatorGiftPurchase"]>
 export type CreatorGiftPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   recipientShop?: boolean | Prisma.CreatorGiftPurchase$recipientShopArgs<ExtArgs>
   codes?: boolean | Prisma.CreatorGiftPurchase$codesArgs<ExtArgs>
@@ -1405,6 +1448,10 @@ export type $CreatorGiftPurchasePayload<ExtArgs extends runtime.Types.Extensions
     amountCents: number
     currency: string
     status: $Enums.CreatorGiftPurchaseStatus
+    /**
+     * * Primary product sequence number when checkout has one main line (setup gift).
+     */
+    transactionNumber: number | null
     stripeCheckoutSessionId: string | null
     stripePaymentIntentId: string | null
     paidAt: Date | null
@@ -1854,6 +1901,7 @@ export interface CreatorGiftPurchaseFieldRefs {
   readonly amountCents: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly status: Prisma.FieldRef<"CreatorGiftPurchase", 'CreatorGiftPurchaseStatus'>
+  readonly transactionNumber: Prisma.FieldRef<"CreatorGiftPurchase", 'Int'>
   readonly stripeCheckoutSessionId: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"CreatorGiftPurchase", 'String'>
   readonly paidAt: Prisma.FieldRef<"CreatorGiftPurchase", 'DateTime'>

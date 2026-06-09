@@ -1,3 +1,10 @@
+/** Configured marketplace fee on merchandise after COGS (default 10). */
+export function marketplacePlatformFeePercent(): number {
+  const raw = process.env.MARKETPLACE_PLATFORM_FEE_PERCENT;
+  const pct = raw ? parseInt(raw, 10) : 10;
+  return Math.min(100, Math.max(0, Number.isFinite(pct) ? pct : 10));
+}
+
 /**
  * Split merchandise revenue for one order line: optional goods/services (COGS) retained by the platform,
  * then `MARKETPLACE_PLATFORM_FEE_PERCENT` on the remainder. Values are persisted on `OrderLine`.
@@ -11,9 +18,7 @@ export function splitMerchandiseLineForCheckoutCents(params: {
   const goodsServicesCostCents = Math.min(gRaw, M);
   const pool = M - goodsServicesCostCents;
 
-  const raw = process.env.MARKETPLACE_PLATFORM_FEE_PERCENT;
-  const pct = raw ? parseInt(raw, 10) : 10;
-  const rate = Math.min(100, Math.max(0, Number.isFinite(pct) ? pct : 10)) / 100;
+  const rate = marketplacePlatformFeePercent() / 100;
   const platformCutCents = Math.floor(pool * rate);
   const shopCutCents = pool - platformCutCents;
   return { goodsServicesCostCents, platformCutCents, shopCutCents };

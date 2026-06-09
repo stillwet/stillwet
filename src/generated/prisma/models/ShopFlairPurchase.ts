@@ -28,10 +28,12 @@ export type AggregateShopFlairPurchase = {
 
 export type ShopFlairPurchaseAvgAggregateOutputType = {
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ShopFlairPurchaseSumAggregateOutputType = {
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ShopFlairPurchaseMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type ShopFlairPurchaseMinAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ShopFlairPurchaseStatus | null
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date | null
@@ -54,6 +57,7 @@ export type ShopFlairPurchaseMaxAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ShopFlairPurchaseStatus | null
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date | null
@@ -67,6 +71,7 @@ export type ShopFlairPurchaseCountAggregateOutputType = {
   amountCents: number
   currency: number
   status: number
+  transactionNumber: number
   stripePaymentIntentId: number
   paidAt: number
   createdAt: number
@@ -77,10 +82,12 @@ export type ShopFlairPurchaseCountAggregateOutputType = {
 
 export type ShopFlairPurchaseAvgAggregateInputType = {
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ShopFlairPurchaseSumAggregateInputType = {
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ShopFlairPurchaseMinAggregateInputType = {
@@ -90,6 +97,7 @@ export type ShopFlairPurchaseMinAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -103,6 +111,7 @@ export type ShopFlairPurchaseMaxAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -116,6 +125,7 @@ export type ShopFlairPurchaseCountAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -216,6 +226,7 @@ export type ShopFlairPurchaseGroupByOutputType = {
   amountCents: number
   currency: string
   status: $Enums.ShopFlairPurchaseStatus
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date
@@ -252,6 +263,7 @@ export type ShopFlairPurchaseWhereInput = {
   amountCents?: Prisma.IntFilter<"ShopFlairPurchase"> | number
   currency?: Prisma.StringFilter<"ShopFlairPurchase"> | string
   status?: Prisma.EnumShopFlairPurchaseStatusFilter<"ShopFlairPurchase"> | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopFlairPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ShopFlairPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopFlairPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopFlairPurchase"> | Date | string
@@ -267,6 +279,7 @@ export type ShopFlairPurchaseOrderByWithRelationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -286,6 +299,7 @@ export type ShopFlairPurchaseWhereUniqueInput = Prisma.AtLeast<{
   amountCents?: Prisma.IntFilter<"ShopFlairPurchase"> | number
   currency?: Prisma.StringFilter<"ShopFlairPurchase"> | string
   status?: Prisma.EnumShopFlairPurchaseStatusFilter<"ShopFlairPurchase"> | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopFlairPurchase"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopFlairPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopFlairPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ShopFlairPurchase"> | Date | string
@@ -300,6 +314,7 @@ export type ShopFlairPurchaseOrderByWithAggregationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -321,6 +336,7 @@ export type ShopFlairPurchaseScalarWhereWithAggregatesInput = {
   amountCents?: Prisma.IntWithAggregatesFilter<"ShopFlairPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"ShopFlairPurchase"> | string
   status?: Prisma.EnumShopFlairPurchaseStatusWithAggregatesFilter<"ShopFlairPurchase"> | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"ShopFlairPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"ShopFlairPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShopFlairPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ShopFlairPurchase"> | Date | string
@@ -332,6 +348,7 @@ export type ShopFlairPurchaseCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -347,6 +364,7 @@ export type ShopFlairPurchaseUncheckedCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -358,6 +376,7 @@ export type ShopFlairPurchaseUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -373,6 +392,7 @@ export type ShopFlairPurchaseUncheckedUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -386,6 +406,7 @@ export type ShopFlairPurchaseCreateManyInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -397,6 +418,7 @@ export type ShopFlairPurchaseUpdateManyMutationInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -410,6 +432,7 @@ export type ShopFlairPurchaseUncheckedUpdateManyInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -433,6 +456,7 @@ export type ShopFlairPurchaseCountOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -441,6 +465,7 @@ export type ShopFlairPurchaseCountOrderByAggregateInput = {
 
 export type ShopFlairPurchaseAvgOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ShopFlairPurchaseMaxOrderByAggregateInput = {
@@ -450,6 +475,7 @@ export type ShopFlairPurchaseMaxOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -463,6 +489,7 @@ export type ShopFlairPurchaseMinOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -471,6 +498,7 @@ export type ShopFlairPurchaseMinOrderByAggregateInput = {
 
 export type ShopFlairPurchaseSumOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ShopFlairPurchaseCreateNestedManyWithoutShopInput = {
@@ -566,6 +594,7 @@ export type ShopFlairPurchaseCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -579,6 +608,7 @@ export type ShopFlairPurchaseUncheckedCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -621,6 +651,7 @@ export type ShopFlairPurchaseScalarWhereInput = {
   amountCents?: Prisma.IntFilter<"ShopFlairPurchase"> | number
   currency?: Prisma.StringFilter<"ShopFlairPurchase"> | string
   status?: Prisma.EnumShopFlairPurchaseStatusFilter<"ShopFlairPurchase"> | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopFlairPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ShopFlairPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopFlairPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopFlairPurchase"> | Date | string
@@ -632,6 +663,7 @@ export type ShopFlairPurchaseCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -645,6 +677,7 @@ export type ShopFlairPurchaseUncheckedCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -683,6 +716,7 @@ export type ShopFlairPurchaseCreateManyShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -694,6 +728,7 @@ export type ShopFlairPurchaseUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -707,6 +742,7 @@ export type ShopFlairPurchaseUncheckedUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -719,6 +755,7 @@ export type ShopFlairPurchaseUncheckedUpdateManyWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -731,6 +768,7 @@ export type ShopFlairPurchaseCreateManyShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -742,6 +780,7 @@ export type ShopFlairPurchaseUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -755,6 +794,7 @@ export type ShopFlairPurchaseUncheckedUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -767,6 +807,7 @@ export type ShopFlairPurchaseUncheckedUpdateManyWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopFlairPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopFlairPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -782,6 +823,7 @@ export type ShopFlairPurchaseSelect<ExtArgs extends runtime.Types.Extensions.Int
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -797,6 +839,7 @@ export type ShopFlairPurchaseSelectCreateManyAndReturn<ExtArgs extends runtime.T
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -812,6 +855,7 @@ export type ShopFlairPurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -827,13 +871,14 @@ export type ShopFlairPurchaseSelectScalar = {
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ShopFlairPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "amountCents" | "currency" | "status" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shopFlairPurchase"]>
+export type ShopFlairPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "amountCents" | "currency" | "status" | "transactionNumber" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shopFlairPurchase"]>
 export type ShopFlairPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -860,6 +905,10 @@ export type $ShopFlairPurchasePayload<ExtArgs extends runtime.Types.Extensions.I
     amountCents: number
     currency: string
     status: $Enums.ShopFlairPurchaseStatus
+    /**
+     * * Platform-wide Shop Flair sequence number for Stripe labels.
+     */
+    transactionNumber: number | null
     stripePaymentIntentId: string | null
     paidAt: Date | null
     createdAt: Date
@@ -1295,6 +1344,7 @@ export interface ShopFlairPurchaseFieldRefs {
   readonly amountCents: Prisma.FieldRef<"ShopFlairPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"ShopFlairPurchase", 'String'>
   readonly status: Prisma.FieldRef<"ShopFlairPurchase", 'ShopFlairPurchaseStatus'>
+  readonly transactionNumber: Prisma.FieldRef<"ShopFlairPurchase", 'Int'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"ShopFlairPurchase", 'String'>
   readonly paidAt: Prisma.FieldRef<"ShopFlairPurchase", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ShopFlairPurchase", 'DateTime'>

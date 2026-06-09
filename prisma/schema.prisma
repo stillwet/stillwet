@@ -343,6 +343,8 @@ model ShopFlairPurchase {
   amountCents           Int
   currency              String                  @default("usd")
   status                ShopFlairPurchaseStatus @default(pending)
+  /** Platform-wide Shop Flair sequence number for Stripe labels. */
+  transactionNumber     Int?
   stripePaymentIntentId String?                 @unique
   paidAt                DateTime?
   createdAt             DateTime                @default(now())
@@ -372,6 +374,8 @@ model ShopGoogleShoppingPurchase {
   amountCents           Int
   currency              String                           @default("usd")
   status                ShopGoogleShoppingPurchaseStatus @default(pending)
+  /** Platform-wide G-Shop Listing Upgrade sequence number for Stripe labels. */
+  transactionNumber     Int?
   stripePaymentIntentId String?                          @unique
   paidAt                DateTime?
   createdAt             DateTime                         @default(now())
@@ -483,13 +487,21 @@ model SupportMessage {
 }
 
 model SupportTip {
-  id                     String   @id @default(cuid())
-  stripeCheckoutSessionId String  @unique
-  amountCents            Int
-  currency               String   @default("usd")
-  createdAt              DateTime @default(now())
+  id                      String   @id @default(cuid())
+  stripeCheckoutSessionId String?  @unique
+  /** Platform-wide Support Platform sequence number for Stripe labels. */
+  transactionNumber       Int?
+  amountCents             Int
+  currency                String   @default("usd")
+  createdAt               DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/** Per-product platform-wide transaction counters (`{Product} - #{N}` labels). */
+model PlatformTransactionSequence {
+  productKey String @id
+  lastNumber Int    @default(0)
 }
 
 model ShopOwnerNotice {
@@ -758,6 +770,8 @@ model PromotionPurchase {
   eligibleFrom          DateTime?
   /** True when checkout used an admin-granted promotion credit (amountCents is 0). */
   paidViaPromotionCredit Boolean                 @default(false)
+  /** Platform-wide promo-type sequence number for Stripe labels. */
+  transactionNumber     Int?
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
 
@@ -808,6 +822,8 @@ model ListingCreditPackPurchase {
   amountCents           Int
   currency              String                        @default("usd")
   status                ListingCreditPackPurchaseStatus @default(pending)
+  /** Platform-wide Listing Credits sequence number for Stripe labels. */
+  transactionNumber     Int?
   stripePaymentIntentId String?                       @unique
   paidAt                DateTime?
   createdAt             DateTime                      @default(now())
@@ -845,6 +861,8 @@ model ShopSetupFeePurchase {
   amountCents             Int
   currency                String                     @default("usd")
   status                  ShopSetupFeePurchaseStatus @default(pending)
+  /** Platform-wide Shop Creation Fee sequence number for Stripe labels. */
+  transactionNumber       Int?
   stripeCheckoutSessionId String?                    @unique
   stripePaymentIntentId   String?                    @unique
   paidAt                  DateTime?
@@ -865,6 +883,8 @@ model ShopReactivationPurchase {
   amountCents             Int
   currency                String                         @default("usd")
   status                  ShopReactivationPurchaseStatus @default(pending)
+  /** Platform-wide Shop Reactivation Fee sequence number for Stripe labels. */
+  transactionNumber       Int?
   stripeCheckoutSessionId String?                        @unique
   stripePaymentIntentId   String?                        @unique
   paidAt                  DateTime?
@@ -898,6 +918,8 @@ model CreatorGiftPurchase {
   amountCents                  Int
   currency                     String                     @default("usd")
   status                       CreatorGiftPurchaseStatus  @default(pending)
+  /** Primary product sequence number when checkout has one main line (setup gift). */
+  transactionNumber            Int?
   stripeCheckoutSessionId      String?                    @unique
   stripePaymentIntentId        String?                    @unique
   paidAt                       DateTime?
@@ -1052,9 +1074,14 @@ model OrderLine {
   fulfillmentType    FulfillmentType
   printifyProductId  String?
   printifyVariantId  String?
-  /** Fulfillment / COGS for this line (total cents), deducted before marketplace fee; retained by platform. */
+  /**
+   * COGS for this line (total cents), deducted before marketplace fee; retained by platform.
+   * See also {@link productionFeeCents}.
+   */
   goodsServicesCostCents Int        @default(0)
-  /** Marketplace fee (cents) on merchandise after goods/services cost. */
+  /** Production fee for this line (total cents); retained by platform with COGS. */
+  productionFeeCents     Int        @default(0)
+  /** Marketplace fee (cents) on merchandise after item cost (COGS + production fee). */
   platformCutCents   Int            @default(0)
   shopCutCents       Int            @default(0)
   createdAt          DateTime       @default(now())
@@ -1116,10 +1143,12 @@ model AdminCatalogItem {
   /** Minimum list price in cents for the item (required on save). */
   itemMinPriceCents     Int     @default(0)
   /**
-   * Fulfillment / goods-and-services COGS (cents per unit) retained by the platform from the sale;
-   * distinct from the marketplace fee on the remainder.
+   * COGS (cents per unit) retained by the platform from the sale;
+   * distinct from production fee and the marketplace fee on the remainder.
    */
   itemGoodsServicesCostCents Int @default(0)
+  /** Production fee (cents per unit) retained by the platform from the sale. */
+  itemProductionFeeCents       Int @default(0)
   /**
    * Optional free-text shown on the listing request form (e.g. "12\" @ 300 DPI").
    */

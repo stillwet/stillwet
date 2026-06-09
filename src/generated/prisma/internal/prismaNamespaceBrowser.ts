@@ -66,6 +66,7 @@ export const ModelName = {
   SupportThread: 'SupportThread',
   SupportMessage: 'SupportMessage',
   SupportTip: 'SupportTip',
+  PlatformTransactionSequence: 'PlatformTransactionSequence',
   ShopOwnerNotice: 'ShopOwnerNotice',
   BugFeedbackReport: 'BugFeedbackReport',
   ShopUser: 'ShopUser',
@@ -246,6 +247,7 @@ export const ShopFlairPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
@@ -264,6 +266,7 @@ export const ShopGoogleShoppingPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
@@ -348,12 +351,21 @@ export type SupportMessageScalarFieldEnum = (typeof SupportMessageScalarFieldEnu
 export const SupportTipScalarFieldEnum = {
   id: 'id',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
+  transactionNumber: 'transactionNumber',
   amountCents: 'amountCents',
   currency: 'currency',
   createdAt: 'createdAt'
 } as const
 
 export type SupportTipScalarFieldEnum = (typeof SupportTipScalarFieldEnum)[keyof typeof SupportTipScalarFieldEnum]
+
+
+export const PlatformTransactionSequenceScalarFieldEnum = {
+  productKey: 'productKey',
+  lastNumber: 'lastNumber'
+} as const
+
+export type PlatformTransactionSequenceScalarFieldEnum = (typeof PlatformTransactionSequenceScalarFieldEnum)[keyof typeof PlatformTransactionSequenceScalarFieldEnum]
 
 
 export const ShopOwnerNoticeScalarFieldEnum = {
@@ -518,6 +530,7 @@ export const PromotionPurchaseScalarFieldEnum = {
   paidAt: 'paidAt',
   eligibleFrom: 'eligibleFrom',
   paidViaPromotionCredit: 'paidViaPromotionCredit',
+  transactionNumber: 'transactionNumber',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -558,6 +571,7 @@ export const ListingCreditPackPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
@@ -590,6 +604,7 @@ export const ShopSetupFeePurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
@@ -607,6 +622,7 @@ export const ShopReactivationPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
@@ -636,6 +652,7 @@ export const CreatorGiftPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
@@ -746,6 +763,7 @@ export const OrderLineScalarFieldEnum = {
   printifyProductId: 'printifyProductId',
   printifyVariantId: 'printifyVariantId',
   goodsServicesCostCents: 'goodsServicesCostCents',
+  productionFeeCents: 'productionFeeCents',
   platformCutCents: 'platformCutCents',
   shopCutCents: 'shopCutCents',
   createdAt: 'createdAt'
@@ -790,6 +808,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemSizeExampleImageUrl: 'itemSizeExampleImageUrl',
   itemMinPriceCents: 'itemMinPriceCents',
   itemGoodsServicesCostCents: 'itemGoodsServicesCostCents',
+  itemProductionFeeCents: 'itemProductionFeeCents',
   itemImageRequirementLabel: 'itemImageRequirementLabel',
   itemMinArtworkLongEdgePx: 'itemMinArtworkLongEdgePx',
   itemPrintAreaWidthPx: 'itemPrintAreaWidthPx',

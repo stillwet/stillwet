@@ -34,13 +34,42 @@ export function shopInactivityReactivationWindowExpired(
 
 export function splitMerchandiseLineForInactiveShopCents(params: {
   lineMerchandiseCents: number;
+  cogsLineCents: number;
+  productionFeeLineCents: number;
+}): {
+  goodsServicesCostCents: number;
+  productionFeeCents: number;
+  platformCutCents: number;
+  shopCutCents: number;
+} {
+  const line = Math.max(0, Math.round(params.lineMerchandiseCents));
+  const cogs = Math.min(line, Math.max(0, Math.round(params.cogsLineCents)));
+  const remainingAfterCogs = line - cogs;
+  const production = Math.min(
+    remainingAfterCogs,
+    Math.max(0, Math.round(params.productionFeeLineCents)),
+  );
+  return {
+    goodsServicesCostCents: cogs,
+    productionFeeCents: production,
+    platformCutCents: line - cogs - production,
+    shopCutCents: 0,
+  };
+}
+
+/** @deprecated Pass separate COGS and production fee lines via {@link splitMerchandiseLineForInactiveShopCents}. */
+export function splitMerchandiseLineForInactiveShopFromItemCostCents(params: {
+  lineMerchandiseCents: number;
   goodsServicesLineCents: number;
 }): { goodsServicesCostCents: number; platformCutCents: number; shopCutCents: number } {
-  const line = Math.max(0, Math.round(params.lineMerchandiseCents));
-  const goods = Math.min(line, Math.max(0, Math.round(params.goodsServicesLineCents)));
+  const split = splitMerchandiseLineForInactiveShopCents({
+    lineMerchandiseCents: params.lineMerchandiseCents,
+    cogsLineCents: params.goodsServicesLineCents,
+    productionFeeLineCents: 0,
+  });
   return {
-    goodsServicesCostCents: goods,
-    platformCutCents: line - goods,
-    shopCutCents: 0,
+    goodsServicesCostCents: split.goodsServicesCostCents + split.productionFeeCents,
+    platformCutCents: split.platformCutCents,
+    shopCutCents: split.shopCutCents,
   };
 }

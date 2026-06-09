@@ -4,6 +4,10 @@ import {
   googleShoppingCreditPackById,
   googleShoppingCreditPackPriceUsdLabel,
 } from "@/lib/google-shopping-credit-packs";
+import {
+  platformTransactionReferenceLabel,
+  PLATFORM_TRANSACTION_PRODUCT,
+} from "@/lib/platform-transaction-reference";
 
 export const SHOP_GOOGLE_SHOPPING_PURCHASE_HISTORY_KIND = "SHOP_GOOGLE_SHOPPING_PACK";
 
@@ -13,7 +17,14 @@ export const SHOP_GOOGLE_SHOPPING_ACCESS_PURCHASE_HISTORY_KIND = "SHOP_GOOGLE_SH
 export function shopGoogleShoppingPurchaseHistoryLabel(row?: {
   packId?: string | null;
   creditsGranted?: number | null;
+  transactionNumber?: number | null;
 }): string {
+  const ref = platformTransactionReferenceLabel(
+    PLATFORM_TRANSACTION_PRODUCT.gshop_listing_upgrade,
+    row?.transactionNumber,
+  );
+  if (ref) return ref;
+
   if (row?.packId === GOOGLE_SHOPPING_ADMIN_GRANT_PACK_ID) {
     const n = row.creditsGranted ?? 1;
     return `Google Shopping — ${n} listing credit${n === 1 ? "" : "s"} (admin grant)`;

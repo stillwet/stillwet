@@ -8,8 +8,11 @@ import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly, getShopOwnerSession } from "@/lib/session";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
 import { listingStripeProductName } from "@/lib/listing-cart-stripe-name";
-import { baselineGoodsServicesUnitCents } from "@/lib/baseline-goods-services-unit-cents";
-import { splitMerchandiseLineForCheckoutCents } from "@/lib/marketplace-fee";
+import {
+  baselineCogsUnitCents,
+  baselineProductionFeeUnitCents,
+} from "@/lib/baseline-goods-services-unit-cents";
+import { itemCostLineCents, splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
 import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { shopDemoPurchaseFeatureEnabled } from "@/lib/shop-demo-purchase-feature";
@@ -95,24 +98,34 @@ export async function simulateShopDemoPurchase(): Promise<SimulateShopDemoPurcha
 
     const quantity = 1;
     const lineMerchCents = unitPriceCents * quantity;
-    let catalogRow: { itemGoodsServicesCostCents: number } | undefined;
+    let catalogRow: { itemGoodsServicesCostCents: number; itemProductionFeeCents: number } | undefined;
     const pick = parseBaselinePick(listing.baselineCatalogPickEncoded ?? "");
     if (pick) {
       catalogRow =
         (await prisma.adminCatalogItem.findUnique({
           where: { id: pick.itemId },
-          select: { itemGoodsServicesCostCents: true },
+          select: { itemGoodsServicesCostCents: true, itemProductionFeeCents: true },
         })) ?? undefined;
     }
-    const goodsUnit = baselineGoodsServicesUnitCents({
+    const cogsUnit = baselineCogsUnitCents({
       baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
       catalogRow,
     });
-    const goodsLine = Math.min(lineMerchCents, Math.max(0, goodsUnit) * quantity);
-    const { goodsServicesCostCents, platformCutCents, shopCutCents } =
-      splitMerchandiseLineForCheckoutCents({
+    const productionFeeUnit = baselineProductionFeeUnitCents({
+      baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
+      catalogRow,
+    });
+    const { cogsLineCents, productionFeeLineCents } = itemCostLineCents({
+      cogsUnitCents: cogsUnit,
+      productionFeeUnitCents: productionFeeUnit,
+      quantity,
+      lineMerchandiseCents: lineMerchCents,
+    });
+    const { goodsServicesCostCents, productionFeeCents, platformCutCents, shopCutCents } =
+      splitMerchandiseLineWithItemCostCents({
         lineMerchandiseCents: lineMerchCents,
-        goodsServicesLineCents: goodsLine,
+        cogsLineCents,
+        productionFeeLineCents,
       });
     const ship = getShippingFlatCents();
     const tipCents = 0;
@@ -147,6 +160,7 @@ export async function simulateShopDemoPurchase(): Promise<SimulateShopDemoPurcha
                 printifyProductId: listing.listingPrintifyProductId ?? p.printifyProductId,
                 printifyVariantId: orderPrintifyVariantId,
                 goodsServicesCostCents,
+                productionFeeCents,
                 platformCutCents,
                 shopCutCents,
               },

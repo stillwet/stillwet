@@ -6,6 +6,11 @@ import { z } from "zod";
 import { ShopFlairPurchaseStatus } from "@/generated/prisma/enums";
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { prisma } from "@/lib/prisma";
+import {
+  PLATFORM_TRANSACTION_PRODUCT,
+  allocatePlatformTransactionNumber,
+  stripePlatformTransactionReferenceFields,
+} from "@/lib/platform-transaction-reference";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { fulfillShopFlairPurchaseIfPending } from "@/lib/shop-flair-fulfillment";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
@@ -55,15 +60,27 @@ export async function startShopFlairAccessPaymentIntent(): Promise<StartShopFlai
   const paymentProcessingCents = buyerPaymentProcessingFeeCents({ subtotalCents });
   const chargeCents = subtotalCents + paymentProcessingCents;
 
-  const purchase = await prisma.shopFlairPurchase.create({
-    data: {
-      shopId: shop.id,
-      shopUserId: user.id,
-      amountCents: chargeCents,
-      currency: "usd",
-      status: ShopFlairPurchaseStatus.pending,
-    },
+  const purchase = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.shop_flair,
+    );
+    return tx.shopFlairPurchase.create({
+      data: {
+        shopId: shop.id,
+        shopUserId: user.id,
+        amountCents: chargeCents,
+        currency: "usd",
+        status: ShopFlairPurchaseStatus.pending,
+        transactionNumber,
+      },
+    });
   });
+
+  const refFields = stripePlatformTransactionReferenceFields(
+    PLATFORM_TRANSACTION_PRODUCT.shop_flair,
+    purchase.transactionNumber!,
+  );
 
   try {
     const stripe = getStripe();
@@ -71,6 +88,7 @@ export async function startShopFlairAccessPaymentIntent(): Promise<StartShopFlai
       amount: chargeCents,
       currency: "usd",
       payment_method_types: ["card"],
+      description: refFields.description,
       metadata: {
         kind: "shop_flair_access",
         purchaseId: purchase.id,
@@ -78,6 +96,7 @@ export async function startShopFlairAccessPaymentIntent(): Promise<StartShopFlai
         subtotalCents: String(subtotalCents),
         paymentProcessingCents: String(paymentProcessingCents),
         amountCents: String(chargeCents),
+        ...refFields.metadata,
       },
     });
 

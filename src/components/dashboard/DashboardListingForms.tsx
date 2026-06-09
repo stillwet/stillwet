@@ -728,13 +728,11 @@ function MerchandiseBreakdownCentsRow({
   saleCents,
   goodsServicesCostCents,
   platformCutCents,
-  shopTipCents = 0,
   className = "flex-col items-end gap-1",
 }: {
   saleCents: number;
   goodsServicesCostCents: number;
   platformCutCents: number;
-  shopTipCents?: number;
   className?: string;
 }) {
   return (
@@ -742,9 +740,6 @@ function MerchandiseBreakdownCentsRow({
       <span className="shrink-0">Sale {formatUsdFromCents(saleCents)}</span>
       <span className="shrink-0">Goods/services cost {formatUsdFromCents(goodsServicesCostCents)}</span>
       <span className="shrink-0">Platform fee {formatUsdFromCents(platformCutCents)}</span>
-      {shopTipCents > 0 ? (
-        <span className="shrink-0">Tip {formatUsdFromCents(shopTipCents)}</span>
-      ) : null}
     </div>
   );
 }
@@ -755,17 +750,15 @@ export function PaidOrderShopProfitHelp({
   saleCents,
   goodsServicesCostCents,
   platformCutCents,
-  shopTipCents = 0,
 }: {
   shopProfitCents: number;
   saleCents: number;
   goodsServicesCostCents: number;
   platformCutCents: number;
-  shopTipCents?: number;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const showHelp = saleCents > 0 || shopTipCents > 0;
+  const showHelp = saleCents > 0;
 
   useEffect(() => {
     if (!open) return;
@@ -785,7 +778,7 @@ export function PaidOrderShopProfitHelp({
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative inline-flex shrink-0 items-center leading-snug">
+    <div ref={rootRef} className="relative inline-flex shrink-0 items-center justify-center leading-snug">
       <span className="text-[11px] tabular-nums leading-snug text-zinc-100">
         {formatUsdFromCents(shopProfitCents)}
       </span>
@@ -809,7 +802,6 @@ export function PaidOrderShopProfitHelp({
                 saleCents={saleCents}
                 goodsServicesCostCents={goodsServicesCostCents}
                 platformCutCents={platformCutCents}
-                shopTipCents={shopTipCents}
               />
             </div>
           ) : null}

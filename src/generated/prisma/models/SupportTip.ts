@@ -27,16 +27,19 @@ export type AggregateSupportTip = {
 }
 
 export type SupportTipAvgAggregateOutputType = {
+  transactionNumber: number | null
   amountCents: number | null
 }
 
 export type SupportTipSumAggregateOutputType = {
+  transactionNumber: number | null
   amountCents: number | null
 }
 
 export type SupportTipMinAggregateOutputType = {
   id: string | null
   stripeCheckoutSessionId: string | null
+  transactionNumber: number | null
   amountCents: number | null
   currency: string | null
   createdAt: Date | null
@@ -45,6 +48,7 @@ export type SupportTipMinAggregateOutputType = {
 export type SupportTipMaxAggregateOutputType = {
   id: string | null
   stripeCheckoutSessionId: string | null
+  transactionNumber: number | null
   amountCents: number | null
   currency: string | null
   createdAt: Date | null
@@ -53,6 +57,7 @@ export type SupportTipMaxAggregateOutputType = {
 export type SupportTipCountAggregateOutputType = {
   id: number
   stripeCheckoutSessionId: number
+  transactionNumber: number
   amountCents: number
   currency: number
   createdAt: number
@@ -61,16 +66,19 @@ export type SupportTipCountAggregateOutputType = {
 
 
 export type SupportTipAvgAggregateInputType = {
+  transactionNumber?: true
   amountCents?: true
 }
 
 export type SupportTipSumAggregateInputType = {
+  transactionNumber?: true
   amountCents?: true
 }
 
 export type SupportTipMinAggregateInputType = {
   id?: true
   stripeCheckoutSessionId?: true
+  transactionNumber?: true
   amountCents?: true
   currency?: true
   createdAt?: true
@@ -79,6 +87,7 @@ export type SupportTipMinAggregateInputType = {
 export type SupportTipMaxAggregateInputType = {
   id?: true
   stripeCheckoutSessionId?: true
+  transactionNumber?: true
   amountCents?: true
   currency?: true
   createdAt?: true
@@ -87,6 +96,7 @@ export type SupportTipMaxAggregateInputType = {
 export type SupportTipCountAggregateInputType = {
   id?: true
   stripeCheckoutSessionId?: true
+  transactionNumber?: true
   amountCents?: true
   currency?: true
   createdAt?: true
@@ -181,7 +191,8 @@ export type SupportTipGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type SupportTipGroupByOutputType = {
   id: string
-  stripeCheckoutSessionId: string
+  stripeCheckoutSessionId: string | null
+  transactionNumber: number | null
   amountCents: number
   currency: string
   createdAt: Date
@@ -212,7 +223,8 @@ export type SupportTipWhereInput = {
   OR?: Prisma.SupportTipWhereInput[]
   NOT?: Prisma.SupportTipWhereInput | Prisma.SupportTipWhereInput[]
   id?: Prisma.StringFilter<"SupportTip"> | string
-  stripeCheckoutSessionId?: Prisma.StringFilter<"SupportTip"> | string
+  stripeCheckoutSessionId?: Prisma.StringNullableFilter<"SupportTip"> | string | null
+  transactionNumber?: Prisma.IntNullableFilter<"SupportTip"> | number | null
   amountCents?: Prisma.IntFilter<"SupportTip"> | number
   currency?: Prisma.StringFilter<"SupportTip"> | string
   createdAt?: Prisma.DateTimeFilter<"SupportTip"> | Date | string
@@ -220,7 +232,8 @@ export type SupportTipWhereInput = {
 
 export type SupportTipOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  stripeCheckoutSessionId?: Prisma.SortOrder
+  stripeCheckoutSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -232,6 +245,7 @@ export type SupportTipWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.SupportTipWhereInput | Prisma.SupportTipWhereInput[]
   OR?: Prisma.SupportTipWhereInput[]
   NOT?: Prisma.SupportTipWhereInput | Prisma.SupportTipWhereInput[]
+  transactionNumber?: Prisma.IntNullableFilter<"SupportTip"> | number | null
   amountCents?: Prisma.IntFilter<"SupportTip"> | number
   currency?: Prisma.StringFilter<"SupportTip"> | string
   createdAt?: Prisma.DateTimeFilter<"SupportTip"> | Date | string
@@ -239,7 +253,8 @@ export type SupportTipWhereUniqueInput = Prisma.AtLeast<{
 
 export type SupportTipOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  stripeCheckoutSessionId?: Prisma.SortOrder
+  stripeCheckoutSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -255,7 +270,8 @@ export type SupportTipScalarWhereWithAggregatesInput = {
   OR?: Prisma.SupportTipScalarWhereWithAggregatesInput[]
   NOT?: Prisma.SupportTipScalarWhereWithAggregatesInput | Prisma.SupportTipScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"SupportTip"> | string
-  stripeCheckoutSessionId?: Prisma.StringWithAggregatesFilter<"SupportTip"> | string
+  stripeCheckoutSessionId?: Prisma.StringNullableWithAggregatesFilter<"SupportTip"> | string | null
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"SupportTip"> | number | null
   amountCents?: Prisma.IntWithAggregatesFilter<"SupportTip"> | number
   currency?: Prisma.StringWithAggregatesFilter<"SupportTip"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SupportTip"> | Date | string
@@ -263,7 +279,8 @@ export type SupportTipScalarWhereWithAggregatesInput = {
 
 export type SupportTipCreateInput = {
   id?: string
-  stripeCheckoutSessionId: string
+  stripeCheckoutSessionId?: string | null
+  transactionNumber?: number | null
   amountCents: number
   currency?: string
   createdAt?: Date | string
@@ -271,7 +288,8 @@ export type SupportTipCreateInput = {
 
 export type SupportTipUncheckedCreateInput = {
   id?: string
-  stripeCheckoutSessionId: string
+  stripeCheckoutSessionId?: string | null
+  transactionNumber?: number | null
   amountCents: number
   currency?: string
   createdAt?: Date | string
@@ -279,7 +297,8 @@ export type SupportTipUncheckedCreateInput = {
 
 export type SupportTipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  stripeCheckoutSessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -287,7 +306,8 @@ export type SupportTipUpdateInput = {
 
 export type SupportTipUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  stripeCheckoutSessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -295,7 +315,8 @@ export type SupportTipUncheckedUpdateInput = {
 
 export type SupportTipCreateManyInput = {
   id?: string
-  stripeCheckoutSessionId: string
+  stripeCheckoutSessionId?: string | null
+  transactionNumber?: number | null
   amountCents: number
   currency?: string
   createdAt?: Date | string
@@ -303,7 +324,8 @@ export type SupportTipCreateManyInput = {
 
 export type SupportTipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  stripeCheckoutSessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -311,7 +333,8 @@ export type SupportTipUpdateManyMutationInput = {
 
 export type SupportTipUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  stripeCheckoutSessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -320,18 +343,21 @@ export type SupportTipUncheckedUpdateManyInput = {
 export type SupportTipCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type SupportTipAvgOrderByAggregateInput = {
+  transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
 }
 
 export type SupportTipMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -340,12 +366,14 @@ export type SupportTipMaxOrderByAggregateInput = {
 export type SupportTipMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   stripeCheckoutSessionId?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type SupportTipSumOrderByAggregateInput = {
+  transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
 }
 
@@ -354,6 +382,7 @@ export type SupportTipSumOrderByAggregateInput = {
 export type SupportTipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   stripeCheckoutSessionId?: boolean
+  transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
   createdAt?: boolean
@@ -362,6 +391,7 @@ export type SupportTipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type SupportTipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   stripeCheckoutSessionId?: boolean
+  transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
   createdAt?: boolean
@@ -370,6 +400,7 @@ export type SupportTipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type SupportTipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   stripeCheckoutSessionId?: boolean
+  transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
   createdAt?: boolean
@@ -378,19 +409,24 @@ export type SupportTipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type SupportTipSelectScalar = {
   id?: boolean
   stripeCheckoutSessionId?: boolean
+  transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
   createdAt?: boolean
 }
 
-export type SupportTipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stripeCheckoutSessionId" | "amountCents" | "currency" | "createdAt", ExtArgs["result"]["supportTip"]>
+export type SupportTipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stripeCheckoutSessionId" | "transactionNumber" | "amountCents" | "currency" | "createdAt", ExtArgs["result"]["supportTip"]>
 
 export type $SupportTipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SupportTip"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    stripeCheckoutSessionId: string
+    stripeCheckoutSessionId: string | null
+    /**
+     * * Platform-wide Support Platform sequence number for Stripe labels.
+     */
+    transactionNumber: number | null
     amountCents: number
     currency: string
     createdAt: Date
@@ -819,6 +855,7 @@ export interface Prisma__SupportTipClient<T, Null = never, ExtArgs extends runti
 export interface SupportTipFieldRefs {
   readonly id: Prisma.FieldRef<"SupportTip", 'String'>
   readonly stripeCheckoutSessionId: Prisma.FieldRef<"SupportTip", 'String'>
+  readonly transactionNumber: Prisma.FieldRef<"SupportTip", 'Int'>
   readonly amountCents: Prisma.FieldRef<"SupportTip", 'Int'>
   readonly currency: Prisma.FieldRef<"SupportTip", 'String'>
   readonly createdAt: Prisma.FieldRef<"SupportTip", 'DateTime'>

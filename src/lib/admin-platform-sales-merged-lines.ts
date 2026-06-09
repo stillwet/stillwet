@@ -3,15 +3,31 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
+  CreatorGiftPurchaseStatus,
   ListingCreditPackPurchaseStatus,
   OrderStatus,
   PromotionKind,
   PromotionPurchaseStatus,
+  ShopReactivationPurchaseStatus,
+  ShopSetupFeePurchaseStatus,
 } from "@/generated/prisma/enums";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
-import { listingFeeCentsForOrdinal, productHref } from "@/lib/marketplace-constants";
-import { checkoutTipApplicationFeeCents } from "@/lib/checkout-tip";
+import { productHref } from "@/lib/marketplace-constants";
+import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
+import { SHOP_REACTIVATION_FEE_CENTS } from "@/lib/shop-inactivity-policy";
+import { checkoutTipProcessingSurchargeCents } from "@/lib/checkout-tip";
 import { promotionKindLabel } from "@/lib/promotions";
+import {
+  aggregateShopUpgradesPlatformRevenue,
+  listingCreditPackPurchaseMerchandiseCents,
+  promotionPurchaseMerchandiseCents,
+  shopFlairPurchaseMerchandiseCents,
+  shopGoogleShoppingPurchaseMerchandiseCents,
+} from "@/lib/admin-platform-shop-upgrades-revenue";
+import {
+  buyerPaymentProcessingFeeCents,
+  checkoutProcessingFeeFromTotal,
+} from "@/lib/stripe-card-processing-fee";
 
 const orderLineInclude = {
   order: {
@@ -22,6 +38,10 @@ const orderLineInclude = {
       email: true,
       shippingState: true,
       shippingCountry: true,
+      subtotalCents: true,
+      tipCents: true,
+      shippingCents: true,
+      totalCents: true,
     },
   },
   shop: { select: { displayName: true, slug: true } },
@@ -45,7 +65,7 @@ export type AdminPlatformSalesOrderLineRow = Prisma.OrderLineGetPayload<{
   include: typeof orderLineInclude;
 }>;
 
-/** Row filters: publication fee vs merchandise order lines vs promotion purchases. */
+/** Row filters: shop upgrades / merchandise order lines / support tips. */
 export type AdminPlatformSaleCategory = "listing" | "item" | "support" | "promotion";
 
 export type AdminPlatformSalesMergedLine =
@@ -57,8 +77,11 @@ export type AdminPlatformSalesMergedLine =
       unitPriceCents: number;
       productName: string;
       goodsServicesCostCents: number;
+      productionFeeCents: number;
       platformCutCents: number;
       shopCutCents: number;
+      /** Buyer-paid Stripe pass-through allocated to this row. */
+      stripeFeeCents: number;
       order: { id: string; createdAt: Date; orderNumber: number };
       shop: { displayName: string; slug: string } | null;
       buyer: AdminPlatformSalesBuyer;
@@ -72,8 +95,10 @@ export type AdminPlatformSalesMergedLine =
       unitPriceCents: number;
       productName: string;
       goodsServicesCostCents: number;
+      productionFeeCents: number;
       platformCutCents: number;
       shopCutCents: number;
+      stripeFeeCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
       itemHref: string | null;
@@ -86,8 +111,10 @@ export type AdminPlatformSalesMergedLine =
       unitPriceCents: number;
       productName: string;
       goodsServicesCostCents: number;
+      productionFeeCents: number;
       platformCutCents: number;
       shopCutCents: number;
+      stripeFeeCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
       itemHref: string | null;
@@ -100,8 +127,10 @@ export type AdminPlatformSalesMergedLine =
       unitPriceCents: number;
       productName: string;
       goodsServicesCostCents: number;
+      productionFeeCents: number;
       platformCutCents: number;
       shopCutCents: number;
+      stripeFeeCents: number;
       order: { id: string; createdAt: Date };
       shop: null;
       itemHref: string | null;
@@ -114,33 +143,14 @@ export type AdminPlatformSalesMergedLine =
       unitPriceCents: number;
       productName: string;
       goodsServicesCostCents: number;
+      productionFeeCents: number;
       platformCutCents: number;
       shopCutCents: number;
+      stripeFeeCents: number;
       order: { id: string; createdAt: Date };
       shop: { displayName: string; slug: string } | null;
       itemHref: string | null;
     };
-
-type ListingFeeRow = {
-  id: string;
-  shopId: string;
-  listingFeePaidAt: Date;
-  listingPublicationFeePaidCents: number | null;
-  requestItemName: string | null;
-  shop: { displayName: string; slug: string; listingFeeBonusFreeSlots: number };
-};
-
-function listingFeePaidAtWhere(
-  salesOrderCreatedAt: { gte?: Date; lte?: Date } | undefined,
-): Prisma.DateTimeNullableFilter {
-  const notNull: Prisma.DateTimeNullableFilter = { not: null };
-  if (!salesOrderCreatedAt) return notNull;
-  return {
-    not: null,
-    ...(salesOrderCreatedAt.gte ? { gte: salesOrderCreatedAt.gte } : {}),
-    ...(salesOrderCreatedAt.lte ? { lte: salesOrderCreatedAt.lte } : {}),
-  };
-}
 
 function promotionPaidAtWhere(
   salesOrderCreatedAt: { gte?: Date; lte?: Date } | undefined,
@@ -166,38 +176,6 @@ function promotionMergedLabel(kind: PromotionKind, listingName: string | null): 
   return ln ? `${k} — ${ln}` : `${k} — listing`;
 }
 
-function buildOrdinalByListingId(
-  rows: { id: string; shopId: string }[],
-): Map<string, number> {
-  const map = new Map<string, number>();
-  let curShop: string | null = null;
-  let idx = 0;
-  for (const r of rows) {
-    if (r.shopId !== curShop) {
-      curShop = r.shopId;
-      idx = 0;
-    }
-    idx++;
-    map.set(r.id, idx);
-  }
-  return map;
-}
-
-function publicationFeeCentsForListing(
-  row: ListingFeeRow,
-  ordinalByListingId: Map<string, number>,
-): number {
-  if (row.listingPublicationFeePaidCents != null) {
-    return row.listingPublicationFeePaidCents;
-  }
-  const ordinal = ordinalByListingId.get(row.id) ?? 1;
-  return listingFeeCentsForOrdinal(
-    ordinal,
-    row.shop.slug,
-    Math.max(0, row.shop.listingFeeBonusFreeSlots),
-  );
-}
-
 /**
  * Same headline counts as {@link loadMergedPlatformSalesLines} for the Platform sales nav badge only.
  * Avoids loading capped order lines / tips / promotion rows when the Sales tab body is not needed.
@@ -217,37 +195,12 @@ export async function loadPlatformSalesNavBadgeCounts(
       ...(opts.salesOrderCreatedAt ? { createdAt: opts.salesOrderCreatedAt } : {}),
     },
   };
-  const listingFeePaidFilter = listingFeePaidAtWhere(opts.salesOrderCreatedAt);
   const promotionPaidFilter = promotionPaidAtWhere(opts.salesOrderCreatedAt);
 
-  const [itemsSoldAgg, feeListings, promotionPurchaseCount, listingCreditPackPurchaseCount] =
-    await Promise.all([
+  const [itemsSoldAgg, listingCreditPackPurchaseCount, promotionPurchaseCount] = await Promise.all([
     prisma.orderLine.aggregate({
       where: orderWhere,
       _sum: { quantity: true },
-    }),
-    prisma.shopListing.findMany({
-      where: { listingFeePaidAt: listingFeePaidFilter },
-      select: {
-        id: true,
-        shopId: true,
-        listingFeePaidAt: true,
-        listingPublicationFeePaidCents: true,
-        requestItemName: true,
-        shop: {
-          select: {
-            displayName: true,
-            slug: true,
-            listingFeeBonusFreeSlots: true,
-          },
-        },
-      },
-    }),
-    prisma.promotionPurchase.count({
-      where: {
-        status: PromotionPurchaseStatus.paid,
-        paidAt: promotionPaidFilter,
-      },
     }),
     (async () => {
       try {
@@ -265,51 +218,55 @@ export async function loadPlatformSalesNavBadgeCounts(
         return 0;
       }
     })(),
-  ]);
-
-  const shopIds = [...new Set(feeListings.map((l) => l.shopId))];
-  const ordinalRows =
-    shopIds.length === 0
-      ? []
-      : await prisma.shopListing.findMany({
-          where: { shopId: { in: shopIds } },
-          orderBy: [{ shopId: "asc" }, { createdAt: "asc" }, { id: "asc" }],
-          select: { id: true, shopId: true },
-        });
-  const ordinalByListingId = buildOrdinalByListingId(ordinalRows);
-
-  let publicationFeePaymentCount = 0;
-  for (const row of feeListings) {
-    if (!row.listingFeePaidAt) continue;
-    if (row.listingPublicationFeePaidCents === 0) continue;
-    const feeCents = publicationFeeCentsForListing(
-      {
-        id: row.id,
-        shopId: row.shopId,
-        listingFeePaidAt: row.listingFeePaidAt,
-        listingPublicationFeePaidCents: row.listingPublicationFeePaidCents,
-        requestItemName: row.requestItemName,
-        shop: {
-          displayName: row.shop.displayName,
-          slug: row.shop.slug,
-          listingFeeBonusFreeSlots: row.shop.listingFeeBonusFreeSlots ?? 0,
-        },
+    prisma.promotionPurchase.count({
+      where: {
+        status: PromotionPurchaseStatus.paid,
+        paidAt: promotionPaidFilter,
       },
-      ordinalByListingId,
-    );
-    if (feeCents > 0) publicationFeePaymentCount++;
-  }
+    }),
+  ]);
 
   return {
     itemsSoldCount: itemsSoldAgg._sum.quantity ?? 0,
-    publicationFeePaymentCount:
-      publicationFeePaymentCount + listingCreditPackPurchaseCount,
+    publicationFeePaymentCount: listingCreditPackPurchaseCount,
     promotionPurchaseCount,
   };
 }
 
+/** Buyer merchandise checkout payment-processing line (stored in order total, not order lines). */
+export function merchandiseOrderPaymentProcessingCents(order: {
+  subtotalCents: number;
+  tipCents: number;
+  shippingCents: number;
+  totalCents: number;
+}): number {
+  return Math.max(
+    0,
+    order.totalCents -
+      order.subtotalCents -
+      Math.max(0, order.tipCents) -
+      Math.max(0, order.shippingCents),
+  );
+}
+
+function allocateMerchandiseLineStripeFeeCents(
+  order: {
+    subtotalCents: number;
+    tipCents: number;
+    shippingCents: number;
+    totalCents: number;
+  },
+  lineMerchandiseCents: number,
+): number {
+  const orderStripeFee = merchandiseOrderPaymentProcessingCents(order);
+  if (orderStripeFee <= 0 || order.subtotalCents <= 0) return 0;
+  const lineMerch = Math.max(0, lineMerchandiseCents);
+  if (lineMerch <= 0) return 0;
+  return Math.round((orderStripeFee * lineMerch) / order.subtotalCents);
+}
+
 /**
- * Paid merchandise order lines plus listing publication fees plus promotion purchases (Stripe / mock).
+ * Paid merchandise order lines plus shop upgrades purchases (see {@link aggregateShopUpgradesPlatformRevenue}).
  * Platform sales tab. Merged newest-first (cap 500 rows).
  */
 export async function loadMergedPlatformSalesLines(
@@ -329,8 +286,6 @@ export async function loadMergedPlatformSalesLines(
     },
   };
 
-  const listingFeePaidFilter = listingFeePaidAtWhere(opts.salesOrderCreatedAt);
-
   const supportTipWhere = opts.salesOrderCreatedAt ? { createdAt: opts.salesOrderCreatedAt } : {};
 
   const promotionPaidFilter = promotionPaidAtWhere(opts.salesOrderCreatedAt);
@@ -338,7 +293,6 @@ export async function loadMergedPlatformSalesLines(
   const [
     orderLinesRaw,
     orderLineCount,
-    feeListings,
     supportTips,
     supportTipCount,
     promotionRows,
@@ -351,24 +305,6 @@ export async function loadMergedPlatformSalesLines(
       include: orderLineInclude,
     }),
     prisma.orderLine.count({ where: orderWhere }),
-    prisma.shopListing.findMany({
-      where: { listingFeePaidAt: listingFeePaidFilter },
-      select: {
-        id: true,
-        shopId: true,
-        listingFeePaidAt: true,
-        listingPublicationFeePaidCents: true,
-        requestItemName: true,
-        product: { select: { slug: true } },
-        shop: {
-          select: {
-            displayName: true,
-            slug: true,
-            listingFeeBonusFreeSlots: true,
-          },
-        },
-      },
-    }),
     prisma.supportTip.findMany({
       where: supportTipWhere,
       orderBy: { createdAt: "desc" },
@@ -387,6 +323,7 @@ export async function loadMergedPlatformSalesLines(
         id: true,
         kind: true,
         amountCents: true,
+        paidViaPromotionCredit: true,
         paidAt: true,
         shop: { select: { displayName: true, slug: true } },
         shopListing: {
@@ -416,64 +353,6 @@ export async function loadMergedPlatformSalesLines(
 
   const orderLines = orderLinesRaw as AdminPlatformSalesOrderLineRow[];
 
-  const shopIds = [...new Set(feeListings.map((l) => l.shopId))];
-  const ordinalRows =
-    shopIds.length === 0
-      ? []
-      : await prisma.shopListing.findMany({
-          where: { shopId: { in: shopIds } },
-          orderBy: [{ shopId: "asc" }, { createdAt: "asc" }, { id: "asc" }],
-          select: { id: true, shopId: true },
-        });
-  const ordinalByListingId = buildOrdinalByListingId(ordinalRows);
-
-  const feeLines: AdminPlatformSalesMergedLine[] = [];
-  let publicationFeePaymentCount = 0;
-  for (const row of feeListings) {
-    if (!row.listingFeePaidAt) continue;
-    /** Free-slot waiver: do not show as a paid publication in platform sales. */
-    if (row.listingPublicationFeePaidCents === 0) continue;
-    const feeCents = publicationFeeCentsForListing(
-      {
-        ...row,
-        listingFeePaidAt: row.listingFeePaidAt,
-        shop: {
-          displayName: row.shop.displayName,
-          slug: row.shop.slug,
-          listingFeeBonusFreeSlots: row.shop.listingFeeBonusFreeSlots ?? 0,
-        },
-      },
-      ordinalByListingId,
-    );
-    if (feeCents <= 0) continue;
-    publicationFeePaymentCount++;
-    const label = row.requestItemName?.trim()
-      ? `Listing publication fee — ${row.requestItemName.trim()}`
-      : "Listing publication fee";
-    feeLines.push({
-      kind: "listing_publication_fee",
-      platformSaleCategory: "listing",
-      id: `listing_publication_fee:${row.id}`,
-      quantity: 1,
-      unitPriceCents: feeCents,
-      productName: label,
-      goodsServicesCostCents: 0,
-      platformCutCents: feeCents,
-      shopCutCents: 0,
-      order: {
-        id: `listing_publication_fee:${row.id}`,
-        createdAt: row.listingFeePaidAt,
-      },
-      shop: {
-        displayName: row.shop.displayName,
-        slug: row.shop.slug,
-      },
-      itemHref: row.product?.slug
-        ? productHref(row.shop.slug, row.product.slug)
-        : null,
-    });
-  }
-
   const merchLines: AdminPlatformSalesMergedLine[] = orderLines.map((l) => ({
     kind: "merchandise" as const,
     platformSaleCategory: "item" as const,
@@ -482,8 +361,13 @@ export async function loadMergedPlatformSalesLines(
     unitPriceCents: l.unitPriceCents,
     productName: orderLineDisplayName(l),
     goodsServicesCostCents: l.goodsServicesCostCents,
+    productionFeeCents: mergedLineProductionFeeCents(l),
     platformCutCents: l.platformCutCents,
     shopCutCents: l.shopCutCents,
+    stripeFeeCents: allocateMerchandiseLineStripeFeeCents(
+      l.order,
+      l.unitPriceCents * l.quantity,
+    ),
     order: { id: l.order.id, createdAt: l.order.createdAt, orderNumber: l.order.orderNumber },
     shop: l.shop,
     buyer: {
@@ -503,8 +387,10 @@ export async function loadMergedPlatformSalesLines(
     unitPriceCents: t.amountCents,
     productName: "Support tip",
     goodsServicesCostCents: 0,
+    productionFeeCents: 0,
     platformCutCents: t.amountCents,
     shopCutCents: 0,
+    stripeFeeCents: buyerPaymentProcessingFeeCents({ subtotalCents: t.amountCents }),
     order: { id: `support_tip:${t.id}`, createdAt: t.createdAt },
     shop: null,
     itemHref: null,
@@ -523,8 +409,13 @@ export async function loadMergedPlatformSalesLines(
         row.shopListing?.requestItemName ?? null,
       ),
       goodsServicesCostCents: 0,
+      productionFeeCents: 0,
       platformCutCents: row.amountCents,
       shopCutCents: 0,
+      stripeFeeCents: checkoutProcessingFeeFromTotal(
+        row.amountCents,
+        promotionPurchaseMerchandiseCents(row),
+      ),
       order: {
         id: `promotion_purchase:${row.id}`,
         createdAt: row.paidAt,
@@ -549,8 +440,13 @@ export async function loadMergedPlatformSalesLines(
       unitPriceCents: row.amountCents,
       productName: listingCreditPackMergedLabel(row.packId),
       goodsServicesCostCents: 0,
+      productionFeeCents: 0,
       platformCutCents: row.amountCents,
       shopCutCents: 0,
+      stripeFeeCents: checkoutProcessingFeeFromTotal(
+        row.amountCents,
+        listingCreditPackPurchaseMerchandiseCents(row),
+      ),
       order: {
         id: `listing_credit_pack_purchase:${row.id}`,
         createdAt: row.paidAt,
@@ -564,7 +460,6 @@ export async function loadMergedPlatformSalesLines(
 
   const merged = [
     ...merchLines,
-    ...feeLines,
     ...listingCreditPackLines,
     ...supportLines,
     ...promotionLines,
@@ -576,7 +471,7 @@ export async function loadMergedPlatformSalesLines(
   return {
     lines,
     orderLineCount,
-    publicationFeePaymentCount,
+    publicationFeePaymentCount: listingCreditPackLines.length,
     supportTipCount,
     promotionPurchaseCount: promotionLines.length,
   };
@@ -615,26 +510,246 @@ export function utcPreviousCalendarMonthRange(through: Date): { gte: Date; lte: 
   return { gte, lte };
 }
 
+/** UTC calendar quarter index (0–3) for month `0` = Jan … `11` = Dec. */
+export function utcCalendarQuarterIndex(monthIndex: number): 0 | 1 | 2 | 3 {
+  return Math.floor(monthIndex / 3) as 0 | 1 | 2 | 3;
+}
+
+/** First instant of the UTC calendar quarter containing `through`, through `through` (quarter-to-date). */
+export function utcQuarterToDateRangeThrough(through: Date): {
+  gte: Date;
+  lte: Date;
+  quarter: 1 | 2 | 3 | 4;
+  year: number;
+} {
+  const year = through.getUTCFullYear();
+  const month = through.getUTCMonth();
+  const quarterIndex = utcCalendarQuarterIndex(month);
+  const startMonth = quarterIndex * 3;
+  const gte = new Date(Date.UTC(year, startMonth, 1, 0, 0, 0, 0));
+  return { gte, lte: through, quarter: (quarterIndex + 1) as 1 | 2 | 3 | 4, year };
+}
+
+const UTC_QUARTER_MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+/** e.g. `Q1 2026 (Jan · Feb · Mar)` */
+export function platformSalesUtcQuarterTitle(quarter: 1 | 2 | 3 | 4, year: number): string {
+  const startMonth = (quarter - 1) * 3;
+  const months = UTC_QUARTER_MONTH_ABBR.slice(startMonth, startMonth + 3);
+  return `Q${quarter} ${year} (${months.join(" · ")})`;
+}
+
+export function platformSalesCurrentUtcQuarterTitle(reference: Date): string {
+  const { quarter, year } = utcQuarterToDateRangeThrough(reference);
+  return platformSalesUtcQuarterTitle(quarter, year);
+}
+
+/** Site launch month for monthly-average platform sales (UTC Jun 2026). */
+export const PLATFORM_SALES_MONTHLY_AVERAGE_EPOCH_UTC = { year: 2026, month: 5 } as const;
+
+/** Inclusive UTC calendar months from {@link PLATFORM_SALES_MONTHLY_AVERAGE_EPOCH_UTC} through `through`. */
+export function utcMonthsSincePlatformSalesEpochThrough(through: Date): number {
+  const { year: epochYear, month: epochMonth } = PLATFORM_SALES_MONTHLY_AVERAGE_EPOCH_UTC;
+  const y = through.getUTCFullYear();
+  const m = through.getUTCMonth();
+  if (y < epochYear || (y === epochYear && m < epochMonth)) return 0;
+  return (y - epochYear) * 12 + (m - epochMonth) + 1;
+}
+
+export function utcPlatformSalesLifetimeRangeThrough(through: Date): { gte: Date; lte: Date } | null {
+  if (utcMonthsSincePlatformSalesEpochThrough(through) <= 0) return null;
+  const { year, month } = PLATFORM_SALES_MONTHLY_AVERAGE_EPOCH_UTC;
+  return {
+    gte: new Date(Date.UTC(year, month, 1, 0, 0, 0, 0)),
+    lte: through,
+  };
+}
+
+export function emptyPlatformSalesPeriodTotals(): PlatformSalesPeriodTotals {
+  return {
+    itemMerchandiseSoldCents: 0,
+    itemPlatformCents: 0,
+    itemGoodsServicesCents: 0,
+    itemProductionFeeCents: 0,
+    itemPlatformMerchandiseTakeCents: 0,
+    listingPlatformCents: 0,
+    shopCreationPlatformCents: 0,
+    promotionPlatformCents: 0,
+    supportPlatformCents: 0,
+    cartTipPlatformCents: 0,
+    platformSalesPaymentProcessingCents: 0,
+    shopSalesPaymentProcessingCents: 0,
+  };
+}
+
+/** Evenly divides each category total by `monthCount` (rounded cents). */
+export function averagePlatformSalesPeriodTotals(
+  totals: PlatformSalesPeriodTotals,
+  monthCount: number,
+): PlatformSalesPeriodTotals {
+  if (monthCount <= 0) return emptyPlatformSalesPeriodTotals();
+  const avg = (n: number) => Math.round(n / monthCount);
+  return {
+    itemMerchandiseSoldCents: avg(totals.itemMerchandiseSoldCents),
+    itemPlatformCents: avg(totals.itemPlatformCents),
+    itemGoodsServicesCents: avg(totals.itemGoodsServicesCents),
+    itemProductionFeeCents: avg(totals.itemProductionFeeCents),
+    itemPlatformMerchandiseTakeCents: avg(totals.itemPlatformMerchandiseTakeCents),
+    listingPlatformCents: avg(totals.listingPlatformCents),
+    shopCreationPlatformCents: avg(totals.shopCreationPlatformCents),
+    promotionPlatformCents: avg(totals.promotionPlatformCents),
+    supportPlatformCents: avg(totals.supportPlatformCents),
+    cartTipPlatformCents: avg(totals.cartTipPlatformCents),
+    platformSalesPaymentProcessingCents: avg(totals.platformSalesPaymentProcessingCents),
+    shopSalesPaymentProcessingCents: avg(totals.shopSalesPaymentProcessingCents),
+  };
+}
+
+export type PlatformSalesMonthlyAverageSummary = {
+  monthCount: number;
+  totals: PlatformSalesPeriodTotals;
+};
+
 export type PlatformSalesPeriodTotals = {
+  /** Sum of paid-order `subtotalCents` (buyer merchandise before tip, shipping, and Stripe). */
+  itemMerchandiseSoldCents: number;
   /** Sum of `OrderLine.platformCutCents` for paid orders in the window. */
   itemPlatformCents: number;
-  /** Sum of publication fee platform revenue (same rules as merged listing fee rows). */
+  /** Sum of `OrderLine.goodsServicesCostCents` for paid merchandise in the window. */
+  itemGoodsServicesCents: number;
+  /** Sum of `OrderLine.productionFeeCents` for paid merchandise in the window. */
+  itemProductionFeeCents: number;
+  /** Merchandise platform retention (COGS + production fee + platform fee). */
+  itemPlatformMerchandiseTakeCents: number;
+  /** Listing credit packs bought on shop upgrades and gifted listing credits. */
   listingPlatformCents: number;
-  /** Sum of paid promotion placements (merchant dashboard boosts). */
+  /** Shop setup and reactivation fee merchandise (self signup, setup gift, or reactivation checkout). */
+  shopCreationPlatformCents: number;
+  /** Shop upgrades tab (excludes listing credits): placements, flair, Google Shopping, and gifted upgrade credits. */
   promotionPlatformCents: number;
-  /** Sum of platform support tips (Stripe Checkout sessions). */
+  /** Sum of platform support tips (tip amount only; processing is separate at checkout). */
   supportPlatformCents: number;
   /** Sum of cart tip platform fees (25¢ per tipped order). */
   cartTipPlatformCents: number;
+  /** Stripe pass-through on platform checkouts (not paid buyer `Order` rows). */
+  platformSalesPaymentProcessingCents: number;
+  /** Stripe pass-through on paid `Order` checkouts only (not shop setup / platform sales). */
+  shopSalesPaymentProcessingCents: number;
 };
 
 export type PlatformSalesYtdTotals = PlatformSalesPeriodTotals & {
   year: number;
 };
 
+const paidOrderLinesInWindowWhere = (gte: Date, lte: Date) => ({
+  order: {
+    status: OrderStatus.paid,
+    createdAt: { gte, lte },
+  },
+});
+
+/** Safe until `OrderLine.productionFeeCents` migration + Prisma client are live in prod. */
+async function sumPaidOrderLineProductionFeeCents(
+  prisma: PrismaClient,
+  gte: Date,
+  lte: Date,
+): Promise<number> {
+  try {
+    const result = await prisma.orderLine.aggregate({
+      where: paidOrderLinesInWindowWhere(gte, lte),
+      _sum: { productionFeeCents: true },
+    });
+    return result._sum.productionFeeCents ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** Persisted production fee on a merged merchandise row (0 when column/client unavailable). */
+export function mergedLineProductionFeeCents(line: { productionFeeCents?: number | null }): number {
+  return Math.max(0, line.productionFeeCents ?? 0);
+}
+
+/**
+ * Shop creation revenue = paid shop setup and reactivation checkouts.
+ *
+ * Include:
+ * - {@link ShopSetupFeePurchase} paid at self-signup checkout
+ * - {@link CreatorGiftPurchase} with `setupFeeIncluded` paid at setup gift checkout
+ * - {@link ShopReactivationPurchase} paid at inactivity reactivation checkout
+ *
+ * Exclude:
+ * - Admin beta tester batches (`isBetaTesterBatch`)
+ * - Admin waived shop fee invite codes (`isWaivedShopFeeBatch`)
+ * - Synthetic test rows without Stripe/mock checkout proof
+ * - Gift code redemption at signup (no new payment row)
+ *
+ * Paid setup gifts count at gift purchase `paidAt`, not when the code is redeemed.
+ */
+export function paidShopSetupCheckoutWhere() {
+  return {
+    amountCents: { gt: 0 },
+    OR: [
+      { stripeCheckoutSessionId: { not: null } },
+      { stripePaymentIntentId: { not: null } },
+    ],
+  };
+}
+
+export function shopSetupFeePurchaseRevenueWhere(gte: Date, lte: Date) {
+  return {
+    status: ShopSetupFeePurchaseStatus.paid,
+    paidAt: { not: null, gte, lte },
+    ...paidShopSetupCheckoutWhere(),
+  };
+}
+
+export function giftedShopSetupPurchaseRevenueWhere(gte: Date, lte: Date) {
+  return {
+    status: CreatorGiftPurchaseStatus.paid,
+    setupFeeIncluded: true,
+    isBetaTesterBatch: false,
+    isWaivedShopFeeBatch: false,
+    paidAt: { not: null, gte, lte },
+    ...paidShopSetupCheckoutWhere(),
+  };
+}
+
+export function shopReactivationPurchaseRevenueWhere(gte: Date, lte: Date) {
+  return {
+    status: ShopReactivationPurchaseStatus.paid,
+    paidAt: { not: null, gte, lte },
+    ...paidShopSetupCheckoutWhere(),
+  };
+}
+
+export type ShopCreationRevenueRowSnapshot = {
+  source: "shop_setup_fee" | "creator_gift" | "shop_reactivation";
+  status: string;
+  amountCents: number;
+  setupFeeIncluded?: boolean;
+  isBetaTesterBatch?: boolean;
+  isWaivedShopFeeBatch?: boolean;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+};
+
+/** Pure classifier for tests and audits — mirrors aggregate filters. */
+export function countsTowardShopCreationRevenue(row: ShopCreationRevenueRowSnapshot): boolean {
+  if (row.status !== "paid") return false;
+  if (row.amountCents <= 0) return false;
+  if (!row.stripeCheckoutSessionId && !row.stripePaymentIntentId) return false;
+  if (row.source === "shop_setup_fee") return true;
+  if (row.source === "shop_reactivation") return true;
+  if (!row.setupFeeIncluded) return false;
+  if (row.isBetaTesterBatch) return false;
+  if (row.isWaivedShopFeeBatch) return false;
+  return true;
+}
+
 /**
  * Platform revenue by category for an arbitrary UTC `[gte, lte]` window.
- * Listing fees use the same waived / ordinal rules as {@link loadMergedPlatformSalesLines}.
+ * Shop upgrades → Listings / Promotions: {@link aggregateShopUpgradesPlatformRevenue}.
  */
 export async function aggregatePlatformRevenueForUtcWindow(
   prisma: PrismaClient,
@@ -642,90 +757,88 @@ export async function aggregatePlatformRevenueForUtcWindow(
   lte: Date,
 ): Promise<PlatformSalesPeriodTotals> {
   const orderLineSum = await prisma.orderLine.aggregate({
+    where: paidOrderLinesInWindowWhere(gte, lte),
+    _sum: {
+      platformCutCents: true,
+      goodsServicesCostCents: true,
+    },
+  });
+
+  const itemPlatformCents = orderLineSum._sum.platformCutCents ?? 0;
+  const itemGoodsServicesCents = orderLineSum._sum.goodsServicesCostCents ?? 0;
+  const itemProductionFeeCents = await sumPaidOrderLineProductionFeeCents(prisma, gte, lte);
+
+  const paidMerchandiseOrders = await prisma.order.findMany({
     where: {
-      order: {
-        status: OrderStatus.paid,
-        createdAt: { gte, lte },
-      },
+      status: OrderStatus.paid,
+      createdAt: { gte, lte },
     },
-    _sum: { platformCutCents: true },
-  });
-
-  const listingFeePaidFilter: Prisma.DateTimeNullableFilter = {
-    not: null,
-    gte,
-    lte,
-  };
-
-  const feeListings = await prisma.shopListing.findMany({
-    where: { listingFeePaidAt: listingFeePaidFilter },
     select: {
-      id: true,
-      shopId: true,
-      listingFeePaidAt: true,
-      listingPublicationFeePaidCents: true,
-      shop: {
-        select: {
-          slug: true,
-          listingFeeBonusFreeSlots: true,
-        },
-      },
+      subtotalCents: true,
+      tipCents: true,
+      shippingCents: true,
+      totalCents: true,
     },
   });
+  const itemMerchandiseSoldCents = paidMerchandiseOrders.reduce(
+    (sum, order) => sum + order.subtotalCents,
+    0,
+  );
+  const shopSalesPaymentProcessingCents = paidMerchandiseOrders.reduce(
+    (sum, order) => sum + merchandiseOrderPaymentProcessingCents(order),
+    0,
+  );
 
-  const shopIds = [...new Set(feeListings.map((l) => l.shopId))];
-  const ordinalRows =
-    shopIds.length === 0
-      ? []
-      : await prisma.shopListing.findMany({
-          where: { shopId: { in: shopIds } },
-          orderBy: [{ shopId: "asc" }, { createdAt: "asc" }, { id: "asc" }],
-          select: { id: true, shopId: true },
-        });
-  const ordinalByListingId = buildOrdinalByListingId(ordinalRows);
+  const supportTipsInWindow = await prisma.supportTip.findMany({
+    where: { createdAt: { gte, lte } },
+    select: { amountCents: true },
+  });
+  const supportPlatformCents = supportTipsInWindow.reduce((sum, row) => sum + row.amountCents, 0);
 
-  let listingPlatformCents = 0;
-  for (const row of feeListings) {
-    if (!row.listingFeePaidAt) continue;
-    if (row.listingPublicationFeePaidCents === 0) continue;
-    const feeCents = publicationFeeCentsForListing(
-      {
-        id: row.id,
-        shopId: row.shopId,
-        listingFeePaidAt: row.listingFeePaidAt,
-        listingPublicationFeePaidCents: row.listingPublicationFeePaidCents,
-        requestItemName: null,
-        shop: {
-          displayName: "",
-          slug: row.shop.slug,
-          listingFeeBonusFreeSlots: row.shop.listingFeeBonusFreeSlots ?? 0,
-        },
-      },
-      ordinalByListingId,
+  const shopSetupRows = await prisma.shopSetupFeePurchase.findMany({
+    where: shopSetupFeePurchaseRevenueWhere(gte, lte),
+    select: { amountCents: true },
+  });
+
+  const giftedSetupRows = await prisma.creatorGiftPurchase.findMany({
+    where: giftedShopSetupPurchaseRevenueWhere(gte, lte),
+    select: { amountCents: true },
+  });
+
+  const shopReactivationRows = await prisma.shopReactivationPurchase.findMany({
+    where: shopReactivationPurchaseRevenueWhere(gte, lte),
+    select: { amountCents: true },
+  });
+
+  const shopUpgradesRevenue = await aggregateShopUpgradesPlatformRevenue(prisma, gte, lte);
+
+  let platformSalesPaymentProcessingCents = 0;
+
+  let shopCreationPlatformCents = 0;
+  for (const row of [...shopSetupRows, ...giftedSetupRows]) {
+    shopCreationPlatformCents += SHOP_SETUP_FEE_CENTS;
+    platformSalesPaymentProcessingCents += checkoutProcessingFeeFromTotal(
+      row.amountCents,
+      SHOP_SETUP_FEE_CENTS,
     );
-    if (feeCents > 0) listingPlatformCents += feeCents;
+  }
+  for (const row of shopReactivationRows) {
+    shopCreationPlatformCents += SHOP_REACTIVATION_FEE_CENTS;
+    platformSalesPaymentProcessingCents += checkoutProcessingFeeFromTotal(
+      row.amountCents,
+      SHOP_REACTIVATION_FEE_CENTS,
+    );
   }
 
-  const supportTipSum = await prisma.supportTip.aggregate({
-    where: { createdAt: { gte, lte } },
-    _sum: { amountCents: true },
-  });
+  const listingPlatformCents = shopUpgradesRevenue.listingMerchandiseCents;
+  const promotionPlatformCents = shopUpgradesRevenue.promotionMerchandiseCents;
+  platformSalesPaymentProcessingCents += shopUpgradesRevenue.paymentProcessingCents;
 
-  const promotionPurchaseSum = await prisma.promotionPurchase.aggregate({
-    where: {
-      status: PromotionPurchaseStatus.paid,
-      paidAt: { not: null, gte, lte },
-    },
-    _sum: { amountCents: true },
-  });
-
-  const listingCreditPackSum = await prisma.listingCreditPackPurchase.aggregate({
-    where: {
-      status: ListingCreditPackPurchaseStatus.paid,
-      paidAt: { not: null, gte, lte },
-    },
-    _sum: { amountCents: true },
-  });
+  for (const row of supportTipsInWindow) {
+    platformSalesPaymentProcessingCents += buyerPaymentProcessingFeeCents({
+      subtotalCents: row.amountCents,
+    });
+  }
 
   const tippedOrders = await prisma.order.findMany({
     where: {
@@ -736,16 +849,24 @@ export async function aggregatePlatformRevenueForUtcWindow(
     select: { tipCents: true },
   });
   const cartTipPlatformCents = tippedOrders.reduce(
-    (sum, o) => sum + checkoutTipApplicationFeeCents(o.tipCents),
+    (sum, o) => sum + checkoutTipProcessingSurchargeCents(o.tipCents),
     0,
   );
 
   return {
-    itemPlatformCents: orderLineSum._sum.platformCutCents ?? 0,
-    listingPlatformCents: listingPlatformCents + (listingCreditPackSum._sum.amountCents ?? 0),
-    promotionPlatformCents: promotionPurchaseSum._sum.amountCents ?? 0,
-    supportPlatformCents: supportTipSum._sum.amountCents ?? 0,
+    itemMerchandiseSoldCents,
+    itemPlatformCents,
+    itemGoodsServicesCents,
+    itemProductionFeeCents,
+    itemPlatformMerchandiseTakeCents:
+      itemPlatformCents + itemGoodsServicesCents + itemProductionFeeCents,
+    listingPlatformCents,
+    shopCreationPlatformCents,
+    promotionPlatformCents,
+    supportPlatformCents,
     cartTipPlatformCents,
+    platformSalesPaymentProcessingCents,
+    shopSalesPaymentProcessingCents,
   };
 }
 
@@ -756,6 +877,32 @@ export async function loadPlatformSalesCurrentMonthTotals(
 ): Promise<PlatformSalesPeriodTotals> {
   const { gte, lte } = utcMonthToDateRangeThrough(through);
   return aggregatePlatformRevenueForUtcWindow(prisma, gte, lte);
+}
+
+/** UTC calendar quarter containing `through`, from quarter start through `through`. */
+export async function loadPlatformSalesCurrentQuarterTotals(
+  prisma: PrismaClient,
+  through: Date,
+): Promise<PlatformSalesPeriodTotals> {
+  const { gte, lte } = utcQuarterToDateRangeThrough(through);
+  return aggregatePlatformRevenueForUtcWindow(prisma, gte, lte);
+}
+
+/** Lifetime platform revenue since Jun 2026 UTC, divided by months the site has existed. */
+export async function loadPlatformSalesMonthlyAverageTotals(
+  prisma: PrismaClient,
+  through: Date,
+): Promise<PlatformSalesMonthlyAverageSummary> {
+  const monthCount = utcMonthsSincePlatformSalesEpochThrough(through);
+  const range = utcPlatformSalesLifetimeRangeThrough(through);
+  if (!range) {
+    return { monthCount: 0, totals: emptyPlatformSalesPeriodTotals() };
+  }
+  const lifetime = await aggregatePlatformRevenueForUtcWindow(prisma, range.gte, range.lte);
+  return {
+    monthCount,
+    totals: averagePlatformSalesPeriodTotals(lifetime, monthCount),
+  };
 }
 
 /** Full UTC calendar month immediately before the month containing `through`. */
@@ -800,11 +947,20 @@ function sumPlatformSalesPeriodTotals(
   b: PlatformSalesPeriodTotals,
 ): PlatformSalesPeriodTotals {
   return {
+    itemMerchandiseSoldCents: a.itemMerchandiseSoldCents + b.itemMerchandiseSoldCents,
     itemPlatformCents: a.itemPlatformCents + b.itemPlatformCents,
+    itemGoodsServicesCents: a.itemGoodsServicesCents + b.itemGoodsServicesCents,
+    itemProductionFeeCents: a.itemProductionFeeCents + b.itemProductionFeeCents,
+    itemPlatformMerchandiseTakeCents: a.itemPlatformMerchandiseTakeCents + b.itemPlatformMerchandiseTakeCents,
     listingPlatformCents: a.listingPlatformCents + b.listingPlatformCents,
+    shopCreationPlatformCents: a.shopCreationPlatformCents + b.shopCreationPlatformCents,
     promotionPlatformCents: a.promotionPlatformCents + b.promotionPlatformCents,
     supportPlatformCents: a.supportPlatformCents + b.supportPlatformCents,
     cartTipPlatformCents: a.cartTipPlatformCents + b.cartTipPlatformCents,
+    platformSalesPaymentProcessingCents:
+      a.platformSalesPaymentProcessingCents + b.platformSalesPaymentProcessingCents,
+    shopSalesPaymentProcessingCents:
+      a.shopSalesPaymentProcessingCents + b.shopSalesPaymentProcessingCents,
   };
 }
 
@@ -819,7 +975,7 @@ function utcYearStartThroughEndOfPreviousCalendarMonth(through: Date): { gte: Da
 
 export function platformSalesUtcMonthTitles(reference: Date): {
   currentMonthTitle: string;
-  previousMonthTitle: string;
+  currentQuarterTitle: string;
 } {
   const fmt = (y: number, m: number) =>
     new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(
@@ -827,11 +983,9 @@ export function platformSalesUtcMonthTitles(reference: Date): {
     );
   const cy = reference.getUTCFullYear();
   const cm = reference.getUTCMonth();
-  const pm = cm === 0 ? 11 : cm - 1;
-  const py = cm === 0 ? cy - 1 : cy;
   return {
     currentMonthTitle: fmt(cy, cm),
-    previousMonthTitle: fmt(py, pm),
+    currentQuarterTitle: platformSalesCurrentUtcQuarterTitle(reference),
   };
 }
 
@@ -876,13 +1030,7 @@ async function loadPlatformSalesYtdPriorMonthsUncached(
   const through = new Date(throughIso);
   const range = utcYearStartThroughEndOfPreviousCalendarMonth(through);
   if (!range || range.gte.getUTCFullYear() !== year) {
-    return {
-      itemPlatformCents: 0,
-      listingPlatformCents: 0,
-      promotionPlatformCents: 0,
-      supportPlatformCents: 0,
-      cartTipPlatformCents: 0,
-    };
+    return emptyPlatformSalesPeriodTotals();
   }
   return aggregatePlatformRevenueForUtcWindow(prisma, range.gte, range.lte);
 }

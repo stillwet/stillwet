@@ -1,23 +1,59 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { OrderStatus } from "@/generated/prisma/enums";
 import type { DashboardPaidOrderRow } from "@/components/dashboard/DashboardMainTabs";
-import {
-  dashboardPaidOrderLineDisplayLabel,
-  paidOrderLineGoodsServicesDisplayCents,
-  type AdminCatalogRowForDisplay,
-} from "@/lib/dashboard-payload-helpers";
+import { dashboardPaidOrderLineDisplayLabel } from "@/lib/dashboard-payload-helpers";
 import { splitCheckoutTipCents } from "@/lib/checkout-tip";
-import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
-import { pacificCalendarDateKey } from "@/lib/promotion-period-pacific";
 import { prisma } from "@/lib/prisma";
 import {
   readShopSalesDashboardSnapshot,
+  shopSalesDashboardSnapshotPeriodKey,
   writeShopSalesDashboardSnapshot,
 } from "@/lib/shop-sales-dashboard-snapshot";
 import {
   loadShopSalesProfitSummary,
   type ShopSalesProfitSummary,
 } from "@/lib/shop-sales-profit-summary";
+
+function mapOrderToPaidOrderRow(o: OrderLineForDash): DashboardPaidOrderRow {
+  return {
+    id: o.id,
+    orderNumber: o.orderNumber,
+    createdAt: o.createdAt.toISOString(),
+    tipCents: o.tipCents,
+    shopTipCents: splitCheckoutTipCents(o.tipCents).shopTipCents,
+    lines: o.lines.map((l) => ({
+      lineDisplayLabel: dashboardPaidOrderLineDisplayLabel(l),
+      quantity: l.quantity,
+      unitPriceCents: l.unitPriceCents,
+      goodsServicesCostCents: l.goodsServicesCostCents,
+      platformCutCents: l.platformCutCents,
+      shopCutCents: l.shopCutCents,
+    })),
+  };
+}
+
+/** Merge live tip fields so cached order rows match profit summary SQL. */
+async function hydratePaidOrderRowTips(
+  orders: DashboardPaidOrderRow[],
+): Promise<DashboardPaidOrderRow[]> {
+  if (orders.length === 0) return orders;
+
+  const tipsByOrderId = new Map(
+    (
+      await prisma.order.findMany({
+        where: { id: { in: orders.map((o) => o.id) } },
+        select: { id: true, tipCents: true },
+      })
+    ).map((o) => [o.id, o.tipCents] as const),
+  );
+
+  return orders.map((o) => {
+    const tipCents = tipsByOrderId.get(o.id) ?? o.tipCents ?? 0;
+    const shopTipCents = splitCheckoutTipCents(tipCents).shopTipCents;
+    if (o.tipCents === tipCents && o.shopTipCents === shopTipCents) return o;
+    return { ...o, tipCents, shopTipCents };
+  });
+}
 
 type OrderLineForDash = Prisma.OrderGetPayload<{
   select: {
@@ -33,25 +69,12 @@ type OrderLineForDash = Prisma.OrderGetPayload<{
         goodsServicesCostCents: true;
         platformCutCents: true;
         shopCutCents: true;
-        printifyVariantId: true;
-        shopListing: { select: { baselineCatalogPickEncoded: true; requestItemName: true } };
+        shopListing: { select: { requestItemName: true } };
         product: { select: { name: true } };
       };
     };
   };
 }>;
-
-const adminCatalogSelect = {
-  id: true,
-  name: true,
-  itemExampleListingUrl: true,
-  itemMinPriceCents: true,
-  itemGoodsServicesCostCents: true,
-  itemImageRequirementLabel: true,
-  itemPrintAreaWidthPx: true,
-  itemPrintAreaHeightPx: true,
-  itemMinArtworkDpi: true,
-} as const;
 
 async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRow[]> {
   const orders = await prisma.order.findMany({
@@ -71,9 +94,8 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
           goodsServicesCostCents: true,
           platformCutCents: true,
           shopCutCents: true,
-          printifyVariantId: true,
           shopListing: {
-            select: { baselineCatalogPickEncoded: true, requestItemName: true },
+            select: { requestItemName: true },
           },
           product: { select: { name: true } },
         },
@@ -81,28 +103,7 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
     },
   });
 
-  const ordersAdminCatalog = await prisma.adminCatalogItem.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: adminCatalogSelect,
-  });
-  const ordersAdminById = new Map<string, AdminCatalogRowForDisplay>(
-    ordersAdminCatalog.map((r) => [r.id, { itemGoodsServicesCostCents: r.itemGoodsServicesCostCents }]),
-  );
-
-  return orders.map((o: OrderLineForDash) => ({
-    id: o.id,
-    orderNumber: o.orderNumber,
-    createdAt: o.createdAt.toISOString(),
-    shopTipCents: splitCheckoutTipCents(o.tipCents).shopTipCents,
-    lines: o.lines.map((l) => ({
-      lineDisplayLabel: dashboardPaidOrderLineDisplayLabel(l),
-      quantity: l.quantity,
-      unitPriceCents: l.unitPriceCents,
-      goodsServicesCostCents: paidOrderLineGoodsServicesDisplayCents(l, ordersAdminById),
-      platformCutCents: l.platformCutCents,
-      shopCutCents: l.shopCutCents,
-    })),
-  }));
+  return orders.map((o: OrderLineForDash) => mapOrderToPaidOrderRow(o));
 }
 
 export type LoadPaidOrdersForShopDashboardResult = {
@@ -116,18 +117,20 @@ export type LoadPaidOrdersForShopDashboardResult = {
 /**
  * Sales tab data: at most one live Postgres rebuild per shop per Pacific calendar day.
  * Pass `force: true` (debug) to bypass the snapshot.
+ * Profit summary cards are always computed live from Postgres.
  */
 export async function loadPaidOrdersForShopDashboard(
   shopId: string,
   options?: { force?: boolean },
 ): Promise<LoadPaidOrdersForShopDashboardResult> {
-  const periodKey = pacificCalendarDateKey();
+  const periodKey = shopSalesDashboardSnapshotPeriodKey();
   const profitSummary = await loadShopSalesProfitSummary(shopId);
   if (!options?.force) {
     const cached = await readShopSalesDashboardSnapshot(shopId, periodKey);
     if (cached.ok) {
+      const orders = await hydratePaidOrderRowTips(cached.orders);
       return {
-        orders: cached.orders,
+        orders,
         profitSummary,
         periodKey: cached.periodKey,
         builtAtIso: cached.builtAtIso,

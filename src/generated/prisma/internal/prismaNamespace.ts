@@ -399,6 +399,7 @@ export const ModelName = {
   SupportThread: 'SupportThread',
   SupportMessage: 'SupportMessage',
   SupportTip: 'SupportTip',
+  PlatformTransactionSequence: 'PlatformTransactionSequence',
   ShopOwnerNotice: 'ShopOwnerNotice',
   BugFeedbackReport: 'BugFeedbackReport',
   ShopUser: 'ShopUser',
@@ -450,7 +451,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
+    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "platformTransactionSequence" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1561,6 +1562,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SupportTipCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SupportTipCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlatformTransactionSequence: {
+      payload: Prisma.$PlatformTransactionSequencePayload<ExtArgs>
+      fields: Prisma.PlatformTransactionSequenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlatformTransactionSequenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlatformTransactionSequenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>
+        }
+        findFirst: {
+          args: Prisma.PlatformTransactionSequenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlatformTransactionSequenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>
+        }
+        findMany: {
+          args: Prisma.PlatformTransactionSequenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>[]
+        }
+        create: {
+          args: Prisma.PlatformTransactionSequenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>
+        }
+        createMany: {
+          args: Prisma.PlatformTransactionSequenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlatformTransactionSequenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>[]
+        }
+        delete: {
+          args: Prisma.PlatformTransactionSequenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>
+        }
+        update: {
+          args: Prisma.PlatformTransactionSequenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlatformTransactionSequenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlatformTransactionSequenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlatformTransactionSequenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlatformTransactionSequenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformTransactionSequencePayload>
+        }
+        aggregate: {
+          args: Prisma.PlatformTransactionSequenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlatformTransactionSequence>
+        }
+        groupBy: {
+          args: Prisma.PlatformTransactionSequenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformTransactionSequenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlatformTransactionSequenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformTransactionSequenceCountAggregateOutputType> | number
         }
       }
     }
@@ -4393,6 +4468,7 @@ export const ShopFlairPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
@@ -4411,6 +4487,7 @@ export const ShopGoogleShoppingPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
@@ -4495,12 +4572,21 @@ export type SupportMessageScalarFieldEnum = (typeof SupportMessageScalarFieldEnu
 export const SupportTipScalarFieldEnum = {
   id: 'id',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
+  transactionNumber: 'transactionNumber',
   amountCents: 'amountCents',
   currency: 'currency',
   createdAt: 'createdAt'
 } as const
 
 export type SupportTipScalarFieldEnum = (typeof SupportTipScalarFieldEnum)[keyof typeof SupportTipScalarFieldEnum]
+
+
+export const PlatformTransactionSequenceScalarFieldEnum = {
+  productKey: 'productKey',
+  lastNumber: 'lastNumber'
+} as const
+
+export type PlatformTransactionSequenceScalarFieldEnum = (typeof PlatformTransactionSequenceScalarFieldEnum)[keyof typeof PlatformTransactionSequenceScalarFieldEnum]
 
 
 export const ShopOwnerNoticeScalarFieldEnum = {
@@ -4665,6 +4751,7 @@ export const PromotionPurchaseScalarFieldEnum = {
   paidAt: 'paidAt',
   eligibleFrom: 'eligibleFrom',
   paidViaPromotionCredit: 'paidViaPromotionCredit',
+  transactionNumber: 'transactionNumber',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4705,6 +4792,7 @@ export const ListingCreditPackPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
@@ -4737,6 +4825,7 @@ export const ShopSetupFeePurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
@@ -4754,6 +4843,7 @@ export const ShopReactivationPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
@@ -4783,6 +4873,7 @@ export const CreatorGiftPurchaseScalarFieldEnum = {
   amountCents: 'amountCents',
   currency: 'currency',
   status: 'status',
+  transactionNumber: 'transactionNumber',
   stripeCheckoutSessionId: 'stripeCheckoutSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   paidAt: 'paidAt',
@@ -4893,6 +4984,7 @@ export const OrderLineScalarFieldEnum = {
   printifyProductId: 'printifyProductId',
   printifyVariantId: 'printifyVariantId',
   goodsServicesCostCents: 'goodsServicesCostCents',
+  productionFeeCents: 'productionFeeCents',
   platformCutCents: 'platformCutCents',
   shopCutCents: 'shopCutCents',
   createdAt: 'createdAt'
@@ -4937,6 +5029,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemSizeExampleImageUrl: 'itemSizeExampleImageUrl',
   itemMinPriceCents: 'itemMinPriceCents',
   itemGoodsServicesCostCents: 'itemGoodsServicesCostCents',
+  itemProductionFeeCents: 'itemProductionFeeCents',
   itemImageRequirementLabel: 'itemImageRequirementLabel',
   itemMinArtworkLongEdgePx: 'itemMinArtworkLongEdgePx',
   itemPrintAreaWidthPx: 'itemPrintAreaWidthPx',
@@ -5692,6 +5785,7 @@ export type GlobalOmitConfig = {
   supportThread?: Prisma.SupportThreadOmit
   supportMessage?: Prisma.SupportMessageOmit
   supportTip?: Prisma.SupportTipOmit
+  platformTransactionSequence?: Prisma.PlatformTransactionSequenceOmit
   shopOwnerNotice?: Prisma.ShopOwnerNoticeOmit
   bugFeedbackReport?: Prisma.BugFeedbackReportOmit
   shopUser?: Prisma.ShopUserOmit

@@ -64,7 +64,6 @@ import {
   type AdminCatalogRowForDisplay,
   dashboardPaidOrderLineDisplayLabel,
   listingGoodsServicesUnitCents,
-  paidOrderLineGoodsServicesDisplayCents,
 } from "@/lib/dashboard-payload-helpers";
 import {
   readShopPromotionsDashboardSnapshot,
@@ -237,6 +236,7 @@ async function loadPromotionsSummaryForShopLive(
         paidAt: true,
         eligibleFrom: true,
         shopListingId: true,
+        transactionNumber: true,
       },
     }),
     prisma.shopFlairPurchase.findMany({
@@ -249,6 +249,7 @@ async function loadPromotionsSummaryForShopLive(
         amountCents: true,
         createdAt: true,
         paidAt: true,
+        transactionNumber: true,
       },
     }),
     prisma.shopGoogleShoppingPurchase.findMany({
@@ -263,6 +264,7 @@ async function loadPromotionsSummaryForShopLive(
         paidAt: true,
         packId: true,
         creditsGranted: true,
+        transactionNumber: true,
       },
     }),
   ]);
@@ -318,6 +320,7 @@ async function loadPromotionsSummaryForShopLive(
       eligibleFromIso: row.eligibleFrom?.toISOString() ?? null,
       activeWindowPacificRange,
       listingLabel: sl ? sl.requestItemName?.trim() || sl.product.name : null,
+      transactionNumber: row.transactionNumber,
       lifecycle: promotionPurchaseLifecycle({
         status: row.status,
         eligibleFrom: row.eligibleFrom,
@@ -338,6 +341,7 @@ async function loadPromotionsSummaryForShopLive(
     eligibleFromIso: null,
     activeWindowPacificRange: null,
     listingLabel: null,
+    transactionNumber: row.transactionNumber,
     lifecycle: shopFlairPurchaseLifecycle(row),
     purchaseType: "shop_flair",
   }));
@@ -357,6 +361,7 @@ async function loadPromotionsSummaryForShopLive(
     purchaseType: "shop_google_shopping",
     googleShoppingPackId: row.packId,
     googleShoppingCreditsGranted: row.creditsGranted,
+    transactionNumber: row.transactionNumber,
   }));
 
   const purchases = [...promotionPurchases, ...flairPurchases, ...googleShoppingPurchases]

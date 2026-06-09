@@ -122,6 +122,11 @@ export type SupportMessage = Prisma.SupportMessageModel
  */
 export type SupportTip = Prisma.SupportTipModel
 /**
+ * Model PlatformTransactionSequence
+ * * Per-product platform-wide transaction counters (`{Product} - #{N}` labels).
+ */
+export type PlatformTransactionSequence = Prisma.PlatformTransactionSequenceModel
+/**
  * Model ShopOwnerNotice
  * 
  */

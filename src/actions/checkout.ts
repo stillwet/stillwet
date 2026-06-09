@@ -10,7 +10,7 @@ import { getCartSessionReadonly } from "@/lib/session";
 import {
   CHECKOUT_TIP_STRIPE_TAX_CODE,
   checkoutApplicationFeeCents,
-  splitCheckoutTipCents,
+  checkoutTipProcessingSurchargeCents,
   validateCheckoutTipCents,
 } from "@/lib/checkout-tip";
 import {
@@ -27,9 +27,12 @@ import { FulfillmentType, OrderProceedsRouting, OrderStatus } from "@/generated/
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import { listingCartUnitCents } from "@/lib/listing-cart-price";
 import { listingStripeProductName } from "@/lib/listing-cart-stripe-name";
-import { baselineGoodsServicesUnitCents } from "@/lib/baseline-goods-services-unit-cents";
+import {
+  baselineCogsUnitCents,
+  baselineProductionFeeUnitCents,
+} from "@/lib/baseline-goods-services-unit-cents";
+import { itemCostLineCents, splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
 import { formatBuyerOrderNumber } from "@/lib/buyer-order-number";
-import { splitMerchandiseLineForCheckoutCents } from "@/lib/marketplace-fee";
 import {
   shopIsInactivityDeactivated,
   splitMerchandiseLineForInactiveShopCents,
@@ -156,6 +159,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
     stripeProductName: string;
     orderPrintifyVariantId: string | null;
     goodsServicesCostCents: number;
+    productionFeeCents: number;
     platformCutCents: number;
     shopCutCents: number;
   }[] = [];
@@ -172,7 +176,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
       ? []
       : await prisma.adminCatalogItem.findMany({
           where: { id: { in: [...baselineCatalogItemIds] } },
-          select: { id: true, variants: true, itemGoodsServicesCostCents: true },
+          select: { id: true, variants: true, itemGoodsServicesCostCents: true, itemProductionFeeCents: true },
         });
   const baselineCatalogById = new Map(baselineCatalogRows.map((r) => [r.id, r]));
 
@@ -200,18 +204,34 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
     const lineTotal = unitPriceCents * quantity;
     const pick = parseBaselinePick(listing.baselineCatalogPickEncoded ?? "");
     const catalogRow = pick ? baselineCatalogById.get(pick.itemId) : undefined;
-    const goodsUnit = baselineGoodsServicesUnitCents({
+    const cogsUnit = baselineCogsUnitCents({
       baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
       catalogRow,
     });
-    const goodsLine = Math.min(lineTotal, Math.max(0, goodsUnit) * quantity);
-    const { goodsServicesCostCents, platformCutCents, shopCutCents } =
-      (shopIsDeactivatedForInactivity
-        ? splitMerchandiseLineForInactiveShopCents
-        : splitMerchandiseLineForCheckoutCents)({
+    const productionFeeUnit = baselineProductionFeeUnitCents({
+      baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
+      catalogRow,
+    });
+    const { cogsLineCents, productionFeeLineCents, itemCostLineCents: itemCostTotal } =
+      itemCostLineCents({
+        cogsUnitCents: cogsUnit,
+        productionFeeUnitCents: productionFeeUnit,
+        quantity,
         lineMerchandiseCents: lineTotal,
-        goodsServicesLineCents: goodsLine,
       });
+    const { goodsServicesCostCents, platformCutCents, shopCutCents, productionFeeCents } =
+      shopIsDeactivatedForInactivity
+        ? splitMerchandiseLineForInactiveShopCents({
+            lineMerchandiseCents: lineTotal,
+            cogsLineCents,
+            productionFeeLineCents,
+          })
+        : splitMerchandiseLineWithItemCostCents({
+            lineMerchandiseCents: lineTotal,
+            cogsLineCents,
+            productionFeeLineCents,
+          });
+    void itemCostTotal;
     subtotalCents += lineTotal;
     lineInputs.push({
       listing,
@@ -222,6 +242,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
       stripeProductName,
       orderPrintifyVariantId,
       goodsServicesCostCents,
+      productionFeeCents,
       platformCutCents,
       shopCutCents,
     });
@@ -337,6 +358,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
               stripeProductName,
               orderPrintifyVariantId,
               goodsServicesCostCents,
+              productionFeeCents,
               platformCutCents,
               shopCutCents,
             }) => ({
@@ -350,6 +372,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
               shopId,
               shopListingId: listing.id,
               goodsServicesCostCents,
+              productionFeeCents,
               platformCutCents,
               shopCutCents,
             }),
@@ -405,10 +428,10 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
     shopRecord?.stripeConnectAccountId &&
     shopRecord.connectChargesEnabled;
   const merchandiseApplicationFeeCents = lineInputs.reduce(
-    (s, x) => s + x.platformCutCents + x.goodsServicesCostCents,
+    (s, x) => s + x.platformCutCents + x.goodsServicesCostCents + x.productionFeeCents,
     0,
   );
-  const { platformTipFeeCents } = splitCheckoutTipCents(tipCents);
+  const tipProcessingSurchargeCents = checkoutTipProcessingSurchargeCents(tipCents);
   const applicationFeeCents =
     checkoutApplicationFeeCents({
       merchandiseApplicationFeeCents,
@@ -429,7 +452,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
       ...(useStripeConnect
         ? {
             tipCents: String(tipCents),
-            platformTipFeeCents: String(platformTipFeeCents),
+            tipProcessingSurchargeCents: String(tipProcessingSurchargeCents),
             paymentProcessingCents: String(paymentProcessingCents),
           }
         : {}),

@@ -1,7 +1,7 @@
 /** Maximum optional cart tip (USD cents). */
 export const MAX_CHECKOUT_TIP_CENTS = 1000;
 
-/** Platform keeps this much of each cart tip; remainder goes to the shop (Connect transfer). */
+/** Flat platform surcharge on Payment Processing when the buyer adds a cart tip. */
 export const PLATFORM_TIP_FEE_CENTS = 25;
 
 /** Stripe USD minimum for a paid line item when tip > 0. */
@@ -18,13 +18,18 @@ export function splitCheckoutTipCents(tipCents: number): {
   if (tip === 0) {
     return { platformTipFeeCents: 0, shopTipCents: 0 };
   }
-  const platformTipFeeCents = Math.min(PLATFORM_TIP_FEE_CENTS, tip);
-  return { platformTipFeeCents, shopTipCents: tip - platformTipFeeCents };
+  return { platformTipFeeCents: 0, shopTipCents: tip };
 }
 
-/** Platform Connect application fee attributable to cart tip (25¢ when tip > 0). */
-export function checkoutTipApplicationFeeCents(tipCents: number): number {
-  return splitCheckoutTipCents(tipCents).platformTipFeeCents;
+/** @deprecated Tip platform revenue is collected via Payment Processing surcharge, not Connect app fee. */
+export function checkoutTipApplicationFeeCents(_tipCents: number): number {
+  return 0;
+}
+
+/** Buyer-facing Payment Processing surcharge when a cart tip is present (25¢). */
+export function checkoutTipProcessingSurchargeCents(tipCents: number): number {
+  const tip = Math.max(0, Math.round(tipCents));
+  return tip > 0 ? PLATFORM_TIP_FEE_CENTS : 0;
 }
 
 export function checkoutApplicationFeeCents(params: {

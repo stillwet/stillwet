@@ -30,10 +30,12 @@ export type AggregatePromotionPurchase = {
 
 export type PromotionPurchaseAvgAggregateOutputType = {
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type PromotionPurchaseSumAggregateOutputType = {
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type PromotionPurchaseMinAggregateOutputType = {
@@ -51,6 +53,7 @@ export type PromotionPurchaseMinAggregateOutputType = {
   paidAt: Date | null
   eligibleFrom: Date | null
   paidViaPromotionCredit: boolean | null
+  transactionNumber: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +73,7 @@ export type PromotionPurchaseMaxAggregateOutputType = {
   paidAt: Date | null
   eligibleFrom: Date | null
   paidViaPromotionCredit: boolean | null
+  transactionNumber: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -89,6 +93,7 @@ export type PromotionPurchaseCountAggregateOutputType = {
   paidAt: number
   eligibleFrom: number
   paidViaPromotionCredit: number
+  transactionNumber: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -97,10 +102,12 @@ export type PromotionPurchaseCountAggregateOutputType = {
 
 export type PromotionPurchaseAvgAggregateInputType = {
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type PromotionPurchaseSumAggregateInputType = {
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type PromotionPurchaseMinAggregateInputType = {
@@ -118,6 +125,7 @@ export type PromotionPurchaseMinAggregateInputType = {
   paidAt?: true
   eligibleFrom?: true
   paidViaPromotionCredit?: true
+  transactionNumber?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -137,6 +145,7 @@ export type PromotionPurchaseMaxAggregateInputType = {
   paidAt?: true
   eligibleFrom?: true
   paidViaPromotionCredit?: true
+  transactionNumber?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -156,6 +165,7 @@ export type PromotionPurchaseCountAggregateInputType = {
   paidAt?: true
   eligibleFrom?: true
   paidViaPromotionCredit?: true
+  transactionNumber?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -262,6 +272,7 @@ export type PromotionPurchaseGroupByOutputType = {
   paidAt: Date | null
   eligibleFrom: Date | null
   paidViaPromotionCredit: boolean
+  transactionNumber: number | null
   createdAt: Date
   updatedAt: Date
   _count: PromotionPurchaseCountAggregateOutputType | null
@@ -304,6 +315,7 @@ export type PromotionPurchaseWhereInput = {
   paidAt?: Prisma.DateTimeNullableFilter<"PromotionPurchase"> | Date | string | null
   eligibleFrom?: Prisma.DateTimeNullableFilter<"PromotionPurchase"> | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFilter<"PromotionPurchase"> | boolean
+  transactionNumber?: Prisma.IntNullableFilter<"PromotionPurchase"> | number | null
   createdAt?: Prisma.DateTimeFilter<"PromotionPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PromotionPurchase"> | Date | string
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
@@ -327,6 +339,7 @@ export type PromotionPurchaseOrderByWithRelationInput = {
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   eligibleFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   paidViaPromotionCredit?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   shop?: Prisma.ShopOrderByWithRelationInput
@@ -353,6 +366,7 @@ export type PromotionPurchaseWhereUniqueInput = Prisma.AtLeast<{
   paidAt?: Prisma.DateTimeNullableFilter<"PromotionPurchase"> | Date | string | null
   eligibleFrom?: Prisma.DateTimeNullableFilter<"PromotionPurchase"> | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFilter<"PromotionPurchase"> | boolean
+  transactionNumber?: Prisma.IntNullableFilter<"PromotionPurchase"> | number | null
   createdAt?: Prisma.DateTimeFilter<"PromotionPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PromotionPurchase"> | Date | string
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
@@ -376,6 +390,7 @@ export type PromotionPurchaseOrderByWithAggregationInput = {
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   eligibleFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   paidViaPromotionCredit?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PromotionPurchaseCountOrderByAggregateInput
@@ -403,6 +418,7 @@ export type PromotionPurchaseScalarWhereWithAggregatesInput = {
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PromotionPurchase"> | Date | string | null
   eligibleFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"PromotionPurchase"> | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolWithAggregatesFilter<"PromotionPurchase"> | boolean
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"PromotionPurchase"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PromotionPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PromotionPurchase"> | Date | string
 }
@@ -418,6 +434,7 @@ export type PromotionPurchaseCreateInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutPromotionPurchasesInput
@@ -441,6 +458,7 @@ export type PromotionPurchaseUncheckedCreateInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -456,6 +474,7 @@ export type PromotionPurchaseUpdateInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutPromotionPurchasesNestedInput
@@ -479,6 +498,7 @@ export type PromotionPurchaseUncheckedUpdateInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -498,6 +518,7 @@ export type PromotionPurchaseCreateManyInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -513,6 +534,7 @@ export type PromotionPurchaseUpdateManyMutationInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -532,6 +554,7 @@ export type PromotionPurchaseUncheckedUpdateManyInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -561,12 +584,14 @@ export type PromotionPurchaseCountOrderByAggregateInput = {
   paidAt?: Prisma.SortOrder
   eligibleFrom?: Prisma.SortOrder
   paidViaPromotionCredit?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type PromotionPurchaseAvgOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type PromotionPurchaseMaxOrderByAggregateInput = {
@@ -584,6 +609,7 @@ export type PromotionPurchaseMaxOrderByAggregateInput = {
   paidAt?: Prisma.SortOrder
   eligibleFrom?: Prisma.SortOrder
   paidViaPromotionCredit?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -603,12 +629,14 @@ export type PromotionPurchaseMinOrderByAggregateInput = {
   paidAt?: Prisma.SortOrder
   eligibleFrom?: Prisma.SortOrder
   paidViaPromotionCredit?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type PromotionPurchaseSumOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type PromotionPurchaseCreateNestedManyWithoutTagInput = {
@@ -798,6 +826,7 @@ export type PromotionPurchaseCreateWithoutTagInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutPromotionPurchasesInput
@@ -819,6 +848,7 @@ export type PromotionPurchaseUncheckedCreateWithoutTagInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -867,6 +897,7 @@ export type PromotionPurchaseScalarWhereInput = {
   paidAt?: Prisma.DateTimeNullableFilter<"PromotionPurchase"> | Date | string | null
   eligibleFrom?: Prisma.DateTimeNullableFilter<"PromotionPurchase"> | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFilter<"PromotionPurchase"> | boolean
+  transactionNumber?: Prisma.IntNullableFilter<"PromotionPurchase"> | number | null
   createdAt?: Prisma.DateTimeFilter<"PromotionPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PromotionPurchase"> | Date | string
 }
@@ -882,6 +913,7 @@ export type PromotionPurchaseCreateWithoutShopInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shopUser: Prisma.ShopUserCreateNestedOneWithoutPromotionPurchasesInput
@@ -903,6 +935,7 @@ export type PromotionPurchaseUncheckedCreateWithoutShopInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -944,6 +977,7 @@ export type PromotionPurchaseCreateWithoutShopUserInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutPromotionPurchasesInput
@@ -965,6 +999,7 @@ export type PromotionPurchaseUncheckedCreateWithoutShopUserInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1006,6 +1041,7 @@ export type PromotionPurchaseCreateWithoutShopListingInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutPromotionPurchasesInput
@@ -1027,6 +1063,7 @@ export type PromotionPurchaseUncheckedCreateWithoutShopListingInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1071,6 +1108,7 @@ export type PromotionPurchaseCreateManyTagInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1086,6 +1124,7 @@ export type PromotionPurchaseUpdateWithoutTagInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutPromotionPurchasesNestedInput
@@ -1107,6 +1146,7 @@ export type PromotionPurchaseUncheckedUpdateWithoutTagInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1125,6 +1165,7 @@ export type PromotionPurchaseUncheckedUpdateManyWithoutTagInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1143,6 +1184,7 @@ export type PromotionPurchaseCreateManyShopInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1158,6 +1200,7 @@ export type PromotionPurchaseUpdateWithoutShopInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shopUser?: Prisma.ShopUserUpdateOneRequiredWithoutPromotionPurchasesNestedInput
@@ -1179,6 +1222,7 @@ export type PromotionPurchaseUncheckedUpdateWithoutShopInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1197,6 +1241,7 @@ export type PromotionPurchaseUncheckedUpdateManyWithoutShopInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1215,6 +1260,7 @@ export type PromotionPurchaseCreateManyShopUserInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1230,6 +1276,7 @@ export type PromotionPurchaseUpdateWithoutShopUserInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutPromotionPurchasesNestedInput
@@ -1251,6 +1298,7 @@ export type PromotionPurchaseUncheckedUpdateWithoutShopUserInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1269,6 +1317,7 @@ export type PromotionPurchaseUncheckedUpdateManyWithoutShopUserInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1287,6 +1336,7 @@ export type PromotionPurchaseCreateManyShopListingInput = {
   paidAt?: Date | string | null
   eligibleFrom?: Date | string | null
   paidViaPromotionCredit?: boolean
+  transactionNumber?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1302,6 +1352,7 @@ export type PromotionPurchaseUpdateWithoutShopListingInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutPromotionPurchasesNestedInput
@@ -1323,6 +1374,7 @@ export type PromotionPurchaseUncheckedUpdateWithoutShopListingInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1341,6 +1393,7 @@ export type PromotionPurchaseUncheckedUpdateManyWithoutShopListingInput = {
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eligibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paidViaPromotionCredit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1362,6 +1415,7 @@ export type PromotionPurchaseSelect<ExtArgs extends runtime.Types.Extensions.Int
   paidAt?: boolean
   eligibleFrom?: boolean
   paidViaPromotionCredit?: boolean
+  transactionNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
@@ -1385,6 +1439,7 @@ export type PromotionPurchaseSelectCreateManyAndReturn<ExtArgs extends runtime.T
   paidAt?: boolean
   eligibleFrom?: boolean
   paidViaPromotionCredit?: boolean
+  transactionNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
@@ -1408,6 +1463,7 @@ export type PromotionPurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   paidAt?: boolean
   eligibleFrom?: boolean
   paidViaPromotionCredit?: boolean
+  transactionNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
@@ -1431,11 +1487,12 @@ export type PromotionPurchaseSelectScalar = {
   paidAt?: boolean
   eligibleFrom?: boolean
   paidViaPromotionCredit?: boolean
+  transactionNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PromotionPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "kind" | "shopListingId" | "tagId" | "amountCents" | "currency" | "status" | "stripePaymentIntentId" | "stripeChargeId" | "paidAt" | "eligibleFrom" | "paidViaPromotionCredit" | "createdAt" | "updatedAt", ExtArgs["result"]["promotionPurchase"]>
+export type PromotionPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "kind" | "shopListingId" | "tagId" | "amountCents" | "currency" | "status" | "stripePaymentIntentId" | "stripeChargeId" | "paidAt" | "eligibleFrom" | "paidViaPromotionCredit" | "transactionNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["promotionPurchase"]>
 export type PromotionPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -1493,6 +1550,10 @@ export type $PromotionPurchasePayload<ExtArgs extends runtime.Types.Extensions.I
      * * True when checkout used an admin-granted promotion credit (amountCents is 0).
      */
     paidViaPromotionCredit: boolean
+    /**
+     * * Platform-wide promo-type sequence number for Stripe labels.
+     */
+    transactionNumber: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["promotionPurchase"]>
@@ -1936,6 +1997,7 @@ export interface PromotionPurchaseFieldRefs {
   readonly paidAt: Prisma.FieldRef<"PromotionPurchase", 'DateTime'>
   readonly eligibleFrom: Prisma.FieldRef<"PromotionPurchase", 'DateTime'>
   readonly paidViaPromotionCredit: Prisma.FieldRef<"PromotionPurchase", 'Boolean'>
+  readonly transactionNumber: Prisma.FieldRef<"PromotionPurchase", 'Int'>
   readonly createdAt: Prisma.FieldRef<"PromotionPurchase", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PromotionPurchase", 'DateTime'>
 }

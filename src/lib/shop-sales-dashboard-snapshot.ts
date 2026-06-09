@@ -1,5 +1,13 @@
-import { prisma } from "@/lib/prisma";
 import type { DashboardPaidOrderRow } from "@/components/dashboard/DashboardMainTabs";
+import { pacificCalendarDateKey } from "@/lib/promotion-period-pacific";
+import { prisma } from "@/lib/prisma";
+
+/** Bump when snapshot payload shape changes (invalidates prior daily caches). */
+const SHOP_SALES_SNAPSHOT_PAYLOAD_VERSION = "v3";
+
+export function shopSalesDashboardSnapshotPeriodKey(now: Date = new Date()): string {
+  return `${pacificCalendarDateKey(now)}:${SHOP_SALES_SNAPSHOT_PAYLOAD_VERSION}`;
+}
 
 function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null;

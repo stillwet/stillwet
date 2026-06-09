@@ -3,7 +3,7 @@
 import { CreatorGiftFulfillmentMode, CreatorGiftPurchaseStatus } from "@/generated/prisma/enums";
 import { verifyGiftRecipientShop } from "@/actions/gift-creator-shop-search";
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
-import { SHOP_SETUP_FEE_CENTS, SHOP_SETUP_FEE_LABEL } from "@/lib/creator-gift-codes";
+import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
 import { creatorGiftMockSessionId } from "@/lib/creator-gift-mock-checkout";
 import { normalizeGiftFromName } from "@/lib/creator-gift-notices";
 import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
@@ -11,8 +11,14 @@ import { listingCreditPackById } from "@/lib/listing-credit-packs";
 import { prisma } from "@/lib/prisma";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import {
+  PLATFORM_TRANSACTION_PRODUCT,
+  allocatePlatformTransactionNumber,
+  promotionKindToPlatformTransactionProduct,
+  stripePlatformTransactionReferenceFields,
+  type PlatformTransactionProduct,
+} from "@/lib/platform-transaction-reference";
+import {
   SHOP_FLAIR_ACCESS_PRICE_CENTS,
-  shopFlairAccessPurchaseLabel,
 } from "@/lib/shop-flair";
 import {
   PROMOTION_KIND_OPTIONS,
@@ -145,37 +151,38 @@ function existingShopMerchandiseSubtotalCents(
 function buildExistingShopLineItems(
   options: ReturnType<typeof parseExistingShopGiftOptions>,
   processingLine: ReturnType<typeof stripeCheckoutPaymentProcessingLineItem>,
+  lineLabels: ExistingShopGiftLineLabels,
 ): CheckoutLineItem[] {
   const lineItems: CheckoutLineItem[] = [];
   const { listingPack, googlePack, promotionKind, promotionCredits, includeShopFlair } = options;
 
-  if (listingPack) {
+  if (listingPack && lineLabels.listingCredits) {
     lineItems.push({
       quantity: 1,
       price_data: {
         currency: "usd",
         unit_amount: listingPack.priceCents,
         product_data: {
-          name: `${listingPack.credits} listing credits`,
+          name: lineLabels.listingCredits,
           description: "Gift listing credits for an existing shop.",
         },
       },
     });
   }
-  if (googlePack) {
+  if (googlePack && lineLabels.googleShopping) {
     lineItems.push({
       quantity: 1,
       price_data: {
         currency: "usd",
         unit_amount: googlePack.priceCents,
         product_data: {
-          name: `${googlePack.credits} Google Shopping credits`,
+          name: lineLabels.googleShopping,
           description: "Gift Google Shopping credits for an existing shop.",
         },
       },
     });
   }
-  if (promotionKind && promotionCredits > 0) {
+  if (promotionKind && promotionCredits > 0 && lineLabels.promotion) {
     const unitCents = promotionPriceCentsForKind(promotionKind);
     lineItems.push({
       quantity: promotionCredits,
@@ -183,20 +190,20 @@ function buildExistingShopLineItems(
         currency: "usd",
         unit_amount: unitCents,
         product_data: {
-          name: `${promotionKindLabel(promotionKind)} promotion credit`,
+          name: lineLabels.promotion,
           description: `Gift ${promotionKindLabel(promotionKind).toLowerCase()} placement credit.`,
         },
       },
     });
   }
-  if (includeShopFlair) {
+  if (includeShopFlair && lineLabels.shopFlair) {
     lineItems.push({
       quantity: 1,
       price_data: {
         currency: "usd",
         unit_amount: SHOP_FLAIR_ACCESS_PRICE_CENTS,
         product_data: {
-          name: shopFlairAccessPurchaseLabel(),
+          name: lineLabels.shopFlair,
           description: "Gift shop flair access for an existing shop.",
         },
       },
@@ -205,6 +212,48 @@ function buildExistingShopLineItems(
   if (processingLine) lineItems.push(processingLine);
 
   return lineItems;
+}
+
+type ExistingShopGiftLineLabels = {
+  listingCredits?: string;
+  googleShopping?: string;
+  promotion?: string;
+  shopFlair?: string;
+};
+
+async function allocateExistingShopGiftLineLabels(
+  options: ReturnType<typeof parseExistingShopGiftOptions>,
+): Promise<{ lineLabels: ExistingShopGiftLineLabels; primaryTransactionNumber: number | null }> {
+  return prisma.$transaction(async (tx) => {
+    const lineLabels: ExistingShopGiftLineLabels = {};
+    let primaryTransactionNumber: number | null = null;
+
+    const allocateGiftLine = async (product: PlatformTransactionProduct) => {
+      const transactionNumber = await allocatePlatformTransactionNumber(tx, product);
+      if (primaryTransactionNumber == null) primaryTransactionNumber = transactionNumber;
+      return stripePlatformTransactionReferenceFields(product, transactionNumber, { gift: true })
+        .lineItemName;
+    };
+
+    if (options.listingPack) {
+      lineLabels.listingCredits = await allocateGiftLine(PLATFORM_TRANSACTION_PRODUCT.listing_credits);
+    }
+    if (options.googlePack) {
+      lineLabels.googleShopping = await allocateGiftLine(
+        PLATFORM_TRANSACTION_PRODUCT.gshop_listing_upgrade,
+      );
+    }
+    if (options.promotionKind && options.promotionCredits > 0) {
+      lineLabels.promotion = await allocateGiftLine(
+        promotionKindToPlatformTransactionProduct(options.promotionKind),
+      );
+    }
+    if (options.includeShopFlair) {
+      lineLabels.shopFlair = await allocateGiftLine(PLATFORM_TRANSACTION_PRODUCT.shop_flair);
+    }
+
+    return { lineLabels, primaryTransactionNumber };
+  });
 }
 
 async function markGiftCheckoutFailed(purchaseId: string): Promise<void> {
@@ -234,25 +283,38 @@ export async function startCreatorGiftCheckout(
     subtotalCents: merchandiseSubtotalCents,
   });
 
-  const purchase = await prisma.creatorGiftPurchase.create({
-    data: {
-      purchaserEmail,
-      fulfillmentMode: CreatorGiftFulfillmentMode.email_codes,
-      setupFeeIncluded: true,
-      amountCents: checkoutTotalCents,
-      currency: "usd",
-      status: CreatorGiftPurchaseStatus.pending,
-    },
-    select: { id: true },
+  const { purchaseId, refFields } = await prisma.$transaction(async (tx) => {
+    const transactionNumber = await allocatePlatformTransactionNumber(
+      tx,
+      PLATFORM_TRANSACTION_PRODUCT.shop_creation_fee,
+    );
+    const fields = stripePlatformTransactionReferenceFields(
+      PLATFORM_TRANSACTION_PRODUCT.shop_creation_fee,
+      transactionNumber,
+      { gift: true },
+    );
+    const purchase = await tx.creatorGiftPurchase.create({
+      data: {
+        purchaserEmail,
+        fulfillmentMode: CreatorGiftFulfillmentMode.email_codes,
+        setupFeeIncluded: true,
+        amountCents: checkoutTotalCents,
+        currency: "usd",
+        status: CreatorGiftPurchaseStatus.pending,
+        transactionNumber,
+      },
+      select: { id: true },
+    });
+    return { purchaseId: purchase.id, refFields: fields };
   });
 
   try {
     const appBase = base.replace(/\/$/, "");
 
     if (isMockCheckoutEnabled()) {
-      const mockSessionId = creatorGiftMockSessionId(purchase.id);
+      const mockSessionId = creatorGiftMockSessionId(purchaseId);
       await prisma.creatorGiftPurchase.update({
-        where: { id: purchase.id },
+        where: { id: purchaseId },
         data: { stripeCheckoutSessionId: mockSessionId },
       });
       return {
@@ -268,7 +330,7 @@ export async function startCreatorGiftCheckout(
           currency: "usd",
           unit_amount: SHOP_SETUP_FEE_CENTS,
           product_data: {
-            name: SHOP_SETUP_FEE_LABEL,
+            name: refFields.lineItemName,
             description: "Gift code for a creator's one-time shop setup account fee.",
           },
         },
@@ -283,28 +345,33 @@ export async function startCreatorGiftCheckout(
       metadata: {
         kind: "creator_gift",
         fulfillmentMode: CreatorGiftFulfillmentMode.email_codes,
-        purchaseId: purchase.id,
+        purchaseId,
         setupFeeIncluded: "1",
         subtotalCents: String(merchandiseSubtotalCents),
         amountCents: String(checkoutTotalCents),
+        ...refFields.metadata,
+      },
+      payment_intent_data: {
+        description: refFields.description,
+        metadata: refFields.metadata,
       },
       success_url: `${appBase}/gift-creator/success?mode=setup&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBase}/gift-creator?mode=setup&gift=cancel`,
     });
 
     if (!session.url) {
-      await markGiftCheckoutFailed(purchase.id);
+      await markGiftCheckoutFailed(purchaseId);
       return { ok: false, error: "Stripe did not return a checkout URL." };
     }
 
     await prisma.creatorGiftPurchase.update({
-      where: { id: purchase.id },
+      where: { id: purchaseId },
       data: { stripeCheckoutSessionId: session.id },
     });
     return { ok: true, url: session.url };
   } catch (e) {
     console.error("[gift-creator] setup checkout failed", e);
-    await markGiftCheckoutFailed(purchase.id);
+    await markGiftCheckoutFailed(purchaseId);
     return { ok: false, error: "Could not start gift checkout. Try again." };
   }
 }
@@ -348,6 +415,14 @@ export async function startCreatorGiftExistingShopCheckout(
   });
   const { listingPack, googlePack, promotionKind, promotionCredits, includeShopFlair } = options;
 
+  const { lineLabels, primaryTransactionNumber } = await allocateExistingShopGiftLineLabels(options);
+  const piDescription =
+    lineLabels.listingCredits ??
+    lineLabels.googleShopping ??
+    lineLabels.promotion ??
+    lineLabels.shopFlair ??
+    "Creator gift";
+
   const purchase = await prisma.creatorGiftPurchase.create({
     data: {
       purchaserEmail: null,
@@ -365,6 +440,7 @@ export async function startCreatorGiftExistingShopCheckout(
       amountCents: checkoutTotalCents,
       currency: "usd",
       status: CreatorGiftPurchaseStatus.pending,
+      transactionNumber: primaryTransactionNumber,
     },
     select: { id: true },
   });
@@ -384,7 +460,7 @@ export async function startCreatorGiftExistingShopCheckout(
       };
     }
 
-    const lineItems = buildExistingShopLineItems(options, processingLine);
+    const lineItems = buildExistingShopLineItems(options, processingLine, lineLabels);
 
     const session = await getStripe().checkout.sessions.create({
       mode: "payment",
@@ -405,6 +481,11 @@ export async function startCreatorGiftExistingShopCheckout(
         shopFlairIncluded: includeShopFlair ? "1" : "0",
         subtotalCents: String(merchandiseSubtotalCents),
         amountCents: String(checkoutTotalCents),
+        platformTransactionGift: "1",
+      },
+      payment_intent_data: {
+        description: piDescription,
+        metadata: { platformTransactionGift: "1" },
       },
       success_url: `${appBase}/gift-creator/success?mode=direct&shop=${encodeURIComponent(shopResult.shop.slug)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBase}/gift-creator?mode=existing&gift=cancel`,

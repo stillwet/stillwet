@@ -29,11 +29,13 @@ export type AggregateShopGoogleShoppingPurchase = {
 export type ShopGoogleShoppingPurchaseAvgAggregateOutputType = {
   creditsGranted: number | null
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ShopGoogleShoppingPurchaseSumAggregateOutputType = {
   creditsGranted: number | null
   amountCents: number | null
+  transactionNumber: number | null
 }
 
 export type ShopGoogleShoppingPurchaseMinAggregateOutputType = {
@@ -45,6 +47,7 @@ export type ShopGoogleShoppingPurchaseMinAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ShopGoogleShoppingPurchaseStatus | null
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date | null
@@ -60,6 +63,7 @@ export type ShopGoogleShoppingPurchaseMaxAggregateOutputType = {
   amountCents: number | null
   currency: string | null
   status: $Enums.ShopGoogleShoppingPurchaseStatus | null
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date | null
@@ -75,6 +79,7 @@ export type ShopGoogleShoppingPurchaseCountAggregateOutputType = {
   amountCents: number
   currency: number
   status: number
+  transactionNumber: number
   stripePaymentIntentId: number
   paidAt: number
   createdAt: number
@@ -86,11 +91,13 @@ export type ShopGoogleShoppingPurchaseCountAggregateOutputType = {
 export type ShopGoogleShoppingPurchaseAvgAggregateInputType = {
   creditsGranted?: true
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ShopGoogleShoppingPurchaseSumAggregateInputType = {
   creditsGranted?: true
   amountCents?: true
+  transactionNumber?: true
 }
 
 export type ShopGoogleShoppingPurchaseMinAggregateInputType = {
@@ -102,6 +109,7 @@ export type ShopGoogleShoppingPurchaseMinAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -117,6 +125,7 @@ export type ShopGoogleShoppingPurchaseMaxAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -132,6 +141,7 @@ export type ShopGoogleShoppingPurchaseCountAggregateInputType = {
   amountCents?: true
   currency?: true
   status?: true
+  transactionNumber?: true
   stripePaymentIntentId?: true
   paidAt?: true
   createdAt?: true
@@ -234,6 +244,7 @@ export type ShopGoogleShoppingPurchaseGroupByOutputType = {
   amountCents: number
   currency: string
   status: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber: number | null
   stripePaymentIntentId: string | null
   paidAt: Date | null
   createdAt: Date
@@ -272,6 +283,7 @@ export type ShopGoogleShoppingPurchaseWhereInput = {
   amountCents?: Prisma.IntFilter<"ShopGoogleShoppingPurchase"> | number
   currency?: Prisma.StringFilter<"ShopGoogleShoppingPurchase"> | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFilter<"ShopGoogleShoppingPurchase"> | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopGoogleShoppingPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ShopGoogleShoppingPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopGoogleShoppingPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopGoogleShoppingPurchase"> | Date | string
@@ -289,6 +301,7 @@ export type ShopGoogleShoppingPurchaseOrderByWithRelationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -310,6 +323,7 @@ export type ShopGoogleShoppingPurchaseWhereUniqueInput = Prisma.AtLeast<{
   amountCents?: Prisma.IntFilter<"ShopGoogleShoppingPurchase"> | number
   currency?: Prisma.StringFilter<"ShopGoogleShoppingPurchase"> | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFilter<"ShopGoogleShoppingPurchase"> | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopGoogleShoppingPurchase"> | number | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopGoogleShoppingPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopGoogleShoppingPurchase"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ShopGoogleShoppingPurchase"> | Date | string
@@ -326,6 +340,7 @@ export type ShopGoogleShoppingPurchaseOrderByWithAggregationInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -349,6 +364,7 @@ export type ShopGoogleShoppingPurchaseScalarWhereWithAggregatesInput = {
   amountCents?: Prisma.IntWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | number
   currency?: Prisma.StringWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ShopGoogleShoppingPurchase"> | Date | string
@@ -362,6 +378,7 @@ export type ShopGoogleShoppingPurchaseCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -379,6 +396,7 @@ export type ShopGoogleShoppingPurchaseUncheckedCreateInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -392,6 +410,7 @@ export type ShopGoogleShoppingPurchaseUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -409,6 +428,7 @@ export type ShopGoogleShoppingPurchaseUncheckedUpdateInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -424,6 +444,7 @@ export type ShopGoogleShoppingPurchaseCreateManyInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -437,6 +458,7 @@ export type ShopGoogleShoppingPurchaseUpdateManyMutationInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -452,6 +474,7 @@ export type ShopGoogleShoppingPurchaseUncheckedUpdateManyInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -477,6 +500,7 @@ export type ShopGoogleShoppingPurchaseCountOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -486,6 +510,7 @@ export type ShopGoogleShoppingPurchaseCountOrderByAggregateInput = {
 export type ShopGoogleShoppingPurchaseAvgOrderByAggregateInput = {
   creditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ShopGoogleShoppingPurchaseMaxOrderByAggregateInput = {
@@ -497,6 +522,7 @@ export type ShopGoogleShoppingPurchaseMaxOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -512,6 +538,7 @@ export type ShopGoogleShoppingPurchaseMinOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -521,6 +548,7 @@ export type ShopGoogleShoppingPurchaseMinOrderByAggregateInput = {
 export type ShopGoogleShoppingPurchaseSumOrderByAggregateInput = {
   creditsGranted?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
+  transactionNumber?: Prisma.SortOrder
 }
 
 export type ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput = {
@@ -618,6 +646,7 @@ export type ShopGoogleShoppingPurchaseCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -633,6 +662,7 @@ export type ShopGoogleShoppingPurchaseUncheckedCreateWithoutShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -677,6 +707,7 @@ export type ShopGoogleShoppingPurchaseScalarWhereInput = {
   amountCents?: Prisma.IntFilter<"ShopGoogleShoppingPurchase"> | number
   currency?: Prisma.StringFilter<"ShopGoogleShoppingPurchase"> | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFilter<"ShopGoogleShoppingPurchase"> | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.IntNullableFilter<"ShopGoogleShoppingPurchase"> | number | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"ShopGoogleShoppingPurchase"> | string | null
   paidAt?: Prisma.DateTimeNullableFilter<"ShopGoogleShoppingPurchase"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ShopGoogleShoppingPurchase"> | Date | string
@@ -690,6 +721,7 @@ export type ShopGoogleShoppingPurchaseCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -705,6 +737,7 @@ export type ShopGoogleShoppingPurchaseUncheckedCreateWithoutShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -745,6 +778,7 @@ export type ShopGoogleShoppingPurchaseCreateManyShopInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -758,6 +792,7 @@ export type ShopGoogleShoppingPurchaseUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -773,6 +808,7 @@ export type ShopGoogleShoppingPurchaseUncheckedUpdateWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -787,6 +823,7 @@ export type ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -801,6 +838,7 @@ export type ShopGoogleShoppingPurchaseCreateManyShopUserInput = {
   amountCents: number
   currency?: string
   status?: $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: number | null
   stripePaymentIntentId?: string | null
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -814,6 +852,7 @@ export type ShopGoogleShoppingPurchaseUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -829,6 +868,7 @@ export type ShopGoogleShoppingPurchaseUncheckedUpdateWithoutShopUserInput = {
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -843,6 +883,7 @@ export type ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopUserInput = 
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumShopGoogleShoppingPurchaseStatusFieldUpdateOperationsInput | $Enums.ShopGoogleShoppingPurchaseStatus
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -860,6 +901,7 @@ export type ShopGoogleShoppingPurchaseSelect<ExtArgs extends runtime.Types.Exten
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -877,6 +919,7 @@ export type ShopGoogleShoppingPurchaseSelectCreateManyAndReturn<ExtArgs extends 
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -894,6 +937,7 @@ export type ShopGoogleShoppingPurchaseSelectUpdateManyAndReturn<ExtArgs extends 
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -911,13 +955,14 @@ export type ShopGoogleShoppingPurchaseSelectScalar = {
   amountCents?: boolean
   currency?: boolean
   status?: boolean
+  transactionNumber?: boolean
   stripePaymentIntentId?: boolean
   paidAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ShopGoogleShoppingPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "packId" | "creditsGranted" | "amountCents" | "currency" | "status" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shopGoogleShoppingPurchase"]>
+export type ShopGoogleShoppingPurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "shopId" | "shopUserId" | "packId" | "creditsGranted" | "amountCents" | "currency" | "status" | "transactionNumber" | "stripePaymentIntentId" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shopGoogleShoppingPurchase"]>
 export type ShopGoogleShoppingPurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   shopUser?: boolean | Prisma.ShopUserDefaultArgs<ExtArgs>
@@ -949,6 +994,10 @@ export type $ShopGoogleShoppingPurchasePayload<ExtArgs extends runtime.Types.Ext
     amountCents: number
     currency: string
     status: $Enums.ShopGoogleShoppingPurchaseStatus
+    /**
+     * * Platform-wide G-Shop Listing Upgrade sequence number for Stripe labels.
+     */
+    transactionNumber: number | null
     stripePaymentIntentId: string | null
     paidAt: Date | null
     createdAt: Date
@@ -1386,6 +1435,7 @@ export interface ShopGoogleShoppingPurchaseFieldRefs {
   readonly amountCents: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'Int'>
   readonly currency: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'String'>
   readonly status: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'ShopGoogleShoppingPurchaseStatus'>
+  readonly transactionNumber: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'Int'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'String'>
   readonly paidAt: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ShopGoogleShoppingPurchase", 'DateTime'>

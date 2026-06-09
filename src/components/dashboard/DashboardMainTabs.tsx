@@ -52,11 +52,16 @@ import {
 } from "@/lib/shop-onboarding-gate";
 import { DashboardNoticeMarkReadForm } from "@/components/dashboard/DashboardNoticeMarkReadForm";
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
-import { dashboardListingMinPriceHintCents } from "@/lib/listing-cart-price";
+import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
 import {
   type ShopSalesProfitSummary,
 } from "@/lib/shop-sales-profit-summary";
+import {
+  orderMerchandiseBreakdownTotals,
+  orderShopMerchandiseProfitCents,
+  orderShopProfitCents,
+} from "@/lib/order-proceeds-splits";
 import {
   parseListingStorefrontCatalogImageSelection,
   productImageUrlsUnionHero,
@@ -188,6 +193,8 @@ export type DashboardPaidOrderRow = {
   id: string;
   orderNumber: number;
   createdAt: string;
+  /** Raw cart tip on the order (for profit helpers). */
+  tipCents?: number;
   /** Shop share of optional cart tip (tip minus platform fee). */
   shopTipCents?: number;
   lines: Array<{
@@ -240,25 +247,29 @@ function paidOrderDateTimeAttr(iso: string) {
   }
 }
 
-function paidOrderMerchandiseTotals(o: DashboardPaidOrderRow) {
-  return o.lines.reduce(
-    (acc, l) => ({
-      saleCents: acc.saleCents + l.unitPriceCents * l.quantity,
-      goodsServicesCostCents: acc.goodsServicesCostCents + l.goodsServicesCostCents,
-      platformCutCents: acc.platformCutCents + l.platformCutCents,
-    }),
-    { saleCents: 0, goodsServicesCostCents: 0, platformCutCents: 0 },
-  );
-}
-
 function paidOrderShopTipCents(o: DashboardPaidOrderRow) {
   return o.shopTipCents ?? 0;
 }
 
-/** Sum of (sale − goods/services − platform fee) per line, plus shop tip share. */
+function paidOrderItemProfitCents(o: DashboardPaidOrderRow) {
+  return orderShopMerchandiseProfitCents(o.lines);
+}
+
 function paidOrderShopProfitCents(o: DashboardPaidOrderRow) {
-  const t = paidOrderMerchandiseTotals(o);
-  return t.saleCents - t.goodsServicesCostCents - t.platformCutCents + paidOrderShopTipCents(o);
+  return orderShopProfitCents({
+    lines: o.lines,
+    tipCents: o.tipCents,
+    shopTipShareCents: o.shopTipCents,
+  });
+}
+
+function paidOrderMerchandiseTotals(o: DashboardPaidOrderRow) {
+  const totals = orderMerchandiseBreakdownTotals(o.lines);
+  return {
+    saleCents: totals.saleCents,
+    goodsServicesCostCents: totals.goodsServicesCostCents,
+    platformCutCents: totals.platformCutCents,
+  };
 }
 
 function formatMoney(cents: number) {
@@ -266,6 +277,48 @@ function formatMoney(cents: number) {
     style: "currency",
     currency: "USD",
   }).format(cents / 100);
+}
+
+const paidOrderTableGridClass =
+  "grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem_4.5rem_5.5rem] sm:grid-cols-[3.5rem_minmax(0,1fr)_5.5rem_4.5rem_3.5rem_5.5rem] items-center gap-x-3";
+
+const paidOrderMetricValueClass =
+  "text-[11px] tabular-nums leading-snug text-zinc-100";
+
+function PaidOrderItemTipHeaderCells() {
+  return (
+    <>
+      <span className="hidden text-center sm:block">Item profit</span>
+      <span className="hidden text-center sm:block">Tip</span>
+      <div className="flex flex-col items-center gap-0.5 text-center leading-tight sm:hidden">
+        <span>Item profit</span>
+        <span>Tip</span>
+      </div>
+    </>
+  );
+}
+
+function PaidOrderItemTipValueCells({
+  itemProfitCents,
+  tipCents,
+}: {
+  itemProfitCents: number;
+  tipCents: number;
+}) {
+  return (
+    <>
+      <span className={`hidden self-center text-center sm:block ${paidOrderMetricValueClass}`}>
+        {formatMoney(itemProfitCents)}
+      </span>
+      <span className={`hidden self-center text-center sm:block ${paidOrderMetricValueClass}`}>
+        {formatMoney(tipCents)}
+      </span>
+      <div className={`flex flex-col items-center gap-0.5 self-center text-center sm:hidden ${paidOrderMetricValueClass}`}>
+        <span>{formatMoney(itemProfitCents)}</span>
+        <span>{formatMoney(tipCents)}</span>
+      </div>
+    </>
+  );
 }
 
 function ShopSalesProfitSummaryCards({ summary }: { summary: ShopSalesProfitSummary }) {
@@ -2084,44 +2137,54 @@ export function DashboardMainTabs(props: {
         {effectivePaidOrders.length > 0 ? (
           <>
             <div
-              className="mt-4 flex items-baseline justify-between gap-4 border-b border-zinc-800/80 pb-2 text-[11px] uppercase tracking-wide text-zinc-500"
+              className="mt-4 border-b border-zinc-800/80 px-3 pb-2 text-[11px] uppercase tracking-wide text-zinc-500"
               aria-hidden
             >
-              <div className="flex min-w-0 flex-1 items-baseline gap-3">
-                <span className="w-14 shrink-0 text-center">Date</span>
-                <span className="min-w-0 flex-1 pl-4 text-left">Item</span>
+              <div className={paidOrderTableGridClass}>
+                <span className="text-center">Date</span>
+                <span className="text-left">Item</span>
+                <span className="text-center text-zinc-600">Order number</span>
+                <PaidOrderItemTipHeaderCells />
+                <span className="text-center text-blue-400">Total profit</span>
               </div>
-              <span className="min-w-[5.5rem] shrink-0 text-center text-blue-400">Shop profit</span>
             </div>
             <ul className="mt-2 space-y-3">
               {effectivePaidOrders.map((o) => (
                 <li key={o.id} className="rounded-lg border border-zinc-800 p-3 text-xs text-zinc-400">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex min-w-0 flex-1 items-start gap-3">
-                      <time
-                        dateTime={paidOrderDateTimeAttr(o.createdAt)}
-                        className="w-14 shrink-0 font-normal tabular-nums text-zinc-300"
-                      >
-                        {formatPaidOrderDate(o.createdAt)}
-                      </time>
-                      <ul className="min-w-0 flex-1 space-y-2 text-zinc-400">
-                        {o.lines.map((l, i) => (
-                          <li key={i} className="leading-snug text-zinc-300">
-                            {l.lineDisplayLabel} × {l.quantity}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className={`${paidOrderTableGridClass} items-start`}>
+                    <time
+                      dateTime={paidOrderDateTimeAttr(o.createdAt)}
+                      className="self-center text-center font-normal tabular-nums text-zinc-300"
+                    >
+                      {formatPaidOrderDate(o.createdAt)}
+                    </time>
+                    <ul className="min-w-0 space-y-2 text-zinc-400">
+                      {o.lines.map((l, i) => (
+                        <li key={i} className="leading-snug text-zinc-300">
+                          {l.lineDisplayLabel} × {l.quantity}
+                        </li>
+                      ))}
+                    </ul>
                     {(() => {
                       const merch = paidOrderMerchandiseTotals(o);
                       return (
-                        <PaidOrderShopProfitHelp
-                          shopProfitCents={paidOrderShopProfitCents(o)}
-                          saleCents={merch.saleCents}
-                          goodsServicesCostCents={merch.goodsServicesCostCents}
-                          platformCutCents={merch.platformCutCents}
-                          shopTipCents={paidOrderShopTipCents(o)}
-                        />
+                        <>
+                          <span className="self-center text-center text-[11px] tabular-nums leading-snug text-zinc-600">
+                            {formatBuyerOrderNumberShort(o.orderNumber)}
+                          </span>
+                          <PaidOrderItemTipValueCells
+                            itemProfitCents={paidOrderItemProfitCents(o)}
+                            tipCents={paidOrderShopTipCents(o)}
+                          />
+                          <div className="flex self-center justify-center">
+                            <PaidOrderShopProfitHelp
+                              shopProfitCents={paidOrderShopProfitCents(o)}
+                              saleCents={merch.saleCents}
+                              goodsServicesCostCents={merch.goodsServicesCostCents}
+                              platformCutCents={merch.platformCutCents}
+                            />
+                          </div>
+                        </>
                       );
                     })()}
                   </div>
