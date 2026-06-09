@@ -49,7 +49,25 @@ export function ShopFlairSection(props: {
   }, [flair.purchasedAt, flair.selectedType?.id]);
 
   if (variant === "selection") {
-    if (!flair.purchasedAt) return null;
+    if (!flair.purchasedAt) {
+      return (
+        <div className={className}>
+          <div className="pointer-events-none select-none opacity-45" aria-disabled="true">
+            <label className="block text-xs text-zinc-500">
+              Shop flair
+              <select
+                disabled
+                value="locked"
+                tabIndex={-1}
+                className="mt-1 block w-full cursor-not-allowed rounded-lg border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-sm text-zinc-600"
+              >
+                <option value="locked">Purchase flair access on Shop upgrades to unlock.</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className={className}>

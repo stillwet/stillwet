@@ -18,16 +18,21 @@ export function AdminSecretMenuShopsPanel(props: {
   const { shopRows, shopPickerOptions, smErr, smGranted, smRevoked } = props;
   const [shopSlug, setShopSlug] = useState("");
 
-  const defaultOpen =
+  const initiallyOpen =
     shopRows.length > 0 ||
     Boolean(smErr?.trim() || smGranted?.trim() || smRevoked?.trim());
+  const [shopsOpen, setShopsOpen] = useState(initiallyOpen);
 
   const summaryLabel =
     shopRows.length > 0 ? `Shop access (${shopRows.length})` : "Shop access";
 
   return (
     <div id="secret-menu-shops" className="rounded-lg border border-zinc-800 bg-zinc-950/40">
-      <details className="group" defaultOpen={defaultOpen}>
+      <details
+        className="group"
+        open={shopsOpen}
+        onToggle={(e) => setShopsOpen(e.currentTarget.open)}
+      >
         <summary className="cursor-pointer select-none list-none px-3 py-2.5 text-xs font-medium uppercase tracking-wide text-zinc-500 hover:text-zinc-300 [&::-webkit-details-marker]:hidden">
           {summaryLabel}
         </summary>

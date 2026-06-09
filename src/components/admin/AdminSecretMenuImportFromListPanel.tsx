@@ -56,10 +56,19 @@ export function AdminSecretMenuImportFromListPanel(props: {
     ) : null;
 
   if (part === "toolbar") {
+    const toolbarHint =
+      importable.length > 0 ? (
+        <p className="text-xs text-zinc-500" role="status">
+          {importable.length} available to import
+        </p>
+      ) : (
+        toolbarStatus
+      );
+
     return (
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
         {title}
-        {toolbarStatus}
+        {toolbarHint}
       </div>
     );
   }
@@ -82,58 +91,65 @@ export function AdminSecretMenuImportFromListPanel(props: {
 
   const importForm =
     importable.length > 0 ? (
-      <form action={adminImportStandardCatalogItemsToSecretMenu} className="space-y-3">
-        <label className="flex items-center gap-2 text-xs text-zinc-400">
-          <input
-            type="checkbox"
-            checked={allImportableSelected}
-            onChange={(e) => toggleAllImportable(e.target.checked)}
-            className="rounded border-zinc-600 bg-zinc-900"
-          />
-          Select all available ({importable.length})
-        </label>
+      <details className="rounded-lg border border-zinc-800/80 bg-zinc-950/30">
+        <summary className="cursor-pointer select-none list-none px-3 py-2.5 text-[11px] font-medium text-zinc-400 hover:text-zinc-200 [&::-webkit-details-marker]:hidden">
+          Select items to import ({importable.length})
+        </summary>
+        <div className="space-y-3 border-t border-zinc-800/80 px-3 pb-3 pt-3">
+          <form action={adminImportStandardCatalogItemsToSecretMenu} className="space-y-3">
+            <label className="flex items-center gap-2 text-xs text-zinc-400">
+              <input
+                type="checkbox"
+                checked={allImportableSelected}
+                onChange={(e) => toggleAllImportable(e.target.checked)}
+                className="rounded border-zinc-600 bg-zinc-900"
+              />
+              Select all available ({importable.length})
+            </label>
 
-        <ul className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-950/60 p-2">
-          {importable.map((option) => (
-            <li key={option.id}>
-              <label className="flex cursor-pointer items-start gap-2 rounded px-2 py-1.5 text-xs text-zinc-200 hover:bg-zinc-900/80">
-                <input
-                  type="checkbox"
-                  name="sourceItemId"
-                  value={option.id}
-                  checked={selectedIds.has(option.id)}
-                  onChange={(e) => toggleItem(option.id, e.target.checked)}
-                  className="mt-0.5 rounded border-zinc-600 bg-zinc-900"
-                />
-                <span className="min-w-0 flex-1">{option.name}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-
-        {alreadyImported.length > 0 ? (
-          <details className="text-[11px] text-zinc-600">
-            <summary className="cursor-pointer select-none text-zinc-500 hover:text-zinc-400">
-              {alreadyImported.length} already in secret menu
-            </summary>
-            <ul className="mt-2 space-y-0.5 pl-3">
-              {alreadyImported.map((option) => (
-                <li key={option.id} className="text-zinc-600">
-                  {option.name}
+            <ul className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-950/60 p-2">
+              {importable.map((option) => (
+                <li key={option.id}>
+                  <label className="flex cursor-pointer items-start gap-2 rounded px-2 py-1.5 text-xs text-zinc-200 hover:bg-zinc-900/80">
+                    <input
+                      type="checkbox"
+                      name="sourceItemId"
+                      value={option.id}
+                      checked={selectedIds.has(option.id)}
+                      onChange={(e) => toggleItem(option.id, e.target.checked)}
+                      className="mt-0.5 rounded border-zinc-600 bg-zinc-900"
+                    />
+                    <span className="min-w-0 flex-1">{option.name}</span>
+                  </label>
                 </li>
               ))}
             </ul>
-          </details>
-        ) : null}
 
-        <button
-          type="submit"
-          disabled={!someSelected}
-          className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Import selected
-        </button>
-      </form>
+            {alreadyImported.length > 0 ? (
+              <details className="text-[11px] text-zinc-600">
+                <summary className="cursor-pointer select-none text-zinc-500 hover:text-zinc-400">
+                  {alreadyImported.length} already in secret menu
+                </summary>
+                <ul className="mt-2 space-y-0.5 pl-3">
+                  {alreadyImported.map((option) => (
+                    <li key={option.id} className="text-zinc-600">
+                      {option.name}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={!someSelected}
+              className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Import selected
+            </button>
+          </form>
+        </div>
+      </details>
     ) : null;
 
   if (part === "content") {

@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type ChangeEvent,
+} from "react";
 import {
   updateShopListedOnShopsBrowseForm,
   updateShopProfileSetup,
@@ -70,21 +78,48 @@ function buildShopProfileFormData(
   return fd;
 }
 
-const btnPrimary =
-  "rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed";
-const btnPrimaryDisabled = "rounded-lg bg-zinc-900/50 px-4 py-2 text-sm font-medium text-zinc-500 ring-1 ring-zinc-800";
-const btnPrimarySaving =
-  "cursor-wait rounded-lg bg-zinc-100/70 px-4 py-2 text-sm font-medium text-zinc-700 ring-1 ring-zinc-300/60";
-const btnPrimarySaved =
-  "cursor-default rounded-lg border border-emerald-800/50 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-300 ring-1 ring-emerald-800/40";
+const PROFILE_AUTOSAVE_DEBOUNCE_MS = 750;
 
-const btnSecondary =
-  "rounded bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 disabled:cursor-not-allowed";
-const btnSecondaryDisabled =
-  "cursor-not-allowed rounded bg-zinc-900/50 px-3 py-1.5 text-xs font-medium text-zinc-500 ring-1 ring-zinc-800";
-const btnSecondarySaving = "cursor-wait rounded bg-zinc-800/80 px-3 py-1.5 text-xs font-medium text-zinc-300";
-const btnSecondarySaved =
-  "cursor-default rounded border border-emerald-900/40 bg-zinc-900/50 px-3 py-1.5 text-xs font-medium text-emerald-300/90";
+function ProfileAutoSaveStatus({
+  pending,
+  savedFlash,
+  dirty,
+}: {
+  pending: boolean;
+  savedFlash: boolean;
+  dirty: boolean;
+}) {
+  const label = pending ? "Saving…" : savedFlash && !dirty ? "Saved" : "\u00a0";
+  return (
+    <span
+      className={`inline-block min-w-[4rem] text-right text-xs font-medium tabular-nums ${
+        pending ? "text-zinc-400" : savedFlash && !dirty ? "text-emerald-400/90" : "text-transparent"
+      }`}
+      aria-live="polite"
+    >
+      {label}
+    </span>
+  );
+}
+
+function ProfilePhotoPencilIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
 
 function initialsFromDisplayName(name: string): string {
   const t = name.trim();
@@ -148,14 +183,16 @@ export function ShopProfileSetupPanel(props: {
   const [socialAddError, setSocialAddError] = useState<string | null>(null);
   const [profileSavedFlash, setProfileSavedFlash] = useState(false);
 
-  const [avatarHasFile, setAvatarHasFile] = useState(false);
   const [avatarSavedFlash, setAvatarSavedFlash] = useState(false);
   const [profileImageUrlOverride, setProfileImageUrlOverride] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const avatarFileInputId = useId();
+  const profileAutosaveGen = useRef(0);
 
   const profileImageUrl = profileImageUrlOverride ?? shop.profileImageUrl;
 
   useEffect(() => {
+    profileAutosaveGen.current += 1;
     setDisplayName(shopDisplayNameForProfileForm(shop.displayName));
     setWelcomeMessage(shop.welcomeMessage ?? "");
     setSocial(socialRecordFromShop(shop.socialLinks));
@@ -165,7 +202,6 @@ export function ShopProfileSetupPanel(props: {
 
   useEffect(() => {
     setProfileImageUrlOverride(null);
-    setAvatarHasFile(false);
     setAvatarSavedFlash(false);
     if (avatarInputRef.current) avatarInputRef.current.value = "";
   }, [shop.profileImageUrl]);
@@ -189,9 +225,42 @@ export function ShopProfileSetupPanel(props: {
     return false;
   }, [displayName, welcomeMessage, social, shop.displayName, shop.welcomeMessage, baselineSocial]);
 
+  const profileAutosaveBlocked = Boolean(welcomeUrlError) || !displayName.trim();
+
   useEffect(() => {
     if (profileDirty) setProfileSavedFlash(false);
   }, [profileDirty]);
+
+  useEffect(() => {
+    if (!profileDirty || profileAutosaveBlocked || isSocialSavePending) return;
+    const gen = profileAutosaveGen.current;
+    const t = window.setTimeout(() => {
+      startProfileTransition(async () => {
+        setMessage(null);
+        const r: ShopSetupActionResult = await updateShopProfileSetup(
+          buildShopProfileFormData(displayName, welcomeMessage, social),
+        );
+        if (gen !== profileAutosaveGen.current) return;
+        if (r.ok) {
+          setMessage(null);
+          setProfileSavedFlash(true);
+          window.setTimeout(() => setProfileSavedFlash(false), 2500);
+          router.refresh();
+        } else {
+          setMessage({ tone: "err", text: r.error });
+        }
+      });
+    }, PROFILE_AUTOSAVE_DEBOUNCE_MS);
+    return () => window.clearTimeout(t);
+  }, [
+    profileDirty,
+    profileAutosaveBlocked,
+    displayName,
+    welcomeMessage,
+    social,
+    isSocialSavePending,
+    router,
+  ]);
 
   useEffect(() => {
     setProfileModerationBlur(emptyProfileModerationBlur);
@@ -200,26 +269,6 @@ export function ShopProfileSetupPanel(props: {
   useEffect(() => {
     setSocialAddError(null);
   }, [socialAddKey, socialAddUrl]);
-
-  useEffect(() => {
-    if (avatarHasFile) setAvatarSavedFlash(false);
-  }, [avatarHasFile]);
-
-  async function handleProfileSubmit(fd: FormData) {
-    setMessage(null);
-    setProfileModerationBlur(emptyProfileModerationBlur);
-    startProfileTransition(async () => {
-      const r: ShopSetupActionResult = await updateShopProfileSetup(fd);
-      if (r.ok) {
-        setMessage(null);
-        setProfileSavedFlash(true);
-        window.setTimeout(() => setProfileSavedFlash(false), 2500);
-        router.refresh();
-      } else {
-        setMessage({ tone: "err", text: r.error });
-      }
-    });
-  }
 
   function persistSocialLinks(nextSocial: Record<ShopSocialKey, string>, prevSocial: Record<ShopSocialKey, string>) {
     startSocialSaveTransition(async () => {
@@ -272,6 +321,7 @@ export function ShopProfileSetupPanel(props: {
             ? "Upload failed — the photo may be over the server size limit (try under 5 MB), or the dashboard could not refresh after upload. Reload the page; if it still fails, redeploy so the 16 MB upload limit is active."
             : msg || "Could not upload that photo. Try again or contact support.",
         });
+        if (avatarInputRef.current) avatarInputRef.current.value = "";
         return;
       }
       if (r.ok) {
@@ -281,38 +331,32 @@ export function ShopProfileSetupPanel(props: {
         setAvatarSavedFlash(true);
         window.setTimeout(() => setAvatarSavedFlash(false), 2500);
         if (avatarInputRef.current) avatarInputRef.current.value = "";
-        setAvatarHasFile(false);
       } else {
         setMessage({ tone: "err", text: r.error });
+        if (avatarInputRef.current) avatarInputRef.current.value = "";
       }
     });
   }
 
-  const profileBtnLabel = isProfilePending
-    ? "Saving..."
-    : profileSavedFlash && !profileDirty
-      ? "Saved"
-      : "Save profile";
-  const profileBtnClass = isProfilePending
-    ? btnPrimarySaving
-    : !profileDirty
-      ? profileSavedFlash
-        ? btnPrimarySaved
-        : btnPrimaryDisabled
-      : btnPrimary;
+  function uploadAvatarPickedFile(file: File) {
+    if (isAvatarPending) return;
+    setAvatarSavedFlash(false);
+    setMessage(null);
+    const fd = new FormData();
+    fd.set("profileImage", file);
+    void handleAvatarSubmit(fd);
+  }
 
-  const avatarBtnLabel = isAvatarPending
-    ? "Saving..."
-    : avatarSavedFlash && !avatarHasFile
-      ? "Saved"
-      : "Upload photo";
-  const avatarBtnClass = isAvatarPending
-    ? btnSecondarySaving
-    : !avatarHasFile
-      ? avatarSavedFlash
-        ? btnSecondarySaved
-        : btnSecondaryDisabled
-      : btnSecondary;
+  function onAvatarFileInputChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setMessage({ tone: "err", text: "Choose an image file (JPEG, PNG, WebP, or GIF)." });
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      return;
+    }
+    uploadAvatarPickedFile(file);
+  }
 
   function runShopProfileModerationCheck() {
     if (moderationPhrases.length === 0) {
@@ -347,67 +391,91 @@ export function ShopProfileSetupPanel(props: {
     >
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Shop profile</h2>
 
-      <div className="mt-6 flex flex-wrap items-center gap-4 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-        {profileImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- R2 / external shop avatars
-          <img
-            src={profileImageUrl}
-            alt=""
-            className="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-zinc-700"
-          />
-        ) : (
-          <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-sm font-semibold text-zinc-300 ring-1 ring-zinc-700"
-            aria-hidden
-          >
-            {initialsFromDisplayName(shop.displayName)}
+      <div className="mt-6 flex flex-col gap-3 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative h-14 w-14 shrink-0">
+            {profileImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- R2 / external shop avatars
+              <img
+                src={profileImageUrl}
+                alt=""
+                className="h-14 w-14 rounded-full object-cover ring-1 ring-zinc-700"
+              />
+            ) : (
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-800 text-sm font-semibold text-zinc-300 ring-1 ring-zinc-700"
+                aria-hidden
+              >
+                {initialsFromDisplayName(shop.displayName)}
+              </div>
+            )}
+            {profileImageUrl && r2Configured ? (
+              <label
+                htmlFor={avatarFileInputId}
+                title="Change profile photo"
+                className={`absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-zinc-600 bg-zinc-800 text-zinc-200 shadow-sm ${
+                  isAvatarPending
+                    ? "pointer-events-none opacity-60"
+                    : "cursor-pointer hover:border-zinc-500 hover:bg-zinc-700"
+                }`}
+              >
+                <ProfilePhotoPencilIcon className="h-3.5 w-3.5" />
+                <span className="sr-only">Change profile photo</span>
+              </label>
+            ) : null}
+            {isAvatarPending ? (
+              <span
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-zinc-950/70 text-[10px] font-medium text-zinc-200"
+                role="status"
+                aria-live="polite"
+              >
+                …
+              </span>
+            ) : null}
           </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-base font-semibold text-zinc-100">{shop.displayName}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-semibold text-zinc-100">{shop.displayName}</p>
+            {avatarSavedFlash ? (
+              <p className="mt-0.5 text-[11px] text-emerald-300/90" role="status">
+                Photo saved
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <span id={`shop-listed-browse-label-${shop.shopSlug}`} className="text-xs text-zinc-500">
-          Store appears in “
-          <Link
-            href="/shops"
-            prefetch={false}
-            className="font-medium text-zinc-400 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-300"
-          >
-            All Shops
-          </Link>
-          ” list
-        </span>
-        <div
-          role="radiogroup"
-          aria-labelledby={`shop-listed-browse-label-${shop.shopSlug}`}
-          className="flex flex-wrap gap-4"
-        >
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
-            <input
-              type="radio"
-              name={`listedOnShopsBrowse-${shop.shopSlug}`}
-              checked={listedOnShopsBrowse}
-              disabled={isListedBrowsePending}
-              onChange={() => setListedOnShopsBrowsePreference(true)}
-              className="border-zinc-600 text-sky-600 focus:ring-sky-500/40"
-            />
-            Yes
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
-            <input
-              type="radio"
-              name={`listedOnShopsBrowse-${shop.shopSlug}`}
-              checked={!listedOnShopsBrowse}
-              disabled={isListedBrowsePending}
-              onChange={() => setListedOnShopsBrowsePreference(false)}
-              className="border-zinc-600 text-sky-600 focus:ring-sky-500/40"
-            />
-            No
-          </label>
-        </div>
+        {!profileImageUrl ? (
+          <div className="border-t border-zinc-800/80 pt-3">
+            <p className="text-xs text-zinc-500">Profile photo</p>
+            <p className="mt-0.5 text-[11px] text-zinc-600">No photo yet.</p>
+            {!r2Configured ? (
+              <p className="mt-2 text-xs text-amber-200/80">
+                R2 uploads are not configured on this server — contact the platform operator.
+              </p>
+            ) : (
+              <label
+                htmlFor={avatarFileInputId}
+                className={`mt-2 inline-block ${isAvatarPending ? "pointer-events-none opacity-60" : "cursor-pointer"}`}
+              >
+                <span className="rounded border border-zinc-700 bg-zinc-900/40 px-2.5 py-1 text-[11px] text-zinc-200 hover:border-zinc-500">
+                  {isAvatarPending ? "Uploading…" : "Choose image"}
+                </span>
+              </label>
+            )}
+          </div>
+        ) : null}
+
+        {r2Configured ? (
+          <input
+            ref={avatarInputRef}
+            id={avatarFileInputId}
+            type="file"
+            name="profileImage"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            disabled={isAvatarPending}
+            onChange={onAvatarFileInputChange}
+            className="sr-only"
+          />
+        ) : null}
       </div>
 
       <div className="mt-8 space-y-6 text-sm text-zinc-300">
@@ -420,16 +488,16 @@ export function ShopProfileSetupPanel(props: {
           </p>
         ) : null}
 
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!profileDirty || isProfilePending || isSocialSavePending || welcomeUrlError) return;
-            void handleProfileSubmit(new FormData(e.currentTarget));
-          }}
-        >
+        <div className="space-y-4">
           <label className="block text-xs text-zinc-500">
-            Shop display name
+            <span className="flex items-center justify-between gap-3">
+              <span>Shop Name</span>
+              <ProfileAutoSaveStatus
+                pending={isProfilePending}
+                savedFlash={profileSavedFlash}
+                dirty={profileDirty}
+              />
+            </span>
             <input
               name="displayName"
               required
@@ -450,7 +518,7 @@ export function ShopProfileSetupPanel(props: {
             Welcome message (max 280 characters, no links)
             <textarea
               name="welcomeMessage"
-              rows={3}
+              rows={1}
               maxLength={280}
               value={welcomeMessage}
               onChange={(e) => setWelcomeMessage(e.target.value)}
@@ -469,70 +537,55 @@ export function ShopProfileSetupPanel(props: {
               </p>
             ) : null}
           </label>
-          {shop.flair?.purchasedAt ? (
+          {shop.flair ? (
             <ShopFlairSection
               flair={shop.flair}
               variant="selection"
               className=""
             />
           ) : null}
-          {SHOP_SOCIAL_KEYS.map((key) => (
-            <input key={key} type="hidden" name={`social_${key}`} value={social[key] ?? ""} />
-          ))}
-          <button
-            type="submit"
-            disabled={
-              !profileDirty || isProfilePending || isSocialSavePending || Boolean(welcomeUrlError)
-            }
-            className={profileBtnClass}
-          >
-            {profileBtnLabel}
-          </button>
           <div className="border-t border-zinc-800 pt-4">
-            <p className="text-xs text-zinc-500">Profile photo</p>
-            {profileImageUrl ? (
-              <div className="mt-3 space-y-2">
-                {/* eslint-disable-next-line @next/next/no-img-element -- R2 / external shop avatars */}
-                <img
-                  src={profileImageUrl}
-                  alt="Current profile photo"
-                  className="h-24 w-24 rounded-lg object-cover ring-1 ring-zinc-700"
-                />
-                <p className="break-all text-[11px] text-zinc-600">{profileImageUrl}</p>
-              </div>
-            ) : (
-              <p className="mt-1 text-[11px] text-zinc-600">No photo yet.</p>
-            )}
-            {!r2Configured ? (
-              <p className="mt-2 text-xs text-amber-200/80">
-                R2 uploads are not configured on this server — contact the platform operator.
-              </p>
-            ) : (
-              <div className="mt-3 flex flex-wrap items-end gap-2">
-                <input
-                  ref={avatarInputRef}
-                  type="file"
-                  name="profileImage"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(e) => setAvatarHasFile(Boolean(e.target.files?.length))}
-                  className="max-w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
-                />
-                <button
-                  type="button"
-                  disabled={!avatarHasFile || isAvatarPending}
-                  className={avatarBtnClass}
-                  onClick={() => {
-                    const file = avatarInputRef.current?.files?.[0];
-                    if (!file || isAvatarPending) return;
-                    const fd = new FormData();
-                    fd.set("profileImage", file);
-                    void handleAvatarSubmit(fd);
-                  }}
+            <div className="flex flex-col gap-3 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <span id={`shop-listed-browse-label-${shop.shopSlug}`} className="text-xs text-zinc-500">
+                Store appears in “
+                <Link
+                  href="/shops"
+                  prefetch={false}
+                  className="font-medium text-zinc-400 underline decoration-zinc-600 underline-offset-2 hover:text-zinc-300"
                 >
-                  {avatarBtnLabel}
-                </button>
+                  All Shops
+                </Link>
+                ” list
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby={`shop-listed-browse-label-${shop.shopSlug}`}
+                className="flex flex-wrap gap-4"
+              >
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+                  <input
+                    type="radio"
+                    name={`listedOnShopsBrowse-${shop.shopSlug}`}
+                    checked={listedOnShopsBrowse}
+                    disabled={isListedBrowsePending}
+                    onChange={() => setListedOnShopsBrowsePreference(true)}
+                    className="border-zinc-600 text-sky-600 focus:ring-sky-500/40"
+                  />
+                  Yes
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+                  <input
+                    type="radio"
+                    name={`listedOnShopsBrowse-${shop.shopSlug}`}
+                    checked={!listedOnShopsBrowse}
+                    disabled={isListedBrowsePending}
+                    onChange={() => setListedOnShopsBrowsePreference(false)}
+                    className="border-zinc-600 text-sky-600 focus:ring-sky-500/40"
+                  />
+                  No
+                </label>
               </div>
-            )}
+            </div>
           </div>
           <div className="space-y-3 border-t border-zinc-800 pt-4">
             <p className="text-xs font-medium text-zinc-500">Social links (optional)</p>
@@ -648,7 +701,7 @@ export function ShopProfileSetupPanel(props: {
               </p>
             ) : null}
           </div>
-        </form>
+        </div>
       </div>
     </section>
   );

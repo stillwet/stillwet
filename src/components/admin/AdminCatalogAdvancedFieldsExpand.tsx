@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export function AdminCatalogFieldsExpand({
   label,
   defaultOpen = false,
@@ -9,10 +11,13 @@ export function AdminCatalogFieldsExpand({
   defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
+
   return (
     <details
       className="rounded-lg border border-zinc-800/80 bg-zinc-950/30"
-      defaultOpen={defaultOpen}
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
     >
       <summary className="cursor-pointer select-none list-none px-3 py-2.5 text-[11px] font-medium text-zinc-400 hover:text-zinc-200 [&::-webkit-details-marker]:hidden">
         {label}
