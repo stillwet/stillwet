@@ -12,7 +12,12 @@ import { getAdminSession, getAdminSessionReadonly } from "@/lib/session";
 import { Audience, FulfillmentType } from "@/generated/prisma/enums";
 import {
   fetchPrintifyCatalogEnriched,
+  fetchPrintifyCatalog,
   fetchPrintifyProductDetail,
+  hasPrintifyApiToken,
+  printifyAuxShopId,
+  printifyPrimaryShopId,
+  releasePrintifyProductPublishState,
   type PrintifyCatalogProduct,
 } from "@/lib/printify";
 import { pickImageForVariant } from "@/lib/printify-catalog";
@@ -579,6 +584,103 @@ export async function resyncPrintifyCatalogProduct(formData: FormData): Promise<
 
   redirect(
     `${ADMIN_BACKEND_BASE_PATH}?tab=printify&sync=ok&syncMode=single&updated=${r.updated}&created=${r.created}&skipped=${r.skipped}&removed=${r.removed}&printifyId=${encodeURIComponent(printifyProductId)}`,
+  );
+}
+
+function printifyAuxUnpublishErrRedirect(
+  printifyProductId: string,
+  r: { status: number; body: string },
+): never {
+  const detail = r.body.trim().slice(0, 240);
+  const q = new URLSearchParams({
+    tab: "printify-aux",
+    unpublish: "err",
+    printifyId: printifyProductId,
+    reason: `api_${r.status}`,
+  });
+  if (detail) q.set("detail", detail);
+  redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}`);
+}
+
+export async function adminUnpublishPrintifyAuxProduct(formData: FormData): Promise<void> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) {
+    redirect("/admin/login");
+  }
+
+  const printifyProductId = String(formData.get("printifyProductId") ?? "").trim();
+  if (!printifyProductId) {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=err&reason=no_product`);
+  }
+
+  const resolved = resolvePrintifyAuxShopForUnpublish();
+  if (!resolved.ok) {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=err&reason=${resolved.reason}`);
+  }
+
+  const r = await releasePrintifyProductPublishState(resolved.shopId, printifyProductId);
+  if (!r.ok) {
+    printifyAuxUnpublishErrRedirect(printifyProductId, r);
+  }
+
+  redirect(
+    `${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=ok&printifyId=${encodeURIComponent(printifyProductId)}`,
+  );
+}
+
+function resolvePrintifyAuxShopForUnpublish():
+  | { ok: true; shopId: string }
+  | { ok: false; reason: string } {
+  const auxShopId = printifyAuxShopId();
+  if (!auxShopId || !hasPrintifyApiToken()) {
+    return { ok: false, reason: "no_aux_shop" };
+  }
+
+  const primaryShopId = printifyPrimaryShopId();
+  if (primaryShopId && auxShopId === primaryShopId) {
+    return { ok: false, reason: "same_as_primary" };
+  }
+
+  return { ok: true, shopId: auxShopId };
+}
+
+export async function adminUnpublishAllPrintifyAuxProducts(formData: FormData): Promise<void> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) {
+    redirect("/admin/login");
+  }
+
+  if (String(formData.get("confirm") ?? "").trim() !== "unpublish_all") {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=err&reason=confirm_required`);
+  }
+
+  const resolved = resolvePrintifyAuxShopForUnpublish();
+  if (!resolved.ok) {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=err&reason=${resolved.reason}`);
+  }
+
+  let catalog: Awaited<ReturnType<typeof fetchPrintifyCatalog>>;
+  try {
+    catalog = await fetchPrintifyCatalog(resolved.shopId);
+  } catch {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=err&reason=catalog_fetch`);
+  }
+
+  if (catalog.length === 0) {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=all_ok&ok=0&failed=0`);
+  }
+
+  let ok = 0;
+  let failed = 0;
+  for (const p of catalog) {
+    const r = await releasePrintifyProductPublishState(resolved.shopId, p.id);
+    if (r.ok) ok += 1;
+    else failed += 1;
+  }
+
+  const status = failed === 0 ? "all_ok" : ok === 0 ? "all_err" : "all_partial";
+  redirect(
+    `${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux&unpublish=${status}&ok=${ok}&failed=${failed}`,
   );
 }
 

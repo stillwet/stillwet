@@ -27,10 +27,16 @@ export default function AdminError({
     /Cannot read properties of undefined \(reading '(?:count|adminCatalogItem)'\)/i.test(
       msg,
     );
+  /** Client bundle from a prior deploy — Server Action id no longer exists on the server. */
+  const looksLikeServerActionSkew =
+    /was not found on the server/i.test(msg) ||
+    /failed-to-find-server-action/i.test(msg) ||
+    /Failed to find Server Action/i.test(msg);
   /** Postgres or migrations behind (missing column/table). */
   const looksLikeDb =
     !looksLikeStaleClient &&
     !looksLikeMissingPostgres &&
+    !looksLikeServerActionSkew &&
     (/does not exist|Unknown column|P20\d{2}/i.test(msg) ||
       (/invalid.*prisma.*invocation/i.test(msg) && /column|relation|migrate/i.test(msg)));
 
@@ -42,8 +48,10 @@ export default function AdminError({
           ? "The running app is using an outdated Prisma Client (Turbopack cache, a long-lived dev process, or a cached `globalThis` Prisma singleton). The schema or generated client on disk is newer than what this Node process loaded (for example a new model delegate or field like `creatorRemovedFromShopAt`)."
           : looksLikeMissingPostgres
             ? "This deployment has no Postgres URL (or Prisma could not connect). On Vercel → Production for stillwet.com: link Neon or set POSTGRES_PRISMA_URL, remove localhost DATABASE_URL/DIRECT_URL, redeploy, then confirm /api/health shows database.ok: true."
+            : looksLikeServerActionSkew
+              ? "This admin tab is still running JavaScript from an older deploy. Saving catalog items uses Server Actions whose IDs change each release — hard-refresh the page (Ctrl+Shift+R), then try again. If it persists after refresh, redeploy and enable Vercel Skew Protection (see VERCEL.md)."
             : looksLikeDb
-            ? "The database does not match the current Prisma schema (for example migration `20260608120000_order_return_claim` for buyer return claims, `20260603120000_admin_catalog_large_listing_artwork` for large listing artwork, `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table). Apply pending migrations to that database, then reload."
+            ? "The database does not match the current Prisma schema (for example migration `20260608120000_order_return_claim` for buyer return claims, `20260603120000_admin_catalog_large_listing_artwork` for large listing artwork, `20260609120000_admin_catalog_canvas_presentation` for canvas presentation fields, `20260415160000_shop_listing_creator_removed`, or the `ModerationKeyword` table). Apply pending migrations to that database, then reload."
             : "Something went wrong while loading this page. Check the server log for the stack trace."}
       </p>
       {looksLikeStaleClient ? (
@@ -73,6 +81,19 @@ export default function AdminError({
           </li>
           <li>Vercel → StillWet project → Storage → Connect Neon (or set POSTGRES_PRISMA_URL).</li>
           <li>Redeploy, then run migrations: npm run db:migrate:prod (after vercel env pull).</li>
+        </ol>
+      ) : null}
+      {looksLikeServerActionSkew ? (
+        <ol className="mt-4 list-decimal space-y-2 pl-5 text-xs text-red-200/75">
+          <li>
+            Hard-refresh this tab: <strong className="font-medium text-red-100/90">Ctrl+Shift+R</strong> (Windows) or{" "}
+            <strong className="font-medium text-red-100/90">Cmd+Shift+R</strong> (Mac).
+          </li>
+          <li>Close other stillwet.com admin tabs that were open before the last deploy.</li>
+          <li>
+            Vercel → project → Settings → enable <strong className="font-medium text-red-100/90">Skew Protection</strong>{" "}
+            (keeps prior deployment assets briefly after a release).
+          </li>
         </ol>
       ) : null}
       {looksLikeDb ? (

@@ -374,3 +374,9 @@ h6 {
   pointer-events: none;
   z-index: 1;
 }
+
+/* Mug / wraparound — crop box is the full print file; hide react-easy-crop outer dimming. */
+.listing-artwork-crop-print-window.listing-artwork-crop-wraparound-preview .reactEasyCrop_CropArea {
+  color: transparent !important;
+  box-shadow: none !important;
+}

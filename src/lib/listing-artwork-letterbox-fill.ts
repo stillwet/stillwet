@@ -153,6 +153,9 @@ export function printAreaSuggestsWhiteLetterbox(
 export function defaultLetterboxFillForCatalogItemName(
   name: string | null | undefined,
 ): ListingArtworkLetterboxFill {
+  if (catalogItemIsWhiteMug({ catalogItemName: name })) {
+    return ListingArtworkLetterboxFill.white;
+  }
   return catalogItemNameSuggestsWhiteLetterbox(name)
     ? ListingArtworkLetterboxFill.white
     : ListingArtworkLetterboxFill.transparent;
@@ -166,6 +169,10 @@ export function resolveListingArtworkLetterboxFill(params: {
   printAreaHeightPx?: number | null;
 }): ListingArtworkLetterboxFill {
   if (listingArtworkLetterboxFillUsesWhite(params.itemArtworkLetterboxFill)) {
+    return ListingArtworkLetterboxFill.white;
+  }
+  // White ceramic mugs do not print white ink — store opaque white margins/background.
+  if (catalogItemIsWhiteMug({ catalogItemName: params.catalogItemName })) {
     return ListingArtworkLetterboxFill.white;
   }
   if (catalogItemNameSuggestsTransparentLetterbox(params.catalogItemName)) {

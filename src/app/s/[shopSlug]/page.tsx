@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { FeaturedProductsCarousel } from "@/components/FeaturedProductsCarousel";
 import { productsToFeaturedCarouselItems } from "@/lib/shop-featured-carousel";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { ShopSocialLinksRow } from "@/components/ShopSocialLinksRow";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
@@ -115,22 +115,22 @@ export default async function ShopTenantHomePage({ params, searchParams }: Props
     shop.homeFeaturedListing.active &&
     shop.homeFeaturedListing.creatorRemovedFromShopAt == null &&
     shop.homeFeaturedListing.product.active
-      ? [
-          productCardProductFromListing({
+      ? await productCardProductsFromListings([
+          {
             id: shop.homeFeaturedListing.id,
             shopId: shop.homeFeaturedListing.shopId,
             priceCents: shop.homeFeaturedListing.priceCents,
             product: shop.homeFeaturedListing.product,
             requestItemName: shop.homeFeaturedListing.requestItemName,
-            adminListingSecondaryImageUrl: shop.homeFeaturedListing.adminListingSecondaryImageUrl,
-            ownerSupplementImageUrl: shop.homeFeaturedListing.ownerSupplementImageUrl,
-            listingStorefrontCatalogImageUrls: shop.homeFeaturedListing.listingStorefrontCatalogImageUrls,
+            baselineCatalogPickEncoded: shop.homeFeaturedListing.baselineCatalogPickEncoded,
+            listingStorefrontCatalogImageUrls:
+              shop.homeFeaturedListing.listingStorefrontCatalogImageUrls,
             shop: { slug: shopSlug },
-          }),
-        ]
+          },
+        ])
       : [];
 
-  const carouselProducts = listings.map((l) => productCardProductFromListing(l));
+  const carouselProducts = await productCardProductsFromListings(listings);
 
   return (
     <div>

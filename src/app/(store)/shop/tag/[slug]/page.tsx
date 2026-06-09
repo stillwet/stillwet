@@ -6,7 +6,7 @@ import { getStoreTags } from "@/lib/store-tags";
 import { ProductCard } from "@/components/ProductCard";
 import { SHOP_ALL_ROUTE } from "@/lib/constants";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import { marketplaceAggregatedListingWhere } from "@/lib/shop-listing-storefront-visibility";
 import { STOREFRONT_LISTING_PRODUCT_RELATION_INCLUDE } from "@/lib/storefront-listing-product-include";
 import {
@@ -66,6 +66,8 @@ export default async function ShopUniversalTagPage({ params }: Props) {
     return <ShopDataLoadError cause={e} />;
   }
 
+  const cardProducts = await productCardProductsFromListings(listings);
+
   return (
     <div>
       <p className="text-xs text-zinc-500">
@@ -84,9 +86,9 @@ export default async function ShopUniversalTagPage({ params }: Props) {
         <p className="mt-8 text-sm text-zinc-600">No products with this tag yet.</p>
       ) : (
         <ul className="mx-auto mt-8 flex max-w-full flex-wrap justify-center gap-3">
-          {listings.map((l) => (
-            <li key={l.id} className="w-[175px] shrink-0">
-              <ProductCard product={productCardProductFromListing(l)} />
+          {cardProducts.map((product, i) => (
+            <li key={listings[i]!.id} className="w-[175px] shrink-0">
+              <ProductCard product={product} />
             </li>
           ))}
         </ul>

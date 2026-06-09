@@ -171,6 +171,13 @@ export function shopBaselineCatalogGroupPrintAreaPixels(group: ShopSetupCatalogG
   );
 }
 
+function compareShopBaselineCatalogGroupsByNameAsc(
+  a: ShopSetupCatalogGroup,
+  b: ShopSetupCatalogGroup,
+): number {
+  return a.itemName.localeCompare(b.itemName, undefined, { sensitivity: "base" });
+}
+
 function compareShopBaselineCatalogGroupsByPrintAreaAsc(
   a: ShopSetupCatalogGroup,
   b: ShopSetupCatalogGroup,
@@ -178,7 +185,13 @@ function compareShopBaselineCatalogGroupsByPrintAreaAsc(
   const areaDiff =
     shopBaselineCatalogGroupPrintAreaPixels(a) - shopBaselineCatalogGroupPrintAreaPixels(b);
   if (areaDiff !== 0) return areaDiff;
-  return a.itemName.localeCompare(b.itemName, undefined, { sensitivity: "base" });
+  return compareShopBaselineCatalogGroupsByNameAsc(a, b);
+}
+
+export function sortShopBaselineCatalogGroupsByNameAsc(
+  groups: ShopSetupCatalogGroup[],
+): ShopSetupCatalogGroup[] {
+  return [...groups].sort(compareShopBaselineCatalogGroupsByNameAsc);
 }
 
 export function sortShopBaselineCatalogGroupsByPrintAreaAsc(
@@ -226,7 +239,7 @@ export function organizeShopBaselineCatalogByCategory(
 
   const sections: ShopSetupCatalogCategorySection[] = [];
   for (const [categoryKey, categoryGroups] of byCategory) {
-    const sortedGroups = sortShopBaselineCatalogGroupsByPrintAreaAsc(categoryGroups);
+    const sortedGroups = sortShopBaselineCatalogGroupsByNameAsc(categoryGroups);
     const sample = sortedGroups[0];
     sections.push({
       categoryKey,
@@ -242,8 +255,6 @@ export function organizeShopBaselineCatalogByCategory(
     const bOther = b.categoryKey === UNCategorizedCatalogCategoryKey;
     if (aOther && !bOther) return 1;
     if (!aOther && bOther) return -1;
-    const byCanvas = a.minPrintAreaPx - b.minPrintAreaPx;
-    if (byCanvas !== 0) return byCanvas;
     const byTagOrder = a.categorySortOrder - b.categorySortOrder;
     if (byTagOrder !== 0) return byTagOrder;
     return a.categoryName.localeCompare(b.categoryName, undefined, { sensitivity: "base" });
@@ -324,7 +335,7 @@ export function partitionShopBaselineCatalogGroups(groups: ShopSetupCatalogGroup
     }
   }
   return {
-    phonePicSafe: sortShopBaselineCatalogGroupsByPrintAreaAsc(phonePicSafe),
-    cameraOrVectorOnly: sortShopBaselineCatalogGroupsByPrintAreaAsc(cameraOrVectorOnly),
+    phonePicSafe: sortShopBaselineCatalogGroupsByNameAsc(phonePicSafe),
+    cameraOrVectorOnly: sortShopBaselineCatalogGroupsByNameAsc(cameraOrVectorOnly),
   };
 }

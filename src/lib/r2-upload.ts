@@ -934,6 +934,110 @@ export async function promoteShopListingSupplementPendingToLive(params: {
   return { ok: true, livePublicUrl };
 }
 
+/** Per-catalog-item size reference photo (Admin List tab). */
+export function adminCatalogItemReferenceImageObjectKey(catalogItemId: string): string {
+  return `admin-catalog/${catalogItemId}/reference.webp`;
+}
+
+export function catalogItemReferenceImageUrlToObjectKey(
+  publicUrl: string,
+  catalogItemId: string,
+): string | null {
+  const expectedKey = adminCatalogItemReferenceImageObjectKey(catalogItemId);
+  const strict = publicUrlToR2ObjectKey(publicUrl.trim());
+  if (strict === expectedKey) return strict;
+
+  let u: URL;
+  try {
+    u = new URL(publicUrl.trim());
+  } catch {
+    return null;
+  }
+
+  let path = u.pathname;
+  const baseRaw = readR2Env("R2_PUBLIC_BASE_URL")?.trim();
+  if (baseRaw) {
+    try {
+      const b = new URL(baseRaw.includes("://") ? baseRaw : `https://${baseRaw}`);
+      if (u.hostname.toLowerCase() === b.hostname.toLowerCase()) {
+        const basePath = b.pathname.replace(/\/$/, "");
+        if (basePath && basePath !== "/" && path.startsWith(basePath)) {
+          path = path.slice(basePath.length);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const normalized = path.replace(/^\/+/, "");
+  return normalized === expectedKey ? expectedKey : null;
+}
+
+export async function deleteAdminCatalogItemReferenceObject(catalogItemId: string): Promise<void> {
+  if (!isR2UploadConfigured()) return;
+  const bucket = readR2BucketName();
+  if (!bucket) return;
+  const Key = adminCatalogItemReferenceImageObjectKey(catalogItemId);
+  try {
+    await r2S3Client().send(new DeleteObjectCommand({ Bucket: bucket, Key }));
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Per-catalog-item size example photo for storefront PDP gallery (Admin List tab). */
+export function adminCatalogItemSizeExampleImageObjectKey(catalogItemId: string): string {
+  return `admin-catalog/${catalogItemId}/size-example.webp`;
+}
+
+export function catalogItemSizeExampleImageUrlToObjectKey(
+  publicUrl: string,
+  catalogItemId: string,
+): string | null {
+  const expectedKey = adminCatalogItemSizeExampleImageObjectKey(catalogItemId);
+  const strict = publicUrlToR2ObjectKey(publicUrl.trim());
+  if (strict === expectedKey) return strict;
+
+  let u: URL;
+  try {
+    u = new URL(publicUrl.trim());
+  } catch {
+    return null;
+  }
+
+  let path = u.pathname;
+  const baseRaw = readR2Env("R2_PUBLIC_BASE_URL")?.trim();
+  if (baseRaw) {
+    try {
+      const b = new URL(baseRaw.includes("://") ? baseRaw : `https://${baseRaw}`);
+      if (u.hostname.toLowerCase() === b.hostname.toLowerCase()) {
+        const basePath = b.pathname.replace(/\/$/, "");
+        if (basePath && basePath !== "/" && path.startsWith(basePath)) {
+          path = path.slice(basePath.length);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const normalized = path.replace(/^\/+/, "");
+  return normalized === expectedKey ? expectedKey : null;
+}
+
+export async function deleteAdminCatalogItemSizeExampleObject(catalogItemId: string): Promise<void> {
+  if (!isR2UploadConfigured()) return;
+  const bucket = readR2BucketName();
+  if (!bucket) return;
+  const Key = adminCatalogItemSizeExampleImageObjectKey(catalogItemId);
+  try {
+    await r2S3Client().send(new DeleteObjectCommand({ Bucket: bucket, Key }));
+  } catch {
+    /* best-effort */
+  }
+}
+
 /** Optional admin-set listing image (WebP, overwritten on each save). */
 export function shopListingAdminSecondaryImageObjectKey(shopId: string, listingId: string): string {
   return `shops/${shopId}/listing-admin-secondary/${listingId}.webp`;
@@ -1056,7 +1160,8 @@ export async function deleteR2ObjectsByKeys(keys: readonly string[]): Promise<nu
     if (
       !Key.startsWith("listing/") &&
       !Key.startsWith("shops/") &&
-      !Key.startsWith("returns/")
+      !Key.startsWith("returns/") &&
+      !Key.startsWith("admin-catalog/")
     ) {
       continue;
     }

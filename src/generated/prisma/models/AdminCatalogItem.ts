@@ -55,6 +55,7 @@ export type AdminCatalogItemMinAggregateOutputType = {
   storefrontDescription: string | null
   itemPlatformProductId: string | null
   itemExampleListingUrl: string | null
+  itemSizeExampleImageUrl: string | null
   itemMinPriceCents: number | null
   itemGoodsServicesCostCents: number | null
   itemImageRequirementLabel: string | null
@@ -76,6 +77,7 @@ export type AdminCatalogItemMaxAggregateOutputType = {
   storefrontDescription: string | null
   itemPlatformProductId: string | null
   itemExampleListingUrl: string | null
+  itemSizeExampleImageUrl: string | null
   itemMinPriceCents: number | null
   itemGoodsServicesCostCents: number | null
   itemImageRequirementLabel: string | null
@@ -98,6 +100,7 @@ export type AdminCatalogItemCountAggregateOutputType = {
   variants: number
   itemPlatformProductId: number
   itemExampleListingUrl: number
+  itemSizeExampleImageUrl: number
   itemMinPriceCents: number
   itemGoodsServicesCostCents: number
   itemImageRequirementLabel: number
@@ -143,6 +146,7 @@ export type AdminCatalogItemMinAggregateInputType = {
   storefrontDescription?: true
   itemPlatformProductId?: true
   itemExampleListingUrl?: true
+  itemSizeExampleImageUrl?: true
   itemMinPriceCents?: true
   itemGoodsServicesCostCents?: true
   itemImageRequirementLabel?: true
@@ -164,6 +168,7 @@ export type AdminCatalogItemMaxAggregateInputType = {
   storefrontDescription?: true
   itemPlatformProductId?: true
   itemExampleListingUrl?: true
+  itemSizeExampleImageUrl?: true
   itemMinPriceCents?: true
   itemGoodsServicesCostCents?: true
   itemImageRequirementLabel?: true
@@ -186,6 +191,7 @@ export type AdminCatalogItemCountAggregateInputType = {
   variants?: true
   itemPlatformProductId?: true
   itemExampleListingUrl?: true
+  itemSizeExampleImageUrl?: true
   itemMinPriceCents?: true
   itemGoodsServicesCostCents?: true
   itemImageRequirementLabel?: true
@@ -297,6 +303,7 @@ export type AdminCatalogItemGroupByOutputType = {
   variants: runtime.JsonValue
   itemPlatformProductId: string | null
   itemExampleListingUrl: string | null
+  itemSizeExampleImageUrl: string | null
   itemMinPriceCents: number
   itemGoodsServicesCostCents: number
   itemImageRequirementLabel: string | null
@@ -344,6 +351,7 @@ export type AdminCatalogItemWhereInput = {
   variants?: Prisma.JsonFilter<"AdminCatalogItem">
   itemPlatformProductId?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
   itemExampleListingUrl?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
+  itemSizeExampleImageUrl?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
   itemMinPriceCents?: Prisma.IntFilter<"AdminCatalogItem"> | number
   itemGoodsServicesCostCents?: Prisma.IntFilter<"AdminCatalogItem"> | number
   itemImageRequirementLabel?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
@@ -371,6 +379,7 @@ export type AdminCatalogItemOrderByWithRelationInput = {
   variants?: Prisma.SortOrder
   itemPlatformProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   itemExampleListingUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  itemSizeExampleImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   itemMinPriceCents?: Prisma.SortOrder
   itemGoodsServicesCostCents?: Prisma.SortOrder
   itemImageRequirementLabel?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -401,6 +410,7 @@ export type AdminCatalogItemWhereUniqueInput = Prisma.AtLeast<{
   variants?: Prisma.JsonFilter<"AdminCatalogItem">
   itemPlatformProductId?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
   itemExampleListingUrl?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
+  itemSizeExampleImageUrl?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
   itemMinPriceCents?: Prisma.IntFilter<"AdminCatalogItem"> | number
   itemGoodsServicesCostCents?: Prisma.IntFilter<"AdminCatalogItem"> | number
   itemImageRequirementLabel?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
@@ -428,6 +438,7 @@ export type AdminCatalogItemOrderByWithAggregationInput = {
   variants?: Prisma.SortOrder
   itemPlatformProductId?: Prisma.SortOrderInput | Prisma.SortOrder
   itemExampleListingUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  itemSizeExampleImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   itemMinPriceCents?: Prisma.SortOrder
   itemGoodsServicesCostCents?: Prisma.SortOrder
   itemImageRequirementLabel?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -460,6 +471,7 @@ export type AdminCatalogItemScalarWhereWithAggregatesInput = {
   variants?: Prisma.JsonWithAggregatesFilter<"AdminCatalogItem">
   itemPlatformProductId?: Prisma.StringNullableWithAggregatesFilter<"AdminCatalogItem"> | string | null
   itemExampleListingUrl?: Prisma.StringNullableWithAggregatesFilter<"AdminCatalogItem"> | string | null
+  itemSizeExampleImageUrl?: Prisma.StringNullableWithAggregatesFilter<"AdminCatalogItem"> | string | null
   itemMinPriceCents?: Prisma.IntWithAggregatesFilter<"AdminCatalogItem"> | number
   itemGoodsServicesCostCents?: Prisma.IntWithAggregatesFilter<"AdminCatalogItem"> | number
   itemImageRequirementLabel?: Prisma.StringNullableWithAggregatesFilter<"AdminCatalogItem"> | string | null
@@ -483,6 +495,7 @@ export type AdminCatalogItemCreateInput = {
   storefrontDescription?: string | null
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -510,6 +523,7 @@ export type AdminCatalogItemUncheckedCreateInput = {
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: string | null
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -535,6 +549,7 @@ export type AdminCatalogItemUpdateInput = {
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -562,6 +577,7 @@ export type AdminCatalogItemUncheckedUpdateInput = {
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -588,6 +604,7 @@ export type AdminCatalogItemCreateManyInput = {
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: string | null
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -611,6 +628,7 @@ export type AdminCatalogItemUpdateManyMutationInput = {
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -635,6 +653,7 @@ export type AdminCatalogItemUncheckedUpdateManyInput = {
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -674,6 +693,7 @@ export type AdminCatalogItemCountOrderByAggregateInput = {
   variants?: Prisma.SortOrder
   itemPlatformProductId?: Prisma.SortOrder
   itemExampleListingUrl?: Prisma.SortOrder
+  itemSizeExampleImageUrl?: Prisma.SortOrder
   itemMinPriceCents?: Prisma.SortOrder
   itemGoodsServicesCostCents?: Prisma.SortOrder
   itemImageRequirementLabel?: Prisma.SortOrder
@@ -707,6 +727,7 @@ export type AdminCatalogItemMaxOrderByAggregateInput = {
   storefrontDescription?: Prisma.SortOrder
   itemPlatformProductId?: Prisma.SortOrder
   itemExampleListingUrl?: Prisma.SortOrder
+  itemSizeExampleImageUrl?: Prisma.SortOrder
   itemMinPriceCents?: Prisma.SortOrder
   itemGoodsServicesCostCents?: Prisma.SortOrder
   itemImageRequirementLabel?: Prisma.SortOrder
@@ -728,6 +749,7 @@ export type AdminCatalogItemMinOrderByAggregateInput = {
   storefrontDescription?: Prisma.SortOrder
   itemPlatformProductId?: Prisma.SortOrder
   itemExampleListingUrl?: Prisma.SortOrder
+  itemSizeExampleImageUrl?: Prisma.SortOrder
   itemMinPriceCents?: Prisma.SortOrder
   itemGoodsServicesCostCents?: Prisma.SortOrder
   itemImageRequirementLabel?: Prisma.SortOrder
@@ -837,6 +859,7 @@ export type AdminCatalogItemCreateWithoutItemPlatformProductInput = {
   storefrontDescription?: string | null
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -862,6 +885,7 @@ export type AdminCatalogItemUncheckedCreateWithoutItemPlatformProductInput = {
   storefrontDescription?: string | null
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -917,6 +941,7 @@ export type AdminCatalogItemScalarWhereInput = {
   variants?: Prisma.JsonFilter<"AdminCatalogItem">
   itemPlatformProductId?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
   itemExampleListingUrl?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
+  itemSizeExampleImageUrl?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
   itemMinPriceCents?: Prisma.IntFilter<"AdminCatalogItem"> | number
   itemGoodsServicesCostCents?: Prisma.IntFilter<"AdminCatalogItem"> | number
   itemImageRequirementLabel?: Prisma.StringNullableFilter<"AdminCatalogItem"> | string | null
@@ -940,6 +965,7 @@ export type AdminCatalogItemCreateWithoutReturnClaimsInput = {
   storefrontDescription?: string | null
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -966,6 +992,7 @@ export type AdminCatalogItemUncheckedCreateWithoutReturnClaimsInput = {
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: string | null
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -1006,6 +1033,7 @@ export type AdminCatalogItemUpdateWithoutReturnClaimsInput = {
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1032,6 +1060,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutReturnClaimsInput = {
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1056,6 +1085,7 @@ export type AdminCatalogItemCreateWithoutCatalogTagsInput = {
   storefrontDescription?: string | null
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -1082,6 +1112,7 @@ export type AdminCatalogItemUncheckedCreateWithoutCatalogTagsInput = {
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: string | null
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -1122,6 +1153,7 @@ export type AdminCatalogItemUpdateWithoutCatalogTagsInput = {
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1148,6 +1180,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutCatalogTagsInput = {
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemPlatformProductId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1172,6 +1205,7 @@ export type AdminCatalogItemCreateManyItemPlatformProductInput = {
   storefrontDescription?: string | null
   variants: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: string | null
+  itemSizeExampleImageUrl?: string | null
   itemMinPriceCents?: number
   itemGoodsServicesCostCents?: number
   itemImageRequirementLabel?: string | null
@@ -1195,6 +1229,7 @@ export type AdminCatalogItemUpdateWithoutItemPlatformProductInput = {
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1220,6 +1255,7 @@ export type AdminCatalogItemUncheckedUpdateWithoutItemPlatformProductInput = {
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1245,6 +1281,7 @@ export type AdminCatalogItemUncheckedUpdateManyWithoutItemPlatformProductInput =
   storefrontDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variants?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   itemExampleListingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemSizeExampleImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   itemMinPriceCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemGoodsServicesCostCents?: Prisma.IntFieldUpdateOperationsInput | number
   itemImageRequirementLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1309,6 +1346,7 @@ export type AdminCatalogItemSelect<ExtArgs extends runtime.Types.Extensions.Inte
   variants?: boolean
   itemPlatformProductId?: boolean
   itemExampleListingUrl?: boolean
+  itemSizeExampleImageUrl?: boolean
   itemMinPriceCents?: boolean
   itemGoodsServicesCostCents?: boolean
   itemImageRequirementLabel?: boolean
@@ -1337,6 +1375,7 @@ export type AdminCatalogItemSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   variants?: boolean
   itemPlatformProductId?: boolean
   itemExampleListingUrl?: boolean
+  itemSizeExampleImageUrl?: boolean
   itemMinPriceCents?: boolean
   itemGoodsServicesCostCents?: boolean
   itemImageRequirementLabel?: boolean
@@ -1362,6 +1401,7 @@ export type AdminCatalogItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   variants?: boolean
   itemPlatformProductId?: boolean
   itemExampleListingUrl?: boolean
+  itemSizeExampleImageUrl?: boolean
   itemMinPriceCents?: boolean
   itemGoodsServicesCostCents?: boolean
   itemImageRequirementLabel?: boolean
@@ -1387,6 +1427,7 @@ export type AdminCatalogItemSelectScalar = {
   variants?: boolean
   itemPlatformProductId?: boolean
   itemExampleListingUrl?: boolean
+  itemSizeExampleImageUrl?: boolean
   itemMinPriceCents?: boolean
   itemGoodsServicesCostCents?: boolean
   itemImageRequirementLabel?: boolean
@@ -1403,7 +1444,7 @@ export type AdminCatalogItemSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sortOrder" | "name" | "storefrontDescription" | "variants" | "itemPlatformProductId" | "itemExampleListingUrl" | "itemMinPriceCents" | "itemGoodsServicesCostCents" | "itemImageRequirementLabel" | "itemMinArtworkLongEdgePx" | "itemPrintAreaWidthPx" | "itemPrintAreaHeightPx" | "itemMinArtworkDpi" | "itemLargeListingArtwork" | "itemArtworkLetterboxFill" | "itemArtworkSourceTierOverride" | "itemCanvasPresentation" | "itemArtworkTemplate" | "createdAt" | "updatedAt", ExtArgs["result"]["adminCatalogItem"]>
+export type AdminCatalogItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sortOrder" | "name" | "storefrontDescription" | "variants" | "itemPlatformProductId" | "itemExampleListingUrl" | "itemSizeExampleImageUrl" | "itemMinPriceCents" | "itemGoodsServicesCostCents" | "itemImageRequirementLabel" | "itemMinArtworkLongEdgePx" | "itemPrintAreaWidthPx" | "itemPrintAreaHeightPx" | "itemMinArtworkDpi" | "itemLargeListingArtwork" | "itemArtworkLetterboxFill" | "itemArtworkSourceTierOverride" | "itemCanvasPresentation" | "itemArtworkTemplate" | "createdAt" | "updatedAt", ExtArgs["result"]["adminCatalogItem"]>
 export type AdminCatalogItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   itemPlatformProduct?: boolean | Prisma.AdminCatalogItem$itemPlatformProductArgs<ExtArgs>
   catalogTags?: boolean | Prisma.AdminCatalogItem$catalogTagsArgs<ExtArgs>
@@ -1446,6 +1487,10 @@ export type $AdminCatalogItemPayload<ExtArgs extends runtime.Types.Extensions.In
      * * Optional example listing for the item.
      */
     itemExampleListingUrl: string | null
+    /**
+     * * Optional size-reference photo for storefront PDP gallery (replaces 2nd mockup slot).
+     */
+    itemSizeExampleImageUrl: string | null
     /**
      * * Minimum list price in cents for the item (required on save).
      */
@@ -1942,6 +1987,7 @@ export interface AdminCatalogItemFieldRefs {
   readonly variants: Prisma.FieldRef<"AdminCatalogItem", 'Json'>
   readonly itemPlatformProductId: Prisma.FieldRef<"AdminCatalogItem", 'String'>
   readonly itemExampleListingUrl: Prisma.FieldRef<"AdminCatalogItem", 'String'>
+  readonly itemSizeExampleImageUrl: Prisma.FieldRef<"AdminCatalogItem", 'String'>
   readonly itemMinPriceCents: Prisma.FieldRef<"AdminCatalogItem", 'Int'>
   readonly itemGoodsServicesCostCents: Prisma.FieldRef<"AdminCatalogItem", 'Int'>
   readonly itemImageRequirementLabel: Prisma.FieldRef<"AdminCatalogItem", 'String'>

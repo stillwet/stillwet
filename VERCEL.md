@@ -94,6 +94,28 @@ npx prisma db push
 3. If the error mentions **Turbopack** vs **webpack**, the deployment is not using the script above — confirm the build command runs **`npm run build`** from the repo root, not a raw `next build` without `--webpack`.
 4. **`ENOENT` / `lstat` … `.next/lock`:** Next.js 16 defaults **`experimental.lockDistDir`** to **`true`**, which creates a native lock file under **`.next/lock`** before cleaning the output dir. On Vercel’s filesystem that step can throw **`ENOENT`**. This repo sets **`experimental.lockDistDir: false`** in [`next.config.ts`](next.config.ts) (one build per container — locking is unnecessary). If you still see cache-related `.next` issues, **redeploy with clear build cache** or set **`VERCEL_FORCE_NO_BUILD_CACHE=1`** once; [`scripts/vercel-build.cjs`](scripts/vercel-build.cjs) may also reset `.next` on Vercel before building.
 
+### “Server Action … was not found on the server” (admin save after deploy)
+
+This is **not** a database error. The browser tab still has JavaScript from a **previous** deploy; Server Action IDs change each release.
+
+**Immediate fix:** hard-refresh the admin tab (**Ctrl+Shift+R** / **Cmd+Shift+R**), then save again.
+
+**Production hardening (recommended):**
+
+1. **Vercel → Project → Settings → Skew Protection** — turn **on** (serves prior deployment assets briefly after a new release).
+2. **`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`** — add to Vercel **Production** and **Preview** (must be present **at build time**, not only runtime). Generate once:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   ```
+   Paste the value as the env var, **redeploy**, then hard-refresh admin.
+3. This repo sets **`deploymentId`** from **`VERCEL_GIT_COMMIT_SHA`** in [`next.config.ts`](next.config.ts) so Next.js can detect version skew.
+
+If saves still fail **after** a hard refresh, apply pending migrations (new catalog columns `itemCanvasPresentation` / `itemArtworkTemplate` need `20260609120000_admin_catalog_canvas_presentation`):
+
+```bash
+npm run db:migrate:prod
+```
+
 ## 4. Seed data (once)
 
 ```bash

@@ -23,8 +23,7 @@ import { useListingArtworkCropViewportSize } from "@/hooks/useListingArtworkCrop
 import {
   listingArtworkComposeCropSize,
   LISTING_ARTWORK_CROP_PREVIEW_BAND_CLASS,
-  LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS,
-  LISTING_ARTWORK_CROP_PRINT_WINDOW_CLASS,
+  listingArtworkCropPrintWindowClassNames,
 } from "@/lib/listing-artwork-crop-viewport";
 import type { CatalogCanvasPresentation } from "@/lib/admin-catalog-canvas-presentation";
 import { CATALOG_CANVAS_PRESENTATION_FLAT } from "@/lib/admin-catalog-canvas-presentation";
@@ -200,7 +199,7 @@ export function ListingArtworkCropDialog({
     });
   }, [cropSize, mediaNatural]);
 
-  const cropperCropSize = composeCropSize ?? cropSize ?? undefined;
+  const cropperCropSize = cropSize ?? composeCropSize ?? undefined;
 
   const { cropFrame } = useListingArtworkCropFrameRect(containerRef, aspect, [
     open,
@@ -364,7 +363,10 @@ export function ListingArtworkCropDialog({
             >
               <div
                 ref={containerRef}
-                className={`${LISTING_ARTWORK_CROP_PRINT_WINDOW_CLASS}${showCanvasWrapMarginPreview ? ` ${LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS}` : ""} relative shrink-0 overflow-hidden`}
+                className={listingArtworkCropPrintWindowClassNames({
+                  showCanvasWrapMarginPreview,
+                  isWraparoundPreview: isWraparound,
+                })}
                 style={cropHostStyle}
               >
             <Cropper

@@ -5,6 +5,7 @@ import {
   hasPrintifyApiToken,
   isPrintifyConfigured,
   listPrintifyWebhooks,
+  printifyAuxShopId,
   PRINTIFY_ADMIN_FETCH_TIMEOUT_MS,
 } from "@/lib/printify";
 import { webhookPublicBaseUrl } from "@/lib/public-app-url";
@@ -18,6 +19,7 @@ export type PrintifyApiTabProps = {
 
 export async function PrintifyApiTab({ hookBanner }: PrintifyApiTabProps = {}) {
   const shopIdEnv = process.env.PRINTIFY_SHOP_ID?.trim() ?? "";
+  const auxShopIdEnv = printifyAuxShopId() ?? "";
   const tokenSet = hasPrintifyApiToken();
   const readyForFulfillment = isPrintifyConfigured();
 
@@ -102,6 +104,33 @@ export async function PrintifyApiTab({ hookBanner }: PrintifyApiTabProps = {}) {
                 <code className="text-zinc-400">.env</code> as{" "}
                 <code className="text-zinc-400">PRINTIFY_SHOP_ID</code>, then restart the dev server
               </>
+            )}
+          </li>
+          <li>
+            <span className="text-zinc-400">PRINTIFY_AUX_SHOP_ID</span> —{" "}
+            {auxShopIdEnv ? (
+              <>
+                <code className="text-zinc-400">{auxShopIdEnv}</code>
+                {" — "}
+                <Link
+                  href={`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux`}
+                  className="text-blue-400/90 hover:underline"
+                >
+                  Printify Catalogue
+                </Link>{" "}
+                tab (unpublish only; not synced to catalog)
+              </>
+            ) : (
+              <span className="text-zinc-500">
+                optional — second shop id for admin unpublish cleanup only (
+                <Link
+                  href={`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux`}
+                  className="text-blue-400/90 hover:underline"
+                >
+                  Printify Catalogue
+                </Link>
+                )
+              </span>
             )}
           </li>
           <li>

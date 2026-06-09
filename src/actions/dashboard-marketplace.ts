@@ -729,210 +729,22 @@ function listingEligibleForOwnerSupplementPhoto(listing: {
 export async function dashboardUploadListingSupplementPhoto(
   formData: FormData,
 ): Promise<ListingSupplementActionResult> {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) {
-    return { ok: false, error: "Not available for the platform catalog shop." };
-  }
-  if (!isR2UploadConfigured()) {
-    return {
-      ok: false,
-      error: "Image uploads are not configured (R2 env vars missing on the server).",
-    };
-  }
-
-  const listingId = String(formData.get("listingId") ?? "").trim();
-  if (!listingId) return { ok: false, error: "Missing listing." };
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id: listingId, shopId: shop.id },
-    select: {
-      id: true,
-      requestStatus: true,
-      creatorRemovedFromShopAt: true,
-      adminRemovedFromShopAt: true,
-      ownerSupplementPendingImageUrl: true,
-      product: { select: { slug: true } },
-    },
-  });
-  if (!listing || !listingEligibleForOwnerSupplementPhoto(listing)) {
-    return { ok: false, error: "This listing cannot be updated." };
-  }
-
-  const file = formData.get("supplementPhoto");
-  if (!file || !(file instanceof Blob) || file.size === 0) {
-    return { ok: false, error: "Choose an image file to upload." };
-  }
-  if (file.size > 20 * 1024 * 1024) {
-    return { ok: false, error: "Image is too large before processing (max 20 MB)." };
-  }
-
-  const previousPendingUrl = listing.ownerSupplementPendingImageUrl?.trim() ?? "";
-  if (previousPendingUrl) {
-    const removedPending = await deleteShopListingSupplementPendingObject(shop.id, listingId);
-    if (!removedPending) {
-      return {
-        ok: false,
-        error:
-          "Could not remove the previous pending image from Cloudflare R2. Try again in a moment.",
-      };
-    }
-  }
-
-  const buf = Buffer.from(await file.arrayBuffer());
-  const webp = await compressShopListingSupplementPhotoWebp(buf);
-  if (!webp) {
-    return {
-      ok: false,
-      error: "Could not compress that image to under 100 KiB. Try a simpler or smaller photo.",
-    };
-  }
-
-  const key = shopListingSupplementPendingImageObjectKey(shop.id, listingId);
-  const url = await putPublicR2Object({
-    key,
-    body: webp,
-    contentType: "image/webp",
-  });
-  if (!listingSupplementPendingImageUrlToObjectKey(url, shop.id, listingId)) {
-    return {
-      ok: false,
-      error: "Upload URL validation failed. Try again or contact support.",
-    };
-  }
-
-  const now = new Date();
-  await prisma.shopListing.update({
-    where: { id: listingId },
-    data: {
-      ownerSupplementPendingImageUrl: url,
-      ownerSupplementPendingSubmittedAt: now,
-    },
-  });
-  revalidatePath("/dashboard");
-  revalidatePath(`/s/${shop.slug}`);
-  revalidatePath(`/s/${shop.slug}/product/${listing.product.slug}`);
-  revalidatePublicStorefront();
-  return { ok: true };
+  void formData;
+  return { ok: false, error: "Custom listing photos are no longer available." };
 }
 
 export async function dashboardWithdrawListingSupplementPending(
   formData: FormData,
 ): Promise<ListingSupplementActionResult> {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) {
-    return { ok: false, error: "Not available for the platform catalog shop." };
-  }
-
-  const listingId = String(formData.get("listingId") ?? "").trim();
-  if (!listingId) return { ok: false, error: "Missing listing." };
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id: listingId, shopId: shop.id },
-    select: {
-      id: true,
-      requestStatus: true,
-      creatorRemovedFromShopAt: true,
-      adminRemovedFromShopAt: true,
-      ownerSupplementPendingImageUrl: true,
-      product: { select: { slug: true } },
-    },
-  });
-  if (!listing || !listingEligibleForOwnerSupplementPhoto(listing)) {
-    return { ok: false, error: "This listing cannot be updated." };
-  }
-  const pendingUrl = listing.ownerSupplementPendingImageUrl?.trim() ?? "";
-  if (!pendingUrl) {
-    return { ok: false, error: "There is no pending image to withdraw." };
-  }
-  if (!listingSupplementPendingImageUrlToObjectKey(pendingUrl, shop.id, listingId)) {
-    return { ok: false, error: "Pending image URL is invalid. Contact support." };
-  }
-
-  const r2Removed = await deleteShopListingSupplementPendingObject(shop.id, listingId);
-  if (!r2Removed) {
-    return {
-      ok: false,
-      error:
-        "Could not remove the pending file from storage (Cloudflare R2). Try again in a moment.",
-    };
-  }
-
-  await prisma.shopListing.update({
-    where: { id: listingId },
-    data: {
-      ownerSupplementPendingImageUrl: null,
-      ownerSupplementPendingSubmittedAt: null,
-    },
-  });
-  revalidatePath("/dashboard");
-  revalidatePath(`/s/${shop.slug}`);
-  revalidatePath(`/s/${shop.slug}/product/${listing.product.slug}`);
-  revalidatePublicStorefront();
-  return { ok: true };
+  void formData;
+  return { ok: false, error: "Custom listing photos are no longer available." };
 }
 
 export async function dashboardClearListingSupplementPhoto(
   formData: FormData,
 ): Promise<ListingSupplementActionResult> {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) {
-    return { ok: false, error: "Not available for the platform catalog shop." };
-  }
-
-  const listingId = String(formData.get("listingId") ?? "").trim();
-  if (!listingId) return { ok: false, error: "Missing listing." };
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id: listingId, shopId: shop.id },
-    select: {
-      id: true,
-      requestStatus: true,
-      creatorRemovedFromShopAt: true,
-      adminRemovedFromShopAt: true,
-      ownerSupplementImageUrl: true,
-      product: { select: { slug: true } },
-    },
-  });
-  if (!listing || !listingEligibleForOwnerSupplementPhoto(listing)) {
-    return { ok: false, error: "This listing cannot be updated." };
-  }
-  if (!listing.ownerSupplementImageUrl?.trim()) {
-    return { ok: false, error: "There is no extra photo to remove." };
-  }
-  if (
-    !listingSupplementImageUrlToObjectKey(
-      listing.ownerSupplementImageUrl.trim(),
-      shop.id,
-      listingId,
-    )
-  ) {
-    return {
-      ok: false,
-      error:
-        "Only your uploaded extra photo can be removed here. Catalog and product images are managed by the platform.",
-    };
-  }
-
-  const r2Removed = await deleteShopListingSupplementObject(shop.id, listingId);
-  if (!r2Removed) {
-    return {
-      ok: false,
-      error:
-        "Could not remove the file from storage (Cloudflare R2). Your listing still has the photo — try again in a moment.",
-    };
-  }
-  await prisma.shopListing.update({
-    where: { id: listingId },
-    data: { ownerSupplementImageUrl: null },
-  });
-  revalidatePath("/dashboard");
-  revalidatePath(`/s/${shop.slug}`);
-  revalidatePath(`/s/${shop.slug}/product/${listing.product.slug}`);
-  revalidatePublicStorefront();
-  return { ok: true };
+  void formData;
+  return { ok: false, error: "Custom listing photos are no longer available." };
 }
 
 export type ListingCatalogImagesFormState = {

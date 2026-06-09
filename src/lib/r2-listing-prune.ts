@@ -1,6 +1,7 @@
 import { parseAdminCatalogVariantsJson } from "@/lib/admin-catalog-item";
-import { prisma } from "@/lib/prisma";
+import { prisma, prismaOrderReturnClaimOrNull } from "@/lib/prisma";
 import { productAllStoredImageUrls } from "@/lib/product-media";
+import { SITE_EMAIL_LOGO_R2_OBJECT_KEY } from "@/lib/site-email-logo-constants";
 import {
   deleteR2ObjectsByKeysForPrune,
   isR2UploadConfigured,
@@ -23,12 +24,32 @@ function addJsonStringArrayUrls(json: unknown, keys: Set<string>): void {
   }
 }
 
+function addR2KeyToReferenced(key: string | null | undefined, keys: Set<string>): void {
+  const k = key?.trim();
+  if (k) keys.add(k);
+}
+
+/** Group orphan keys by first path segment for reporting (e.g. `shops/`, `admin-catalog/`). */
+export function summarizeOrphanR2KeysByPrefix(keys: readonly string[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const key of keys) {
+    const slash = key.indexOf("/");
+    const prefix = slash >= 0 ? `${key.slice(0, slash + 1)}` : key;
+    counts[prefix] = (counts[prefix] ?? 0) + 1;
+  }
+  return Object.fromEntries(
+    Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
+  );
+}
+
 /**
  * R2 object keys referenced from the database (any path under `R2_PUBLIC_BASE_URL` that
- * {@link publicUrlToR2ObjectKey} can resolve).
+ * {@link publicUrlToR2ObjectKey} can resolve), plus stable non-DB keys that must be kept.
  */
 export async function collectReferencedR2ObjectKeysFromDatabase(): Promise<Set<string>> {
   const keys = new Set<string>();
+
+  keys.add(SITE_EMAIL_LOGO_R2_OBJECT_KEY);
 
   const products = await prisma.product.findMany({
     select: {
@@ -53,6 +74,7 @@ export async function collectReferencedR2ObjectKeysFromDatabase(): Promise<Set<s
     select: {
       requestImages: true,
       ownerSupplementImageUrl: true,
+      ownerSupplementPendingImageUrl: true,
       adminListingSecondaryImageUrl: true,
       listingStorefrontCatalogImageUrls: true,
     },
@@ -62,17 +84,48 @@ export async function collectReferencedR2ObjectKeysFromDatabase(): Promise<Set<s
       addUrlToReferencedR2Keys(u, keys);
     }
     addUrlToReferencedR2Keys(l.ownerSupplementImageUrl, keys);
+    addUrlToReferencedR2Keys(l.ownerSupplementPendingImageUrl, keys);
     addUrlToReferencedR2Keys(l.adminListingSecondaryImageUrl, keys);
     addJsonStringArrayUrls(l.listingStorefrontCatalogImageUrls, keys);
   }
 
   const catalogItems = await prisma.adminCatalogItem.findMany({
-    select: { itemExampleListingUrl: true, variants: true },
+    select: { itemExampleListingUrl: true, itemSizeExampleImageUrl: true, variants: true },
   });
   for (const row of catalogItems) {
     addUrlToReferencedR2Keys(row.itemExampleListingUrl, keys);
+    addUrlToReferencedR2Keys(row.itemSizeExampleImageUrl, keys);
     for (const v of parseAdminCatalogVariantsJson(row.variants)) {
       addUrlToReferencedR2Keys(v.exampleListingUrl, keys);
+    }
+  }
+
+  const bugReports = await prisma.bugFeedbackReport.findMany({
+    where: { imageDeletedAt: null },
+    select: { imageUrl: true, imageR2Key: true },
+  });
+  for (const row of bugReports) {
+    addR2KeyToReferenced(row.imageR2Key, keys);
+    addUrlToReferencedR2Keys(row.imageUrl, keys);
+  }
+
+  const returnClaimDelegate = prismaOrderReturnClaimOrNull();
+  const returnClaimImageDelegate = (
+    prisma as {
+      orderReturnClaimImage?: {
+        findMany: (args: unknown) => Promise<
+          { imageUrl: string; imageR2Key: string }[]
+        >;
+      };
+    }
+  ).orderReturnClaimImage;
+  if (returnClaimImageDelegate?.findMany) {
+    const claimImages = await returnClaimImageDelegate.findMany({
+      select: { imageUrl: true, imageR2Key: true },
+    });
+    for (const img of claimImages) {
+      addR2KeyToReferenced(img.imageR2Key, keys);
+      addUrlToReferencedR2Keys(img.imageUrl, keys);
     }
   }
 
@@ -84,6 +137,7 @@ export type PruneOrphanListingImagesResult = {
   referencedKeyCount: number;
   orphanKeyCount: number;
   orphanKeysSample: string[];
+  orphanKeysByPrefix: Record<string, number>;
   deletedCount: number;
 };
 
@@ -91,7 +145,7 @@ const ORPHAN_SAMPLE_MAX = 40;
 
 /**
  * List every object in the R2 bucket and delete keys not referenced from the database
- * (products, shops, shop listings, admin catalog example URLs that resolve to this bucket).
+ * (products, shops, shop listings, admin catalog, bug feedback, return claims, etc.).
  */
 export async function pruneOrphanListingImagesFromR2(options: {
   dryRun: boolean;
@@ -111,6 +165,7 @@ export async function pruneOrphanListingImagesFromR2(options: {
     referencedKeyCount: referenced.size,
     orphanKeyCount: orphans.length,
     orphanKeysSample: orphans.slice(0, ORPHAN_SAMPLE_MAX),
+    orphanKeysByPrefix: summarizeOrphanR2KeysByPrefix(orphans),
     deletedCount,
   };
 }

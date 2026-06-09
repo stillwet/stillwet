@@ -1,6 +1,6 @@
 /**
  * Remove R2 objects in the configured bucket that are not referenced from the database
- * (products, shops, shop listings, admin catalog example URLs when they resolve to this bucket).
+ * (products, shops, shop listings, admin catalog, bug feedback, return claims, etc.).
  *
  * Usage (repo root, requires DATABASE_URL + R2 env like test-r2-upload):
  *   npx tsx scripts/r2-prune-orphan-listings.ts           # dry-run (report only)
@@ -8,13 +8,14 @@
  */
 
 import { config } from "dotenv";
-import { pruneOrphanListingImagesFromR2 } from "../src/lib/r2-listing-prune";
-import { isR2UploadConfigured } from "../src/lib/r2-upload";
 
 config({ path: ".env" });
 config({ path: ".env.local", override: true });
 
 async function main() {
+  const { pruneOrphanListingImagesFromR2 } = await import("../src/lib/r2-listing-prune");
+  const { isR2UploadConfigured } = await import("../src/lib/r2-upload");
+
   const execute = process.argv.includes("--execute");
   if (!isR2UploadConfigured()) {
     console.error("[r2-prune] R2 is not configured (.env.local).");
@@ -30,6 +31,7 @@ async function main() {
         referencedKeyCount: r.referencedKeyCount,
         orphanKeyCount: r.orphanKeyCount,
         deletedCount: r.deletedCount,
+        orphanKeysByPrefix: r.orphanKeysByPrefix,
         orphanKeysSample: r.orphanKeysSample,
       },
       null,

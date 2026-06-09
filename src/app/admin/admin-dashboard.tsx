@@ -24,6 +24,7 @@ import { AdminPlatformSalesTabLoader } from "@/components/admin/AdminPlatformSal
 import { AdminNexusPlanningTabLoader } from "@/components/admin/AdminNexusPlanningTabLoader";
 import { printifyHookBannerFromSearchParams } from "@/lib/admin-printify-hook-banner";
 import { PrintifyApiTab } from "./printify-api-tab";
+import { PrintifyAuxTab, printifyAuxTabPropsFromSearchParams } from "./printify-aux-tab";
 import {
   AdminMainEmptyDbBanner,
   AdminMainNavCount,
@@ -128,6 +129,7 @@ async function AdminDashboardPageBody({
     "keyword-triggers",
     "tags",
     "printify-api",
+    "printify-aux",
   ] as const;
 
   if (
@@ -640,6 +642,18 @@ async function AdminDashboardPageBody({
           >
             Printify API
           </Link>
+          <Link
+            href={`${basePath}?tab=printify-aux`}
+            role="tab"
+            aria-selected={inventoryTab === "printify-aux"}
+            className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+              inventoryTab === "printify-aux"
+                ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+            }`}
+          >
+            Printify Catalogue
+          </Link>
                 </div>
               </div>
             </div>
@@ -660,6 +674,10 @@ async function AdminDashboardPageBody({
           ) : adminSection === "backend" && inventoryTab === "printify-api" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <PrintifyApiTab hookBanner={printifyHookBannerFromSearchParams(sp)} />
+            </Suspense>
+          ) : adminSection === "backend" && inventoryTab === "printify-aux" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <PrintifyAuxTab {...printifyAuxTabPropsFromSearchParams(sp)} />
             </Suspense>
           ) : adminSection === "backend" && inventoryTab === "flairs" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

@@ -21,8 +21,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
         product={detail.product}
         variant="page"
         tenant={detail.tenant}
-        adminListingSecondaryImageUrl={detail.adminListingSecondaryImageUrl}
-        ownerSupplementImageUrl={detail.ownerSupplementImageUrl}
+        adminCatalogSizeExampleImageUrl={detail.adminCatalogSizeExampleImageUrl}
         listingStorefrontCatalogImageUrls={detail.listingStorefrontCatalogImageUrls}
         adminCatalogStorefrontDescription={detail.adminCatalogStorefrontDescription}
         listingItemName={detail.listingItemName}

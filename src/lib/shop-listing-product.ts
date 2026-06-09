@@ -1,10 +1,6 @@
 import type { ProductCardProduct } from "@/components/ProductCard";
 import { parseListingStorefrontCatalogImageSelection } from "@/lib/product-media";
 import {
-  sanitizeShopListingAdminSecondaryImageUrlForDisplay,
-  sanitizeShopListingOwnerSupplementImageUrlForDisplay,
-} from "@/lib/r2-upload";
-import {
   firstLinkedAdminCatalogItemName,
   storefrontListingDisplayTitle,
   titleFromProductSlug,
@@ -13,12 +9,9 @@ import {
 export function productCardProductFromListing<
   LP extends {
     id: string;
-    shopId: string;
     priceCents: number;
     product: ProductCardProduct;
     requestItemName?: string | null;
-    adminListingSecondaryImageUrl?: string | null;
-    ownerSupplementImageUrl?: string | null;
     listingStorefrontCatalogImageUrls?: unknown;
     shop?: { slug: string; displayName?: string } | null;
   },
@@ -42,16 +35,19 @@ export function productCardProductFromListing<
     priceCents: listing.priceCents,
     ...(storefrontShopSlug ? { storefrontShopSlug } : {}),
     ...(storefrontShopDisplayName ? { storefrontShopDisplayName } : {}),
-    adminListingSecondaryImageUrl: sanitizeShopListingAdminSecondaryImageUrlForDisplay(
-      listing.adminListingSecondaryImageUrl,
-      listing.shopId,
-      listing.id,
-    ),
-    ownerSupplementImageUrl: sanitizeShopListingOwnerSupplementImageUrlForDisplay(
-      listing.ownerSupplementImageUrl,
-      listing.shopId,
-      listing.id,
-    ),
     ...(catalogSel !== null ? { listingStorefrontCatalogImageUrls: catalogSel } : {}),
   };
+}
+
+export async function productCardProductsFromListings<
+  LP extends {
+    id: string;
+    priceCents: number;
+    product: ProductCardProduct;
+    requestItemName?: string | null;
+    listingStorefrontCatalogImageUrls?: unknown;
+    shop?: { slug: string; displayName?: string } | null;
+  },
+>(listings: LP[]): Promise<ProductCardProduct[]> {
+  return listings.map((l) => productCardProductFromListing(l));
 }

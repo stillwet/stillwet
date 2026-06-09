@@ -1109,6 +1109,8 @@ model AdminCatalogItem {
   itemPlatformProduct   Product? @relation("AdminCatalogItemPlatformProduct", fields: [itemPlatformProductId], references: [id], onDelete: SetNull)
   /** Optional example listing for the item. */
   itemExampleListingUrl String? @db.VarChar(2048)
+  /** Optional size-reference photo for storefront PDP gallery (replaces 2nd mockup slot). */
+  itemSizeExampleImageUrl String? @db.VarChar(2048)
   /** Minimum list price in cents for the item (required on save). */
   itemMinPriceCents     Int     @default(0)
   /**

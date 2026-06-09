@@ -12,6 +12,7 @@ import {
 import { getSiteEmailTemplatesProdSyncAvailability } from "@/lib/site-email-templates-prod-sync";
 import { SITE_EMAIL_TEMPLATE_KEYS } from "@/lib/site-email-template-keys";
 import { PrintifyApiTab } from "./printify-api-tab";
+import { PrintifyAuxTab, printifyAuxTabPropsFromSearchParams } from "./printify-aux-tab";
 import { PrintifyInventoryTab } from "./printify-inventory-tab";
 import { loadAdminShopLeaderboardRows } from "@/lib/admin-shop-leaderboard-load";
 import { AdminShopLeaderboardTab } from "@/components/admin/AdminShopLeaderboardTab";
@@ -1105,6 +1106,8 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                 </button>
               </form>
             </section>
+          ) : inventoryTab === "printify-aux" ? (
+            <PrintifyAuxTab {...printifyAuxTabPropsFromSearchParams(sp)} />
           ) : inventoryTab === "printify-api" ? (
             <PrintifyApiTab hookBanner={printifyHookBanner} />
           ) : null

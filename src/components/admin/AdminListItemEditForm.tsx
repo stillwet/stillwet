@@ -25,6 +25,8 @@ import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCa
 import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
+import { AdminCatalogItemSizeExampleFields } from "@/components/admin/AdminCatalogItemSizeExampleFields";
+import { AdminCatalogItemSizeExampleImageSection } from "@/components/admin/AdminCatalogItemSizeExampleImageSection";
 import {
   AdminCatalogItemTagsEditor,
   type AdminListItemTag,
@@ -37,6 +39,7 @@ export type AdminListItemSerializable = {
   storefrontDescription: string | null;
   itemPlatformProductId: string | null;
   itemExampleListingUrl: string | null;
+  itemSizeExampleImageUrl: string | null;
   itemMinPriceCents: number;
   itemGoodsServicesCostCents: number;
   itemImageRequirementLabel: string | null;
@@ -54,10 +57,12 @@ export function AdminListItemEditForm({
   item,
   allTags,
   onCancel,
+  r2Configured = false,
 }: {
   item: AdminListItemSerializable;
   allTags: AdminListTagOption[];
   onCancel: () => void;
+  r2Configured?: boolean;
 }) {
   const router = useRouter();
   const [editName, setEditName] = useState(item.name);
@@ -66,6 +71,9 @@ export function AdminListItemEditForm({
   );
   const [editItemExampleListingUrl, setEditItemExampleListingUrl] = useState(
     item.itemExampleListingUrl ?? "",
+  );
+  const [editItemSizeExampleImageUrl, setEditItemSizeExampleImageUrl] = useState(
+    item.itemSizeExampleImageUrl ?? "",
   );
   const [editItemMinPriceDollars, setEditItemMinPriceDollars] = useState(
     dollarsStringFromCents(item.itemMinPriceCents),
@@ -149,6 +157,7 @@ export function AdminListItemEditForm({
     fd.set("itemName", name);
     fd.set("storefrontDescription", editStorefrontDescription);
     fd.set("itemExampleListingUrl", editItemExampleListingUrl);
+    fd.set("itemSizeExampleImageUrl", editItemSizeExampleImageUrl);
     fd.set("itemMinPriceDollars", editItemMinPriceDollars);
     fd.set("itemGoodsServicesCostDollars", editItemGoodsServicesCostDollars);
     fd.set("itemImageRequirementLabel", editItemImageRequirementLabel);
@@ -192,6 +201,10 @@ export function AdminListItemEditForm({
           onChangeMinPriceDollars={setEditItemMinPriceDollars}
           onChangeGoodsServicesCostDollars={setEditItemGoodsServicesCostDollars}
           onChangeStorefrontDescription={setEditStorefrontDescription}
+        />
+        <AdminCatalogItemSizeExampleFields
+          sizeExampleImageUrl={editItemSizeExampleImageUrl}
+          onChangeSizeExampleImageUrl={setEditItemSizeExampleImageUrl}
         />
         <AdminCatalogArtworkRequirementFields
           imageRequirementLabel={editItemImageRequirementLabel}
@@ -237,6 +250,12 @@ export function AdminListItemEditForm({
           </button>
         </div>
       </form>
+      <AdminCatalogItemSizeExampleImageSection
+        catalogItemId={item.id}
+        sizeExampleImageUrl={editItemSizeExampleImageUrl}
+        onUploadedUrl={setEditItemSizeExampleImageUrl}
+        r2Configured={r2Configured}
+      />
     </div>
   );
 }

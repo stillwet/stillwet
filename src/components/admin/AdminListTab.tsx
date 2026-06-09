@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { loadAdminCatalogItemsForListTab } from "@/lib/admin-baseline-catalog-rows";
+import { isR2UploadConfigured } from "@/lib/r2-upload";
 import { AdminListAddItemForm } from "@/components/admin/AdminListAddItemForm";
 import { AdminListItemsPanel } from "@/components/admin/AdminListItemsPanel";
 import { AdminListTabLoadError } from "@/components/admin/AdminListTabLoadError";
@@ -20,6 +21,7 @@ export async function AdminListTab() {
       storefrontDescription: item.storefrontDescription,
       itemPlatformProductId: item.itemPlatformProductId,
       itemExampleListingUrl: item.itemExampleListingUrl,
+      itemSizeExampleImageUrl: item.itemSizeExampleImageUrl,
       itemMinPriceCents: item.itemMinPriceCents,
       itemGoodsServicesCostCents: item.itemGoodsServicesCostCents,
       itemImageRequirementLabel: item.itemImageRequirementLabel,
@@ -37,6 +39,8 @@ export async function AdminListTab() {
       })),
     }));
 
+    const r2Configured = isR2UploadConfigured();
+
     return (
       <section id="admin-baseline-list" aria-label="Admin list">
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Admin list</h2>
@@ -46,7 +50,7 @@ export async function AdminListTab() {
         </div>
 
         <div className="mt-8">
-          <AdminListItemsPanel items={serializable} allTags={allTags} />
+          <AdminListItemsPanel items={serializable} allTags={allTags} r2Configured={r2Configured} />
         </div>
       </section>
     );

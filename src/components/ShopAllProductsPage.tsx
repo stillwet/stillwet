@@ -17,7 +17,7 @@ import { ShopAllHotItemsSection, ShopAllHotItemsSkeleton } from "@/components/Sh
 import { ShopPlatformBrowseGrid } from "@/components/ShopPlatformBrowseGrid";
 import { getStoreTags, getStoreTagsForShop } from "@/lib/store-tags";
 import { productsToFeaturedCarouselItems } from "@/lib/shop-featured-carousel";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import {
   marketplaceAggregatedListingWhere,
@@ -113,7 +113,7 @@ function listingTextSearchWhere(query: string | undefined): Prisma.ShopListingWh
   };
 }
 
-type ShopListingForCard = Parameters<typeof productCardProductFromListing>[0];
+type ShopListingForCard = Parameters<typeof productCardProductsFromListings>[0][number];
 
 async function loadBrowsePageSlice(args: {
   where: Prisma.ShopListingWhereInput;
@@ -331,8 +331,8 @@ export async function ShopAllProductsPage({
         }
       : listingIncludeBase;
 
-  let browseProducts: ReturnType<typeof productCardProductFromListing>[];
-  let featuredSourceProducts: ReturnType<typeof productCardProductFromListing>[] = [];
+  let browseProducts: Awaited<ReturnType<typeof productCardProductsFromListings>>;
+  let featuredSourceProducts: Awaited<ReturnType<typeof productCardProductsFromListings>> = [];
   /** Marketplace aggregate scope — passed to deferred Hot items carousel. */
   let platformFullWhere: Prisma.ShopListingWhereInput | undefined;
 
@@ -417,7 +417,7 @@ export async function ShopAllProductsPage({
         Math.ceil(browseSlice.totalCount / SHOP_ALL_PAGE_SIZE),
       );
 
-      browseProducts = browseSlice.rows.map((l) => productCardProductFromListing(l));
+      browseProducts = await productCardProductsFromListings(browseSlice.rows);
     } else if (browseFlat) {
       const base = withSearch(shopWhereBase);
       const where =
@@ -446,17 +446,15 @@ export async function ShopAllProductsPage({
         Math.ceil(browseSlice.totalCount / SHOP_ALL_PAGE_SIZE),
       );
 
-      browseProducts = browseSlice.rows.map((l) => productCardProductFromListing(l));
-      featuredSourceProducts = poolRows.map((l) => productCardProductFromListing(l));
+      browseProducts = await productCardProductsFromListings(browseSlice.rows);
+      featuredSourceProducts = await productCardProductsFromListings(poolRows);
     } else {
       const shopFeaturedWhere = withSearch(shopWhereBase);
       const shopListings = await loadCachedNameOrderedFeaturedRows(
         shopFeaturedWhere,
         cacheablePublicBrowse ? `shop-mixed:${shopSlug}:featured` : null,
       );
-      featuredSourceProducts = shopListings.map((l) =>
-        productCardProductFromListing(l),
-      );
+      featuredSourceProducts = await productCardProductsFromListings(shopListings);
 
       const mBase = withSearch(marketplaceWhereBase);
       const mWhere =
@@ -477,7 +475,7 @@ export async function ShopAllProductsPage({
         Math.ceil(browseSlice.totalCount / SHOP_ALL_PAGE_SIZE),
       );
 
-      browseProducts = browseSlice.rows.map((l) => productCardProductFromListing(l));
+      browseProducts = await productCardProductsFromListings(browseSlice.rows);
     }
   const featuredCarouselItems = !isPlatformCatalog
     ? productsToFeaturedCarouselItems(featuredSourceProducts)

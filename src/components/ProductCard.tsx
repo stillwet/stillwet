@@ -13,9 +13,6 @@ export type ProductCardProduct = Product & {
   storefrontShopSlug?: string;
   /** Creator shop display name (marketplace / multi-vendor). */
   storefrontShopDisplayName?: string;
-  /** Admin-set optional second listing image (platform R2); owners cannot remove via dashboard. */
-  adminListingSecondaryImageUrl?: string | null;
-  ownerSupplementImageUrl?: string | null;
   /** Subset of catalog/Printify image URLs for this listing; undefined = show all. */
   listingStorefrontCatalogImageUrls?: string[];
 };
@@ -38,8 +35,6 @@ export function ProductCard({
   showShopName?: boolean;
 }) {
   const img = productPrimaryImageForShopListing(product, {
-    adminListingSecondaryImageUrl: product.adminListingSecondaryImageUrl,
-    ownerSupplementImageUrl: product.ownerSupplementImageUrl,
     listingStorefrontCatalogImageUrls: product.listingStorefrontCatalogImageUrls,
   });
   const label = cardLabelTag({

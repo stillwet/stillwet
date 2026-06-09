@@ -40,8 +40,6 @@ export const CATALOG_CANVAS_PRESENTATION_WRAPAROUND_MUG_3VIEW: CatalogCanvasPres
     { label: "Center", assetKey: "mug-white-handle-center", alignGuideIndex: 1 },
     { label: "Right", assetKey: "mug-white-handle-right", alignGuideIndex: 2 },
   ],
-  /** UI-only safe zone inside the full wrap print file (matches mug template reference). */
-  safeAreaInsetFraction: { x: 0.1, y: 0.22 },
 };
 
 export const CATALOG_CANVAS_PRESENTATION_SHAPE_OUTLINE_TEE: CatalogCanvasPresentationShapeOutline = {

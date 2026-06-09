@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getStoreTagsForShop } from "@/lib/store-tags";
 import { ProductCard } from "@/components/ProductCard";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import { shopAllProductsHref } from "@/lib/marketplace-constants";
 import { marketplaceAggregatedListingWhere } from "@/lib/shop-listing-storefront-visibility";
 import { STOREFRONT_LISTING_PRODUCT_RELATION_INCLUDE } from "@/lib/storefront-listing-product-include";
@@ -86,6 +86,8 @@ export default async function ShopTenantUniversalTagPage({ params }: Props) {
 
   const allHref = shopAllProductsHref(shopSlug);
 
+  const cardProducts = await productCardProductsFromListings(listings);
+
   return (
     <div>
       <p className="text-xs text-zinc-500">
@@ -103,9 +105,9 @@ export default async function ShopTenantUniversalTagPage({ params }: Props) {
         <p className="mt-8 text-sm text-zinc-600">No products with this tag yet.</p>
       ) : (
         <ul className="mx-auto mt-8 flex max-w-full flex-wrap justify-center gap-3">
-          {listings.map((l) => (
-            <li key={l.id} className="w-[175px] shrink-0">
-              <ProductCard product={productCardProductFromListing(l)} showShopName />
+          {cardProducts.map((product, i) => (
+            <li key={listings[i]!.id} className="w-[175px] shrink-0">
+              <ProductCard product={product} showShopName />
             </li>
           ))}
         </ul>

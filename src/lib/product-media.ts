@@ -195,12 +195,27 @@ export function listingCatalogUrlsForPersist(
 }
 
 /**
- * Storefront gallery: Printify/catalog hero ∪ gallery, optional admin secondary, optional owner
- * supplement. When `listingStorefrontCatalogImageUrls` is **null** (unset), uses full catalog
- * then admin then owner (legacy). When it is a **non-null** array that does **not** include the
- * owner supplement URL, treats it as a catalog-only subset and still appends owner at the end
- * (legacy persisted rows). When the array **does** include the owner URL, order is taken from that
- * list (so the custom image can be primary).
+ * Insert size example at gallery index 1 (replaces 2nd Printify mockup), or append when fewer images.
+ */
+export function injectCatalogSizeExampleIntoGallery(base: string[], sizeExampleUrl: string): string[] {
+  const size = sizeExampleUrl.trim();
+  if (!size) return uniqueImageUrlsOrdered(base);
+
+  const sizeKey = catalogImageUrlKey(size);
+  const withoutDup = base.filter((u) => catalogImageUrlKey(u) !== sizeKey);
+
+  if (withoutDup.length >= 2) {
+    return uniqueImageUrlsOrdered([withoutDup[0]!, size, ...withoutDup.slice(1)]);
+  }
+  if (withoutDup.length === 1) {
+    return uniqueImageUrlsOrdered([withoutDup[0]!, size]);
+  }
+  return [size];
+}
+
+/**
+ * Storefront gallery: Printify/catalog hero ∪ gallery, optional per-catalog-item size example at index 1.
+ * Shop owner supplement and legacy per-listing admin secondary images are not included on storefront.
  */
 export function productImageUrlsForShopListing(
   product: {
@@ -208,74 +223,31 @@ export function productImageUrlsForShopListing(
     imageGallery: Prisma.JsonValue | null;
   },
   extras?: {
-    adminListingSecondaryImageUrl?: string | null;
-    ownerSupplementImageUrl?: string | null;
-    /** Non-null array = explicit storefront image order (catalog subset and/or owner supplement). */
+    /** Admin List size example photo (replaces 2nd mockup thumbnail when set). */
+    adminCatalogSizeExampleImageUrl?: string | null;
+    /** @deprecated Use adminCatalogSizeExampleImageUrl */
+    adminCatalogReferenceImageUrl?: string | null;
+    /** Non-null array = explicit storefront catalog mockup subset. */
     listingStorefrontCatalogImageUrls?: string[] | null;
   },
 ): string[] {
   const fullBase = productImageUrlsUnionHero(product);
-  const admin = extras?.adminListingSecondaryImageUrl?.trim();
-  const owner = extras?.ownerSupplementImageUrl?.trim();
+  const sizeExample = (
+    extras?.adminCatalogSizeExampleImageUrl ?? extras?.adminCatalogReferenceImageUrl
+  )?.trim();
   const parsedSel = parseListingStorefrontCatalogImageSelection(extras?.listingStorefrontCatalogImageUrls);
 
-  if (parsedSel === null) {
-    return uniqueImageUrlsOrdered([
-      ...fullBase,
-      ...(admin ? [admin] : []),
-      ...(owner ? [owner] : []),
-    ]);
-  }
-  if (parsedSel.length === 0) {
-    return uniqueImageUrlsOrdered([
-      ...fullBase,
-      ...(admin ? [admin] : []),
-      ...(owner ? [owner] : []),
-    ]);
+  let base: string[];
+  if (parsedSel === null || parsedSel.length === 0) {
+    base = fullBase;
+  } else {
+    base = storefrontCatalogImagesFromSelection(fullBase, parsedSel);
   }
 
-  const ownerKey = owner ? catalogImageUrlKey(owner) : "";
-  const hasOwnerInSelection = owner && parsedSel.some((u) => catalogImageUrlKey(u.trim()) === ownerKey);
-
-  if (owner && !hasOwnerInSelection) {
-    const base = storefrontCatalogImagesFromSelection(fullBase, parsedSel);
-    return uniqueImageUrlsOrdered([
-      ...base,
-      ...(admin ? [admin] : []),
-      ...(owner ? [owner] : []),
-    ]);
+  if (!sizeExample) {
+    return uniqueImageUrlsOrdered(base);
   }
-
-  const base = listingCatalogUrlsForPersist(
-    { imageUrl: product.imageUrl, imageGallery: product.imageGallery },
-    parsedSel,
-    owner || null,
-  );
-  const adminTail =
-    admin && !base.some((u) => catalogImageUrlKey(u) === catalogImageUrlKey(admin)) ? [admin] : [];
-  return uniqueImageUrlsOrdered([...base, ...adminTail]);
-}
-
-/** Catalog / Printify images first, then one optional owner supplement URL (deduped). */
-export function productImageUrlsWithOwnerSupplement(
-  product: {
-    imageUrl: string | null;
-    imageGallery: Prisma.JsonValue | null;
-  },
-  ownerSupplementImageUrl: string | null | undefined,
-): string[] {
-  return productImageUrlsForShopListing(product, { ownerSupplementImageUrl });
-}
-
-export function productPrimaryImageWithOwnerSupplement(
-  product: {
-    imageUrl: string | null;
-    imageGallery: Prisma.JsonValue | null;
-  },
-  ownerSupplementImageUrl: string | null | undefined,
-): string | null {
-  const urls = productImageUrlsWithOwnerSupplement(product, ownerSupplementImageUrl);
-  return urls[0] ?? null;
+  return injectCatalogSizeExampleIntoGallery(base, sizeExample);
 }
 
 export function productPrimaryImageForShopListing(
@@ -284,8 +256,9 @@ export function productPrimaryImageForShopListing(
     imageGallery: Prisma.JsonValue | null;
   },
   extras?: {
-    adminListingSecondaryImageUrl?: string | null;
-    ownerSupplementImageUrl?: string | null;
+    adminCatalogSizeExampleImageUrl?: string | null;
+    /** @deprecated Use adminCatalogSizeExampleImageUrl */
+    adminCatalogReferenceImageUrl?: string | null;
     listingStorefrontCatalogImageUrls?: string[] | null;
   },
 ): string | null {

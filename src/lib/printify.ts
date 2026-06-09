@@ -24,6 +24,26 @@ export function hasPrintifyApiToken(): boolean {
   return Boolean(process.env.PRINTIFY_API_TOKEN?.trim());
 }
 
+/** Primary fulfillment shop id (`PRINTIFY_SHOP_ID`). */
+export function printifyPrimaryShopId(): string | null {
+  const id = process.env.PRINTIFY_SHOP_ID?.trim();
+  return id || null;
+}
+
+/** Optional second shop for admin unpublish-only cleanup (`PRINTIFY_AUX_SHOP_ID`). */
+export function printifyAuxShopId(): string | null {
+  const id = process.env.PRINTIFY_AUX_SHOP_ID?.trim();
+  return id || null;
+}
+
+/** Token + aux shop id set and distinct from the primary shop. */
+export function isPrintifyAuxShopConfigured(): boolean {
+  const aux = printifyAuxShopId();
+  if (!hasPrintifyApiToken() || !aux) return false;
+  const primary = printifyPrimaryShopId();
+  return !primary || aux !== primary;
+}
+
 /** Default for checkout/fulfillment; admin UI uses a shorter timeout via `timeoutMs`. */
 const PRINTIFY_FETCH_TIMEOUT_MS = 60_000;
 /** Admin Printify tabs — fail fast instead of blocking the page for a full minute. */
@@ -360,14 +380,15 @@ export async function setPrintifyProductPublishingSucceeded(
 export async function setPrintifyProductPublishingFailed(
   shopId: string,
   printifyProductId: string,
+  reason = "Unpublished via StillWet admin",
 ): Promise<{ ok: true } | { ok: false; status: number; body: string }> {
-  return postPrintifyPublishingStatus(shopId, printifyProductId, "publishing_failed");
+  return postPrintifyPublishingStatus(shopId, printifyProductId, "publishing_failed", { reason });
 }
 
-async function postPrintifyPublishingStatus(
+/** Notify Printify that a product was removed from the sales channel. */
+export async function notifyPrintifyProductUnpublished(
   shopId: string,
   printifyProductId: string,
-  endpoint: "publishing_succeeded" | "publishing_failed",
 ): Promise<{ ok: true } | { ok: false; status: number; body: string }> {
   const sid = shopId.trim();
   const pid = printifyProductId.trim();
@@ -376,11 +397,66 @@ async function postPrintifyPublishingStatus(
   }
 
   const res = await printifyAuthorizedFetch(
-    `/shops/${encodeURIComponent(sid)}/products/${encodeURIComponent(pid)}/${endpoint}.json`,
+    `/shops/${encodeURIComponent(sid)}/products/${encodeURIComponent(pid)}/unpublish.json`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "{}",
+    },
+  );
+  const body = await res.text();
+  if (res.ok || res.status === 204) {
+    return { ok: true };
+  }
+  return { ok: false, status: res.status, body };
+}
+
+/**
+ * Clear accidental publish state: try publishing_failed (stuck/locked queue), then unpublish (live on channel).
+ * @see https://developers.printify.com/#set-product-publish-status-to-failed
+ * @see https://developers.printify.com/#notify-that-a-product-has-been-unpublished
+ */
+export async function releasePrintifyProductPublishState(
+  shopId: string,
+  printifyProductId: string,
+  reason = "Unpublished via StillWet admin",
+): Promise<{ ok: true } | { ok: false; status: number; body: string }> {
+  const failedAttempt = await setPrintifyProductPublishingFailed(shopId, printifyProductId, reason);
+  if (failedAttempt.ok) return failedAttempt;
+
+  const unpublishAttempt = await notifyPrintifyProductUnpublished(shopId, printifyProductId);
+  if (unpublishAttempt.ok) return unpublishAttempt;
+
+  return {
+    ok: false,
+    status: unpublishAttempt.status,
+    body: `publishing_failed (${failedAttempt.status}): ${failedAttempt.body}\nunpublish (${unpublishAttempt.status}): ${unpublishAttempt.body}`,
+  };
+}
+
+async function postPrintifyPublishingStatus(
+  shopId: string,
+  printifyProductId: string,
+  endpoint: "publishing_succeeded" | "publishing_failed",
+  payload?: Record<string, unknown>,
+): Promise<{ ok: true } | { ok: false; status: number; body: string }> {
+  const sid = shopId.trim();
+  const pid = printifyProductId.trim();
+  if (!sid || !pid) {
+    return { ok: false, status: 400, body: "Missing shop id or product id" };
+  }
+
+  const bodyJson =
+    endpoint === "publishing_failed"
+      ? JSON.stringify(payload ?? { reason: "Unpublished via StillWet admin" })
+      : JSON.stringify(payload ?? {});
+
+  const res = await printifyAuthorizedFetch(
+    `/shops/${encodeURIComponent(sid)}/products/${encodeURIComponent(pid)}/${endpoint}.json`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: bodyJson,
     },
   );
   const body = await res.text();

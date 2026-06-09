@@ -100,6 +100,19 @@ function resolveVercelBuildDatabaseUrl() {
   return { ok: false, localhostKeys };
 }
 
+function logVercelServerActionsEnvHint() {
+  if (!shouldCleanNextForVercel()) return;
+  if (process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY?.trim()) {
+    console.log("[build] NEXT_SERVER_ACTIONS_ENCRYPTION_KEY is set (Server Action ids stable across instances).");
+    return;
+  }
+  console.warn(
+    "[build] NEXT_SERVER_ACTIONS_ENCRYPTION_KEY is not set. Server Action ids change each build; after deploy, " +
+      "users with an old admin tab may see 'Server Action was not found'. Set a stable base64 AES key in Vercel " +
+      "Production + Preview (available at build time), or enable Skew Protection — see VERCEL.md.",
+  );
+}
+
 function logVercelDatabaseEnvDiagnostics() {
   if (!shouldCleanNextForVercel()) return;
 
@@ -172,6 +185,7 @@ function runOptionalSchemaSync() {
 resetNextDirOnVercel("before prisma generate");
 
 logVercelDatabaseEnvDiagnostics();
+logVercelServerActionsEnvHint();
 
 run("npx prisma generate --schema prisma/schema.prisma");
 runOptionalSchemaSync();

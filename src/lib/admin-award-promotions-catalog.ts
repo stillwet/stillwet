@@ -88,3 +88,33 @@ export function adminAwardGrantQuantityBounds(def: AdminAwardDefinition): {
   if (def.key === "free_listing_slots") return { min: 1, max: 500 };
   return { min: 1, max: 100 };
 }
+
+/** Success/revoke banner copy, e.g. “50 free listing slots” (not “50 Free listing slotss”). */
+export function formatAdminAwardGrantSummary(
+  quantity: number,
+  awardLabel: string | undefined,
+): string {
+  const n = Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+  const unit = (awardLabel ?? "award").trim();
+  const unitLower = unit.toLowerCase();
+
+  if (unitLower === "shop flair access") {
+    return unit;
+  }
+
+  if (unitLower.endsWith(" slots")) {
+    const singular = unit.slice(0, -1);
+    return `${n} ${n === 1 ? singular : unit}`;
+  }
+
+  if (unitLower.endsWith(" credits")) {
+    const singular = unit.slice(0, -1);
+    return `${n} ${n === 1 ? singular : unit}`;
+  }
+
+  if (unitLower.endsWith(" credit")) {
+    return `${n} ${n === 1 ? unit : `${unit}s`}`;
+  }
+
+  return `${n} ${n === 1 ? unit : `${unit}s`}`;
+}

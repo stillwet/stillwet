@@ -50,8 +50,7 @@ export async function ProductModalInterceptBody({
         product={detail.product}
         variant="modal"
         tenant={detail.tenant}
-        adminListingSecondaryImageUrl={detail.adminListingSecondaryImageUrl}
-        ownerSupplementImageUrl={detail.ownerSupplementImageUrl}
+        adminCatalogSizeExampleImageUrl={detail.adminCatalogSizeExampleImageUrl}
         listingStorefrontCatalogImageUrls={detail.listingStorefrontCatalogImageUrls}
         adminCatalogStorefrontDescription={detail.adminCatalogStorefrontDescription}
         listingItemName={detail.listingItemName}

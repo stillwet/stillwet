@@ -10,7 +10,13 @@ const include = {
   primaryTag: true,
   tags: { include: { tag: true } },
   adminCatalogItemPlatformLinks: {
-    select: { id: true, name: true, storefrontDescription: true },
+    select: {
+      id: true,
+      name: true,
+      storefrontDescription: true,
+      itemExampleListingUrl: true,
+      itemSizeExampleImageUrl: true,
+    },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   },
 } satisfies Prisma.ProductInclude;

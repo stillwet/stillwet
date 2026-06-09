@@ -8,6 +8,7 @@ import type {
 } from "@/actions/admin-award-promotions";
 import { AdminAwardPromotionGrantForm } from "@/components/admin/AdminAwardPromotionGrantForm";
 import { AdminRevokeAwardGrantButton } from "@/components/admin/AdminRevokeAwardGrantButton";
+import { formatAdminAwardGrantSummary } from "@/lib/admin-award-promotions-catalog";
 import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
 
 export function AdminAwardPromotionsTab(props: {
@@ -64,8 +65,7 @@ export function AdminAwardPromotionsTab(props: {
           role="status"
           className="mt-3 rounded-lg border border-amber-900/50 bg-amber-950/30 px-4 py-2 text-sm text-amber-200/90"
         >
-          Revoked {apGranted ?? 0} {apAwardLabel ?? "award"}
-          {(apGranted ?? 0) === 1 ? "" : "s"} from{" "}
+          Revoked {formatAdminAwardGrantSummary(apGranted ?? 0, apAwardLabel)} from{" "}
           <span className="font-mono text-amber-100">{apShop}</span>.
         </p>
       ) : null}
@@ -74,8 +74,7 @@ export function AdminAwardPromotionsTab(props: {
           role="status"
           className="mt-3 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90"
         >
-          Granted {apGranted ?? 0} {apAwardLabel ?? "award"}
-          {(apGranted ?? 0) === 1 ? "" : "s"} to{" "}
+          Granted {formatAdminAwardGrantSummary(apGranted ?? 0, apAwardLabel)} to{" "}
           <span className="font-mono text-emerald-100">{apShop}</span>.
           {apDetail ? (
             <>

@@ -10,7 +10,7 @@ import {
   PLATFORM_ALL_PAGE_FEATURED_LIMIT,
   PLATFORM_ALL_PAGE_FEATURED_SALES_WINDOW_DAYS,
 } from "@/lib/platform-all-page-featured-constants";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import {
   marketplaceAggregatedListingWhere,
   storefrontShopListingWhere,
@@ -182,7 +182,7 @@ export async function getPlatformAllPageFeaturedProducts(): Promise<ProductCardP
   const listings = await collectPlatformHotItemsListings(
     PLATFORM_ALL_PAGE_FEATURED_LIMIT,
   );
-  return listings.map((l) => productCardProductFromListing(l));
+  return productCardProductsFromListings(listings);
 }
 
 /**

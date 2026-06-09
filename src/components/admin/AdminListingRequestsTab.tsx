@@ -1,24 +1,19 @@
 "use client";
 
 import {
-  useActionState,
   useCallback,
   useEffect,
   useMemo,
   useState,
-  type ChangeEvent,
   type MouseEvent,
 } from "react";
 import { useFormStatus } from "react-dom";
 import type { Prisma } from "@/generated/prisma/client";
 import {
-  adminClearShopListingSecondaryImage,
   adminFreezeShopListing,
   adminMarkListingImagesOk,
   adminMarkPrintifyListingReady,
   adminRemoveListingFromRequestsQueue,
-  adminUpsertShopListingSecondaryImageForm,
-  type AdminSecondaryImageFormState,
 } from "@/actions/admin-marketplace";
 import { productImageUrlsUnionHero } from "@/lib/product-media";
 import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums";
@@ -199,238 +194,45 @@ function AdminPrintifyMappingFormFields({
   );
 }
 
-function AdminSecondaryImageThumb({
-  label,
-  src,
-  onError,
-}: {
-  label: string;
-  src: string;
-  onError?: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-[9px] font-medium uppercase tracking-wide text-zinc-600">{label}</span>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt=""
-        className="h-20 w-20 rounded border border-zinc-700 bg-zinc-900 object-cover"
-        onError={onError}
-      />
-    </div>
-  );
-}
-
-const initialSecondaryImageFormState: AdminSecondaryImageFormState = {
-  ok: false,
-  error: null,
-};
-
-function ListingAdminSecondaryImageUploadForm({
-  listingId,
-  onFileChange,
-  onUrlChange,
-  urlDraft,
-}: {
-  listingId: string;
-  onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onUrlChange: (value: string) => void;
-  urlDraft: string;
-}) {
-  const [state, formAction, pending] = useActionState(
-    adminUpsertShopListingSecondaryImageForm,
-    initialSecondaryImageFormState,
-  );
-
-  return (
-    <form action={formAction} className="mt-2 flex flex-col gap-2 sm:max-w-lg">
-      <input type="hidden" name="listingId" value={listingId} />
-      <label className="block text-[11px] text-zinc-500">
-        Upload (JPEG / PNG / WebP / GIF, max 20 MB before compression)
-        <input
-          type="file"
-          name="adminListingSecondaryImageFile"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          onChange={onFileChange}
-          className="mt-1 block w-full max-w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
-        />
-      </label>
-      <label className="block text-[11px] text-zinc-500">
-        Or image URL
-        <input
-          type="url"
-          name="adminListingSecondaryImageUrl"
-          placeholder="https://…"
-          value={urlDraft}
-          onChange={(e) => onUrlChange(e.target.value)}
-          className="mt-1 w-full rounded border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-xs text-zinc-200"
-          autoComplete="off"
-        />
-      </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-fit rounded bg-zinc-800 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {pending ? "Uploading…" : "Upload"}
-      </button>
-      {state.ok ? <p className="text-xs text-emerald-400/95">Uploaded successfully.</p> : null}
-      {state.error ? (
-        <p className="text-xs text-red-400/95" role="alert">
-          {state.error}
-        </p>
-      ) : null}
-    </form>
-  );
-}
-
-function ListingAdminSecondaryImagePanel({
+function ListingPrintifyHeroSummary({
   r,
-  r2Configured,
   printifyHeroPreview,
 }: {
   r: ListingRequestTabRow;
-  r2Configured: boolean;
   printifyHeroPreview: string | null;
 }) {
-  const [fileObjectUrl, setFileObjectUrl] = useState<string | null>(null);
-  const [urlDraft, setUrlDraft] = useState("");
-  const [urlPreviewBroken, setUrlPreviewBroken] = useState(false);
-
-  const revokeBlob = useCallback((u: string | null) => {
-    if (u?.startsWith("blob:")) URL.revokeObjectURL(u);
-  }, []);
-
-  useEffect(() => {
-    return () => revokeBlob(fileObjectUrl);
-  }, [fileObjectUrl, revokeBlob]);
-
-  useEffect(() => {
-    setFileObjectUrl((prev) => {
-      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-      return null;
-    });
-    setUrlDraft("");
-    setUrlPreviewBroken(false);
-  }, [r.id, r.adminListingSecondaryImageUrl]);
-
-  const onFileChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const f = e.target.files?.[0];
-      setFileObjectUrl((prev) => {
-        revokeBlob(prev);
-        return f ? URL.createObjectURL(f) : null;
-      });
-      setUrlPreviewBroken(false);
-    },
-    [revokeBlob],
-  );
-
-  const httpsUrlForPreview = useMemo(() => {
-    const t = urlDraft.trim();
-    if (!t) return null;
-    try {
-      const u = new URL(t);
-      if (u.protocol !== "https:") return null;
-      return t;
-    } catch {
-      return null;
-    }
-  }, [urlDraft]);
-
-  useEffect(() => {
-    setUrlPreviewBroken(false);
-  }, [httpsUrlForPreview]);
-
-  const showUrlThumb = Boolean(httpsUrlForPreview && !fileObjectUrl);
-  const hasSecondaryPreviewRow = Boolean(
-    r.adminListingSecondaryImageUrl || fileObjectUrl || httpsUrlForPreview,
-  );
-
   return (
-    <>
-      <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/25 p-3">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">Hero (Printify)</p>
-        <div className="mt-2 flex flex-wrap items-start gap-3">
-          {printifyHeroPreview ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={printifyHeroPreview}
-              alt=""
-              className="h-24 w-24 shrink-0 rounded border border-zinc-700 object-cover"
-            />
-          ) : null}
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-xs text-zinc-500">
-              <span className="font-medium text-zinc-400">Saved mapping</span> — Printify product:{" "}
-              <span className="font-mono text-zinc-400">{r.listingPrintifyProductId ?? "—"}</span>
-            </p>
-            <div className="border-t border-zinc-800/50 pt-2">
-              <ListingRequestCopySummary r={r} className="mt-0 space-y-0.5 text-xs" />
-            </div>
-            {!printifyHeroPreview ? (
-              <p className="text-[11px] text-amber-200/85">
-                No hero image on the catalog product yet. Re-save Printify mapping or check Printify mockups before
-                approving.
-              </p>
-            ) : null}
+    <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/25 p-3">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">Hero (Printify)</p>
+      <div className="mt-2 flex flex-wrap items-start gap-3">
+        {printifyHeroPreview ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={printifyHeroPreview}
+            alt=""
+            className="h-24 w-24 shrink-0 rounded border border-zinc-700 object-cover"
+          />
+        ) : null}
+        <div className="min-w-0 flex-1 space-y-2">
+          <p className="text-xs text-zinc-500">
+            <span className="font-medium text-zinc-400">Saved mapping</span> — Printify product:{" "}
+            <span className="font-mono text-zinc-400">{r.listingPrintifyProductId ?? "—"}</span>
+          </p>
+          <div className="border-t border-zinc-800/50 pt-2">
+            <ListingRequestCopySummary r={r} className="mt-0 space-y-0.5 text-xs" />
           </div>
+          {!printifyHeroPreview ? (
+            <p className="text-[11px] text-amber-200/85">
+              No hero image on the catalog product yet. Re-save Printify mapping or check Printify mockups before
+              approving.
+            </p>
+          ) : null}
+          <p className="text-[11px] text-zinc-600">
+            Item reference photos are managed per catalog item on the Admin List tab.
+          </p>
         </div>
       </div>
-      {r2Configured ? (
-        <div className="space-y-2 rounded-lg border border-zinc-800/80 bg-zinc-950/20 p-3">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">
-            Optional second image (admin)
-          </p>
-          {hasSecondaryPreviewRow ? (
-            <div className="flex flex-wrap items-end gap-4">
-              {r.adminListingSecondaryImageUrl ? (
-                <div className="flex flex-wrap items-end gap-3">
-                  <AdminSecondaryImageThumb label="Saved on listing" src={r.adminListingSecondaryImageUrl} />
-                  <form action={adminClearShopListingSecondaryImage} className="inline">
-                    <input type="hidden" name="listingId" value={r.id} />
-                    <button
-                      type="submit"
-                      className="rounded border border-zinc-600 px-2 py-1 text-[11px] text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
-                    >
-                      Remove admin second image
-                    </button>
-                  </form>
-                </div>
-              ) : (
-                <p className="text-[11px] text-zinc-600">Nothing saved yet — thumbnails update as you pick a file or URL.</p>
-              )}
-              {fileObjectUrl ? <AdminSecondaryImageThumb label="File preview" src={fileObjectUrl} /> : null}
-              {showUrlThumb && httpsUrlForPreview ? (
-                urlPreviewBroken ? (
-                  <p className="max-w-[11rem] text-[10px] leading-snug text-amber-200/80">
-                    URL preview failed (blocked or not an image). You can still try Upload if the server can fetch it.
-                  </p>
-                ) : (
-                  <AdminSecondaryImageThumb
-                    label="URL preview"
-                    src={httpsUrlForPreview}
-                    onError={() => setUrlPreviewBroken(true)}
-                  />
-                )
-              ) : null}
-            </div>
-          ) : null}
-          <ListingAdminSecondaryImageUploadForm
-            key={`${r.id}-${r.adminListingSecondaryImageUrl ? "y" : "n"}`}
-            listingId={r.id}
-            urlDraft={urlDraft}
-            onUrlChange={setUrlDraft}
-            onFileChange={onFileChange}
-          />
-        </div>
-      ) : (
-        <p className="text-xs text-amber-200/85">
-          R2 is not configured — optional admin second image upload is unavailable. Set R2 env vars on the server.
-        </p>
-      )}
-    </>
+    </div>
   );
 }
 
@@ -1036,11 +838,7 @@ function ListingRequestCard({
               </form>
             </div>
           </details>
-          <ListingAdminSecondaryImagePanel
-            r={r}
-            r2Configured={r2Configured}
-            printifyHeroPreview={printifyHeroPreview}
-          />
+          <ListingPrintifyHeroSummary r={r} printifyHeroPreview={printifyHeroPreview} />
           {suppressLegacyGroupStep3Decision && groupedVariant ? (
             <p className="text-[11px] text-zinc-600">
               Use <span className="font-medium text-zinc-400">Approve all sizes</span> /{" "}
@@ -1117,11 +915,7 @@ function ListingRequestCard({
               </form>
             </div>
           </details>
-          <ListingAdminSecondaryImagePanel
-            r={r}
-            r2Configured={r2Configured}
-            printifyHeroPreview={printifyHeroPreview}
-          />
+          <ListingPrintifyHeroSummary r={r} printifyHeroPreview={printifyHeroPreview} />
         </div>
       ) : null}
 

@@ -34,7 +34,7 @@ function row(
 }
 
 describe("organizeShopBaselineCatalogByCategory", () => {
-  it("orders categories by smallest print canvas and items within by canvas size", () => {
+  it("orders categories by tag sort order and items within alphabetically", () => {
     const groups = buildShopBaselineCatalogGroups([
       row("mug", "Ceramic Mug", 2475, 1155, [{ id: "t-drink", name: "Drinkware", slug: "drinkware", sortOrder: 10 }]),
       row("poster-s", "Small Poster", 4200, 2970, [
@@ -55,7 +55,7 @@ describe("organizeShopBaselineCatalogByCategory", () => {
     );
     assert.deepEqual(
       sections.find((s) => s.categoryName === "Wall art")?.groups.map((g) => g.itemName),
-      ["Small Poster", "Large Poster"],
+      ["Large Poster", "Small Poster"],
     );
   });
 
@@ -82,7 +82,7 @@ describe("partitionShopBaselineCatalogGroups", () => {
     assert.equal(cameraOrVectorOnly[0]?.itemName, "Blanket");
   });
 
-  it("orders items smallest canvas first within a tier", () => {
+  it("orders items alphabetically within a tier", () => {
     const groups = buildShopBaselineCatalogGroups([
       row("poster-l", "Large Poster", 4200, 2970, [
         { id: "t-wall", name: "Wall art", slug: "wall-art", sortOrder: 20 },
@@ -95,7 +95,7 @@ describe("partitionShopBaselineCatalogGroups", () => {
     const { phonePicSafe } = partitionShopBaselineCatalogGroups(groups);
     assert.deepEqual(
       phonePicSafe.map((g) => g.itemName),
-      ["Mug", "Small Poster", "Large Poster"],
+      ["Large Poster", "Mug", "Small Poster"],
     );
   });
 });

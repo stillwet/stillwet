@@ -33,8 +33,6 @@ export function productsToFeaturedCarouselItems(
   return [...products]
     .filter((p) =>
       productPrimaryImageForShopListing(p, {
-        adminListingSecondaryImageUrl: p.adminListingSecondaryImageUrl,
-        ownerSupplementImageUrl: p.ownerSupplementImageUrl,
         listingStorefrontCatalogImageUrls: p.listingStorefrontCatalogImageUrls,
       }),
     )
@@ -47,8 +45,6 @@ export function productsToFeaturedCarouselItems(
         name: p.name,
         ...(typeLabel ? { catalogItemType: typeLabel } : {}),
         imageUrl: productPrimaryImageForShopListing(p, {
-          adminListingSecondaryImageUrl: p.adminListingSecondaryImageUrl,
-          ownerSupplementImageUrl: p.ownerSupplementImageUrl,
           listingStorefrontCatalogImageUrls: p.listingStorefrontCatalogImageUrls,
         })!,
         ...(p.storefrontShopSlug ? { listingShopSlug: p.storefrontShopSlug } : {}),

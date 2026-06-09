@@ -1,6 +1,5 @@
 "use client";
 
-import { useId } from "react";
 import type {
   CatalogCanvasPresentation,
   ListingArtworkCropFrameRect,
@@ -14,7 +13,6 @@ export function ListingArtworkCanvasGuideOverlay({
   canvasPresentation: CatalogCanvasPresentation;
   cropFrame: ListingArtworkCropFrameRect | null;
 }) {
-  const bleedMaskId = useId();
   if (!cropFrame || canvasPresentation.type === "flat") return null;
 
   if (canvasPresentation.type === "shapeOutline") {
@@ -44,9 +42,7 @@ export function ListingArtworkCanvasGuideOverlay({
 
   if (canvasPresentation.type !== "wraparound") return null;
 
-  const { verticalGuideFractions, safeAreaInsetFraction } = canvasPresentation;
-  const insetX = safeAreaInsetFraction?.x ?? 0;
-  const insetY = safeAreaInsetFraction?.y ?? 0;
+  const { verticalGuideFractions } = canvasPresentation;
 
   return (
     <svg
@@ -59,50 +55,6 @@ export function ListingArtworkCanvasGuideOverlay({
       }}
       aria-hidden
     >
-      {insetX > 0 || insetY > 0 ? (
-        <>
-          <defs>
-            <mask id={bleedMaskId}>
-              <rect x={0} y={0} width={cropFrame.width} height={cropFrame.height} fill="white" />
-              <rect
-                x={cropFrame.width * insetX}
-                y={cropFrame.height * insetY}
-                width={cropFrame.width * (1 - 2 * insetX)}
-                height={cropFrame.height * (1 - 2 * insetY)}
-                fill="black"
-              />
-            </mask>
-          </defs>
-          <rect
-            x={0}
-            y={0}
-            width={cropFrame.width}
-            height={cropFrame.height}
-            fill="rgba(39,39,42,0.82)"
-            mask={`url(#${bleedMaskId})`}
-          />
-          <rect
-            x={cropFrame.width * insetX}
-            y={cropFrame.height * insetY}
-            width={cropFrame.width * (1 - 2 * insetX)}
-            height={cropFrame.height * (1 - 2 * insetY)}
-            fill="none"
-            stroke="rgba(250,250,250,0.45)"
-            strokeWidth={1}
-            strokeDasharray="4 4"
-          />
-        </>
-      ) : (
-        <rect
-          x={0}
-          y={0}
-          width={cropFrame.width}
-          height={cropFrame.height}
-          fill="none"
-          stroke="rgba(113,113,122,0.55)"
-          strokeWidth={1}
-        />
-      )}
       {verticalGuideFractions.map((fraction, i) => {
         const x = cropFrame.width * fraction;
         return (

@@ -37,7 +37,7 @@ export function buyerSalesShopConnectPrismaWhere(): Prisma.ShopWhereInput {
 }
 
 export const SHOP_NOT_LIVE_CONNECT_MESSAGE =
-  "Shop is not live until Stripe Connect setup is complete.";
+  "Shop is not live until onboarding setup is complete.";
 
 /**
  * Whether the shop can be charged a listing publication fee via Stripe (Connect must be usable).

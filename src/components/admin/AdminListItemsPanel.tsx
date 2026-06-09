@@ -128,9 +128,11 @@ function AdminCatalogItemImageCell({ url }: { url: string }) {
 export function AdminListItemsPanel({
   items,
   allTags,
+  r2Configured = false,
 }: {
   items: AdminListItemSerializable[];
   allTags: AdminListTagOption[];
+  r2Configured?: boolean;
 }) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -194,16 +196,18 @@ export function AdminListItemsPanel({
           item={editingItem}
           allTags={allTags}
           onCancel={cancelEdit}
+          r2Configured={r2Configured}
         />
       ) : null}
 
       <div className="overflow-x-auto rounded-lg border border-zinc-800">
-        <table className="w-full min-w-[48rem] text-left text-xs">
+        <table className="w-full min-w-[56rem] text-left text-xs">
           <thead className="border-b border-zinc-800 bg-zinc-900/80 text-[10px] font-medium uppercase tracking-wide text-zinc-500">
             <tr>
               <th className="p-3 font-medium">Item name</th>
               <th className="p-3 font-medium">Tags</th>
               <th className="p-3 font-medium">Item image</th>
+              <th className="p-3 font-medium whitespace-nowrap">Size Ex Pic</th>
               <th className="p-3 font-medium whitespace-nowrap" title="Goods/services fulfillment cost per unit">
                 G/S cost
               </th>
@@ -239,6 +243,13 @@ export function AdminListItemsPanel({
                 <td className="p-3 text-zinc-400">
                   {item.itemExampleListingUrl ? (
                     <AdminCatalogItemImageCell url={item.itemExampleListingUrl} />
+                  ) : (
+                    <span className="text-zinc-600">—</span>
+                  )}
+                </td>
+                <td className="p-3 text-zinc-400">
+                  {item.itemSizeExampleImageUrl ? (
+                    <AdminCatalogItemImageCell url={item.itemSizeExampleImageUrl} />
                   ) : (
                     <span className="text-zinc-600">—</span>
                   )}

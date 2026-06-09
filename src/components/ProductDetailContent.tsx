@@ -26,8 +26,7 @@ export function ProductDetailContent({
   product,
   variant,
   tenant,
-  adminListingSecondaryImageUrl,
-  ownerSupplementImageUrl,
+  adminCatalogSizeExampleImageUrl,
   listingStorefrontCatalogImageUrls,
   adminCatalogStorefrontDescription,
   /** Shop listing’s item name (`requestItemName`); preferred for title with admin catalog fallback. */
@@ -44,10 +43,8 @@ export function ProductDetailContent({
   variant: "page" | "modal";
   /** When set, cart + breadcrumbs target this shop slug (`/s/...`). */
   tenant?: { shopSlug: string; listingPriceCents: number; shopDisplayName: string };
-  /** Optional admin-set listing image (tenant PDP only). */
-  adminListingSecondaryImageUrl?: string | null;
-  /** Extra listing image from the shop owner (tenant PDP only). */
-  ownerSupplementImageUrl?: string | null;
+  /** Per-catalog-item size example photo (tenant PDP only). */
+  adminCatalogSizeExampleImageUrl?: string | null;
   /** Catalog image subset for this shop listing; undefined = all catalog images. */
   listingStorefrontCatalogImageUrls?: string[];
   /**
@@ -80,8 +77,7 @@ export function ProductDetailContent({
   const displayPriceCents = tenant?.listingPriceCents ?? product.priceCents;
 
   const images = productImageUrlsForShopListing(product, {
-    adminListingSecondaryImageUrl,
-    ownerSupplementImageUrl,
+    adminCatalogSizeExampleImageUrl,
     listingStorefrontCatalogImageUrls,
   });
   const description = (adminCatalogStorefrontDescription ?? "").trim();
@@ -105,7 +101,10 @@ export function ProductDetailContent({
   const grid = (
     <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-8 xl:gap-x-10">
       <div className={PRODUCT_HERO_GALLERY_WRAP_CLASS}>
-        <ProductImageGallery images={images} />
+        <ProductImageGallery
+          images={images}
+          sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
+        />
         {purchaseDisabled ? null : (
           <ProductAddToCartForm
             productId={product.id}

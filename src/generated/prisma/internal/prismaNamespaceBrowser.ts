@@ -786,6 +786,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   variants: 'variants',
   itemPlatformProductId: 'itemPlatformProductId',
   itemExampleListingUrl: 'itemExampleListingUrl',
+  itemSizeExampleImageUrl: 'itemSizeExampleImageUrl',
   itemMinPriceCents: 'itemMinPriceCents',
   itemGoodsServicesCostCents: 'itemGoodsServicesCostCents',
   itemImageRequirementLabel: 'itemImageRequirementLabel',

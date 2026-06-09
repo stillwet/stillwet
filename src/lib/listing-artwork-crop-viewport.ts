@@ -38,6 +38,23 @@ export const LISTING_ARTWORK_CROP_PREVIEW_BAND_CLASS =
 /** Canvas wrap margin preview — semi-transparent crop mask + SVG bleed overlay. */
 export const LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS = "listing-artwork-crop-canvas-wrap-preview";
 
+/** Mug wraparound — full print area is the crop box; no outer dimming mask. */
+export const LISTING_ARTWORK_CROP_WRAPAROUND_PREVIEW_CLASS = "listing-artwork-crop-wraparound-preview";
+
+export function listingArtworkCropPrintWindowClassNames(options: {
+  showCanvasWrapMarginPreview: boolean;
+  isWraparoundPreview: boolean;
+}): string {
+  const out = [LISTING_ARTWORK_CROP_PRINT_WINDOW_CLASS];
+  if (options.showCanvasWrapMarginPreview) {
+    out.push(LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS);
+  } else if (options.isWraparoundPreview) {
+    out.push(LISTING_ARTWORK_CROP_WRAPAROUND_PREVIEW_CLASS);
+  }
+  out.push("relative", "shrink-0", "overflow-hidden");
+  return out.join(" ");
+}
+
 /** @deprecated Use {@link LISTING_ARTWORK_CROP_CANVAS_WRAP_PREVIEW_CLASS}. */
 export const LISTING_ARTWORK_CROP_CANVAS_BLEED_FRAME_CLASS = "listing-artwork-crop-canvas-bleed-frame";
 

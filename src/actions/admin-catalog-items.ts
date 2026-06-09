@@ -21,6 +21,7 @@ import {
   parseAdminCatalogArtworkTemplatePreset,
   parseAdminCatalogCanvasPresentationPreset,
 } from "@/lib/admin-catalog-canvas-presentation";
+import { normalizeAdminCatalogImageUrl } from "@/lib/admin-catalog-reference-image";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -62,6 +63,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
   | {
       ok: true;
       itemExampleListingUrl: string | null;
+      itemSizeExampleImageUrl: string | null;
       itemMinPriceCents: number;
       itemGoodsServicesCostCents: number;
       itemImageRequirementLabel: string | null;
@@ -95,9 +97,18 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     String(formData.get("itemArtworkTemplatePreset") ?? ""),
   );
   const canvasPresentation = catalogCanvasPresentationFromPreset(canvasPreset);
+  const sizeExRaw = String(formData.get("itemSizeExampleImageUrl") ?? "").trim();
+  const itemSizeExampleImageUrl = sizeExRaw
+    ? normalizeAdminCatalogImageUrl(sizeExRaw.slice(0, 2048))
+    : null;
+  if (sizeExRaw && !itemSizeExampleImageUrl) {
+    return { ok: false, error: "Size Ex Pic URL must be http(s) or a site-relative path." };
+  }
+
   return {
     ok: true,
     itemExampleListingUrl: v.exampleListingUrl,
+    itemSizeExampleImageUrl,
     itemMinPriceCents: v.minPriceCents,
     itemGoodsServicesCostCents: v.itemGoodsServicesCostCents,
     itemImageRequirementLabel: ar.itemImageRequirementLabel,
@@ -139,6 +150,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
         storefrontDescription,
         variants: EMPTY_VARIANTS_JSON,
         itemExampleListingUrl: itemLevel.itemExampleListingUrl,
+        itemSizeExampleImageUrl: itemLevel.itemSizeExampleImageUrl,
         itemMinPriceCents: itemLevel.itemMinPriceCents,
         itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
         itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
@@ -188,6 +200,7 @@ export async function adminUpdateCatalogItem(
         variants: EMPTY_VARIANTS_JSON,
         storefrontDescription,
         itemExampleListingUrl: itemLevel.itemExampleListingUrl,
+        itemSizeExampleImageUrl: itemLevel.itemSizeExampleImageUrl,
         itemMinPriceCents: itemLevel.itemMinPriceCents,
         itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
         itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,

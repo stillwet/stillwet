@@ -8,6 +8,7 @@ import {
 } from "@/actions/admin-award-promotions";
 import { adminAwardCatalog } from "@/lib/admin-award-promotions-catalog";
 import { normalizeShopSlugInput } from "@/lib/normalize-shop-slug-input";
+import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
 
 const SUGGESTION_LIMIT = 12;
 const AWARD_OPTIONS = adminAwardCatalog();
@@ -143,6 +144,7 @@ export function AdminAwardPromotionGrantForm(props: {
       try {
         await adminAwardPromotionGrantForm(fd);
       } catch (err) {
+        rethrowNextNavigationError(err);
         console.error("[AdminAwardPromotionGrantForm] grant failed", err);
         setClientError("Grant failed. Check the server log and try again.");
         setIsGranting(false);
@@ -168,7 +170,7 @@ export function AdminAwardPromotionGrantForm(props: {
               required
               autoComplete="off"
               spellCheck={false}
-              placeholder="e.g. goddess-xtina"
+              placeholder="e.g. smith-shop"
               role="combobox"
               aria-autocomplete="list"
               aria-expanded={showList}

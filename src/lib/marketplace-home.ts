@@ -4,7 +4,7 @@ import { marketplaceAggregatedListingWhere } from "@/lib/shop-listing-storefront
 import { OrderStatus } from "@/generated/prisma/enums";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import type { ProductCardProduct } from "@/components/ProductCard";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import { sortShopsForBrowse } from "@/lib/shops-browse";
 import {
   HOME_HOT_CAROUSEL_DEFAULT_DISPLAY,
@@ -129,7 +129,7 @@ async function getHomeHotCarouselProductsUncached(
     { max: HOME_HOT_CAROUSEL_MAX_ITEMS },
   );
   const used = new Set<string>();
-  const out: ProductCardProduct[] = [];
+  const listingOut: Parameters<typeof productCardProductsFromListings>[0] = [];
 
   const manualCap = Math.min(
     Math.max(displayLimit, adminIds.length),
@@ -154,14 +154,14 @@ async function getHomeHotCarouselProductsUncached(
       if (!byPid.has(r.productId)) byPid.set(r.productId, r);
     }
     for (const pid of adminIds) {
-      if (out.length >= manualCap) break;
+      if (listingOut.length >= manualCap) break;
       const row = byPid.get(pid);
       if (row) {
-        out.push(productCardProductFromListing(row));
+        listingOut.push(row);
         used.add(pid);
       }
     }
-    return out;
+    return productCardProductsFromListings(listingOut);
   }
 
   const promoIds = await getOrderedHotFeaturedItemProductIds();
@@ -183,16 +183,16 @@ async function getHomeHotCarouselProductsUncached(
       if (!byPid.has(r.productId)) byPid.set(r.productId, r);
     }
     for (const pid of promoIds) {
-      if (out.length >= displayLimit) break;
+      if (listingOut.length >= displayLimit) break;
       const row = byPid.get(pid);
       if (row && !used.has(pid)) {
-        out.push(productCardProductFromListing(row));
+        listingOut.push(row);
         used.add(pid);
       }
     }
   }
 
-  const needViews = displayLimit - out.length;
+  const needViews = displayLimit - listingOut.length;
   if (needViews > 0) {
     const exclude = [...used];
     const viewedRows = await prisma.shopListing.findMany({
@@ -211,14 +211,14 @@ async function getHomeHotCarouselProductsUncached(
       },
     });
     for (const row of viewedRows) {
-      if (out.length >= displayLimit) break;
+      if (listingOut.length >= displayLimit) break;
       if (used.has(row.productId)) continue;
       used.add(row.productId);
-      out.push(productCardProductFromListing(row));
+      listingOut.push(row);
     }
   }
 
-  const needAny = displayLimit - out.length;
+  const needAny = displayLimit - listingOut.length;
   if (needAny > 0) {
     const exclude = [...used];
     const anyRows = await prisma.shopListing.findMany({
@@ -237,14 +237,14 @@ async function getHomeHotCarouselProductsUncached(
       },
     });
     for (const row of anyRows) {
-      if (out.length >= displayLimit) break;
+      if (listingOut.length >= displayLimit) break;
       if (used.has(row.productId)) continue;
       used.add(row.productId);
-      out.push(productCardProductFromListing(row));
+      listingOut.push(row);
     }
   }
 
-  return out;
+  return productCardProductsFromListings(listingOut);
 }
 
 export async function getHomeHotCarouselProducts(
@@ -281,7 +281,7 @@ async function getHomePopularCarouselProductsUncached(
     { max: HOME_HOT_CAROUSEL_MAX_ITEMS },
   );
   const used = new Set<string>();
-  const out: ProductCardProduct[] = [];
+  const listingOut: Parameters<typeof productCardProductsFromListings>[0] = [];
 
   const manualCap = Math.min(
     Math.max(displayLimit, adminIds.length),
@@ -306,14 +306,14 @@ async function getHomePopularCarouselProductsUncached(
       if (!byPid.has(r.productId)) byPid.set(r.productId, r);
     }
     for (const pid of adminIds) {
-      if (out.length >= manualCap) break;
+      if (listingOut.length >= manualCap) break;
       const row = byPid.get(pid);
       if (row) {
-        out.push(productCardProductFromListing(row));
+        listingOut.push(row);
         used.add(pid);
       }
     }
-    return out;
+    return productCardProductsFromListings(listingOut);
   }
 
   const promoIds = await getOrderedPopularFeaturedItemProductIds();
@@ -335,16 +335,16 @@ async function getHomePopularCarouselProductsUncached(
       if (!byPid.has(r.productId)) byPid.set(r.productId, r);
     }
     for (const pid of promoIds) {
-      if (out.length >= displayLimit) break;
+      if (listingOut.length >= displayLimit) break;
       const row = byPid.get(pid);
       if (row && !used.has(pid)) {
-        out.push(productCardProductFromListing(row));
+        listingOut.push(row);
         used.add(pid);
       }
     }
   }
 
-  const needViews = displayLimit - out.length;
+  const needViews = displayLimit - listingOut.length;
   if (needViews > 0) {
     const exclude = [...used];
     const viewedRows = await prisma.shopListing.findMany({
@@ -363,14 +363,14 @@ async function getHomePopularCarouselProductsUncached(
       },
     });
     for (const row of viewedRows) {
-      if (out.length >= displayLimit) break;
+      if (listingOut.length >= displayLimit) break;
       if (used.has(row.productId)) continue;
       used.add(row.productId);
-      out.push(productCardProductFromListing(row));
+      listingOut.push(row);
     }
   }
 
-  const needAny = displayLimit - out.length;
+  const needAny = displayLimit - listingOut.length;
   if (needAny > 0) {
     const exclude = [...used];
     const anyRows = await prisma.shopListing.findMany({
@@ -389,14 +389,14 @@ async function getHomePopularCarouselProductsUncached(
       },
     });
     for (const row of anyRows) {
-      if (out.length >= displayLimit) break;
+      if (listingOut.length >= displayLimit) break;
       if (used.has(row.productId)) continue;
       used.add(row.productId);
-      out.push(productCardProductFromListing(row));
+      listingOut.push(row);
     }
   }
 
-  return out;
+  return productCardProductsFromListings(listingOut);
 }
 
 export async function getHomePopularCarouselProducts(
@@ -448,12 +448,12 @@ async function getHotListingProductsForHomeUncached(
   for (const l of listings) {
     if (!byProduct.has(l.productId)) byProduct.set(l.productId, l);
   }
-  const out: ProductCardProduct[] = [];
+  const listingOut: Parameters<typeof productCardProductsFromListings>[0] = [];
   for (const g of grouped) {
     const row = byProduct.get(g.productId);
-    if (row) out.push(productCardProductFromListing(row));
+    if (row) listingOut.push(row);
   }
-  return out;
+  return productCardProductsFromListings(listingOut);
 }
 
 export async function getHotListingProductsForHome(

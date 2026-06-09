@@ -6,6 +6,7 @@ import {
   catalogItemIsWhiteMug,
   catalogItemIsCanvasPrint,
   catalogItemNameSuggestsWhiteLetterbox,
+  defaultLetterboxFillForCatalogItemName,
   printAreaSuggestsWhiteLetterbox,
   resolveListingArtworkLetterboxFill,
 } from "@/lib/listing-artwork-letterbox-fill";
@@ -35,6 +36,30 @@ describe("resolveListingArtworkLetterboxFill", () => {
         catalogItemName: "Domme tee",
         printAreaWidthPx: 4500,
         printAreaHeightPx: 5400,
+      }),
+      ListingArtworkLetterboxFill.transparent,
+    );
+  });
+
+  it("uses opaque white for white ceramic mugs (white ink is not printed)", () => {
+    assert.equal(
+      resolveListingArtworkLetterboxFill({
+        itemArtworkLetterboxFill: ListingArtworkLetterboxFill.transparent,
+        catalogItemName: "Ceramic Mug (white, 11 oz)",
+      }),
+      ListingArtworkLetterboxFill.white,
+    );
+    assert.equal(
+      defaultLetterboxFillForCatalogItemName("Ceramic Mug (white, 11 oz)"),
+      ListingArtworkLetterboxFill.white,
+    );
+  });
+
+  it("keeps black mugs transparent for PNG export", () => {
+    assert.equal(
+      resolveListingArtworkLetterboxFill({
+        itemArtworkLetterboxFill: ListingArtworkLetterboxFill.transparent,
+        catalogItemName: "Ceramic Mug (Black, 11 oz)",
       }),
       ListingArtworkLetterboxFill.transparent,
     );

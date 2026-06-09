@@ -18,7 +18,7 @@ describe("parseCatalogCanvasPresentation", () => {
     if (p.type !== "wraparound") return;
     assert.equal(p.verticalGuideFractions.length, 3);
     assert.equal(p.orientationPreviews.length, 3);
-    assert.deepEqual(p.safeAreaInsetFraction, { x: 0.1, y: 0.22 });
+    assert.equal(p.safeAreaInsetFraction, undefined);
   });
 
   it("parses shapeOutline", () => {

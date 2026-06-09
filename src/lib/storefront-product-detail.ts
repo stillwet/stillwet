@@ -1,10 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { parseListingStorefrontCatalogImageSelection } from "@/lib/product-media";
+import { resolveAdminCatalogItemSizeExampleImageUrl } from "@/lib/admin-catalog-reference-image";
 import { prisma } from "@/lib/prisma";
-import {
-  sanitizeShopListingAdminSecondaryImageUrlForDisplay,
-  sanitizeShopListingOwnerSupplementImageUrlForDisplay,
-} from "@/lib/r2-upload";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import {
   loadStorefrontListingByShopAndProductSlug,
@@ -88,8 +85,8 @@ export async function resolveAdminCatalogItemName(
 export type ResolvedPublicProductDetail = {
   product: StorefrontProduct;
   tenant?: { shopSlug: string; listingPriceCents: number; shopDisplayName: string };
-  adminListingSecondaryImageUrl?: string | null;
-  ownerSupplementImageUrl?: string | null;
+  /** Per-catalog-item size example photo (PDP gallery slot 2). */
+  adminCatalogSizeExampleImageUrl?: string | null;
   listingStorefrontCatalogImageUrls?: string[];
   /**
    * Resolved Admin List storefront body for this listing/product (single catalog item; may be empty).
@@ -110,11 +107,18 @@ async function withAdminCatalogStorefrontDescription(
   detail: ResolvedPublicProductDetail,
   listing: StorefrontShopListing | null,
 ): Promise<ResolvedPublicProductDetail> {
-  const [adminCatalogStorefrontDescription, adminCatalogItemName] = await Promise.all([
-    resolveAdminCatalogStorefrontText(detail.product, listing),
-    resolveAdminCatalogItemName(detail.product, listing),
-  ]);
-  return { ...detail, adminCatalogStorefrontDescription, adminCatalogItemName };
+  const [adminCatalogStorefrontDescription, adminCatalogItemName, adminCatalogSizeExampleImageUrl] =
+    await Promise.all([
+      resolveAdminCatalogStorefrontText(detail.product, listing),
+      resolveAdminCatalogItemName(detail.product, listing),
+      resolveAdminCatalogItemSizeExampleImageUrl(detail.product, listing),
+    ]);
+  return {
+    ...detail,
+    adminCatalogStorefrontDescription,
+    adminCatalogItemName,
+    adminCatalogSizeExampleImageUrl,
+  };
 }
 
 export function mapListingRowToProductDetail(row: StorefrontShopListing): ResolvedPublicProductDetail {
@@ -126,16 +130,6 @@ export function mapListingRowToProductDetail(row: StorefrontShopListing): Resolv
       listingPriceCents: row.priceCents,
       shopDisplayName: row.shop.displayName,
     },
-    adminListingSecondaryImageUrl: sanitizeShopListingAdminSecondaryImageUrlForDisplay(
-      row.adminListingSecondaryImageUrl,
-      row.shopId,
-      row.id,
-    ),
-    ownerSupplementImageUrl: sanitizeShopListingOwnerSupplementImageUrlForDisplay(
-      row.ownerSupplementImageUrl,
-      row.shopId,
-      row.id,
-    ),
     listingStorefrontCatalogImageUrls: catalogSel === null ? undefined : catalogSel,
     listingItemName: row.requestItemName?.trim() || null,
     storefrontItemBlurb: row.storefrontItemBlurb?.trim() || null,

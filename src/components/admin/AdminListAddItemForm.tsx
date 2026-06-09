@@ -15,6 +15,7 @@ import type { CatalogCanvasPresentationPresetId } from "@/lib/admin-catalog-canv
 import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
+import { AdminCatalogItemSizeExampleFields } from "@/components/admin/AdminCatalogItemSizeExampleFields";
 import { parseAdminCatalogItemArtworkForm, validateItemLevelWhenNoVariants } from "@/lib/admin-catalog-item";
 
 export function AdminListAddItemForm() {
@@ -22,6 +23,7 @@ export function AdminListAddItemForm() {
   const [itemName, setItemName] = useState("");
   const [storefrontDescription, setStorefrontDescription] = useState("");
   const [itemExampleListingUrl, setItemExampleListingUrl] = useState("");
+  const [itemSizeExampleImageUrl, setItemSizeExampleImageUrl] = useState("");
   const [itemMinPriceDollars, setItemMinPriceDollars] = useState("");
   const [itemGoodsServicesCostDollars, setItemGoodsServicesCostDollars] = useState("");
   const [itemImageRequirementLabel, setItemImageRequirementLabel] = useState("");
@@ -50,6 +52,7 @@ export function AdminListAddItemForm() {
     setItemName("");
     setStorefrontDescription("");
     setItemExampleListingUrl("");
+    setItemSizeExampleImageUrl("");
     setItemMinPriceDollars("");
     setItemGoodsServicesCostDollars("");
     setItemImageRequirementLabel("");
@@ -99,6 +102,7 @@ export function AdminListAddItemForm() {
     fd.set("itemName", name);
     fd.set("storefrontDescription", storefrontDescription);
     fd.set("itemExampleListingUrl", itemExampleListingUrl);
+    fd.set("itemSizeExampleImageUrl", itemSizeExampleImageUrl);
     fd.set("itemMinPriceDollars", itemMinPriceDollars);
     fd.set("itemGoodsServicesCostDollars", itemGoodsServicesCostDollars);
     fd.set("itemImageRequirementLabel", itemImageRequirementLabel);
@@ -165,6 +169,10 @@ export function AdminListAddItemForm() {
           onChangeMinPriceDollars={setItemMinPriceDollars}
           onChangeGoodsServicesCostDollars={setItemGoodsServicesCostDollars}
           onChangeStorefrontDescription={setStorefrontDescription}
+        />
+        <AdminCatalogItemSizeExampleFields
+          sizeExampleImageUrl={itemSizeExampleImageUrl}
+          onChangeSizeExampleImageUrl={setItemSizeExampleImageUrl}
         />
         <AdminCatalogArtworkRequirementFields
           imageRequirementLabel={itemImageRequirementLabel}

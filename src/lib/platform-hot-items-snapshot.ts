@@ -7,7 +7,7 @@ import {
   type HotItemListing,
 } from "@/lib/platform-all-page-featured";
 import { PLATFORM_ALL_PAGE_FEATURED_LIMIT } from "@/lib/platform-all-page-featured-constants";
-import { productCardProductFromListing } from "@/lib/shop-listing-product";
+import { productCardProductsFromListings } from "@/lib/shop-listing-product";
 import {
   marketplaceAggregatedListingWhere,
   storefrontShopListingWhere,
@@ -24,8 +24,8 @@ function parseListingIdsOrdered(raw: unknown): string[] {
   return out;
 }
 
-function hotItemsProductsFromListings(listings: HotItemListing[]): ProductCardProduct[] {
-  return listings.map((l) => productCardProductFromListing(l));
+async function hotItemsProductsFromListings(listings: HotItemListing[]): Promise<ProductCardProduct[]> {
+  return productCardProductsFromListings(listings);
 }
 
 async function hydrateHotItemsFromSnapshotIds(
@@ -53,7 +53,7 @@ async function hydrateHotItemsFromSnapshotIds(
     if (l) ordered.push(l);
   }
 
-  return hotItemsProductsFromListings(ordered);
+  return await hotItemsProductsFromListings(ordered);
 }
 
 /** Live listings from the official Still Wet shop when snapshot ranking is empty. */
@@ -77,7 +77,7 @@ export async function loadPlatformHotItemsStillwetShopFallback(): Promise<
     include: hotItemsListingInclude,
   });
 
-  return hotItemsProductsFromListings(listings);
+  return await hotItemsProductsFromListings(listings);
 }
 
 /**

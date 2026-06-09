@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { uniqueImageUrlsOrdered } from "@/lib/product-media";
+import { catalogImageUrlKey, uniqueImageUrlsOrdered } from "@/lib/product-media";
 
 export { PRODUCT_HERO_GALLERY_WRAP_CLASS } from "@/lib/product-image-gallery-constants";
 
@@ -11,9 +11,16 @@ type Props = {
   resetKey?: string;
   /** e.g. variant mockup URL — must already be in `images` to select it; otherwise main falls back to first image. */
   preferMainSrc?: string | null;
+  /** Admin catalog item reference photo — caption when shown as main image. */
+  sizeReferenceImageUrl?: string | null;
 };
 
-export function ProductImageGallery({ images, resetKey, preferMainSrc }: Props) {
+export function ProductImageGallery({
+  images,
+  resetKey,
+  preferMainSrc,
+  sizeReferenceImageUrl,
+}: Props) {
   const imagesFingerprint = useMemo(() => images.join("\u001f"), [images]);
   const list = useMemo(
     () => uniqueImageUrlsOrdered(images),
@@ -40,6 +47,11 @@ export function ProductImageGallery({ images, resetKey, preferMainSrc }: Props) 
   }, [list.length, mainIndex]);
 
   const main = list[mainIndex] ?? list[0];
+  const referenceKey = sizeReferenceImageUrl?.trim()
+    ? catalogImageUrlKey(sizeReferenceImageUrl.trim())
+    : "";
+  const showSizeReferenceCaption =
+    Boolean(referenceKey && main && catalogImageUrlKey(main) === referenceKey);
 
   return (
     <>
@@ -57,6 +69,11 @@ export function ProductImageGallery({ images, resetKey, preferMainSrc }: Props) 
           </div>
         )}
       </div>
+      {showSizeReferenceCaption ? (
+        <p className="mt-2 text-center text-[11px] font-semibold uppercase tracking-wide text-zinc-400 sm:text-xs">
+          FOR SIZE REFERENCE
+        </p>
+      ) : null}
       {list.length > 1 ? (
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] justify-items-center gap-2 sm:grid-cols-[repeat(auto-fill,minmax(6rem,1fr))]">
           {list.map((src, i) => (

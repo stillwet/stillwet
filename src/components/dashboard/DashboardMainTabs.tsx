@@ -37,9 +37,7 @@ import {
   DashboardListingStorefrontBlurbForm,
   DashboardListingSearchKeywordsForm,
   DashboardListingPriceForm,
-  DashboardListingSupplementPhotoForm,
   DashboardSubmitListingRequestForm,
-  ListingEmbeddedSupplementCatalogPair,
   ListingStorefrontCatalogImagesForms,
   PaidOrderShopProfitHelp,
 } from "@/components/dashboard/DashboardListingForms";
@@ -404,12 +402,14 @@ function buildListingDerived(
     listing.active &&
     !listing.creatorRemovedFromShopAt &&
     !listing.adminRemovedFromShopAt;
-  const showOwnerSupplementSection =
+  const showStorefrontImageTools =
     !isPlatform &&
     listing.requestStatus === ListingRequestStatus.approved &&
     listing.creatorRemovedFromShopAt == null;
-  const canEditOwnerSupplement =
-    showOwnerSupplementSection && listing.adminRemovedFromShopAt == null;
+  const canEditStorefrontImages =
+    showStorefrontImageTools && listing.adminRemovedFromShopAt == null;
+  /** Printify mockup subset picker on the public PDP. */
+  const showCatalogImagePicker = canEditStorefrontImages;
   const catalogUrls = productImageUrlsUnionHero({
     imageUrl: listing.product.imageUrl,
     imageGallery: listing.product.imageGallery,
@@ -417,8 +417,6 @@ function buildListingDerived(
   const savedCatalogSelection = parseListingStorefrontCatalogImageSelection(
     listing.listingStorefrontCatalogImageUrls,
   );
-  /** Catalog image toggles (or a single-line note when only one hero image exists). */
-  const showCatalogImagePicker = showOwnerSupplementSection && canEditOwnerSupplement;
 
   return {
     minLabel,
@@ -433,8 +431,6 @@ function buildListingDerived(
     freeSlotCap,
     dashboardBadge,
     canRemoveFromShop,
-    showOwnerSupplementSection,
-    canEditOwnerSupplement,
     catalogUrls,
     savedCatalogSelection,
     showCatalogImagePicker,
@@ -483,14 +479,10 @@ function ListingOptionPanel({
     imagesDefault,
     feeCents,
     canRemoveFromShop,
-    showOwnerSupplementSection,
-    canEditOwnerSupplement,
     catalogUrls,
     savedCatalogSelection,
     showCatalogImagePicker,
   } = d;
-  const embeddedSupplementCatalogPair =
-    showOwnerSupplementSection && showCatalogImagePicker && catalogUrls.length > 0;
 
   return (
     <div className={stacked ? "mt-4 border-t border-zinc-800/80 pt-4" : ""}>
@@ -503,66 +495,15 @@ function ListingOptionPanel({
         </p>
       ) : null}
 
-      {showOwnerSupplementSection && listing.adminListingSecondaryImageUrl ? (
+      {showCatalogImagePicker ? (
         <div className="mt-4 border-t border-zinc-800 pt-4">
-          <p className="text-xs font-medium text-zinc-500">Platform listing photo</p>
-          <p className="mt-1 text-[11px] text-zinc-600">
-            Added by the platform. It shows on your public listing with the main product images — you cannot remove it
-            here.
-          </p>
-          <div className="mt-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={listing.adminListingSecondaryImageUrl}
-              alt=""
-              className="h-24 w-24 rounded border border-zinc-700 object-cover"
-            />
-          </div>
-        </div>
-      ) : null}
-      {showOwnerSupplementSection || showCatalogImagePicker ? (
-        <div className="mt-4 border-t border-zinc-800 pt-4">
-          {embeddedSupplementCatalogPair ? (
-            <ListingEmbeddedSupplementCatalogPair
-              key={listing.id}
-              listingId={listing.id}
-              ownerSupplementImageUrl={listing.ownerSupplementImageUrl?.trim() ?? ""}
-              ownerSupplementPendingImageUrl={listing.ownerSupplementPendingImageUrl?.trim() ?? ""}
-              catalogUrls={catalogUrls}
-              savedCatalogSelection={savedCatalogSelection}
-              canEdit={canEditOwnerSupplement}
-              r2Configured={r2Configured}
-            />
-          ) : (
-            <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:gap-8">
-              {showOwnerSupplementSection ? (
-                <div className="flex h-full min-h-0 min-w-0 flex-1 basis-0 flex-col">
-                  <DashboardListingSupplementPhotoForm
-                    embedded
-                    listingId={listing.id}
-                    ownerSupplementImageUrl={listing.ownerSupplementImageUrl}
-                    ownerSupplementPendingImageUrl={listing.ownerSupplementPendingImageUrl}
-                    ownerSupplementPendingSubmittedAtIso={
-                      listing.ownerSupplementPendingSubmittedAtIso
-                    }
-                    r2Configured={r2Configured}
-                    canEdit={canEditOwnerSupplement}
-                  />
-                </div>
-              ) : null}
-              {showCatalogImagePicker ? (
-                <div className="flex h-full min-h-0 min-w-0 flex-1 basis-0 flex-col">
-                  <ListingStorefrontCatalogImagesForms
-                    embedded
-                    key={listing.id}
-                    listingId={listing.id}
-                    catalogUrls={catalogUrls}
-                    savedCatalogSelection={savedCatalogSelection}
-                  />
-                </div>
-              ) : null}
-            </div>
-          )}
+          <ListingStorefrontCatalogImagesForms
+            embedded
+            key={listing.id}
+            listingId={listing.id}
+            catalogUrls={catalogUrls}
+            savedCatalogSelection={savedCatalogSelection}
+          />
         </div>
       ) : null}
 
@@ -798,8 +739,6 @@ function ListingCard({
   const compactTitle = (listing.requestItemName?.trim() || listing.product.name).trim() || "Listing";
   const heroUrl =
     productPrimaryImageForShopListing(listing.product, {
-      adminListingSecondaryImageUrl: listing.adminListingSecondaryImageUrl,
-      ownerSupplementImageUrl: listing.ownerSupplementImageUrl,
       listingStorefrontCatalogImageUrls: parseListingStorefrontCatalogImageSelection(
         listing.listingStorefrontCatalogImageUrls,
       ),

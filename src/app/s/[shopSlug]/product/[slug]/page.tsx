@@ -42,8 +42,7 @@ export default async function ShopTenantProductPage({ params }: Props) {
         product={detail.product}
         variant="page"
         tenant={detail.tenant}
-        adminListingSecondaryImageUrl={detail.adminListingSecondaryImageUrl}
-        ownerSupplementImageUrl={detail.ownerSupplementImageUrl}
+        adminCatalogSizeExampleImageUrl={detail.adminCatalogSizeExampleImageUrl}
         listingStorefrontCatalogImageUrls={detail.listingStorefrontCatalogImageUrls}
         adminCatalogStorefrontDescription={detail.adminCatalogStorefrontDescription}
         listingItemName={detail.listingItemName}

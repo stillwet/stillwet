@@ -9,6 +9,14 @@ const securityHeaders: { key: string; value: string }[] = [
 
 const nextConfig: NextConfig = {
   /**
+   * Lets Next.js detect client/server version skew after deploy (avoids "Server Action not found"
+   * when an old tab calls actions from a previous build). Vercel sets VERCEL_GIT_COMMIT_SHA at build.
+   */
+  deploymentId:
+    process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
+    process.env.DEPLOYMENT_VERSION?.trim() ||
+    undefined,
+  /**
    * Next 16 defaults `experimental.lockDistDir` to true: it acquires a native lock under
    * `.next/lock` before `cleanDistDir`. On Vercel that can fail with
    * `ENOENT: lstat '.next/lock'` (single isolated build per machine — locking is unnecessary).
@@ -56,7 +64,13 @@ const nextConfig: NextConfig = {
         },
       );
     }
-    return [{ source: "/:path*", headers }];
+    return [
+      { source: "/:path*", headers },
+      {
+        source: "/admin/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
+      },
+    ];
   },
   async redirects() {
     return [
