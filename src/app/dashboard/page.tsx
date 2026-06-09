@@ -27,6 +27,7 @@ import {
 } from "@/components/dashboard/DashboardDeferredTabsIsland";
 import { ListingSubmittedFlashBanner } from "@/components/dashboard/ListingSubmittedFlashBanner";
 import { ShopSignupWelcomeConfetti } from "@/components/dashboard/ShopSignupWelcomeConfetti";
+import { StripeOnboardingCompleteCelebration } from "@/components/dashboard/StripeOnboardingCompleteCelebration";
 import { DashboardTabsSuspenseFallback } from "./DashboardPageSuspenseFallback";
 import { DASHBOARD_MAIN_SHELL_CLASS } from "@/lib/dashboard-layout";
 import { scopesForInitialTab } from "@/lib/dashboard-scoped-data";
@@ -104,6 +105,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const sp = await searchParams;
   const connect = typeof sp.connect === "string" ? sp.connect : undefined;
+  const onboardingCompleteFlash = sp.onboardingComplete === "1";
   const connectReason =
     typeof sp.reason === "string" ? sp.reason : Array.isArray(sp.reason) ? sp.reason[0] : undefined;
   const fee = typeof sp.fee === "string" ? sp.fee : undefined;
@@ -313,7 +315,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       connect === "refresh" ||
       (connect === "err" && connectReason === "stripe_link"))
   ) {
-    const qs = dashboardSearchParamsWithoutConnectQuery(sp);
+    const p = new URLSearchParams(dashboardSearchParamsWithoutConnectQuery(sp));
+    if (connect === "return" && incompleteSetupCount === 0) {
+      p.set("onboardingComplete", "1");
+    }
+    const qs = p.toString();
     redirect(qs ? `/dashboard?${qs}` : "/dashboard");
   }
 
@@ -412,6 +418,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     ? {
         setupTabsKey,
         incompleteSetupCount,
+        onboardingCompleteFlash,
         steps: setupSteps,
         shopPanel: {
           shopSlug: shop.slug,
@@ -487,6 +494,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       <Suspense fallback={null}>
         <ShopSignupWelcomeConfetti />
+        <StripeOnboardingCompleteCelebration />
         <ListingSubmittedFlashBanner />
       </Suspense>
       {fee === "ok" ? (

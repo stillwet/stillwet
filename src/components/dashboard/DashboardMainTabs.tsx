@@ -121,6 +121,7 @@ export type DashboardSetupPanelProps = {
   extendedCatalogGroups: ShopSetupCatalogGroup[];
   steps: ShopSetupSteps;
   incompleteSetupCount: number;
+  onboardingCompleteFlash?: boolean;
   r2Configured: boolean;
   listingPickerDiagnostics?: { adminCatalogItemCount: number };
   /** When the next listing request needs a listing credit from the bonus pool. */
@@ -1710,6 +1711,9 @@ export function DashboardMainTabs(props: {
               stripePublishableKey={stripePublishableKey}
               mockListingFeeCheckout={mockListingFeeCheckout}
               moderationPhrases={effectiveModerationPhrases}
+              onboardingComplete={
+                setup.incompleteSetupCount === 0 || Boolean(setup.onboardingCompleteFlash)
+              }
               embedded
             />
           ) : null}

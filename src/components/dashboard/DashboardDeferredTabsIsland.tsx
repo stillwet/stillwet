@@ -18,6 +18,8 @@ import type { DashboardShopAccountPayload } from "@/components/dashboard/Dashboa
 export type CreatorDashboardSetupPayload = {
   setupTabsKey: string;
   incompleteSetupCount: number;
+  /** `?onboardingComplete=1` flash (dev preview or Stripe return). */
+  onboardingCompleteFlash?: boolean;
   steps: ShopSetupSteps;
   shopPanel: ShopSetupShopPayload;
   itemGuidelinesAcknowledged: boolean;
@@ -94,6 +96,7 @@ function buildDashboardMainTabsProps(
             extendedCatalogGroups,
             steps: creatorSetup.steps,
             incompleteSetupCount: creatorSetup.incompleteSetupCount,
+            onboardingCompleteFlash: creatorSetup.onboardingCompleteFlash,
             r2Configured: isR2UploadConfigured(),
             listingPickerDiagnostics: {
               adminCatalogItemCount: 0,

@@ -102,6 +102,27 @@ function ProfileAutoSaveStatus({
   );
 }
 
+function OnboardingCompleteCheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <circle cx="12" cy="12" r="9" className="fill-current" />
+      <path
+        d="m8.5 12 2 2 5-5"
+        className="stroke-black"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function ProfilePhotoPencilIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -154,6 +175,8 @@ export function ShopProfileSetupPanel(props: {
   /** When true, used inside dashboard tab panel (no top margin). */
   embedded?: boolean;
   moderationPhrases?: readonly string[];
+  /** All shop onboarding checklist steps finished. */
+  onboardingComplete?: boolean;
 }) {
   const {
     shop,
@@ -162,6 +185,7 @@ export function ShopProfileSetupPanel(props: {
     mockListingFeeCheckout = false,
     embedded = false,
     moderationPhrases = [],
+    onboardingComplete = false,
   } = props;
 
   const router = useRouter();
@@ -442,6 +466,13 @@ export function ShopProfileSetupPanel(props: {
             ) : null}
           </div>
         </div>
+
+        {onboardingComplete ? (
+          <p className="flex items-center gap-1.5 border-t border-zinc-800/60 pt-2.5 text-[11px] text-zinc-500">
+            <OnboardingCompleteCheckIcon className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+            <span>Onboarding complete</span>
+          </p>
+        ) : null}
 
         {!profileImageUrl ? (
           <div className="border-t border-zinc-800/80 pt-3">
