@@ -26,9 +26,19 @@ const adminCatalogSelect = {
   },
 } as const;
 
-/** Admin baseline rows for shop dashboard catalog. */
+/** Admin baseline rows for shop dashboard catalog (standard items only). */
 export async function loadAdminBaselineCatalogRows(): Promise<AdminBaselineRow[]> {
   return prisma.adminCatalogItem.findMany({
+    where: { itemSecretMenuOnly: false },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    select: adminCatalogSelect,
+  });
+}
+
+/** Secret-menu catalog rows for shops with admin-granted access. */
+export async function loadAdminSecretMenuCatalogRows(): Promise<AdminBaselineRow[]> {
+  return prisma.adminCatalogItem.findMany({
+    where: { itemSecretMenuOnly: true },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     select: adminCatalogSelect,
   });
@@ -97,8 +107,10 @@ export type AdminListTabCatalogItem = Awaited<
 >[number];
 
 /** Admin → List tab rows. */
-export async function loadAdminCatalogItemsForListTab() {
+export async function loadAdminCatalogItemsForListTab(options?: { secretMenuOnly?: boolean }) {
+  const secretMenuOnly = options?.secretMenuOnly ?? false;
   return prisma.adminCatalogItem.findMany({
+    where: { itemSecretMenuOnly: secretMenuOnly },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     select: adminListItemSelect,
   });

@@ -129,10 +129,12 @@ export function AdminListItemsPanel({
   items,
   allTags,
   r2Configured = false,
+  secretMenuCatalog = false,
 }: {
   items: AdminListItemSerializable[];
   allTags: AdminListTagOption[];
   r2Configured?: boolean;
+  secretMenuCatalog?: boolean;
 }) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -197,6 +199,7 @@ export function AdminListItemsPanel({
           allTags={allTags}
           onCancel={cancelEdit}
           r2Configured={r2Configured}
+          secretMenuCatalog={secretMenuCatalog}
         />
       ) : null}
 

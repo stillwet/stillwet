@@ -18,7 +18,7 @@ import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItem
 import { AdminCatalogItemSizeExampleFields } from "@/components/admin/AdminCatalogItemSizeExampleFields";
 import { parseAdminCatalogItemArtworkForm, validateItemLevelWhenNoVariants } from "@/lib/admin-catalog-item";
 
-export function AdminListAddItemForm() {
+export function AdminListAddItemForm({ secretMenuCatalog = false }: { secretMenuCatalog?: boolean }) {
   const router = useRouter();
   const [itemName, setItemName] = useState("");
   const [storefrontDescription, setStorefrontDescription] = useState("");
@@ -113,6 +113,9 @@ export function AdminListAddItemForm() {
     fd.set("itemArtworkSourceTierOverride", itemArtworkSourceTierOverride);
     fd.set("itemCanvasPresentationPreset", itemCanvasPresentationPreset);
     fd.set("itemArtworkTemplatePreset", itemArtworkTemplatePreset);
+    if (secretMenuCatalog) {
+      fd.set("itemSecretMenuOnly", "1");
+    }
     startTransition(() => {
       saveAction(fd);
     });
@@ -134,7 +137,9 @@ export function AdminListAddItemForm() {
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">List item</h3>
+            <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              {secretMenuCatalog ? "Secret menu item" : "List item"}
+            </h3>
             <button
               type="button"
               onClick={() => {

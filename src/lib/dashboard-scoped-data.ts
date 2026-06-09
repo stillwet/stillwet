@@ -22,7 +22,14 @@ import {
 } from "@/lib/r2-upload";
 import { ensureBaselineAdminCatalogIfEmpty } from "@/lib/seed-baseline-admin-catalog";
 import { buildShopBaselineCatalogGroups } from "@/lib/shop-baseline-catalog";
-import { loadAdminBaselineCatalogRows } from "@/lib/admin-baseline-catalog-rows";
+import {
+  loadAdminBaselineCatalogRows,
+  loadAdminSecretMenuCatalogRows,
+} from "@/lib/admin-baseline-catalog-rows";
+import {
+  shopHasSecretMenuAccess,
+  sortExtendedCatalogGroups,
+} from "@/lib/secret-menu-catalog";
 import { listingRejectionReasonTextForCard, resolveListingRejectionNoticeBody } from "@/lib/shop-listing-rejection-notice";
 import {
   resolveCatalogPrefillFromBaselinePickEncoded,
@@ -673,6 +680,7 @@ export async function loadDashboardScopedChunks(
   supportChat: DashboardSupportChatPayload | null;
   requestListingCatalog: {
     catalogGroups: ShopSetupCatalogGroup[];
+    extendedCatalogGroups: ShopSetupCatalogGroup[];
     draftListingRequestPrefill: DraftListingRequestPrefillPayload | null;
     adminCatalogItemCount: number;
     unpaidPublicationFeeListings: UnpaidPublicationFeeListingRow[];
@@ -704,6 +712,7 @@ export async function loadDashboardScopedChunks(
     supportChat: null as DashboardSupportChatPayload | null,
     requestListingCatalog: null as {
       catalogGroups: ShopSetupCatalogGroup[];
+      extendedCatalogGroups: ShopSetupCatalogGroup[];
       draftListingRequestPrefill: DraftListingRequestPrefillPayload | null;
       adminCatalogItemCount: number;
       unpaidPublicationFeeListings: UnpaidPublicationFeeListingRow[];
@@ -912,6 +921,7 @@ export async function loadDashboardScopedChunks(
     })(),
     (async (): Promise<{
       catalogGroups: ShopSetupCatalogGroup[];
+      extendedCatalogGroups: ShopSetupCatalogGroup[];
       draftListingRequestPrefill: DraftListingRequestPrefillPayload | null;
       adminCatalogItemCount: number;
       unpaidPublicationFeeListings: UnpaidPublicationFeeListingRow[];
@@ -923,6 +933,26 @@ export async function loadDashboardScopedChunks(
             ? adminCatalogRows
             : await loadAdminBaselineCatalogRows();
         const catalogGroups = buildShopBaselineCatalogGroups(rows);
+
+        const shopRow = await prisma.shop.findUnique({
+          where: { id: shopId },
+          select: {
+            slug: true,
+            listingFeeBonusFreeSlots: true,
+            secretMenuAccessGrantedAt: true,
+          },
+        });
+
+        let extendedCatalogGroups: ShopSetupCatalogGroup[] = [];
+        let secretRows: Awaited<ReturnType<typeof loadAdminSecretMenuCatalogRows>> = [];
+        if (shopRow && shopHasSecretMenuAccess(shopRow)) {
+          secretRows = await loadAdminSecretMenuCatalogRows();
+          extendedCatalogGroups = sortExtendedCatalogGroups(
+            buildShopBaselineCatalogGroups(secretRows),
+          );
+        }
+
+        const prefillRows = [...rows, ...secretRows];
 
         const draftListingForRequestPrefill = await prisma.shopListing.findFirst({
           where: {
@@ -936,14 +966,14 @@ export async function loadDashboardScopedChunks(
         });
 
         let draftListingRequestPrefill: DraftListingRequestPrefillPayload | null = null;
-        if (draftListingForRequestPrefill && rows.length > 0) {
+        if (draftListingForRequestPrefill && prefillRows.length > 0) {
           const encoded = draftListingForRequestPrefill.baselineCatalogPickEncoded?.trim();
           const fromEncoded = encoded
             ? resolveCatalogPrefillFromBaselinePickEncoded(
                 encoded,
                 draftListingForRequestPrefill.priceCents,
                 draftListingForRequestPrefill.requestItemName,
-                rows,
+                prefillRows,
               )
             : null;
           const resolved =
@@ -953,7 +983,7 @@ export async function loadDashboardScopedChunks(
               draftListingForRequestPrefill.product.slug,
               draftListingForRequestPrefill.priceCents,
               draftListingForRequestPrefill.requestItemName,
-              rows,
+              prefillRows,
             );
           if (resolved) {
             draftListingRequestPrefill = {
@@ -965,10 +995,6 @@ export async function loadDashboardScopedChunks(
           }
         }
 
-        const shopRow = await prisma.shop.findUnique({
-          where: { id: shopId },
-          select: { slug: true, listingFeeBonusFreeSlots: true },
-        });
         const [unpaidPublicationFeeListings, nonDraftListingCount] = await Promise.all([
           loadUnpaidPublicationFeeListings(prisma, shopId),
           prisma.shopListing.count({
@@ -983,8 +1009,9 @@ export async function loadDashboardScopedChunks(
 
         return {
           catalogGroups,
+          extendedCatalogGroups,
           draftListingRequestPrefill,
-          adminCatalogItemCount: rows.length,
+          adminCatalogItemCount: rows.length + secretRows.length,
           unpaidPublicationFeeListings,
           freeListingSlots,
         };

@@ -34,6 +34,7 @@ import {
   CATALOG_ARTWORK_SOURCE_TIER_GUIDANCE,
   CATALOG_ARTWORK_SOURCE_TIER_LABELS,
 } from "@/lib/listing-artwork-source-tier";
+import { SHOP_EXTENDED_CATALOG_SECTION_LABEL } from "@/lib/secret-menu-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
@@ -219,6 +220,8 @@ async function probeDashboardListingCount(): Promise<number | null> {
 
 export function ShopFirstListingRequestPanel(props: {
   catalogGroups: ShopSetupCatalogGroup[];
+  /** Admin-only extended catalog — shown as a third picker section when non-empty. */
+  extendedCatalogGroups?: ShopSetupCatalogGroup[];
   r2Configured: boolean;
   listingPickerDiagnostics?: { adminCatalogItemCount: number };
   draftListingRequestPrefill?: DraftListingRequestPrefillPayload | null;
@@ -239,6 +242,7 @@ export function ShopFirstListingRequestPanel(props: {
 }) {
   const {
     catalogGroups,
+    extendedCatalogGroups = [],
     r2Configured,
     listingPickerDiagnostics,
     draftListingRequestPrefill = null,
@@ -331,9 +335,15 @@ export function ShopFirstListingRequestPanel(props: {
   const shopAtInReviewListingLimit = shopInReviewListingRequestLimitReached(inReviewListingRequestCount);
   const feeConsentOk = !listingCreditConsentRequired || feeChargeConsentChecked;
 
+  const allCatalogGroups = useMemo(
+    () => [...catalogGroups, ...extendedCatalogGroups],
+    [catalogGroups, extendedCatalogGroups],
+  );
+  const hasCatalogItems = allCatalogGroups.length > 0;
+
   const catalogOptions = useMemo(
-    () => flattenShopBaselineCatalogGroups(catalogGroups),
-    [catalogGroups],
+    () => flattenShopBaselineCatalogGroups(allCatalogGroups),
+    [allCatalogGroups],
   );
 
   const catalogGroupsByTier = useMemo(
@@ -342,11 +352,11 @@ export function ShopFirstListingRequestPanel(props: {
   );
 
   const selectedCatalogGroup = useMemo(() => {
-    for (const g of catalogGroups) {
+    for (const g of allCatalogGroups) {
       if (g.option.productId === listingProductId) return g;
     }
     return null;
-  }, [catalogGroups, listingProductId]);
+  }, [allCatalogGroups, listingProductId]);
 
   const catalogArtworkSurfaces = selectedCatalogGroup?.option.artworkSurfaces ?? [];
   const isPillowItem = useMemo(
@@ -656,7 +666,7 @@ export function ShopFirstListingRequestPanel(props: {
     setListingSubmitArtworkFile(null);
     setSurfaceArtwork({});
     setActiveSurfaceId(() => {
-      for (const g of catalogGroups) {
+      for (const g of allCatalogGroups) {
         if (g.option.productId === listingProductId) {
           return g.option.artworkSurfaces[0]?.id ?? "front";
         }
@@ -684,7 +694,7 @@ export function ShopFirstListingRequestPanel(props: {
     setListingKeywordsModerationBlurError(null);
     setPillowDoubleSided(false);
     setPillowSidesMode("same");
-  }, [listingProductId, catalogGroups]);
+  }, [listingProductId, allCatalogGroups]);
 
   useEffect(() => {
     if (adminPillowDualSided) {
@@ -709,15 +719,15 @@ export function ShopFirstListingRequestPanel(props: {
   }, [draftListingRequestPrefill]);
 
   useEffect(() => {
-    if (!draftListingRequestPrefill || catalogGroups.length === 0) return;
+    if (!draftListingRequestPrefill || !hasCatalogItems) return;
     if (prefillAppliedListingIdRef.current === draftListingRequestPrefill.listingId) return;
     prefillAppliedListingIdRef.current = draftListingRequestPrefill.listingId;
     setListingProductId(draftListingRequestPrefill.catalogProductPick);
-  }, [draftListingRequestPrefill, catalogGroups.length]);
+  }, [draftListingRequestPrefill, hasCatalogItems]);
 
   useEffect(() => {
     const p = draftListingRequestPrefill;
-    if (!p || catalogGroups.length === 0) return;
+    if (!p || !hasCatalogItems) return;
     if (prefillAppliedListingIdRef.current !== p.listingId) return;
     if (listingProductId !== p.catalogProductPick) return;
     if (p.listingPriceDollars != null) {
@@ -728,7 +738,7 @@ export function ShopFirstListingRequestPanel(props: {
     setKeywordTokens(parseKeywordTokensFromStored(p.listingSearchKeywords));
     setKeywordDraft("");
     setKeywordDuplicateHint(null);
-  }, [draftListingRequestPrefill, catalogGroups.length, listingProductId]);
+  }, [draftListingRequestPrefill, hasCatalogItems, listingProductId]);
 
   const listingPriceMeetsMinimum = useMemo(() => {
     if (!listingProductId) return false;
@@ -985,7 +995,7 @@ export function ShopFirstListingRequestPanel(props: {
         mockListingFeeCheckout={mockListingFeeCheckout}
       />
 
-      {catalogGroups.length === 0 ? (
+      {!hasCatalogItems ? (
         <p className="text-xs text-amber-200/80">
           <strong className="text-amber-100/90">No items to add yet.</strong>{" "}
           {listingPickerDiagnostics ? (

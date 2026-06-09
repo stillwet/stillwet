@@ -14,6 +14,7 @@ import {
   AdminDashboardTabPanelFallback,
 } from "./admin-dashboard-tab-panel";
 import { AdminListTab } from "@/components/admin/AdminListTab";
+import { AdminSecretMenuTab } from "@/components/admin/AdminSecretMenuTab";
 import { AdminBetaTestersTabLoader } from "@/components/admin/AdminBetaTestersTabLoader";
 import { AdminWaivedShopFeesTabLoader } from "@/components/admin/AdminWaivedShopFeesTabLoader";
 import { AdminShopFlairsTabLoader } from "@/components/admin/AdminShopFlairsTabLoader";
@@ -120,6 +121,7 @@ async function AdminDashboardPageBody({
     "award-promotions",
     "free-listings",
     "admin-list",
+    "secret-menu",
     "printify",
     "flairs",
     "google-shopping",
@@ -245,7 +247,8 @@ async function AdminDashboardPageBody({
   // Baseline catalog seed only where the admin list / requests tab needs it — not every main visit.
   const needsBaselineCatalogSeed =
     inventoryTab === "requests" ||
-    (adminSection === "backend" && inventoryTab === "admin-list");
+    (adminSection === "backend" &&
+      (inventoryTab === "admin-list" || inventoryTab === "secret-menu"));
   const baselinePromise = needsBaselineCatalogSeed
     ? (async () => {
         try {
@@ -532,6 +535,18 @@ async function AdminDashboardPageBody({
             Admin list
           </Link>
           <Link
+            href={`${basePath}?tab=secret-menu`}
+            role="tab"
+            aria-selected={inventoryTab === "secret-menu"}
+            className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+              inventoryTab === "secret-menu"
+                ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+            }`}
+          >
+            Secret menu
+          </Link>
+          <Link
             href={`${basePath}?tab=printify`}
             role="tab"
             aria-selected={inventoryTab === "printify"}
@@ -670,6 +685,14 @@ async function AdminDashboardPageBody({
           ) : adminSection === "backend" && inventoryTab === "admin-list" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <AdminListTab />
+            </Suspense>
+          ) : adminSection === "backend" && inventoryTab === "secret-menu" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminSecretMenuTab
+                smErr={typeof sp.smErr === "string" ? sp.smErr : undefined}
+                smGranted={typeof sp.smGranted === "string" ? sp.smGranted : undefined}
+                smRevoked={typeof sp.smRevoked === "string" ? sp.smRevoked : undefined}
+              />
             </Suspense>
           ) : adminSection === "backend" && inventoryTab === "printify-api" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

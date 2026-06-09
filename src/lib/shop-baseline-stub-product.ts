@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Audience, FulfillmentType } from "@/generated/prisma/enums";
 import type { ParsedBaselinePick } from "@/lib/shop-baseline-catalog";
 import { computeBaselineStubSlug } from "@/lib/shop-baseline-stub-slug";
+import { shopHasSecretMenuAccess } from "@/lib/secret-menu-catalog";
 
 /** Picks that map to a single stub `Product` for a baseline listing request. */
 export type BaselineStubPick = Extract<ParsedBaselinePick, { mode: "item" } | { mode: "variant" }>;
@@ -38,6 +39,13 @@ export async function createBaselineStubProductForNewListing(
     where: { id: pick.itemId },
   });
   if (!row) return null;
+  if (row.itemSecretMenuOnly) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { secretMenuAccessGrantedAt: true },
+    });
+    if (!shop || !shopHasSecretMenuAccess(shop)) return null;
+  }
   const resolved = resolveBaselineAgainstItem(row);
   if (!resolved) return null;
 

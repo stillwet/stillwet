@@ -75,6 +75,7 @@ export type ShopMinAggregateOutputType = {
   betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt: Date | null
   betaTesterOnboardingCompletedAt: Date | null
+  secretMenuAccessGrantedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -112,6 +113,7 @@ export type ShopMaxAggregateOutputType = {
   betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt: Date | null
   betaTesterOnboardingCompletedAt: Date | null
+  secretMenuAccessGrantedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -154,6 +156,7 @@ export type ShopCountAggregateOutputType = {
   betaTesterOnboardingStatus: number
   betaTesterOnboardingCheckedAt: number
   betaTesterOnboardingCompletedAt: number
+  secretMenuAccessGrantedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -209,6 +212,7 @@ export type ShopMinAggregateInputType = {
   betaTesterOnboardingStatus?: true
   betaTesterOnboardingCheckedAt?: true
   betaTesterOnboardingCompletedAt?: true
+  secretMenuAccessGrantedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -246,6 +250,7 @@ export type ShopMaxAggregateInputType = {
   betaTesterOnboardingStatus?: true
   betaTesterOnboardingCheckedAt?: true
   betaTesterOnboardingCompletedAt?: true
+  secretMenuAccessGrantedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -288,6 +293,7 @@ export type ShopCountAggregateInputType = {
   betaTesterOnboardingStatus?: true
   betaTesterOnboardingCheckedAt?: true
   betaTesterOnboardingCompletedAt?: true
+  secretMenuAccessGrantedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -417,6 +423,7 @@ export type ShopGroupByOutputType = {
   betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt: Date | null
   betaTesterOnboardingCompletedAt: Date | null
+  secretMenuAccessGrantedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ShopCountAggregateOutputType | null
@@ -482,6 +489,7 @@ export type ShopWhereInput = {
   betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   homeFeaturedListing?: Prisma.XOR<Prisma.ShopListingNullableScalarRelationFilter, Prisma.ShopListingWhereInput> | null
@@ -547,6 +555,7 @@ export type ShopOrderByWithRelationInput = {
   betaTesterOnboardingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   betaTesterOnboardingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   betaTesterOnboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  secretMenuAccessGrantedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   homeFeaturedListing?: Prisma.ShopListingOrderByWithRelationInput
@@ -615,6 +624,7 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   homeFeaturedListing?: Prisma.XOR<Prisma.ShopListingNullableScalarRelationFilter, Prisma.ShopListingWhereInput> | null
@@ -680,6 +690,7 @@ export type ShopOrderByWithAggregationInput = {
   betaTesterOnboardingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   betaTesterOnboardingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   betaTesterOnboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  secretMenuAccessGrantedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ShopCountOrderByAggregateInput
@@ -730,6 +741,7 @@ export type ShopScalarWhereWithAggregatesInput = {
   betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableWithAggregatesFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
 }
@@ -770,6 +782,7 @@ export type ShopCreateInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -835,6 +848,7 @@ export type ShopUncheckedCreateInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -896,6 +910,7 @@ export type ShopUpdateInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -961,6 +976,7 @@ export type ShopUncheckedUpdateInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -1024,6 +1040,7 @@ export type ShopCreateManyInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1064,6 +1081,7 @@ export type ShopUpdateManyMutationInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1106,6 +1124,7 @@ export type ShopUncheckedUpdateManyInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1148,6 +1167,7 @@ export type ShopCountOrderByAggregateInput = {
   betaTesterOnboardingStatus?: Prisma.SortOrder
   betaTesterOnboardingCheckedAt?: Prisma.SortOrder
   betaTesterOnboardingCompletedAt?: Prisma.SortOrder
+  secretMenuAccessGrantedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1193,6 +1213,7 @@ export type ShopMaxOrderByAggregateInput = {
   betaTesterOnboardingStatus?: Prisma.SortOrder
   betaTesterOnboardingCheckedAt?: Prisma.SortOrder
   betaTesterOnboardingCompletedAt?: Prisma.SortOrder
+  secretMenuAccessGrantedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1230,6 +1251,7 @@ export type ShopMinOrderByAggregateInput = {
   betaTesterOnboardingStatus?: Prisma.SortOrder
   betaTesterOnboardingCheckedAt?: Prisma.SortOrder
   betaTesterOnboardingCompletedAt?: Prisma.SortOrder
+  secretMenuAccessGrantedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1692,6 +1714,7 @@ export type ShopCreateWithoutFlairTypeInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -1755,6 +1778,7 @@ export type ShopUncheckedCreateWithoutFlairTypeInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -1847,6 +1871,7 @@ export type ShopScalarWhereInput = {
   betaTesterOnboardingStatus?: Prisma.EnumBetaTesterOnboardingStatusNullableFilter<"Shop"> | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.DateTimeNullableFilter<"Shop"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
 }
@@ -1887,6 +1912,7 @@ export type ShopCreateWithoutFlairPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -1951,6 +1977,7 @@ export type ShopUncheckedCreateWithoutFlairPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2027,6 +2054,7 @@ export type ShopUpdateWithoutFlairPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2091,6 +2119,7 @@ export type ShopUncheckedUpdateWithoutFlairPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2151,6 +2180,7 @@ export type ShopCreateWithoutGoogleShoppingPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2215,6 +2245,7 @@ export type ShopUncheckedCreateWithoutGoogleShoppingPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2291,6 +2322,7 @@ export type ShopUpdateWithoutGoogleShoppingPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2355,6 +2387,7 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2415,6 +2448,7 @@ export type ShopCreateWithoutGoogleShoppingEnrollmentsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2479,6 +2513,7 @@ export type ShopUncheckedCreateWithoutGoogleShoppingEnrollmentsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2555,6 +2590,7 @@ export type ShopUpdateWithoutGoogleShoppingEnrollmentsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2619,6 +2655,7 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingEnrollmentsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2679,6 +2716,7 @@ export type ShopCreateWithoutPromotionsDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -2743,6 +2781,7 @@ export type ShopUncheckedCreateWithoutPromotionsDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -2819,6 +2858,7 @@ export type ShopUpdateWithoutPromotionsDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -2883,6 +2923,7 @@ export type ShopUncheckedUpdateWithoutPromotionsDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -2943,6 +2984,7 @@ export type ShopCreateWithoutSalesDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3007,6 +3049,7 @@ export type ShopUncheckedCreateWithoutSalesDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3083,6 +3126,7 @@ export type ShopUpdateWithoutSalesDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3147,6 +3191,7 @@ export type ShopUncheckedUpdateWithoutSalesDashboardSnapshotInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3207,6 +3252,7 @@ export type ShopCreateWithoutListingSlotPromoRedemptionsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3271,6 +3317,7 @@ export type ShopUncheckedCreateWithoutListingSlotPromoRedemptionsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3347,6 +3394,7 @@ export type ShopUpdateWithoutListingSlotPromoRedemptionsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3411,6 +3459,7 @@ export type ShopUncheckedUpdateWithoutListingSlotPromoRedemptionsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3471,6 +3520,7 @@ export type ShopCreateWithoutSupportThreadInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3535,6 +3585,7 @@ export type ShopUncheckedCreateWithoutSupportThreadInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3611,6 +3662,7 @@ export type ShopUpdateWithoutSupportThreadInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3675,6 +3727,7 @@ export type ShopUncheckedUpdateWithoutSupportThreadInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3735,6 +3788,7 @@ export type ShopCreateWithoutOwnerNoticesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -3799,6 +3853,7 @@ export type ShopUncheckedCreateWithoutOwnerNoticesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -3875,6 +3930,7 @@ export type ShopUpdateWithoutOwnerNoticesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -3939,6 +3995,7 @@ export type ShopUncheckedUpdateWithoutOwnerNoticesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -3999,6 +4056,7 @@ export type ShopCreateWithoutBugFeedbackReportsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4063,6 +4121,7 @@ export type ShopUncheckedCreateWithoutBugFeedbackReportsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4139,6 +4198,7 @@ export type ShopUpdateWithoutBugFeedbackReportsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -4203,6 +4263,7 @@ export type ShopUncheckedUpdateWithoutBugFeedbackReportsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -4263,6 +4324,7 @@ export type ShopCreateWithoutUsersInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4327,6 +4389,7 @@ export type ShopUncheckedCreateWithoutUsersInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
@@ -4403,6 +4466,7 @@ export type ShopUpdateWithoutUsersInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -4467,6 +4531,7 @@ export type ShopUncheckedUpdateWithoutUsersInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
@@ -4527,6 +4592,7 @@ export type ShopCreateWithoutListingsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -4591,6 +4657,7 @@ export type ShopUncheckedCreateWithoutListingsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4656,6 +4723,7 @@ export type ShopCreateWithoutHomeFeaturedListingInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
@@ -4719,6 +4787,7 @@ export type ShopUncheckedCreateWithoutHomeFeaturedListingInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -4796,6 +4865,7 @@ export type ShopUpdateWithoutListingsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -4860,6 +4930,7 @@ export type ShopUncheckedUpdateWithoutListingsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -4931,6 +5002,7 @@ export type ShopUpdateWithoutHomeFeaturedListingInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
@@ -4994,6 +5066,7 @@ export type ShopUncheckedUpdateWithoutHomeFeaturedListingInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5055,6 +5128,7 @@ export type ShopCreateWithoutPromotionPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5119,6 +5193,7 @@ export type ShopUncheckedCreateWithoutPromotionPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5195,6 +5270,7 @@ export type ShopUpdateWithoutPromotionPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5259,6 +5335,7 @@ export type ShopUncheckedUpdateWithoutPromotionPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5319,6 +5396,7 @@ export type ShopCreateWithoutPromotionCreditBalancesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5383,6 +5461,7 @@ export type ShopUncheckedCreateWithoutPromotionCreditBalancesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5459,6 +5538,7 @@ export type ShopUpdateWithoutPromotionCreditBalancesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5523,6 +5603,7 @@ export type ShopUncheckedUpdateWithoutPromotionCreditBalancesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5583,6 +5664,7 @@ export type ShopCreateWithoutAdminAwardGrantsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5647,6 +5729,7 @@ export type ShopUncheckedCreateWithoutAdminAwardGrantsInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5723,6 +5806,7 @@ export type ShopUpdateWithoutAdminAwardGrantsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -5787,6 +5871,7 @@ export type ShopUncheckedUpdateWithoutAdminAwardGrantsInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -5847,6 +5932,7 @@ export type ShopCreateWithoutListingCreditPackPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -5911,6 +5997,7 @@ export type ShopUncheckedCreateWithoutListingCreditPackPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -5987,6 +6074,7 @@ export type ShopUpdateWithoutListingCreditPackPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -6051,6 +6139,7 @@ export type ShopUncheckedUpdateWithoutListingCreditPackPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -6111,6 +6200,7 @@ export type ShopCreateWithoutSetupFeePurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -6175,6 +6265,7 @@ export type ShopUncheckedCreateWithoutSetupFeePurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -6251,6 +6342,7 @@ export type ShopUpdateWithoutSetupFeePurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -6315,6 +6407,7 @@ export type ShopUncheckedUpdateWithoutSetupFeePurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -6375,6 +6468,7 @@ export type ShopCreateWithoutReactivationPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -6439,6 +6533,7 @@ export type ShopUncheckedCreateWithoutReactivationPurchasesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -6515,6 +6610,7 @@ export type ShopUpdateWithoutReactivationPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -6579,6 +6675,7 @@ export type ShopUncheckedUpdateWithoutReactivationPurchasesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -6639,6 +6736,7 @@ export type ShopCreateWithoutCreatorGiftPurchasesReceivedInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -6703,6 +6801,7 @@ export type ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -6779,6 +6878,7 @@ export type ShopUpdateWithoutCreatorGiftPurchasesReceivedInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -6843,6 +6943,7 @@ export type ShopUncheckedUpdateWithoutCreatorGiftPurchasesReceivedInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -6903,6 +7004,7 @@ export type ShopCreateWithoutCreatorGiftCodesRedeemedInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -6967,6 +7069,7 @@ export type ShopUncheckedCreateWithoutCreatorGiftCodesRedeemedInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -7043,6 +7146,7 @@ export type ShopUpdateWithoutCreatorGiftCodesRedeemedInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -7107,6 +7211,7 @@ export type ShopUncheckedUpdateWithoutCreatorGiftCodesRedeemedInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -7167,6 +7272,7 @@ export type ShopCreateWithoutOrdersInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -7231,6 +7337,7 @@ export type ShopUncheckedCreateWithoutOrdersInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -7307,6 +7414,7 @@ export type ShopUpdateWithoutOrdersInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -7371,6 +7479,7 @@ export type ShopUncheckedUpdateWithoutOrdersInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -7431,6 +7540,7 @@ export type ShopCreateWithoutOrderLinesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
@@ -7495,6 +7605,7 @@ export type ShopUncheckedCreateWithoutOrderLinesInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
@@ -7571,6 +7682,7 @@ export type ShopUpdateWithoutOrderLinesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -7635,6 +7747,7 @@ export type ShopUncheckedUpdateWithoutOrderLinesInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -7696,6 +7809,7 @@ export type ShopCreateManyFlairTypeInput = {
   betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Date | string | null
   betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -7736,6 +7850,7 @@ export type ShopUpdateWithoutFlairTypeInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
@@ -7799,6 +7914,7 @@ export type ShopUncheckedUpdateWithoutFlairTypeInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
@@ -7861,6 +7977,7 @@ export type ShopUncheckedUpdateManyWithoutFlairTypeInput = {
   betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
   betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -8087,6 +8204,7 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   betaTesterOnboardingStatus?: boolean
   betaTesterOnboardingCheckedAt?: boolean
   betaTesterOnboardingCompletedAt?: boolean
+  secretMenuAccessGrantedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
@@ -8153,6 +8271,7 @@ export type ShopSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   betaTesterOnboardingStatus?: boolean
   betaTesterOnboardingCheckedAt?: boolean
   betaTesterOnboardingCompletedAt?: boolean
+  secretMenuAccessGrantedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
@@ -8197,6 +8316,7 @@ export type ShopSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   betaTesterOnboardingStatus?: boolean
   betaTesterOnboardingCheckedAt?: boolean
   betaTesterOnboardingCompletedAt?: boolean
+  secretMenuAccessGrantedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
@@ -8241,11 +8361,12 @@ export type ShopSelectScalar = {
   betaTesterOnboardingStatus?: boolean
   betaTesterOnboardingCheckedAt?: boolean
   betaTesterOnboardingCompletedAt?: boolean
+  secretMenuAccessGrantedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "displayName" | "profileImageUrl" | "bio" | "welcomeMessage" | "socialLinks" | "active" | "listedOnShopsBrowse" | "stripeConnectAccountId" | "connectChargesEnabled" | "payoutsEnabled" | "editorialPriority" | "editorialPinnedUntil" | "totalSalesCents" | "storefrontViewCount" | "ownerPausedShopAt" | "accountDeletionRequestedAt" | "accountDeletionEmailConfirmedAt" | "inactivityWarningSentAt" | "inactivityDeactivatedAt" | "adminFrozenAt" | "inactivityDeletionTriggeredAt" | "homeFeaturedListingId" | "itemGuidelinesAcknowledgedAt" | "listingFeeBonusFreeSlots" | "browseAllPageFeaturedProductIds" | "homeHotCarouselFeaturedProductIds" | "popularItemsFeaturedProductIds" | "browseShopsPageFeaturedShopIds" | "flairTypeId" | "flairPurchasedAt" | "googleShoppingCredits" | "betaTesterAt" | "betaTesterOnboardingStatus" | "betaTesterOnboardingCheckedAt" | "betaTesterOnboardingCompletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
+export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "displayName" | "profileImageUrl" | "bio" | "welcomeMessage" | "socialLinks" | "active" | "listedOnShopsBrowse" | "stripeConnectAccountId" | "connectChargesEnabled" | "payoutsEnabled" | "editorialPriority" | "editorialPinnedUntil" | "totalSalesCents" | "storefrontViewCount" | "ownerPausedShopAt" | "accountDeletionRequestedAt" | "accountDeletionEmailConfirmedAt" | "inactivityWarningSentAt" | "inactivityDeactivatedAt" | "adminFrozenAt" | "inactivityDeletionTriggeredAt" | "homeFeaturedListingId" | "itemGuidelinesAcknowledgedAt" | "listingFeeBonusFreeSlots" | "browseAllPageFeaturedProductIds" | "homeHotCarouselFeaturedProductIds" | "popularItemsFeaturedProductIds" | "browseShopsPageFeaturedShopIds" | "flairTypeId" | "flairPurchasedAt" | "googleShoppingCredits" | "betaTesterAt" | "betaTesterOnboardingStatus" | "betaTesterOnboardingCheckedAt" | "betaTesterOnboardingCompletedAt" | "secretMenuAccessGrantedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
 export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   homeFeaturedListing?: boolean | Prisma.Shop$homeFeaturedListingArgs<ExtArgs>
   users?: boolean | Prisma.Shop$usersArgs<ExtArgs>
@@ -8436,6 +8557,10 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     betaTesterOnboardingStatus: $Enums.BetaTesterOnboardingStatus | null
     betaTesterOnboardingCheckedAt: Date | null
     betaTesterOnboardingCompletedAt: Date | null
+    /**
+     * * Admin-granted access to extended catalog items (secret menu). Not surfaced in shop UI.
+     */
+    secretMenuAccessGrantedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["shop"]>
@@ -8921,6 +9046,7 @@ export interface ShopFieldRefs {
   readonly betaTesterOnboardingStatus: Prisma.FieldRef<"Shop", 'BetaTesterOnboardingStatus'>
   readonly betaTesterOnboardingCheckedAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly betaTesterOnboardingCompletedAt: Prisma.FieldRef<"Shop", 'DateTime'>
+  readonly secretMenuAccessGrantedAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Shop", 'DateTime'>
 }

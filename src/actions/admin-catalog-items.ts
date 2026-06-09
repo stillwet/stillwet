@@ -22,6 +22,7 @@ import {
   parseAdminCatalogCanvasPresentationPreset,
 } from "@/lib/admin-catalog-canvas-presentation";
 import { normalizeAdminCatalogImageUrl } from "@/lib/admin-catalog-reference-image";
+import { parseAdminCatalogItemSecretMenuOnlyForm } from "@/lib/secret-menu-catalog";
 
 const EMPTY_VARIANTS_JSON = [] as unknown as Prisma.InputJsonValue;
 
@@ -138,6 +139,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
   const storefrontDescription = storefrontDescriptionRaw.trim()
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
     : null;
+  const itemSecretMenuOnly = parseAdminCatalogItemSecretMenuOnlyForm(formData);
 
   const maxSort = await prisma.adminCatalogItem.aggregate({ _max: { sortOrder: true } });
   const sortOrder = (maxSort._max.sortOrder ?? 0) + 1;
@@ -168,6 +170,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
           itemLevel.itemArtworkTemplate === null
             ? Prisma.JsonNull
             : (itemLevel.itemArtworkTemplate as Prisma.InputJsonValue),
+        itemSecretMenuOnly,
       },
     });
   } catch (e) {
@@ -191,6 +194,7 @@ export async function adminUpdateCatalogItem(
   const storefrontDescription = storefrontDescriptionRaw.trim()
     ? storefrontDescriptionRaw.trim().slice(0, 10_000)
     : null;
+  const itemSecretMenuOnly = parseAdminCatalogItemSecretMenuOnlyForm(formData);
 
   try {
     await prisma.adminCatalogItem.update({
@@ -218,6 +222,7 @@ export async function adminUpdateCatalogItem(
           itemLevel.itemArtworkTemplate === null
             ? Prisma.JsonNull
             : (itemLevel.itemArtworkTemplate as Prisma.InputJsonValue),
+        itemSecretMenuOnly,
       },
     });
   } catch (e) {

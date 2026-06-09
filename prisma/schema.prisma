@@ -305,6 +305,8 @@ model Shop {
   betaTesterOnboardingStatus      BetaTesterOnboardingStatus?
   betaTesterOnboardingCheckedAt   DateTime?
   betaTesterOnboardingCompletedAt DateTime?
+  /** Admin-granted access to extended catalog items (secret menu). Not surfaced in shop UI. */
+  secretMenuAccessGrantedAt     DateTime?
   createdAt                      DateTime                       @default(now())
   updatedAt                      DateTime                       @updatedAt
 
@@ -1160,6 +1162,11 @@ model AdminCatalogItem {
    * requests may require one baked file per required surface.
    */
   itemArtworkTemplate Json?
+  /**
+   * When true, item appears only in the admin secret menu catalog and in listing pickers for shops
+   * with {@link Shop.secretMenuAccessGrantedAt} set.
+   */
+  itemSecretMenuOnly    Boolean @default(false)
   catalogTags           AdminCatalogItemTag[]
   returnClaims          OrderReturnClaim[]
   createdAt             DateTime @default(now())

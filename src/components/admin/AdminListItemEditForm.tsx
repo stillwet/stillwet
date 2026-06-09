@@ -58,11 +58,13 @@ export function AdminListItemEditForm({
   allTags,
   onCancel,
   r2Configured = false,
+  secretMenuCatalog = false,
 }: {
   item: AdminListItemSerializable;
   allTags: AdminListTagOption[];
   onCancel: () => void;
   r2Configured?: boolean;
+  secretMenuCatalog?: boolean;
 }) {
   const router = useRouter();
   const [editName, setEditName] = useState(item.name);
@@ -168,6 +170,9 @@ export function AdminListItemEditForm({
     fd.set("itemArtworkSourceTierOverride", editItemArtworkSourceTierOverride);
     fd.set("itemCanvasPresentationPreset", editCanvasPresentationPreset);
     fd.set("itemArtworkTemplatePreset", editArtworkTemplatePreset);
+    if (secretMenuCatalog) {
+      fd.set("itemSecretMenuOnly", "1");
+    }
     startTransition(() => {
       saveAction(fd);
     });

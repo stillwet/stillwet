@@ -218,6 +218,7 @@ export const ShopScalarFieldEnum = {
   betaTesterOnboardingStatus: 'betaTesterOnboardingStatus',
   betaTesterOnboardingCheckedAt: 'betaTesterOnboardingCheckedAt',
   betaTesterOnboardingCompletedAt: 'betaTesterOnboardingCompletedAt',
+  secretMenuAccessGrantedAt: 'secretMenuAccessGrantedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -799,6 +800,7 @@ export const AdminCatalogItemScalarFieldEnum = {
   itemArtworkSourceTierOverride: 'itemArtworkSourceTierOverride',
   itemCanvasPresentation: 'itemCanvasPresentation',
   itemArtworkTemplate: 'itemArtworkTemplate',
+  itemSecretMenuOnly: 'itemSecretMenuOnly',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
