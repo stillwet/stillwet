@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addToCart } from "@/actions/cart";
+import { useCloseProductModalOnAddToCart } from "@/components/product-modal-context";
 import { notifyCartHeaderChanged } from "@/lib/cart-header-sync-client";
 
 const ADDED_MS = 2200;
@@ -16,6 +17,7 @@ export function ProductAddToCartForm({
   shopSlug?: string;
 }) {
   const router = useRouter();
+  const closeProductModal = useCloseProductModalOnAddToCart();
   const [pending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -36,6 +38,10 @@ export function ProductAddToCartForm({
           if (!r.ok) return;
           notifyCartHeaderChanged();
           router.refresh();
+          if (closeProductModal) {
+            closeProductModal();
+            return;
+          }
           setAdded(true);
           if (timerRef.current) clearTimeout(timerRef.current);
           timerRef.current = setTimeout(() => setAdded(false), ADDED_MS);

@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ProductModalProvider } from "@/components/product-modal-context";
 
 export function ProductModalShell({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -40,7 +41,7 @@ export function ProductModalShell({ children }: { children: ReactNode }) {
           ×
         </button>
         <div className="store-product-modal-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-10 pr-14 sm:px-10 sm:pb-10 sm:pt-6 sm:pr-16">
-          {children}
+          <ProductModalProvider onClose={close}>{children}</ProductModalProvider>
         </div>
       </div>
     </div>
