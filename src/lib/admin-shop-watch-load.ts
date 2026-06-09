@@ -332,7 +332,6 @@ export async function loadAdminShopWatchSummaryRows(): Promise<ShopWatchRow[]> {
         id: true,
         shopId: true,
         listingFeePaidAt: true,
-        listingPublicationFeePaidCents: true,
       },
     }),
   ]);
@@ -350,7 +349,6 @@ export async function loadAdminShopWatchSummaryRows(): Promise<ShopWatchRow[]> {
   for (const row of paidOrdinalRows) {
     const shop = shopMetaById.get(row.shopId);
     if (!shop || !row.listingFeePaidAt) continue;
-    if (row.listingPublicationFeePaidCents === 0) continue;
     const ordinal = ordinalByListingId.get(row.id) ?? 1;
     const kind = listingFeeKindForShopWatch(
       shop.slug,

@@ -16,7 +16,7 @@ const ELIGIBLE_STATUSES: ListingRequestStatus[] = [
   ListingRequestStatus.approved,
 ];
 
-/** Draft / in-progress listings that still owe a paid publication fee (after free-slot waivers). */
+/** Draft / in-progress listings that still need listing credits (after free-slot waivers). */
 export async function loadUnpaidPublicationFeeListings(
   db: Pick<PrismaClient, "shop" | "shopListing">,
   shopId: string,

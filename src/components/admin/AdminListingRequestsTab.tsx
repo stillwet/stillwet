@@ -881,7 +881,7 @@ function ListingRequestCard({
           <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Admin listing images</p>
           <p className="text-xs text-zinc-500">
             Hero and optional second image (same as step 3). You can update the second image while this listing awaits
-            the publication fee.
+            listing credits from the shop.
           </p>
           <p className="text-xs text-zinc-500">
             <span className="font-medium text-zinc-400">Printify mapping</span> — product:{" "}
@@ -942,9 +942,9 @@ function ListingRequestCard({
             </p>
           ) : (
             <p className="text-xs text-zinc-500">
-              <span className="font-medium text-zinc-400">Awaiting publication fee</span> — listing{" "}
-              <span className="tabular-nums text-zinc-400">#{r.listingOrdinal}</span> requires payment before it can go
-              live. After the creator pays (or free-slot waiver applies), this row leaves Listing requests and you can
+              <span className="font-medium text-zinc-400">Awaiting listing credits</span> — listing{" "}
+              <span className="tabular-nums text-zinc-400">#{r.listingOrdinal}</span> needs credits before it can go
+              live. After the creator buys credits (or a free-slot waiver applies), this row leaves Listing requests and you can
               follow it under <span className="text-zinc-400">Shop Data</span>.
             </p>
           )}
@@ -1066,7 +1066,7 @@ export function AdminListingRequestsTab(props: {
           <p className="text-sm text-zinc-600">
             {tab === "new"
               ? "No new requests awaiting Printify setup or approval."
-              : "No approved listings waiting on a publication fee."}
+              : "No approved listings waiting on listing credits."}
           </p>
         )}
       </div>

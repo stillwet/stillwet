@@ -139,7 +139,7 @@ export const loadAdminBadgePlatformSales = unstable_cache(
     });
     return (
       salesBadgeCounts.itemsSoldCount +
-      salesBadgeCounts.publicationFeePaymentCount +
+      salesBadgeCounts.listingCreditPackPurchaseCount +
       salesBadgeCounts.promotionPurchaseCount
     );
   },

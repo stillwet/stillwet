@@ -27,7 +27,7 @@ import {
  * **When adding a new shop upgrades purchase type:**
  * 1. Add a `*PurchaseMerchandiseCents` helper below.
  * 2. Register in {@link aggregateShopUpgradesPlatformRevenue} under Listings or Promotions.
- * 3. Add a merged admin sales line in `loadMergedPlatformSalesLines`.
+ * 3. Add a merged admin sales line in `loadMergedPlatformSalesLines` (and filter category if new).
  * 4. If creator gifts can grant it, extend {@link giftedShopUpgradePurchaseWhere}.
  */
 export type ShopUpgradesPlatformRevenueTotals = {
@@ -113,7 +113,9 @@ function creatorGiftPromotionMerchandiseCents(row: CreatorGiftShopUpgradeRevenue
   return promotionPriceCentsForKind(row.promotionKind) * row.promotionCreditsGranted;
 }
 
-function creatorGiftNonListingShopUpgradeMerchandiseCents(row: CreatorGiftShopUpgradeRevenueRow): number {
+export function creatorGiftNonListingShopUpgradeMerchandiseCents(
+  row: CreatorGiftShopUpgradeRevenueRow,
+): number {
   const googlePack = row.googleShoppingCreditPackId
     ? googleShoppingCreditPackById(row.googleShoppingCreditPackId)
     : null;

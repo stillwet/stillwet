@@ -13,7 +13,6 @@ export const PLATFORM_TRANSACTION_PRODUCT = {
   gshop_listing_upgrade: "gshop_listing_upgrade",
   listing_credits: "listing_credits",
   shop_flair: "shop_flair",
-  listing_publication_fee: "listing_publication_fee",
 } as const;
 
 export type PlatformTransactionProduct =
@@ -30,7 +29,6 @@ const DISPLAY_NAMES: Record<PlatformTransactionProduct, string> = {
   gshop_listing_upgrade: "G-Shop Listing Upgrade",
   listing_credits: "Listing Credits",
   shop_flair: "Shop Flair",
-  listing_publication_fee: "Listing Publication Fee",
 };
 
 export function platformTransactionDisplayName(product: PlatformTransactionProduct): string {

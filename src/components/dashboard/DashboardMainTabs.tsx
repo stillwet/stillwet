@@ -18,7 +18,6 @@ import type { DashboardSupportChatPayload } from "@/lib/dashboard-scoped-data";
 import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums";
 import {
   dashboardCreatorRemoveListingFromShop,
-  dashboardPayListingFee,
 } from "@/actions/dashboard-marketplace";
 import {
   countListingRowsInReview,
@@ -135,7 +134,7 @@ export type DashboardSetupPanelProps = {
   inReviewListingRequestCount: number;
   /** Legacy — listing credits and upgrades are not gated on Connect readiness. */
   stripeConnectReadyForPaidListings: boolean;
-  /** Listings that owe a paid publication fee (shown on Request listing tab). */
+  /** Listings that still need listing credits (shown on Request listing tab). */
   unpaidPublicationFeeListings: UnpaidPublicationFeeListingRow[];
   freeListingSlots: FreeListingRequestSlotsSummary;
 };
@@ -500,7 +499,6 @@ function ListingOptionPanel({
   r2Configured,
   shopStripeConnectReadyForCharges,
   stripePublishableKey,
-  mockListingFeeCheckout,
   freeListingFooterNote = null,
   variantLabel,
   stacked,
@@ -514,7 +512,6 @@ function ListingOptionPanel({
   r2Configured: boolean;
   shopStripeConnectReadyForCharges: boolean;
   stripePublishableKey: string | null;
-  mockListingFeeCheckout: boolean;
   /** Shown bottom-left next to “Delete Listing” when expanded (e.g. free slot ordinal). */
   freeListingFooterNote?: string | null;
   /** When set (legacy grouped card), show per-option catalog line. */
@@ -572,28 +569,16 @@ function ListingOptionPanel({
           listing.requestStatus === ListingRequestStatus.submitted ||
           listing.requestStatus === ListingRequestStatus.images_ok ||
           listing.requestStatus === ListingRequestStatus.printify_item_created) ? (
-        mockListingFeeCheckout ? (
-          <form action={dashboardPayListingFee} className="mt-3">
-            <input type="hidden" name="listingId" value={listing.id} />
-            <button
-              type="submit"
-              className="rounded border border-blue-900/60 bg-blue-950/30 px-3 py-1.5 text-xs text-blue-200 hover:border-blue-700/60"
-            >
-              Apply listing credit (mock checkout)
-            </button>
-          </form>
-        ) : (
-          <p className="mt-3 rounded-lg border border-amber-900/45 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
-            This listing needs listing credits before you can submit or publish.{" "}
-            <Link
-              href="/dashboard?dash=requestListing"
-              className="text-amber-100 underline-offset-2 hover:underline"
-            >
-              Buy listing credits on the Request listing tab
-            </Link>
-            .
-          </p>
-        )
+        <p className="mt-3 rounded-lg border border-amber-900/45 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90">
+          This listing needs listing credits before you can submit or publish.{" "}
+          <Link
+            href="/dashboard?dash=requestListing"
+            className="text-amber-100 underline-offset-2 hover:underline"
+          >
+            Buy listing credits on the Request listing tab
+          </Link>
+          .
+        </p>
       ) : null}
 
       {canSubmit ? (
@@ -1059,7 +1044,6 @@ function ListingCard({
             r2Configured={r2Configured}
             shopStripeConnectReadyForCharges={shopStripeConnectReadyForCharges}
             stripePublishableKey={stripePublishableKey}
-            mockListingFeeCheckout={mockListingFeeCheckout}
             freeListingFooterNote={freeListingInline}
             onCloseExpanded={() => setExpanded(false)}
             shopAtInReviewListingLimit={shopAtInReviewListingLimit}

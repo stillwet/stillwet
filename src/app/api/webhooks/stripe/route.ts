@@ -10,51 +10,12 @@ import { OrderStatus } from "@/generated/prisma/enums";
 import { fulfillListingCreditPackPurchaseIfPending } from "@/lib/listing-credit-pack-fulfillment";
 import { fulfillShopFlairPurchaseIfPending } from "@/lib/shop-flair-fulfillment";
 import { fulfillShopGoogleShoppingPurchaseIfPending } from "@/lib/shop-google-shopping-fulfillment";
-import { fulfillListingFeeForShopListingIfUnpaid } from "@/lib/listing-fee-fulfillment";
 import { fulfillPromotionPurchasePaidIfPending } from "@/lib/promotion-fulfillment";
 import { fulfillShopSetupFeeCheckoutSession } from "@/lib/shop-setup-fee-fulfillment";
 import { fulfillCreatorGiftCheckoutSession } from "@/lib/creator-gift-fulfillment";
 import { fulfillShopReactivationCheckoutSession } from "@/lib/shop-reactivation-fulfillment";
 
 export const runtime = "nodejs";
-
-/**
- * Listing-fee Checkout Sessions (no `Order` row). Returns true when this event was handled here.
- */
-async function fulfillListingFeeCheckout(session: Stripe.Checkout.Session): Promise<boolean> {
-  if (session.metadata?.kind !== "listing_fee") return false;
-  const listingId = session.metadata.shopListingId;
-  if (!listingId || typeof listingId !== "string") return true;
-  const fromTotal =
-    typeof session.amount_total === "number" && Number.isFinite(session.amount_total)
-      ? session.amount_total
-      : undefined;
-  const fromMeta = session.metadata?.feeCents
-    ? parseInt(String(session.metadata.feeCents), 10)
-    : NaN;
-  const paidPublicationFeeCents =
-    fromTotal ??
-    (Number.isFinite(fromMeta) ? fromMeta : undefined);
-  await fulfillListingFeeForShopListingIfUnpaid(listingId, {
-    ...(paidPublicationFeeCents !== undefined
-      ? { paidPublicationFeeCents }
-      : {}),
-  });
-  return true;
-}
-
-async function fulfillListingFeePaymentIntent(pi: Stripe.PaymentIntent): Promise<boolean> {
-  if (pi.metadata?.kind !== "listing_fee") return false;
-  const listingId = pi.metadata.shopListingId;
-  if (!listingId || typeof listingId !== "string") return true;
-  if (pi.status !== "succeeded") return true;
-  const paidPublicationFeeCents =
-    typeof pi.amount === "number" && Number.isFinite(pi.amount) ? pi.amount : undefined;
-  await fulfillListingFeeForShopListingIfUnpaid(listingId, {
-    ...(paidPublicationFeeCents !== undefined ? { paidPublicationFeeCents } : {}),
-  });
-  return true;
-}
 
 async function fulfillListingCreditPackPaymentIntent(pi: Stripe.PaymentIntent): Promise<boolean> {
   if (pi.metadata?.kind !== "listing_credit_pack") return false;
@@ -251,10 +212,6 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const listingFee = await fulfillListingFeeCheckout(session);
-    if (listingFee) {
-      return NextResponse.json({ received: true });
-    }
     const promotionCheckout = await fulfillPromotionCheckoutSession(session);
     if (promotionCheckout) {
       return NextResponse.json({ received: true });
@@ -280,10 +237,6 @@ export async function POST(req: Request) {
 
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
-    const listingFee = await fulfillListingFeePaymentIntent(pi);
-    if (listingFee) {
-      return NextResponse.json({ received: true });
-    }
     const promo = await fulfillPromotionPaymentIntent(pi);
     if (promo) {
       return NextResponse.json({ received: true });

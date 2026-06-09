@@ -7,7 +7,6 @@ import { Prisma } from "@/generated/prisma/client";
 import { getShopOwnerSession } from "@/lib/session";
 import { getStripe } from "@/lib/stripe";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
-import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import {
   LISTING_REQUEST_IN_REVIEW_STATUSES,
   shopCanSubmitAnotherListingRequest,
@@ -33,10 +32,7 @@ import {
 import { notifyAdminCreatorRemovedListingFromShop } from "@/lib/admin-creator-removed-listing-inbox-notice";
 import { purgeShopListingR2Media } from "@/lib/shop-listing-r2-purge";
 import { compressShopListingSupplementPhotoWebp } from "@/lib/shop-setup-image";
-import { fulfillListingFeeForShopListingIfUnpaid } from "@/lib/listing-fee-fulfillment";
-import { ensureListingFeeStripeConnectNotice } from "@/lib/listing-fee-connect-notice";
 import { platformStripeConnectAccountCountryCode } from "@/lib/platform-checkout-limits";
-import { shopStripeConnectReadyForListingCharges } from "@/lib/shop-stripe-connect-gate";
 import { printifyVariantShopFloorCents } from "@/lib/listing-cart-price";
 import { listingCatalogUrlsForPersist } from "@/lib/product-media";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
@@ -499,169 +495,6 @@ export async function dashboardSubmitListingRequest(
     },
   });
   revalidatePath("/dashboard");
-  return { ok: true };
-}
-
-export async function dashboardPayListingFee(formData: FormData) {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) return;
-
-  const listingId = String(formData.get("listingId") ?? "").trim();
-  if (!listingId) return;
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id: listingId, shopId: shop.id },
-    select: {
-      id: true,
-      listingFeePaidAt: true,
-      requestStatus: true,
-      creatorRemovedFromShopAt: true,
-      adminRemovedFromShopAt: true,
-    },
-  });
-  if (!listing || listing.listingFeePaidAt) return;
-  if (listing.creatorRemovedFromShopAt != null) return;
-  if (listing.adminRemovedFromShopAt != null) return;
-
-  const canPayListingFee =
-    listing.requestStatus === ListingRequestStatus.draft ||
-    listing.requestStatus === ListingRequestStatus.approved ||
-    listing.requestStatus === ListingRequestStatus.submitted ||
-    listing.requestStatus === ListingRequestStatus.images_ok ||
-    listing.requestStatus === ListingRequestStatus.printify_item_created;
-  if (!canPayListingFee) return;
-
-  const ordinal = await getListingOrdinal(listingId, shop.id);
-  if (ordinal === null) return;
-  const feeCents = listingFeeCentsForOrdinal(ordinal, shop.slug, shop.listingFeeBonusFreeSlots ?? 0);
-
-  if (feeCents === 0) {
-    await fulfillListingFeeForShopListingIfUnpaid(listingId, {
-      paidPublicationFeeCents: 0,
-    });
-    redirect("/dashboard?fee=ok");
-  }
-
-  if (isMockCheckoutEnabled()) {
-    await fulfillListingFeeForShopListingIfUnpaid(listingId, {
-      paidPublicationFeeCents: feeCents,
-    });
-    redirect("/dashboard?fee=ok");
-  }
-
-  redirect("/dashboard?fee=err&reason=listing_credits_required");
-}
-
-export type StartListingFeePaymentIntentResult =
-  | { ok: true; clientSecret: string }
-  | { ok: false; error: string };
-
-export async function startListingFeePaymentIntent(
-  listingId: string,
-): Promise<StartListingFeePaymentIntentResult> {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) {
-    return { ok: false, error: "Not available for the platform catalog shop." };
-  }
-  const id = listingId.trim();
-  if (!id) return { ok: false, error: "Missing listing." };
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id, shopId: shop.id },
-    select: {
-      id: true,
-      listingFeePaidAt: true,
-      requestStatus: true,
-      creatorRemovedFromShopAt: true,
-      adminRemovedFromShopAt: true,
-    },
-  });
-  if (!listing) return { ok: false, error: "Listing not found." };
-  if (listing.listingFeePaidAt) return { ok: false, error: "This listing fee is already paid." };
-  if (listing.creatorRemovedFromShopAt != null || listing.adminRemovedFromShopAt != null) {
-    return { ok: false, error: "This listing cannot be charged." };
-  }
-
-  const canPayListingFee =
-    listing.requestStatus === ListingRequestStatus.draft ||
-    listing.requestStatus === ListingRequestStatus.approved ||
-    listing.requestStatus === ListingRequestStatus.submitted ||
-    listing.requestStatus === ListingRequestStatus.images_ok ||
-    listing.requestStatus === ListingRequestStatus.printify_item_created;
-  if (!canPayListingFee) {
-    return { ok: false, error: "Publication fees can only be paid for eligible listing rows." };
-  }
-
-  const ordinal = await getListingOrdinal(id, shop.id);
-  if (ordinal === null) return { ok: false, error: "Listing not found." };
-  const feeCents = listingFeeCentsForOrdinal(ordinal, shop.slug, shop.listingFeeBonusFreeSlots ?? 0);
-  if (feeCents <= 0) return { ok: false, error: "No publication fee is due for this listing." };
-
-  if (!isMockCheckoutEnabled()) {
-    return {
-      ok: false,
-      error:
-        "Per-listing card payment is no longer available. Buy a listing credit pack on the Request listing tab.",
-    };
-  }
-
-  return {
-    ok: false,
-    error: "Mock checkout is enabled — use the mock pay button instead of card entry.",
-  };
-}
-
-export type FinalizeListingFeePaymentIntentResult = { ok: true } | { ok: false; error: string };
-
-export async function finalizeListingFeePaymentIntent(
-  paymentIntentId: string,
-): Promise<FinalizeListingFeePaymentIntentResult> {
-  const user = await requireShopOwner();
-  const shop = user.shop;
-  if (shop.slug === PLATFORM_SHOP_SLUG) {
-    return { ok: false, error: "Not available for the platform catalog shop." };
-  }
-  const piId = paymentIntentId.trim();
-  if (!piId) return { ok: false, error: "Missing payment confirmation." };
-
-  const stripe = getStripe();
-  const pi = await stripe.paymentIntents.retrieve(piId);
-
-  if (pi.metadata?.kind !== "listing_fee") {
-    return { ok: false, error: "This payment is not a listing publication fee." };
-  }
-  const metaShopId = pi.metadata.shopId;
-  if (metaShopId && metaShopId !== shop.id) {
-    return { ok: false, error: "This payment does not belong to your shop." };
-  }
-
-  const listingId = pi.metadata.shopListingId;
-  if (!listingId) return { ok: false, error: "Invalid payment metadata." };
-
-  const listing = await prisma.shopListing.findFirst({
-    where: { id: listingId, shopId: shop.id },
-    select: { id: true, listingFeePaidAt: true },
-  });
-  if (!listing) return { ok: false, error: "Listing not found." };
-  if (listing.listingFeePaidAt) return { ok: true };
-
-  const ordinal = await getListingOrdinal(listingId, shop.id);
-  if (ordinal === null) return { ok: false, error: "Listing not found." };
-  const feeCents = listingFeeCentsForOrdinal(ordinal, shop.slug, shop.listingFeeBonusFreeSlots ?? 0);
-  if (feeCents <= 0) return { ok: false, error: "No fee is configured for this listing." };
-  if (pi.amount !== feeCents) {
-    return { ok: false, error: "Payment amount does not match the current publication fee." };
-  }
-
-  if (pi.status !== "succeeded") {
-    return { ok: false, error: `Payment is not complete yet (status: ${pi.status}).` };
-  }
-
-  await fulfillListingFeeForShopListingIfUnpaid(listingId, {
-    paidPublicationFeeCents: pi.amount,
-  });
   return { ok: true };
 }
 

@@ -8,21 +8,27 @@ import {
   OrderStatus,
   PromotionKind,
   PromotionPurchaseStatus,
+  ShopFlairPurchaseStatus,
+  ShopGoogleShoppingPurchaseStatus,
   ShopReactivationPurchaseStatus,
   ShopSetupFeePurchaseStatus,
 } from "@/generated/prisma/enums";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
 import { productHref } from "@/lib/marketplace-constants";
-import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
-import { SHOP_REACTIVATION_FEE_CENTS } from "@/lib/shop-inactivity-policy";
+import { SHOP_SETUP_FEE_CENTS, SHOP_SETUP_FEE_LABEL } from "@/lib/creator-gift-codes";
+import { SHOP_REACTIVATION_FEE_CENTS, SHOP_REACTIVATION_FEE_LABEL } from "@/lib/shop-inactivity-policy";
 import { checkoutTipProcessingSurchargeCents } from "@/lib/checkout-tip";
+import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
 import { promotionKindLabel } from "@/lib/promotions";
 import {
   aggregateShopUpgradesPlatformRevenue,
+  creatorGiftListingMerchandiseCents,
+  creatorGiftNonListingShopUpgradeMerchandiseCents,
   listingCreditPackPurchaseMerchandiseCents,
   promotionPurchaseMerchandiseCents,
   shopFlairPurchaseMerchandiseCents,
   shopGoogleShoppingPurchaseMerchandiseCents,
+  type CreatorGiftShopUpgradeRevenueRow,
 } from "@/lib/admin-platform-shop-upgrades-revenue";
 import {
   buyerPaymentProcessingFeeCents,
@@ -65,8 +71,47 @@ export type AdminPlatformSalesOrderLineRow = Prisma.OrderLineGetPayload<{
   include: typeof orderLineInclude;
 }>;
 
-/** Row filters: shop upgrades / merchandise order lines / support tips. */
-export type AdminPlatformSaleCategory = "listing" | "item" | "support" | "promotion";
+/** Row filters for the Platform sales lines table. */
+export type AdminPlatformSaleCategory =
+  | "listing"
+  | "item"
+  | "support"
+  | "promotion"
+  | "shop_creation";
+
+/** Platform checkout rows (not buyer merchandise lines). Merch / G/S columns show —. */
+export function isPlatformCheckoutMergedLine(l: AdminPlatformSalesMergedLine): boolean {
+  return l.kind !== "merchandise";
+}
+
+/** Shop display name for shop checkouts, otherwise the transaction email. */
+export function mergedLineTransactionPartyLabel(l: AdminPlatformSalesMergedLine): string {
+  if (l.kind === "merchandise") {
+    return l.buyer.email?.trim() || "—";
+  }
+  if (l.kind === "creator_gift_purchase") {
+    return l.transactionEmail?.trim() || "—";
+  }
+  const shopName = l.shop?.displayName?.trim();
+  if (shopName) return shopName;
+  return l.transactionEmail?.trim() || "—";
+}
+
+type PlatformCheckoutMergedLineBase = {
+  quantity: number;
+  unitPriceCents: number;
+  productName: string;
+  goodsServicesCostCents: number;
+  productionFeeCents: number;
+  platformCutCents: number;
+  shopCutCents: number;
+  stripeFeeCents: number;
+  order: { id: string; createdAt: Date };
+  shop: { displayName: string; slug: string } | null;
+  /** Checkout email when there is no purchasing shop row (gifts, pre-shop signup). */
+  transactionEmail: string | null;
+  itemHref: string | null;
+};
 
 export type AdminPlatformSalesMergedLine =
   | {
@@ -87,70 +132,46 @@ export type AdminPlatformSalesMergedLine =
       buyer: AdminPlatformSalesBuyer;
       itemHref: string | null;
     }
-  | {
-      kind: "listing_publication_fee";
-      platformSaleCategory: "listing";
-      id: string;
-      quantity: number;
-      unitPriceCents: number;
-      productName: string;
-      goodsServicesCostCents: number;
-      productionFeeCents: number;
-      platformCutCents: number;
-      shopCutCents: number;
-      stripeFeeCents: number;
-      order: { id: string; createdAt: Date };
-      shop: { displayName: string; slug: string } | null;
-      itemHref: string | null;
-    }
-  | {
+  | ({
       kind: "listing_credit_pack_purchase";
       platformSaleCategory: "listing";
       id: string;
-      quantity: number;
-      unitPriceCents: number;
-      productName: string;
-      goodsServicesCostCents: number;
-      productionFeeCents: number;
-      platformCutCents: number;
-      shopCutCents: number;
-      stripeFeeCents: number;
-      order: { id: string; createdAt: Date };
-      shop: { displayName: string; slug: string } | null;
-      itemHref: string | null;
-    }
-  | {
+    } & PlatformCheckoutMergedLineBase)
+  | ({
       kind: "support_tip";
       platformSaleCategory: "support";
       id: string;
-      quantity: number;
-      unitPriceCents: number;
-      productName: string;
-      goodsServicesCostCents: number;
-      productionFeeCents: number;
-      platformCutCents: number;
-      shopCutCents: number;
-      stripeFeeCents: number;
-      order: { id: string; createdAt: Date };
-      shop: null;
-      itemHref: string | null;
-    }
-  | {
+    } & PlatformCheckoutMergedLineBase)
+  | ({
       kind: "promotion_purchase";
       platformSaleCategory: "promotion";
       id: string;
-      quantity: number;
-      unitPriceCents: number;
-      productName: string;
-      goodsServicesCostCents: number;
-      productionFeeCents: number;
-      platformCutCents: number;
-      shopCutCents: number;
-      stripeFeeCents: number;
-      order: { id: string; createdAt: Date };
-      shop: { displayName: string; slug: string } | null;
-      itemHref: string | null;
-    };
+    } & PlatformCheckoutMergedLineBase)
+  | ({
+      kind: "shop_setup_fee_purchase";
+      platformSaleCategory: "shop_creation";
+      id: string;
+    } & PlatformCheckoutMergedLineBase)
+  | ({
+      kind: "shop_reactivation_purchase";
+      platformSaleCategory: "shop_creation";
+      id: string;
+    } & PlatformCheckoutMergedLineBase)
+  | ({
+      kind: "shop_flair_purchase";
+      platformSaleCategory: "promotion";
+      id: string;
+    } & PlatformCheckoutMergedLineBase)
+  | ({
+      kind: "shop_google_shopping_purchase";
+      platformSaleCategory: "promotion";
+      id: string;
+    } & PlatformCheckoutMergedLineBase)
+  | ({
+      kind: "creator_gift_purchase";
+      platformSaleCategory: "shop_creation" | "listing" | "promotion";
+      id: string;
+    } & PlatformCheckoutMergedLineBase);
 
 function promotionPaidAtWhere(
   salesOrderCreatedAt: { gte?: Date; lte?: Date } | undefined,
@@ -176,6 +197,165 @@ function promotionMergedLabel(kind: PromotionKind, listingName: string | null): 
   return ln ? `${k} — ${ln}` : `${k} — listing`;
 }
 
+function googleShoppingMergedLabel(packId: string): string {
+  const pack = googleShoppingCreditPackById(packId);
+  return pack ? `Google Shopping — ${pack.label}` : "Google Shopping credits";
+}
+
+function creatorGiftListingLabel(row: CreatorGiftShopUpgradeRevenueRow): string {
+  const pack = row.listingCreditPackId ? listingCreditPackById(row.listingCreditPackId) : null;
+  return pack ? `Creator gift — ${pack.label}` : "Creator gift — listing credits";
+}
+
+function creatorGiftPromotionLabel(row: CreatorGiftShopUpgradeRevenueRow): string {
+  const parts: string[] = [];
+  if (row.promotionKind && row.promotionCreditsGranted > 0) {
+    parts.push(promotionKindLabel(row.promotionKind));
+  }
+  if (row.googleShoppingCreditsGranted > 0 || row.googleShoppingCreditPackId) {
+    parts.push("Google Shopping credits");
+  }
+  if (row.shopFlairIncluded) parts.push("Shop flair");
+  return parts.length > 0 ? `Creator gift — ${parts.join(", ")}` : "Creator gift — shop upgrades";
+}
+
+function allocateCheckoutStripeFeeCents(
+  checkoutTotalCents: number,
+  totalMerchandiseCents: number,
+  segmentMerchandiseCents: number,
+): number {
+  if (checkoutTotalCents <= 0 || totalMerchandiseCents <= 0 || segmentMerchandiseCents <= 0) {
+    return 0;
+  }
+  const totalFee = checkoutProcessingFeeFromTotal(checkoutTotalCents, totalMerchandiseCents);
+  return Math.round((totalFee * segmentMerchandiseCents) / totalMerchandiseCents);
+}
+
+function platformCheckoutMergedLine<K extends AdminPlatformSalesMergedLine["kind"]>(
+  kind: K,
+  platformSaleCategory: AdminPlatformSaleCategory,
+  params: {
+    id: string;
+    productName: string;
+    checkoutTotalCents: number;
+    merchandiseCents: number;
+    paidAt: Date;
+    shop: { displayName: string; slug: string } | null;
+    itemHref: string | null;
+    stripeFeeCents?: number;
+    transactionEmail?: string | null;
+  },
+): Extract<AdminPlatformSalesMergedLine, { kind: K }> {
+  const stripeFeeCents =
+    params.stripeFeeCents ??
+    checkoutProcessingFeeFromTotal(params.checkoutTotalCents, params.merchandiseCents);
+  return {
+    kind,
+    platformSaleCategory,
+    id: params.id,
+    quantity: 1,
+    unitPriceCents: params.checkoutTotalCents,
+    productName: params.productName,
+    goodsServicesCostCents: 0,
+    productionFeeCents: 0,
+    /** Platform merchandise revenue (excludes buyer Stripe pass-through in the adjacent column). */
+    platformCutCents: params.merchandiseCents,
+    shopCutCents: 0,
+    stripeFeeCents,
+    order: { id: params.id, createdAt: params.paidAt },
+    shop: params.shop,
+    transactionEmail: params.transactionEmail ?? null,
+    itemHref: params.itemHref,
+  } as Extract<AdminPlatformSalesMergedLine, { kind: K }>;
+}
+
+type CreatorGiftPurchaseMergedRow = CreatorGiftShopUpgradeRevenueRow & {
+  id: string;
+  amountCents: number;
+  paidAt: Date | null;
+  purchaserEmail: string | null;
+  setupFeeIncluded: boolean;
+  isBetaTesterBatch: boolean;
+  isWaivedShopFeeBatch: boolean;
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
+  recipientShop: { displayName: string; slug: string } | null;
+};
+
+function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): AdminPlatformSalesMergedLine[] {
+  if (row.paidAt == null || row.amountCents <= 0) return [];
+
+  const segments: {
+    category: AdminPlatformSaleCategory;
+    label: string;
+    merchandiseCents: number;
+  }[] = [];
+
+  if (
+    countsTowardShopCreationRevenue({
+      source: "creator_gift",
+      status: "paid",
+      amountCents: row.amountCents,
+      setupFeeIncluded: row.setupFeeIncluded,
+      isBetaTesterBatch: row.isBetaTesterBatch,
+      isWaivedShopFeeBatch: row.isWaivedShopFeeBatch,
+      stripeCheckoutSessionId: row.stripeCheckoutSessionId,
+      stripePaymentIntentId: row.stripePaymentIntentId,
+    })
+  ) {
+    segments.push({
+      category: "shop_creation",
+      label: "Creator gift — shop setup",
+      merchandiseCents: SHOP_SETUP_FEE_CENTS,
+    });
+  }
+
+  const listingMerch = creatorGiftListingMerchandiseCents(row);
+  if (listingMerch > 0) {
+    segments.push({
+      category: "listing",
+      label: creatorGiftListingLabel(row),
+      merchandiseCents: listingMerch,
+    });
+  }
+
+  const promotionMerch = creatorGiftNonListingShopUpgradeMerchandiseCents(row);
+  if (promotionMerch > 0) {
+    segments.push({
+      category: "promotion",
+      label: creatorGiftPromotionLabel(row),
+      merchandiseCents: promotionMerch,
+    });
+  }
+
+  if (segments.length === 0) return [];
+
+  const totalMerch = segments.reduce((sum, seg) => sum + seg.merchandiseCents, 0);
+  const shop = row.recipientShop;
+
+  return segments.map((seg) => {
+    const isSingle = segments.length === 1;
+    const checkoutTotalCents = isSingle
+      ? row.amountCents
+      : Math.round((row.amountCents * seg.merchandiseCents) / totalMerch);
+    const stripeFeeCents = isSingle
+      ? checkoutProcessingFeeFromTotal(row.amountCents, totalMerch)
+      : allocateCheckoutStripeFeeCents(row.amountCents, totalMerch, seg.merchandiseCents);
+
+    return platformCheckoutMergedLine("creator_gift_purchase", seg.category, {
+      id: `creator_gift_purchase:${row.id}:${seg.category}`,
+      productName: seg.label,
+      checkoutTotalCents,
+      merchandiseCents: seg.merchandiseCents,
+      paidAt: row.paidAt!,
+      shop,
+      itemHref: null,
+      stripeFeeCents,
+      transactionEmail: row.purchaserEmail,
+    });
+  });
+}
+
 /**
  * Same headline counts as {@link loadMergedPlatformSalesLines} for the Platform sales nav badge only.
  * Avoids loading capped order lines / tips / promotion rows when the Sales tab body is not needed.
@@ -186,7 +366,7 @@ export async function loadPlatformSalesNavBadgeCounts(
 ): Promise<{
   /** Sum of paid merchandise `OrderLine.quantity` (units sold), not order or line row count. */
   itemsSoldCount: number;
-  publicationFeePaymentCount: number;
+  listingCreditPackPurchaseCount: number;
   promotionPurchaseCount: number;
 }> {
   const orderWhere = {
@@ -228,7 +408,7 @@ export async function loadPlatformSalesNavBadgeCounts(
 
   return {
     itemsSoldCount: itemsSoldAgg._sum.quantity ?? 0,
-    publicationFeePaymentCount: listingCreditPackPurchaseCount,
+    listingCreditPackPurchaseCount: listingCreditPackPurchaseCount,
     promotionPurchaseCount,
   };
 }
@@ -266,8 +446,8 @@ function allocateMerchandiseLineStripeFeeCents(
 }
 
 /**
- * Paid merchandise order lines plus shop upgrades purchases (see {@link aggregateShopUpgradesPlatformRevenue}).
- * Platform sales tab. Merged newest-first (cap 500 rows).
+ * All paid buyer merchandise lines and platform checkout rows that feed Platform sales summaries.
+ * Merged newest-first (cap 500 rows).
  */
 export async function loadMergedPlatformSalesLines(
   prisma: PrismaClient,
@@ -275,10 +455,11 @@ export async function loadMergedPlatformSalesLines(
 ): Promise<{
   lines: AdminPlatformSalesMergedLine[];
   orderLineCount: number;
-  publicationFeePaymentCount: number;
+  listingCreditPackPurchaseCount: number;
   supportTipCount: number;
   promotionPurchaseCount: number;
 }> {
+  const perSourceCap = 200;
   const orderWhere = {
     order: {
       status: OrderStatus.paid,
@@ -287,8 +468,8 @@ export async function loadMergedPlatformSalesLines(
   };
 
   const supportTipWhere = opts.salesOrderCreatedAt ? { createdAt: opts.salesOrderCreatedAt } : {};
-
-  const promotionPaidFilter = promotionPaidAtWhere(opts.salesOrderCreatedAt);
+  const paidAtFilter = promotionPaidAtWhere(opts.salesOrderCreatedAt);
+  const paidCheckoutWhere = paidShopSetupCheckoutWhere();
 
   const [
     orderLinesRaw,
@@ -297,28 +478,33 @@ export async function loadMergedPlatformSalesLines(
     supportTipCount,
     promotionRows,
     listingCreditPackRows,
+    shopSetupRows,
+    shopReactivationRows,
+    shopFlairRows,
+    shopGoogleShoppingRows,
+    creatorGiftRows,
   ] = await Promise.all([
     prisma.orderLine.findMany({
       where: orderWhere,
       orderBy: { order: { createdAt: "desc" } },
-      take: 500,
+      take: perSourceCap,
       include: orderLineInclude,
     }),
     prisma.orderLine.count({ where: orderWhere }),
     prisma.supportTip.findMany({
       where: supportTipWhere,
       orderBy: { createdAt: "desc" },
-      take: 500,
+      take: perSourceCap,
       select: { id: true, amountCents: true, createdAt: true },
     }),
     prisma.supportTip.count({ where: supportTipWhere }),
     prisma.promotionPurchase.findMany({
       where: {
         status: PromotionPurchaseStatus.paid,
-        paidAt: promotionPaidFilter,
+        paidAt: paidAtFilter,
       },
       orderBy: { paidAt: "desc" },
-      take: 500,
+      take: perSourceCap,
       select: {
         id: true,
         kind: true,
@@ -337,16 +523,106 @@ export async function loadMergedPlatformSalesLines(
     prisma.listingCreditPackPurchase.findMany({
       where: {
         status: ListingCreditPackPurchaseStatus.paid,
-        paidAt: promotionPaidFilter,
+        paidAt: paidAtFilter,
       },
       orderBy: { paidAt: "desc" },
-      take: 500,
+      take: perSourceCap,
       select: {
         id: true,
         packId: true,
         amountCents: true,
         paidAt: true,
         shop: { select: { displayName: true, slug: true } },
+      },
+    }),
+    prisma.shopSetupFeePurchase.findMany({
+      where: {
+        status: ShopSetupFeePurchaseStatus.paid,
+        paidAt: paidAtFilter,
+        ...paidCheckoutWhere,
+      },
+      orderBy: { paidAt: "desc" },
+      take: perSourceCap,
+      select: {
+        id: true,
+        amountCents: true,
+        paidAt: true,
+        shop: { select: { displayName: true, slug: true } },
+        pendingSignup: { select: { email: true } },
+      },
+    }),
+    prisma.shopReactivationPurchase.findMany({
+      where: {
+        status: ShopReactivationPurchaseStatus.paid,
+        paidAt: paidAtFilter,
+        ...paidCheckoutWhere,
+      },
+      orderBy: { paidAt: "desc" },
+      take: perSourceCap,
+      select: {
+        id: true,
+        amountCents: true,
+        paidAt: true,
+        shop: { select: { displayName: true, slug: true } },
+      },
+    }),
+    prisma.shopFlairPurchase.findMany({
+      where: {
+        status: ShopFlairPurchaseStatus.paid,
+        paidAt: paidAtFilter,
+        amountCents: { gt: 0 },
+      },
+      orderBy: { paidAt: "desc" },
+      take: perSourceCap,
+      select: {
+        id: true,
+        amountCents: true,
+        paidAt: true,
+        shop: { select: { displayName: true, slug: true } },
+      },
+    }),
+    prisma.shopGoogleShoppingPurchase.findMany({
+      where: {
+        status: ShopGoogleShoppingPurchaseStatus.paid,
+        paidAt: paidAtFilter,
+        amountCents: { gt: 0 },
+      },
+      orderBy: { paidAt: "desc" },
+      take: perSourceCap,
+      select: {
+        id: true,
+        packId: true,
+        amountCents: true,
+        paidAt: true,
+        shop: { select: { displayName: true, slug: true } },
+      },
+    }),
+    prisma.creatorGiftPurchase.findMany({
+      where: {
+        status: CreatorGiftPurchaseStatus.paid,
+        paidAt: paidAtFilter,
+        ...paidCheckoutWhere,
+      },
+      orderBy: { paidAt: "desc" },
+      take: perSourceCap,
+      select: {
+        id: true,
+        amountCents: true,
+        paidAt: true,
+        setupFeeIncluded: true,
+        isBetaTesterBatch: true,
+        isWaivedShopFeeBatch: true,
+        stripeCheckoutSessionId: true,
+        stripePaymentIntentId: true,
+        listingCreditPackId: true,
+        listingCreditsGranted: true,
+        googleShoppingCreditPackId: true,
+        googleShoppingCreditsGranted: true,
+        promotionKind: true,
+        promotionCreditsGranted: true,
+        shopFlairIncluded: true,
+        purchaserEmail: true,
+        recipientShop: { select: { displayName: true, slug: true } },
       },
     }),
   ]);
@@ -379,99 +655,128 @@ export async function loadMergedPlatformSalesLines(
       l.shop && l.product.slug ? productHref(l.shop.slug, l.product.slug) : null,
   }));
 
-  const supportLines: AdminPlatformSalesMergedLine[] = supportTips.map((t) => ({
-    kind: "support_tip" as const,
-    platformSaleCategory: "support" as const,
-    id: `support_tip:${t.id}`,
-    quantity: 1,
-    unitPriceCents: t.amountCents,
-    productName: "Support tip",
-    goodsServicesCostCents: 0,
-    productionFeeCents: 0,
-    platformCutCents: t.amountCents,
-    shopCutCents: 0,
-    stripeFeeCents: buyerPaymentProcessingFeeCents({ subtotalCents: t.amountCents }),
-    order: { id: `support_tip:${t.id}`, createdAt: t.createdAt },
-    shop: null,
-    itemHref: null,
-  }));
+  const supportLines: AdminPlatformSalesMergedLine[] = supportTips.map((t) =>
+    platformCheckoutMergedLine("support_tip", "support", {
+      id: `support_tip:${t.id}`,
+      productName: "Support tip",
+      checkoutTotalCents: t.amountCents,
+      merchandiseCents: t.amountCents,
+      paidAt: t.createdAt,
+      shop: null,
+      itemHref: null,
+      stripeFeeCents: buyerPaymentProcessingFeeCents({ subtotalCents: t.amountCents }),
+    }),
+  );
 
   const promotionLines: AdminPlatformSalesMergedLine[] = promotionRows
     .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
-    .map((row) => ({
-      kind: "promotion_purchase" as const,
-      platformSaleCategory: "promotion" as const,
-      id: `promotion_purchase:${row.id}`,
-      quantity: 1,
-      unitPriceCents: row.amountCents,
-      productName: promotionMergedLabel(
-        row.kind,
-        row.shopListing?.requestItemName ?? null,
-      ),
-      goodsServicesCostCents: 0,
-      productionFeeCents: 0,
-      platformCutCents: row.amountCents,
-      shopCutCents: 0,
-      stripeFeeCents: checkoutProcessingFeeFromTotal(
-        row.amountCents,
-        promotionPurchaseMerchandiseCents(row),
-      ),
-      order: {
+    .map((row) =>
+      platformCheckoutMergedLine("promotion_purchase", "promotion", {
         id: `promotion_purchase:${row.id}`,
-        createdAt: row.paidAt,
-      },
-      shop: {
-        displayName: row.shop.displayName,
-        slug: row.shop.slug,
-      },
-      itemHref:
-        row.shopListing?.product.slug != null
-          ? productHref(row.shop.slug, row.shopListing.product.slug)
-          : null,
-    }));
+        productName: promotionMergedLabel(row.kind, row.shopListing?.requestItemName ?? null),
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: promotionPurchaseMerchandiseCents(row),
+        paidAt: row.paidAt,
+        shop: row.shop,
+        itemHref:
+          row.shopListing?.product.slug != null
+            ? productHref(row.shop.slug, row.shopListing.product.slug)
+            : null,
+      }),
+    );
 
   const listingCreditPackLines: AdminPlatformSalesMergedLine[] = listingCreditPackRows
     .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
-    .map((row) => ({
-      kind: "listing_credit_pack_purchase" as const,
-      platformSaleCategory: "listing" as const,
-      id: `listing_credit_pack_purchase:${row.id}`,
-      quantity: 1,
-      unitPriceCents: row.amountCents,
-      productName: listingCreditPackMergedLabel(row.packId),
-      goodsServicesCostCents: 0,
-      productionFeeCents: 0,
-      platformCutCents: row.amountCents,
-      shopCutCents: 0,
-      stripeFeeCents: checkoutProcessingFeeFromTotal(
-        row.amountCents,
-        listingCreditPackPurchaseMerchandiseCents(row),
-      ),
-      order: {
+    .map((row) =>
+      platformCheckoutMergedLine("listing_credit_pack_purchase", "listing", {
         id: `listing_credit_pack_purchase:${row.id}`,
-        createdAt: row.paidAt,
-      },
-      shop: {
-        displayName: row.shop.displayName,
-        slug: row.shop.slug,
-      },
-      itemHref: null,
-    }));
+        productName: listingCreditPackMergedLabel(row.packId),
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: listingCreditPackPurchaseMerchandiseCents(row),
+        paidAt: row.paidAt,
+        shop: row.shop,
+        itemHref: null,
+      }),
+    );
+
+  const shopSetupLines: AdminPlatformSalesMergedLine[] = shopSetupRows
+    .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
+    .map((row) =>
+      platformCheckoutMergedLine("shop_setup_fee_purchase", "shop_creation", {
+        id: `shop_setup_fee_purchase:${row.id}`,
+        productName: SHOP_SETUP_FEE_LABEL,
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: SHOP_SETUP_FEE_CENTS,
+        paidAt: row.paidAt,
+        shop: row.shop,
+        itemHref: null,
+        transactionEmail: row.pendingSignup.email,
+      }),
+    );
+
+  const shopReactivationLines: AdminPlatformSalesMergedLine[] = shopReactivationRows
+    .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
+    .map((row) =>
+      platformCheckoutMergedLine("shop_reactivation_purchase", "shop_creation", {
+        id: `shop_reactivation_purchase:${row.id}`,
+        productName: SHOP_REACTIVATION_FEE_LABEL,
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: SHOP_REACTIVATION_FEE_CENTS,
+        paidAt: row.paidAt,
+        shop: row.shop,
+        itemHref: null,
+      }),
+    );
+
+  const shopFlairLines: AdminPlatformSalesMergedLine[] = shopFlairRows
+    .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
+    .map((row) =>
+      platformCheckoutMergedLine("shop_flair_purchase", "promotion", {
+        id: `shop_flair_purchase:${row.id}`,
+        productName: "Shop flair access",
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: shopFlairPurchaseMerchandiseCents(row),
+        paidAt: row.paidAt,
+        shop: row.shop,
+        itemHref: null,
+      }),
+    );
+
+  const shopGoogleShoppingLines: AdminPlatformSalesMergedLine[] = shopGoogleShoppingRows
+    .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
+    .map((row) =>
+      platformCheckoutMergedLine("shop_google_shopping_purchase", "promotion", {
+        id: `shop_google_shopping_purchase:${row.id}`,
+        productName: googleShoppingMergedLabel(row.packId),
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: shopGoogleShoppingPurchaseMerchandiseCents(row),
+        paidAt: row.paidAt,
+        shop: row.shop,
+        itemHref: null,
+      }),
+    );
+
+  const creatorGiftLines = creatorGiftRows.flatMap((row) =>
+    creatorGiftPurchaseToMergedLines(row),
+  );
 
   const merged = [
     ...merchLines,
     ...listingCreditPackLines,
+    ...shopSetupLines,
+    ...shopReactivationLines,
+    ...creatorGiftLines,
+    ...shopFlairLines,
+    ...shopGoogleShoppingLines,
     ...supportLines,
     ...promotionLines,
-  ].sort(
-    (a, b) => b.order.createdAt.getTime() - a.order.createdAt.getTime(),
-  );
+  ].sort((a, b) => b.order.createdAt.getTime() - a.order.createdAt.getTime());
   const lines = merged.slice(0, 500);
 
   return {
     lines,
     orderLineCount,
-    publicationFeePaymentCount: listingCreditPackLines.length,
+    listingCreditPackPurchaseCount: listingCreditPackLines.length,
     supportTipCount,
     promotionPurchaseCount: promotionLines.length,
   };

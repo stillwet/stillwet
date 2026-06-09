@@ -492,7 +492,7 @@ async function tryExecuteAdminApproveListingRequest(
       data: {
         shopId: listing.shopId,
         kind: "listing_approved_pay_fee",
-        body: `Your listing ${approvedListingLabel} was approved. Pay the publication fee on the Listings tab to publish it in your shop.`,
+        body: `Your listing ${approvedListingLabel} was approved. Buy listing credits on the Request listing tab if needed, then publish it from the Listings tab.`,
       },
     });
   }
@@ -501,8 +501,8 @@ async function tryExecuteAdminApproveListingRequest(
 }
 
 /**
- * Step 2: approve listing (requires Printify IDs). Applies free-slot waivers, charges listing fee policy,
- * and either goes live or asks the shop to pay the publication fee.
+ * Step 2: approve listing (requires Printify IDs). Applies free-slot waivers and either goes live
+ * or asks the shop to buy listing credits when slots are exhausted.
  */
 export async function adminApproveListingRequest(formData: FormData): Promise<void> {
   await requireAdmin();

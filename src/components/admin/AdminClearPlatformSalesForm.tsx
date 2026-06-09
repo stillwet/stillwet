@@ -19,7 +19,7 @@ export function AdminClearPlatformSalesForm(props: {
   if (!enabled) {
     return (
       <p className="mt-3 max-w-xl text-[11px] leading-relaxed text-zinc-600">
-        Clearing orders is blocked in production unless{" "}
+        Clearing sales history is blocked in production unless{" "}
         <span className="font-mono text-zinc-500">ALLOW_ADMIN_CLEAR_SALES_HISTORY=true</span>.
       </p>
     );
@@ -32,21 +32,11 @@ export function AdminClearPlatformSalesForm(props: {
       </summary>
       <form action={formAction} className="mt-3 space-y-3 text-xs">
         <p className="leading-relaxed text-zinc-500">
-          Deletes <span className="font-medium text-zinc-400">all orders</span> (and cascaded lines / fulfillment
-          jobs). Stripe idempotency rows are not cleared — see ops notes. This cannot be undone.
+          Deletes all buyer orders (and cascaded lines / fulfillment jobs) plus every platform checkout row used
+          on this tab: shop setup and reactivation fees, creator gift purchases, listing credit packs,
+          promotions, flair, Google Shopping, and support tips. Resets shop merchandise sales counters.
+          Stripe idempotency rows are not cleared — see ops notes. This cannot be undone.
         </p>
-        <label className="flex cursor-pointer items-start gap-2 text-zinc-400">
-          <input
-            type="checkbox"
-            name="resetListingPublicationFees"
-            value="true"
-            className="mt-1 border-zinc-600 bg-zinc-900"
-          />
-          <span>
-            Also reset publication-fee timestamps on every shop listing (clears synthetic listing-fee rows from this
-            report).
-          </span>
-        </label>
         <label className="block text-zinc-500">
           Type DELETE SALES to confirm
           <input

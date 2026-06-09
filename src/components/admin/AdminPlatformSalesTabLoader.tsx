@@ -22,11 +22,12 @@ export async function AdminPlatformSalesTabLoader(props: {
   const salesFromRaw = typeof props.sp.salesFrom === "string" ? props.sp.salesFrom : "";
   const salesToRaw = typeof props.sp.salesTo === "string" ? props.sp.salesTo : "";
   const salesKindRaw = typeof props.sp.salesKind === "string" ? props.sp.salesKind.trim() : "";
-  const salesKindFilter: "all" | "listing" | "item" | "support" | "promotion" =
+  const salesKindFilter: "all" | "listing" | "item" | "support" | "promotion" | "shop_creation" =
     salesKindRaw === "listing" ||
     salesKindRaw === "item" ||
     salesKindRaw === "support" ||
-    salesKindRaw === "promotion"
+    salesKindRaw === "promotion" ||
+    salesKindRaw === "shop_creation"
       ? salesKindRaw
       : "all";
 

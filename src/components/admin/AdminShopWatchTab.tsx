@@ -37,7 +37,7 @@ export type ShopWatchRow = {
   activeListingsCount: number;
   /** Paid checkout orders for this shop (`Order.status` = paid). */
   salesCount: number;
-  /** Listings where a publication fee applied and was paid (matches blue $ in details; excludes free / promo). */
+  /** Listings past free slots with listing credits applied (`listingFeePaidAt`; excludes free / promo). */
   paidListingsCount: number;
   frozenCount: number;
   /** Creator self-removals, admin “×” queue removals, plus formal admin rejects (same roll-up as the Removed column). */
@@ -142,8 +142,8 @@ function DetailSection(props: {
                   {d.listingFeeKind === "paid" ? (
                     <span
                       className="select-none text-sm font-semibold text-blue-400"
-                      title="Listing publication fee paid"
-                      aria-label="Listing publication fee paid"
+                      title="Listing credits applied"
+                      aria-label="Listing credits applied"
                     >
                       $
                     </span>
@@ -527,7 +527,7 @@ export function AdminShopWatchTab(props: {
                 </th>
                 <th
                   className="whitespace-nowrap px-3 py-2.5 text-center"
-                  title="Listings with a charged publication fee that is paid (excludes free slots and promo/founder waivers)"
+                  title="Listings past free slots with credits applied (excludes free slots and promo/founder waivers)"
                 >
                   Paid
                 </th>

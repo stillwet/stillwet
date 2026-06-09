@@ -22,7 +22,7 @@ function FreeListingSlotsHint(props: { slots: FreeListingRequestSlotsSummary }) 
   const { slots } = props;
   if (slots.founderUnlimited) {
     return (
-      <p className="mt-2 text-xs text-zinc-500">Listing publication fees are waived for your shop.</p>
+      <p className="mt-2 text-xs text-zinc-500">Listing credits are not required for your shop.</p>
     );
   }
   const available = slots.listingCreditsAvailable;

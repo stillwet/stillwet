@@ -13,7 +13,7 @@ export type AdminSummaryMetrics = {
   bugFeedbackReports: number;
   /** New shop owner accounts (excludes platform shop) */
   newCreatorAccounts: number;
-  /** Listing publication fees satisfied (`listingFeePaidAt`) */
+  /** Listing slots satisfied via free tier or credits (`listingFeePaidAt`) */
   newPaidListings: number;
   /** Lines on paid checkout orders */
   paidOrderLines: number;

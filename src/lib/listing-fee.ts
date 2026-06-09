@@ -60,8 +60,8 @@ export async function getListingOrdinal(
 }
 
 /**
- * After creating a listing as `submitted`, if it still owes a publication fee, move it back to `draft`
- * so the queue never contains unpaid fee listings.
+ * After creating a listing as `submitted`, if it still needs listing credits, move it back to `draft`
+ * so the queue never contains unpaid slot listings.
  */
 export async function downgradeSubmittedToDraftIfListingFeeUnpaid(
   shopId: string,
@@ -94,6 +94,6 @@ export async function downgradeSubmittedToDraftIfListingFeeUnpaid(
   return {
     downgraded: true,
     message:
-      "Your listing was saved as a draft. Pay the publication fee on the Listings tab, then use Submit for admin approval.",
+      "Your listing was saved as a draft. Buy listing credits on the Request listing tab, then use Submit for admin approval.",
   };
 }
