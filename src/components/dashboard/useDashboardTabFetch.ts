@@ -78,6 +78,7 @@ export function useDashboardTabFetch(options: {
   const [supportChat, setSupportChat] = useState<DashboardSupportChatPayload | null>(null);
   const [requestListingCatalog, setRequestListingCatalog] = useState<{
     catalogGroups: ShopSetupCatalogGroup[];
+    extendedCatalogGroups: ShopSetupCatalogGroup[];
     draftListingRequestPrefill: DraftListingRequestPrefillPayload | null;
     adminCatalogItemCount: number;
     unpaidPublicationFeeListings: UnpaidPublicationFeeListingRow[];

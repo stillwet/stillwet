@@ -1762,6 +1762,7 @@ export function DashboardMainTabs(props: {
           ) : activeTab === "requestListing" ? (
             <ShopFirstListingRequestPanelLazy
               catalogGroups={setup.catalogGroups}
+              extendedCatalogGroups={setup.extendedCatalogGroups}
               r2Configured={setup.r2Configured}
               listingPickerDiagnostics={setup.listingPickerDiagnostics}
               draftListingRequestPrefill={draftListingRequestPrefill}

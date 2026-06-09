@@ -69,6 +69,7 @@ function buildDashboardMainTabsProps(
   const notificationsPayload = null;
   const supportChatPayload = null;
   const catalogGroups: ShopSetupCatalogGroup[] = [];
+  const extendedCatalogGroups: ShopSetupCatalogGroup[] = [];
   const draftListingRequestPrefill = null;
 
   const showDemoPurchaseButton = !isPlatform && shopDemoPurchaseFeatureEnabled() && adminLoggedIn;
@@ -90,6 +91,7 @@ function buildDashboardMainTabsProps(
             shop: creatorSetup.shopPanel,
             itemGuidelinesAcknowledged: creatorSetup.itemGuidelinesAcknowledged,
             catalogGroups,
+            extendedCatalogGroups,
             steps: creatorSetup.steps,
             incompleteSetupCount: creatorSetup.incompleteSetupCount,
             r2Configured: isR2UploadConfigured(),
