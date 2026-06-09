@@ -108,7 +108,7 @@ This is **not** a database error. The browser tab still has JavaScript from a **
    node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
    Paste the value as the env var, **redeploy**, then hard-refresh admin.
-3. This repo sets **`deploymentId`** from **`VERCEL_GIT_COMMIT_SHA`** in [`next.config.ts`](next.config.ts) so Next.js can detect version skew.
+3. This repo sets **`deploymentId`** from the first 32 chars of **`VERCEL_GIT_COMMIT_SHA`** in [`next.config.ts`](next.config.ts) (Vercel’s skew-protection limit) so Next.js can detect version skew.
 
 If saves still fail **after** a hard refresh, apply pending migrations (new catalog columns `itemCanvasPresentation` / `itemArtworkTemplate` need `20260609120000_admin_catalog_canvas_presentation`):
 

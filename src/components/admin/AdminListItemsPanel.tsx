@@ -153,6 +153,11 @@ export function AdminListItemsPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [deleteDialog, deletePending]);
 
+  useEffect(() => {
+    if (!editingId) return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [editingId]);
+
   function openDeleteCatalogItemDialog(itemId: string, itemName: string) {
     setDeleteDialog({ itemId, itemName });
   }
@@ -193,14 +198,16 @@ export function AdminListItemsPanel({
   return (
     <>
       {editingId && editingItem ? (
-        <AdminListItemEditForm
-          key={editingId}
-          item={editingItem}
-          allTags={allTags}
-          onCancel={cancelEdit}
-          r2Configured={r2Configured}
-          secretMenuCatalog={secretMenuCatalog}
-        />
+        <div id="admin-catalog-item-edit" className="mb-6">
+          <AdminListItemEditForm
+            key={editingId}
+            item={editingItem}
+            allTags={allTags}
+            onCancel={cancelEdit}
+            r2Configured={r2Configured}
+            secretMenuCatalog={secretMenuCatalog}
+          />
+        </div>
       ) : null}
 
       <div className="overflow-x-auto rounded-lg border border-zinc-800">

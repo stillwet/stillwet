@@ -106,12 +106,16 @@ export type AdminListTabCatalogItem = Awaited<
   ReturnType<typeof loadAdminCatalogItemsForListTab>
 >[number];
 
-/** Admin → List tab rows. */
+function compareAdminCatalogItemNamesAsc(a: { name: string }, b: { name: string }): number {
+  return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+}
+
+/** Admin → List tab rows (standard or secret menu), A→Z by item name. */
 export async function loadAdminCatalogItemsForListTab(options?: { secretMenuOnly?: boolean }) {
   const secretMenuOnly = options?.secretMenuOnly ?? false;
-  return prisma.adminCatalogItem.findMany({
+  const rows = await prisma.adminCatalogItem.findMany({
     where: { itemSecretMenuOnly: secretMenuOnly },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     select: adminListItemSelect,
   });
+  return rows.sort(compareAdminCatalogItemNamesAsc);
 }

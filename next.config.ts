@@ -1,5 +1,13 @@
 import type { NextConfig } from "next";
 
+/** Vercel skew protection allows deploymentId ≤ 32 chars; git SHAs are 40. */
+function readNextDeploymentId(): string | undefined {
+  const raw =
+    process.env.VERCEL_GIT_COMMIT_SHA?.trim() || process.env.DEPLOYMENT_VERSION?.trim();
+  if (!raw) return undefined;
+  return raw.length > 32 ? raw.slice(0, 32) : raw;
+}
+
 const securityHeaders: { key: string; value: string }[] = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -12,10 +20,7 @@ const nextConfig: NextConfig = {
    * Lets Next.js detect client/server version skew after deploy (avoids "Server Action not found"
    * when an old tab calls actions from a previous build). Vercel sets VERCEL_GIT_COMMIT_SHA at build.
    */
-  deploymentId:
-    process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
-    process.env.DEPLOYMENT_VERSION?.trim() ||
-    undefined,
+  deploymentId: readNextDeploymentId(),
   /**
    * Next 16 defaults `experimental.lockDistDir` to true: it acquires a native lock under
    * `.next/lock` before `cleanDistDir`. On Vercel that can fail with

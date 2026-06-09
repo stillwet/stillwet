@@ -8,6 +8,11 @@ import {
 } from "@/actions/admin-catalog-items";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
 import {
+  AdminCatalogAdvancedFieldsExpand,
+  AdminCatalogPicturesExpand,
+} from "@/components/admin/AdminCatalogAdvancedFieldsExpand";
+import { AdminCatalogItemReferencePhotoFields } from "@/components/admin/AdminCatalogItemReferencePhotoFields";
+import {
   AdminCatalogCanvasPresentationFields,
   type CatalogArtworkTemplatePresetId,
 } from "@/components/admin/AdminCatalogCanvasPresentationFields";
@@ -18,7 +23,18 @@ import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItem
 import { AdminCatalogItemSizeExampleFields } from "@/components/admin/AdminCatalogItemSizeExampleFields";
 import { parseAdminCatalogItemArtworkForm, validateItemLevelWhenNoVariants } from "@/lib/admin-catalog-item";
 
-export function AdminListAddItemForm({ secretMenuCatalog = false }: { secretMenuCatalog?: boolean }) {
+export function AdminListAddItemForm({
+  secretMenuCatalog = false,
+  embedded = false,
+  open: controlledOpen,
+  onOpenChange,
+}: {
+  secretMenuCatalog?: boolean;
+  /** Render inside secret-menu split card (no standalone trigger). */
+  embedded?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const router = useRouter();
   const [itemName, setItemName] = useState("");
   const [storefrontDescription, setStorefrontDescription] = useState("");
@@ -40,7 +56,13 @@ export function AdminListAddItemForm({ secretMenuCatalog = false }: { secretMenu
   const [itemArtworkTemplatePreset, setItemArtworkTemplatePreset] =
     useState<CatalogArtworkTemplatePresetId>("none");
   const [clientError, setClientError] = useState<string | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
+  const [internalFormOpen, setInternalFormOpen] = useState(false);
+  const formOpen = embedded && controlledOpen !== undefined ? controlledOpen : internalFormOpen;
+
+  function setFormOpen(next: boolean) {
+    if (embedded && onOpenChange) onOpenChange(next);
+    else setInternalFormOpen(next);
+  }
 
   const [saveState, saveAction, savePending] = useActionState<
     AdminCatalogItemSaveResult | null,
@@ -124,34 +146,44 @@ export function AdminListAddItemForm({ secretMenuCatalog = false }: { secretMenu
   const serverError = saveState?.ok === false ? saveState.error : null;
   const displayError = clientError ?? serverError;
 
+  if (embedded && !formOpen) return null;
+
+  if (!formOpen) {
+    return (
+      <button
+        type="button"
+        onClick={() => setFormOpen(true)}
+        className="rounded-md border border-zinc-800 bg-zinc-900/40 px-3 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800/70 hover:text-zinc-100"
+      >
+        Add new catalogue item
+      </button>
+    );
+  }
+
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
-      {!formOpen ? (
+    <div
+      className={
+        embedded
+          ? "mt-3 border-t border-zinc-800/80 pt-3"
+          : "rounded-lg border border-zinc-800 bg-zinc-900/30 p-4"
+      }
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          {secretMenuCatalog ? "Secret menu item" : "List item"}
+        </h3>
         <button
           type="button"
-          onClick={() => setFormOpen(true)}
-          className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
+          onClick={() => {
+            setFormOpen(false);
+            setClientError(null);
+          }}
+          className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-300 hover:underline"
         >
-          Add new catalogue item
+          Cancel
         </button>
-      ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-              {secretMenuCatalog ? "Secret menu item" : "List item"}
-            </h3>
-            <button
-              type="button"
-              onClick={() => {
-                setFormOpen(false);
-                setClientError(null);
-              }}
-              className="text-xs text-zinc-500 underline-offset-2 hover:text-zinc-300 hover:underline"
-            >
-              Cancel
-            </button>
-          </div>
-          <form onSubmit={submit} className="mt-4 space-y-4">
+      </div>
+      <form onSubmit={submit} className="mt-4 space-y-4">
         <label className="block text-xs text-zinc-500">
           Item name
           <input
@@ -166,40 +198,46 @@ export function AdminListAddItemForm({ secretMenuCatalog = false }: { secretMenu
         </label>
 
         <AdminCatalogItemLevelFields
-          exampleListingUrl={itemExampleListingUrl}
           minPriceDollars={itemMinPriceDollars}
           goodsServicesCostDollars={itemGoodsServicesCostDollars}
           storefrontDescription={storefrontDescription}
-          onChangeExampleListingUrl={setItemExampleListingUrl}
           onChangeMinPriceDollars={setItemMinPriceDollars}
           onChangeGoodsServicesCostDollars={setItemGoodsServicesCostDollars}
           onChangeStorefrontDescription={setStorefrontDescription}
         />
-        <AdminCatalogItemSizeExampleFields
-          sizeExampleImageUrl={itemSizeExampleImageUrl}
-          onChangeSizeExampleImageUrl={setItemSizeExampleImageUrl}
-        />
-        <AdminCatalogArtworkRequirementFields
-          imageRequirementLabel={itemImageRequirementLabel}
-          printAreaWidthPx={itemPrintAreaWidthPx}
-          printAreaHeightPx={itemPrintAreaHeightPx}
-          minArtworkDpi={itemMinArtworkDpi}
-          artworkLetterboxFill={itemArtworkLetterboxFill}
-          artworkSourceTierOverride={itemArtworkSourceTierOverride}
-          onChangeImageRequirementLabel={setItemImageRequirementLabel}
-          onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
-          onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
-          onChangeMinArtworkDpi={setItemMinArtworkDpi}
-          onChangeArtworkLetterboxFill={setItemArtworkLetterboxFill}
-          onChangeArtworkSourceTierOverride={setItemArtworkSourceTierOverride}
-        />
+        <AdminCatalogPicturesExpand>
+          <AdminCatalogItemReferencePhotoFields
+            exampleListingUrl={itemExampleListingUrl}
+            onChangeExampleListingUrl={setItemExampleListingUrl}
+          />
+          <AdminCatalogItemSizeExampleFields
+            sizeExampleImageUrl={itemSizeExampleImageUrl}
+            onChangeSizeExampleImageUrl={setItemSizeExampleImageUrl}
+          />
+        </AdminCatalogPicturesExpand>
+        <AdminCatalogAdvancedFieldsExpand>
+          <AdminCatalogArtworkRequirementFields
+            imageRequirementLabel={itemImageRequirementLabel}
+            printAreaWidthPx={itemPrintAreaWidthPx}
+            printAreaHeightPx={itemPrintAreaHeightPx}
+            minArtworkDpi={itemMinArtworkDpi}
+            artworkLetterboxFill={itemArtworkLetterboxFill}
+            artworkSourceTierOverride={itemArtworkSourceTierOverride}
+            onChangeImageRequirementLabel={setItemImageRequirementLabel}
+            onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
+            onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
+            onChangeMinArtworkDpi={setItemMinArtworkDpi}
+            onChangeArtworkLetterboxFill={setItemArtworkLetterboxFill}
+            onChangeArtworkSourceTierOverride={setItemArtworkSourceTierOverride}
+          />
 
-        <AdminCatalogCanvasPresentationFields
-          canvasPresentationPreset={itemCanvasPresentationPreset}
-          artworkTemplatePreset={itemArtworkTemplatePreset}
-          onChangeCanvasPresentationPreset={setItemCanvasPresentationPreset}
-          onChangeArtworkTemplatePreset={setItemArtworkTemplatePreset}
-        />
+          <AdminCatalogCanvasPresentationFields
+            canvasPresentationPreset={itemCanvasPresentationPreset}
+            artworkTemplatePreset={itemArtworkTemplatePreset}
+            onChangeCanvasPresentationPreset={setItemCanvasPresentationPreset}
+            onChangeArtworkTemplatePreset={setItemArtworkTemplatePreset}
+          />
+        </AdminCatalogAdvancedFieldsExpand>
 
         {displayError ? (
           <p className="text-xs text-amber-200/90" role="alert">
@@ -215,8 +253,6 @@ export function AdminListAddItemForm({ secretMenuCatalog = false }: { secretMenu
           {savePending ? "Saving…" : "Save item"}
         </button>
       </form>
-        </>
-      )}
     </div>
   );
 }

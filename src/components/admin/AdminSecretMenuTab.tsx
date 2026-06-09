@@ -1,33 +1,36 @@
 import { prisma } from "@/lib/prisma";
 import { loadAdminCatalogItemsForListTab } from "@/lib/admin-baseline-catalog-rows";
 import {
+  loadAdminSecretMenuImportOptions,
   loadAdminSecretMenuShopRows,
   loadAdminShopSlugPickerOptions,
 } from "@/actions/admin-secret-menu";
 import { isR2UploadConfigured } from "@/lib/r2-upload";
-import { AdminListAddItemForm } from "@/components/admin/AdminListAddItemForm";
 import { AdminListItemsPanel } from "@/components/admin/AdminListItemsPanel";
 import { AdminListTabLoadError } from "@/components/admin/AdminListTabLoadError";
-import { AdminSecretMenuCopyFromListPanel } from "@/components/admin/AdminSecretMenuCopyFromListPanel";
+import { AdminSecretMenuCatalogActionsPanel } from "@/components/admin/AdminSecretMenuCatalogActionsPanel";
+import { AdminSecretMenuFlashParamsCleanup } from "@/components/admin/AdminSecretMenuFlashParamsCleanup";
 import { AdminSecretMenuShopsPanel } from "@/components/admin/AdminSecretMenuShopsPanel";
 
 type AdminSecretMenuTabProps = {
   smErr?: string;
   smGranted?: string;
   smRevoked?: string;
-  smCopied?: string;
+  smImported?: string;
+  smImportSkipped?: string;
 };
 
 export async function AdminSecretMenuTab({
   smErr,
   smGranted,
   smRevoked,
-  smCopied,
+  smImported,
+  smImportSkipped,
 }: AdminSecretMenuTabProps) {
   try {
-    const [items, standardItemCount, allTags, shopRows, shopPickerOptions] = await Promise.all([
+    const [items, importOptions, allTags, shopRows, shopPickerOptions] = await Promise.all([
       loadAdminCatalogItemsForListTab({ secretMenuOnly: true }),
-      prisma.adminCatalogItem.count({ where: { itemSecretMenuOnly: false } }),
+      loadAdminSecretMenuImportOptions(),
       prisma.tag.findMany({
         orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
         select: { id: true, name: true, slug: true },
@@ -64,11 +67,8 @@ export async function AdminSecretMenuTab({
 
     return (
       <section id="admin-secret-menu" aria-label="Secret menu">
+        <AdminSecretMenuFlashParamsCleanup />
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Secret menu</h2>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-zinc-600">
-          Extended catalog items and prices for selected shops only. Items here never appear in the
-          public Admin list or in other shops&apos; listing pickers.
-        </p>
 
         <div className="mt-6">
           <AdminSecretMenuShopsPanel
@@ -80,17 +80,11 @@ export async function AdminSecretMenuTab({
           />
         </div>
 
-        <div className="mt-6">
-          <AdminSecretMenuCopyFromListPanel
-            standardItemCount={standardItemCount}
-            secretItemCount={items.length}
-            smCopied={smCopied}
-          />
-        </div>
-
-        <div className="mt-8">
-          <AdminListAddItemForm secretMenuCatalog />
-        </div>
+        <AdminSecretMenuCatalogActionsPanel
+          importOptions={importOptions}
+          smImported={smImported}
+          smImportSkipped={smImportSkipped}
+        />
 
         <div className="mt-8">
           <AdminListItemsPanel

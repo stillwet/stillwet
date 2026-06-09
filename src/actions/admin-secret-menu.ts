@@ -5,7 +5,10 @@ import { revalidatePath } from "next/cache";
 import { ADMIN_BACKEND_BASE_PATH } from "@/lib/admin-dashboard-urls";
 import { normalizeShopSlugInput } from "@/lib/normalize-shop-slug-input";
 import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
-import { copyStandardAdminCatalogToSecretMenu } from "@/lib/admin-secret-menu-catalog-copy";
+import {
+  importStandardAdminCatalogItemsToSecretMenu,
+  loadAdminCatalogSecretMenuImportOptions,
+} from "@/lib/admin-secret-menu-catalog-copy";
 import { revalidateAdminViews } from "@/lib/revalidate-admin-views";
 import { prisma } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
@@ -107,16 +110,28 @@ export async function adminRevokeShopSecretMenuAccess(formData: FormData): Promi
   redirect(secretMenuRedirectUrl({ smRevoked: slug }));
 }
 
-export async function adminCopyStandardCatalogToSecretMenu(formData: FormData): Promise<void> {
+export async function adminImportStandardCatalogItemsToSecretMenu(formData: FormData): Promise<void> {
   await requireAdmin();
-  const replaceExisting = String(formData.get("replaceExisting") ?? "") === "1";
+  const sourceItemIds = formData
+    .getAll("sourceItemId")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
 
-  const result = await copyStandardAdminCatalogToSecretMenu({ replaceExisting });
+  const result = await importStandardAdminCatalogItemsToSecretMenu(sourceItemIds);
   if (!result.ok) {
     redirect(secretMenuRedirectUrl({ smErr: result.error }));
   }
 
   revalidateAdminViews();
   revalidatePath("/dashboard");
-  redirect(secretMenuRedirectUrl({ smCopied: String(result.copiedCount) }));
+  redirect(
+    secretMenuRedirectUrl({
+      smImported: String(result.copiedCount),
+      smImportSkipped: String(result.skippedAlreadyPresentCount),
+    }),
+  );
+}
+
+export async function loadAdminSecretMenuImportOptions() {
+  return loadAdminCatalogSecretMenuImportOptions();
 }

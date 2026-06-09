@@ -7,48 +7,70 @@ import {
   catalogItemReferenceImageUrlToObjectKey,
   catalogItemSizeExampleImageUrlToObjectKey,
   copyR2ObjectWithinBucket,
-  deleteAdminCatalogItemReferenceObject,
-  deleteAdminCatalogItemSizeExampleObject,
   publicHttpsUrlForR2ObjectKey,
 } from "@/lib/r2-upload";
 
-export type CopyStandardCatalogToSecretMenuResult =
-  | { ok: true; copiedCount: number }
+export type ImportStandardCatalogToSecretMenuResult =
+  | { ok: true; copiedCount: number; skippedAlreadyPresentCount: number }
   | { ok: false; error: string };
 
-type StandardCatalogRow = Awaited<ReturnType<typeof loadStandardCatalogRowsForCopy>>[number];
+export type AdminCatalogSecretMenuImportOption = {
+  id: string;
+  name: string;
+  alreadyImported: boolean;
+};
 
-async function loadStandardCatalogRowsForCopy() {
+type StandardCatalogRow = Awaited<ReturnType<typeof loadStandardCatalogRowsByIds>>[number];
+
+/** Match secret-menu copies to Admin list rows by trimmed name (case-insensitive). */
+export function adminCatalogItemNameImportKey(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+async function loadStandardCatalogRowsByIds(ids: string[]) {
+  if (ids.length === 0) return [];
   return prisma.adminCatalogItem.findMany({
-    where: { itemSecretMenuOnly: false },
+    where: { id: { in: ids }, itemSecretMenuOnly: false },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: { catalogTags: { select: { tagId: true } } },
   });
 }
 
-async function deleteSecretMenuCatalogItems(): Promise<void> {
-  const existing = await prisma.adminCatalogItem.findMany({
+async function loadSecretMenuNameImportKeys(): Promise<Set<string>> {
+  const rows = await prisma.adminCatalogItem.findMany({
     where: { itemSecretMenuOnly: true },
-    select: { id: true },
+    select: { name: true },
   });
-  if (existing.length === 0) return;
+  return new Set(rows.map((r) => adminCatalogItemNameImportKey(r.name)));
+}
 
-  await prisma.adminCatalogItem.deleteMany({ where: { itemSecretMenuOnly: true } });
-
-  await Promise.all(
-    existing.map(async ({ id }) => {
-      await deleteAdminCatalogItemReferenceObject(id);
-      await deleteAdminCatalogItemSizeExampleObject(id);
+export async function loadAdminCatalogSecretMenuImportOptions(): Promise<
+  AdminCatalogSecretMenuImportOption[]
+> {
+  const [standardRows, secretNameKeys] = await Promise.all([
+    prisma.adminCatalogItem.findMany({
+      where: { itemSecretMenuOnly: false },
+      select: { id: true, name: true },
     }),
-  );
+    loadSecretMenuNameImportKeys(),
+  ]);
+
+  return standardRows
+    .map((row) => ({
+      id: row.id,
+      name: row.name,
+      alreadyImported: secretNameKeys.has(adminCatalogItemNameImportKey(row.name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
 function catalogItemCreateDataFromStandardRow(
   source: StandardCatalogRow,
+  sortOrder: number,
 ): Prisma.AdminCatalogItemCreateInput {
   return {
     name: source.name,
-    sortOrder: source.sortOrder,
+    sortOrder,
     storefrontDescription: source.storefrontDescription,
     variants: source.variants as Prisma.InputJsonValue,
     itemPlatformProduct: source.itemPlatformProductId
@@ -127,52 +149,94 @@ async function copyCatalogItemImagesFromStandardRow(
   return { itemExampleListingUrl, itemSizeExampleImageUrl };
 }
 
-/** Duplicate standard Admin list rows into the secret menu catalog. */
-export async function copyStandardAdminCatalogToSecretMenu(options?: {
-  replaceExisting?: boolean;
-}): Promise<CopyStandardCatalogToSecretMenuResult> {
-  const replaceExisting = options?.replaceExisting ?? false;
+async function copySingleStandardRowToSecretMenu(
+  source: StandardCatalogRow,
+  sortOrder: number,
+): Promise<void> {
+  const created = await prisma.adminCatalogItem.create({
+    data: catalogItemCreateDataFromStandardRow(source, sortOrder),
+    select: { id: true },
+  });
 
-  const [standardRows, secretCount] = await Promise.all([
-    loadStandardCatalogRowsForCopy(),
-    prisma.adminCatalogItem.count({ where: { itemSecretMenuOnly: true } }),
+  const urls = await copyCatalogItemImagesFromStandardRow(source, created.id);
+  if (
+    urls.itemExampleListingUrl !== source.itemExampleListingUrl ||
+    urls.itemSizeExampleImageUrl !== source.itemSizeExampleImageUrl
+  ) {
+    await prisma.adminCatalogItem.update({
+      where: { id: created.id },
+      data: urls,
+    });
+  }
+}
+
+/** Import selected standard Admin list rows into the secret menu catalog. */
+export async function importStandardAdminCatalogItemsToSecretMenu(
+  sourceItemIds: string[],
+): Promise<ImportStandardCatalogToSecretMenuResult> {
+  const uniqueIds = [...new Set(sourceItemIds.map((id) => id.trim()).filter(Boolean))];
+  if (uniqueIds.length === 0) {
+    return { ok: false, error: "Select at least one Admin list item to import." };
+  }
+
+  const [standardRows, secretNameKeys, maxSort] = await Promise.all([
+    loadStandardCatalogRowsByIds(uniqueIds),
+    loadSecretMenuNameImportKeys(),
+    prisma.adminCatalogItem.aggregate({
+      where: { itemSecretMenuOnly: true },
+      _max: { sortOrder: true },
+    }),
   ]);
 
   if (standardRows.length === 0) {
-    return { ok: false, error: "The Admin list has no standard catalog items to copy." };
+    return { ok: false, error: "No matching Admin list items found for import." };
   }
 
-  if (secretCount > 0 && !replaceExisting) {
+  const foundIds = new Set(standardRows.map((r) => r.id));
+  const missingIds = uniqueIds.filter((id) => !foundIds.has(id));
+  if (missingIds.length > 0) {
     return {
       ok: false,
-      error: `Secret menu already has ${secretCount} item(s). Replace them first or confirm replace.`,
+      error: `Some selected items are missing or not on the Admin list (${missingIds.length}). Refresh and try again.`,
     };
   }
 
-  if (replaceExisting && secretCount > 0) {
-    await deleteSecretMenuCatalogItems();
-  }
-
+  let sortOrder = (maxSort._max.sortOrder ?? 0) + 1;
   let copiedCount = 0;
-  for (const source of standardRows) {
-    const created = await prisma.adminCatalogItem.create({
-      data: catalogItemCreateDataFromStandardRow(source),
-      select: { id: true },
-    });
+  let skippedAlreadyPresentCount = 0;
 
-    const urls = await copyCatalogItemImagesFromStandardRow(source, created.id);
-    if (
-      urls.itemExampleListingUrl !== source.itemExampleListingUrl ||
-      urls.itemSizeExampleImageUrl !== source.itemSizeExampleImageUrl
-    ) {
-      await prisma.adminCatalogItem.update({
-        where: { id: created.id },
-        data: urls,
-      });
+  for (const source of standardRows) {
+    const nameKey = adminCatalogItemNameImportKey(source.name);
+    if (secretNameKeys.has(nameKey)) {
+      skippedAlreadyPresentCount += 1;
+      continue;
     }
 
+    await copySingleStandardRowToSecretMenu(source, sortOrder);
+    secretNameKeys.add(nameKey);
+    sortOrder += 1;
     copiedCount += 1;
   }
 
-  return { ok: true, copiedCount };
+  if (copiedCount === 0) {
+    return {
+      ok: false,
+      error:
+        skippedAlreadyPresentCount > 0
+          ? "Every selected item is already in the secret menu catalog (matched by name)."
+          : "Nothing was imported.",
+    };
+  }
+
+  return { ok: true, copiedCount, skippedAlreadyPresentCount };
+}
+
+/** Import every Admin list item not yet present in the secret menu (by name). */
+export async function importAllMissingStandardAdminCatalogToSecretMenu(): Promise<ImportStandardCatalogToSecretMenuResult> {
+  const options = await loadAdminCatalogSecretMenuImportOptions();
+  const ids = options.filter((o) => !o.alreadyImported).map((o) => o.id);
+  if (ids.length === 0) {
+    return { ok: false, error: "Every Admin list item is already in the secret menu catalog." };
+  }
+  return importStandardAdminCatalogItemsToSecretMenu(ids);
 }

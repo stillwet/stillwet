@@ -22,6 +22,11 @@ import {
 } from "@/components/admin/AdminCatalogCanvasPresentationFields";
 import type { CatalogCanvasPresentationPresetId } from "@/lib/admin-catalog-canvas-presentation";
 import { AdminCatalogArtworkRequirementFields } from "@/components/admin/AdminCatalogArtworkRequirementFields";
+import {
+  AdminCatalogAdvancedFieldsExpand,
+  AdminCatalogPicturesExpand,
+} from "@/components/admin/AdminCatalogAdvancedFieldsExpand";
+import { AdminCatalogItemReferencePhotoFields } from "@/components/admin/AdminCatalogItemReferencePhotoFields";
 import { AdminCatalogItemArtworkSourceTierOverride, ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 import { AdminCatalogItemLevelFields } from "@/components/admin/AdminCatalogItemLevelFields";
@@ -32,6 +37,7 @@ import {
   type AdminListItemTag,
   type AdminListTagOption,
 } from "@/components/admin/AdminCatalogItemTagsEditor";
+import { adminCatalogItemHasAdvancedArtworkSettings, adminCatalogItemHasPictureSettings } from "@/lib/admin-catalog-advanced-fields";
 
 export type AdminListItemSerializable = {
   id: string;
@@ -180,66 +186,88 @@ export function AdminListItemEditForm({
 
   const serverError = saveState?.ok === false ? saveState.error : null;
   const displayError = clientError ?? serverError;
+  const editFormId = `admin-catalog-item-edit-form-${item.id}`;
+  const advancedFieldsDefaultOpen = adminCatalogItemHasAdvancedArtworkSettings(item);
+  const picturesDefaultOpen = adminCatalogItemHasPictureSettings(item);
 
   return (
-    <div className="mb-6 rounded-lg border border-amber-900/50 bg-amber-950/20 p-4">
+    <div className="relative mb-6 rounded-lg border border-amber-900/50 bg-amber-950/20 p-4">
       <h3 className="text-xs font-medium uppercase tracking-wide text-amber-200/80">Edit item</h3>
       <p className="mt-1 text-[11px] text-zinc-500">Updating “{item.name}”</p>
-      <form onSubmit={submitEdit} className="mt-4 space-y-4">
-        <label className="block text-xs text-zinc-500">
-          Item name
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            required
-            maxLength={300}
-            className="mt-1 block w-full max-w-xl rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+
+      <div className="mt-4 space-y-6">
+        <div className="space-y-4">
+          <label className="block text-xs text-zinc-500">
+            Item name
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              required
+              maxLength={300}
+              className="mt-1 block w-full max-w-xl rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+            />
+          </label>
+          <AdminCatalogItemLevelFields
+            minPriceDollars={editItemMinPriceDollars}
+            goodsServicesCostDollars={editItemGoodsServicesCostDollars}
+            storefrontDescription={editStorefrontDescription}
+            onChangeMinPriceDollars={setEditItemMinPriceDollars}
+            onChangeGoodsServicesCostDollars={setEditItemGoodsServicesCostDollars}
+            onChangeStorefrontDescription={setEditStorefrontDescription}
           />
-        </label>
-        <AdminCatalogItemLevelFields
-          exampleListingUrl={editItemExampleListingUrl}
-          minPriceDollars={editItemMinPriceDollars}
-          goodsServicesCostDollars={editItemGoodsServicesCostDollars}
-          storefrontDescription={editStorefrontDescription}
-          onChangeExampleListingUrl={setEditItemExampleListingUrl}
-          onChangeMinPriceDollars={setEditItemMinPriceDollars}
-          onChangeGoodsServicesCostDollars={setEditItemGoodsServicesCostDollars}
-          onChangeStorefrontDescription={setEditStorefrontDescription}
-        />
-        <AdminCatalogItemSizeExampleFields
-          sizeExampleImageUrl={editItemSizeExampleImageUrl}
-          onChangeSizeExampleImageUrl={setEditItemSizeExampleImageUrl}
-        />
-        <AdminCatalogArtworkRequirementFields
-          imageRequirementLabel={editItemImageRequirementLabel}
-          printAreaWidthPx={editItemPrintAreaWidthPx}
-          printAreaHeightPx={editItemPrintAreaHeightPx}
-          minArtworkDpi={editItemMinArtworkDpi}
-          artworkLetterboxFill={editItemArtworkLetterboxFill}
-          artworkSourceTierOverride={editItemArtworkSourceTierOverride}
-          onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
-          onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
-          onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
-          onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
-          onChangeArtworkLetterboxFill={setEditItemArtworkLetterboxFill}
-          onChangeArtworkSourceTierOverride={setEditItemArtworkSourceTierOverride}
-        />
-        <AdminCatalogCanvasPresentationFields
-          canvasPresentationPreset={editCanvasPresentationPreset}
-          artworkTemplatePreset={editArtworkTemplatePreset}
-          onChangeCanvasPresentationPreset={setEditCanvasPresentationPreset}
-          onChangeArtworkTemplatePreset={setEditArtworkTemplatePreset}
-        />
-        {displayError ? (
-          <p className="text-xs text-amber-200/90" role="alert">
-            {displayError}
-          </p>
-        ) : null}
-        <AdminCatalogItemTagsEditor itemId={item.id} linkedTags={item.tags} allTags={allTags} />
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-zinc-800 pt-4">
+          <AdminCatalogPicturesExpand defaultOpen={picturesDefaultOpen}>
+            <AdminCatalogItemReferencePhotoFields
+              exampleListingUrl={editItemExampleListingUrl}
+              onChangeExampleListingUrl={setEditItemExampleListingUrl}
+            />
+            <AdminCatalogItemSizeExampleFields
+              sizeExampleImageUrl={editItemSizeExampleImageUrl}
+              onChangeSizeExampleImageUrl={setEditItemSizeExampleImageUrl}
+            />
+            <AdminCatalogItemSizeExampleImageSection
+              catalogItemId={item.id}
+              sizeExampleImageUrl={editItemSizeExampleImageUrl}
+              onUploadedUrl={setEditItemSizeExampleImageUrl}
+              r2Configured={r2Configured}
+            />
+          </AdminCatalogPicturesExpand>
+          <form id={editFormId} onSubmit={submitEdit} className="space-y-4">
+            <AdminCatalogAdvancedFieldsExpand defaultOpen={advancedFieldsDefaultOpen}>
+            <AdminCatalogArtworkRequirementFields
+              imageRequirementLabel={editItemImageRequirementLabel}
+              printAreaWidthPx={editItemPrintAreaWidthPx}
+              printAreaHeightPx={editItemPrintAreaHeightPx}
+              minArtworkDpi={editItemMinArtworkDpi}
+              artworkLetterboxFill={editItemArtworkLetterboxFill}
+              artworkSourceTierOverride={editItemArtworkSourceTierOverride}
+              onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
+              onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
+              onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
+              onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
+              onChangeArtworkLetterboxFill={setEditItemArtworkLetterboxFill}
+              onChangeArtworkSourceTierOverride={setEditItemArtworkSourceTierOverride}
+            />
+            <AdminCatalogCanvasPresentationFields
+              canvasPresentationPreset={editCanvasPresentationPreset}
+              artworkTemplatePreset={editArtworkTemplatePreset}
+              onChangeCanvasPresentationPreset={setEditCanvasPresentationPreset}
+              onChangeArtworkTemplatePreset={setEditArtworkTemplatePreset}
+            />
+          </AdminCatalogAdvancedFieldsExpand>
+            {displayError ? (
+              <p className="text-xs text-amber-200/90" role="alert">
+                {displayError}
+              </p>
+            ) : null}
+            <AdminCatalogItemTagsEditor itemId={item.id} linkedTags={item.tags} allTags={allTags} />
+          </form>
+        </div>
+
+        <div className="flex flex-wrap gap-2 border-t border-zinc-800 pt-4">
           <button
             type="submit"
+            form={editFormId}
             disabled={savePending}
             className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
           >
@@ -254,13 +282,7 @@ export function AdminListItemEditForm({
             Cancel
           </button>
         </div>
-      </form>
-      <AdminCatalogItemSizeExampleImageSection
-        catalogItemId={item.id}
-        sizeExampleImageUrl={editItemSizeExampleImageUrl}
-        onUploadedUrl={setEditItemSizeExampleImageUrl}
-        r2Configured={r2Configured}
-      />
+      </div>
     </div>
   );
 }
