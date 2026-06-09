@@ -305,32 +305,57 @@ export async function uploadShopProfileImageSetup(
   const previousUrl = shop.profileImageUrl;
   const previousKey = previousUrl ? publicUrlToR2ObjectKey(previousUrl) : null;
 
-  // Best-effort: remove any old rolling keys before writing the next one.
-  // (We run this *before* upload so we never delete the new key by mistake.)
-  await deleteLegacyShopProfileAvatarKeys(shop.id);
-  // Best-effort: also remove the old canonical key used by earlier versions.
-  await deleteR2ObjectsByKeys([shopProfileAvatarObjectKey(shop.id)]);
+  try {
+    // Best-effort: remove any old rolling keys before writing the next one.
+    // (We run this *before* upload so we never delete the new key by mistake.)
+    await deleteLegacyShopProfileAvatarKeys(shop.id);
+    // Best-effort: also remove the old canonical key used by earlier versions.
+    await deleteR2ObjectsByKeys([shopProfileAvatarObjectKey(shop.id)]);
 
-  const key = `shops/${shop.id}/avatar-${randomUUID()}.webp`;
-  const url = await putPublicR2Object({
-    key,
-    body: webp,
-    contentType: "image/webp",
-  });
-  // Best-effort: delete the previous avatar object (covers older `avatar.webp?v=...` URLs too).
-  if (previousKey && previousKey.startsWith(`shops/${shop.id}/`) && previousKey !== key) {
-    await deleteR2ObjectsByKeys([previousKey]);
+    const key = `shops/${shop.id}/avatar-${randomUUID()}.webp`;
+    const url = await putPublicR2Object({
+      key,
+      body: webp,
+      contentType: "image/webp",
+    });
+    // Best-effort: delete the previous avatar object (covers older `avatar.webp?v=...` URLs too).
+    if (previousKey && previousKey.startsWith(`shops/${shop.id}/`) && previousKey !== key) {
+      await deleteR2ObjectsByKeys([previousKey]);
+    }
+
+    await prisma.shop.update({
+      where: { id: shop.id },
+      data: { profileImageUrl: url },
+    });
+    revalidatePath("/dashboard");
+    revalidatePath(`/s/${shop.slug}`);
+    revalidatePath("/shops");
+    revalidatePublicStorefront();
+    return { ok: true, profileImageUrl: url };
+  } catch (e) {
+    console.error("[uploadShopProfileImageSetup]", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    if (/body exceeded|1\s*mb limit|413|payload too large/i.test(msg)) {
+      return {
+        ok: false,
+        error:
+          "That photo is too large for upload (server limit). Try a smaller file or redeploy after the latest build — profile uploads need a 16 MB Server Action limit.",
+      };
+    }
+    if (/R2 bucket credentials|R2_PUBLIC_BASE_URL missing/i.test(msg)) {
+      return {
+        ok: false,
+        error: "Image uploads are not configured on this server (R2 env vars missing).",
+      };
+    }
+    if (/public image URL is not reachable/i.test(msg)) {
+      return { ok: false, error: msg };
+    }
+    return {
+      ok: false,
+      error: "Could not upload that photo. Try a smaller image or contact support.",
+    };
   }
-
-  await prisma.shop.update({
-    where: { id: shop.id },
-    data: { profileImageUrl: url },
-  });
-  revalidatePath("/dashboard");
-  revalidatePath(`/s/${shop.slug}`);
-  revalidatePath("/shops");
-  revalidatePublicStorefront();
-  return { ok: true, profileImageUrl: url };
 }
 
 export type ListingArtworkStagingUploadResult =

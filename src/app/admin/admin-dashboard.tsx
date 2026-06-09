@@ -692,6 +692,7 @@ async function AdminDashboardPageBody({
                 smErr={typeof sp.smErr === "string" ? sp.smErr : undefined}
                 smGranted={typeof sp.smGranted === "string" ? sp.smGranted : undefined}
                 smRevoked={typeof sp.smRevoked === "string" ? sp.smRevoked : undefined}
+                smCopied={typeof sp.smCopied === "string" ? sp.smCopied : undefined}
               />
             </Suspense>
           ) : adminSection === "backend" && inventoryTab === "printify-api" ? (

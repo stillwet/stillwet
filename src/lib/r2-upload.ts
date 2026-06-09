@@ -1038,6 +1038,57 @@ export async function deleteAdminCatalogItemSizeExampleObject(catalogItemId: str
   }
 }
 
+/** Copy an object within the configured R2 bucket (best-effort). */
+export async function copyR2ObjectWithinBucket(
+  sourceKey: string,
+  destKey: string,
+  contentType = "image/webp",
+): Promise<boolean> {
+  if (!isR2UploadConfigured()) return false;
+  const bucket = readR2BucketName();
+  if (!bucket) return false;
+
+  const client = r2S3Client();
+  const copySource = `${bucket}/${sourceKey}`;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await client.send(
+        new CopyObjectCommand({
+          Bucket: bucket,
+          Key: destKey,
+          CopySource: copySource,
+          ContentType: contentType,
+        }),
+      );
+      return true;
+    } catch {
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 400));
+    }
+  }
+
+  try {
+    const getRes = await client.send(new GetObjectCommand({ Bucket: bucket, Key: sourceKey }));
+    const chunks: Uint8Array[] = [];
+    if (getRes.Body) {
+      for await (const chunk of getRes.Body as AsyncIterable<Uint8Array>) {
+        chunks.push(chunk);
+      }
+    }
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: destKey,
+        Body: Buffer.concat(chunks),
+        ContentType: contentType,
+      }),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Optional admin-set listing image (WebP, overwritten on each save). */
 export function shopListingAdminSecondaryImageObjectKey(shopId: string, listingId: string): string {
   return `shops/${shopId}/listing-admin-secondary/${listingId}.webp`;

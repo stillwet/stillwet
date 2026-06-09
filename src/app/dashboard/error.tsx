@@ -20,7 +20,9 @@ export default function DashboardError({
     /Cannot read properties of undefined \(reading 'count'\)/i.test(msg) ||
     /moderationKeyword/i.test(msg);
   const looksLikeUploadOrAction =
-    /body exceeded|1\s*mb limit|unexpected response was received from the server/i.test(msg);
+    /body exceeded|1\s*mb limit|unexpected response was received from the server|Server Components render/i.test(
+      msg,
+    );
   const looksLikeDb =
     !looksLikeStaleClient &&
     !looksLikeUploadOrAction &&
@@ -34,7 +36,7 @@ export default function DashboardError({
         {looksLikeStaleClient
           ? "The running app is using an outdated Prisma Client. Run `npx prisma generate`, redeploy, or restart the server so delegates like `moderationKeyword` are available."
           : looksLikeUploadOrAction
-            ? "A listing upload or dashboard refresh failed (often artwork over the size limit). Try a smaller image (pick up to 15 MB; stored at 10 MB after crop), or open the Listings tab after a full page reload."
+            ? "An upload or dashboard refresh failed (often a shop profile photo or listing artwork over the 1 MB Server Action default). Try a smaller image, or redeploy after the latest build (profile uploads allow up to 16 MB). Reload the page before retrying."
             : looksLikeDb
               ? "Production Postgres may be missing a recent migration (for example `20260516120000_moderation_keyword` or `listingFeeBonusFreeSlots` on Shop). Apply pending migrations, then redeploy."
               : "Something went wrong while loading the shop dashboard. Check Vercel → Logs for the stack trace."}

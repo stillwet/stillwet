@@ -8,18 +8,26 @@ import { isR2UploadConfigured } from "@/lib/r2-upload";
 import { AdminListAddItemForm } from "@/components/admin/AdminListAddItemForm";
 import { AdminListItemsPanel } from "@/components/admin/AdminListItemsPanel";
 import { AdminListTabLoadError } from "@/components/admin/AdminListTabLoadError";
+import { AdminSecretMenuCopyFromListPanel } from "@/components/admin/AdminSecretMenuCopyFromListPanel";
 import { AdminSecretMenuShopsPanel } from "@/components/admin/AdminSecretMenuShopsPanel";
 
 type AdminSecretMenuTabProps = {
   smErr?: string;
   smGranted?: string;
   smRevoked?: string;
+  smCopied?: string;
 };
 
-export async function AdminSecretMenuTab({ smErr, smGranted, smRevoked }: AdminSecretMenuTabProps) {
+export async function AdminSecretMenuTab({
+  smErr,
+  smGranted,
+  smRevoked,
+  smCopied,
+}: AdminSecretMenuTabProps) {
   try {
-    const [items, allTags, shopRows, shopPickerOptions] = await Promise.all([
+    const [items, standardItemCount, allTags, shopRows, shopPickerOptions] = await Promise.all([
       loadAdminCatalogItemsForListTab({ secretMenuOnly: true }),
+      prisma.adminCatalogItem.count({ where: { itemSecretMenuOnly: false } }),
       prisma.tag.findMany({
         orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
         select: { id: true, name: true, slug: true },
@@ -69,6 +77,14 @@ export async function AdminSecretMenuTab({ smErr, smGranted, smRevoked }: AdminS
             smErr={smErr}
             smGranted={smGranted}
             smRevoked={smRevoked}
+          />
+        </div>
+
+        <div className="mt-6">
+          <AdminSecretMenuCopyFromListPanel
+            standardItemCount={standardItemCount}
+            secretItemCount={items.length}
+            smCopied={smCopied}
           />
         </div>
 

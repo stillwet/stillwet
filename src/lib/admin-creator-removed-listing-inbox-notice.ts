@@ -48,9 +48,7 @@ export async function notifyAdminCreatorRemovedListingFromShop(
     "Storefront listing images on R2 were deleted. The listing row and order history are retained.",
   ];
 
-  const subject = printifyProductId
-    ? `Shop removed listing — ${shopLabel} (Printify ${printifyProductId})`
-    : `Shop removed listing — ${shopLabel}`;
+  const subject = "Removed Listing - Delete Printify Item";
 
   await recordAdminInboxSystemNotice({
     resendEmailIdSuffix: `creator-removed-listing:${listing.id}:${removedAt.getTime()}`,

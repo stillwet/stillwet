@@ -33,6 +33,7 @@
     "db:copy-admin-config": "tsx scripts/copy-admin-config-to-prod.ts",
     "db:copy-flairs-local-to-prod": "tsx scripts/copy-flairs-local-to-prod.ts",
     "db:copy-site-email-templates": "tsx scripts/copy-site-email-templates-to-prod.ts",
+    "db:copy-admin-catalog-to-secret-menu": "tsx scripts/copy-admin-catalog-to-secret-menu.ts",
     "generate:beta-tester-codes": "tsx scripts/generate-beta-tester-codes.ts",
     "test:r2": "tsx scripts/test-r2-upload.ts",
     "r2:prune-listings": "tsx scripts/r2-purge-orphan-listings.ts",

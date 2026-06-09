@@ -25,6 +25,13 @@ const nextConfig: NextConfig = {
     lockDistDir: false,
     /** All listing artwork uses chunked staging API; proxy limit applies to chunk route bodies. */
     proxyClientMaxBodySize: "32mb",
+    /**
+     * Shop profile photo upload uses a Server Action (accepts up to 15 MB before WebP compression).
+     * Default Next.js limit is 1 MB, which surfaces as a generic RSC error in production.
+     */
+    serverActions: {
+      bodySizeLimit: "16mb",
+    },
   },
   /**
    * First compile of a route segment can exceed the default chunk script timeout on slow disks /

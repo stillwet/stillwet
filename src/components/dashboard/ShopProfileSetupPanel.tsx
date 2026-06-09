@@ -264,11 +264,12 @@ export function ShopProfileSetupPanel(props: {
         const msg = e instanceof Error ? e.message : String(e);
         const actionResponseRace =
           /body exceeded|1\s*mb limit|413|payload too large/i.test(msg) ||
-          /unexpected response was received from the server/i.test(msg);
+          /unexpected response was received from the server/i.test(msg) ||
+          /An error occurred in the Server Components render/i.test(msg);
         setMessage({
           tone: "err",
           text: actionResponseRace
-            ? "Upload may have succeeded but the dashboard could not refresh. Reload the page to see your photo, or try a smaller image."
+            ? "Upload failed — the photo may be over the server size limit (try under 5 MB), or the dashboard could not refresh after upload. Reload the page; if it still fails, redeploy so the 16 MB upload limit is active."
             : msg || "Could not upload that photo. Try again or contact support.",
         });
         return;
