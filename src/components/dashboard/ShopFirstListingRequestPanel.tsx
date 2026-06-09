@@ -351,6 +351,29 @@ export function ShopFirstListingRequestPanel(props: {
     [catalogGroups],
   );
 
+  const catalogPickerSections = useMemo(() => {
+    const sections: { key: string; title: string; groups: ShopSetupCatalogGroup[] }[] = [
+      {
+        key: "phone_pic_safe",
+        title: CATALOG_ARTWORK_SOURCE_TIER_LABELS.phone_pic_safe,
+        groups: catalogGroupsByTier.phonePicSafe,
+      },
+      {
+        key: "camera_or_vector_only",
+        title: `${CATALOG_ARTWORK_SOURCE_TIER_LABELS.camera_or_vector_only} -- requires higher resolution images`,
+        groups: catalogGroupsByTier.cameraOrVectorOnly,
+      },
+    ];
+    if (extendedCatalogGroups.length > 0) {
+      sections.push({
+        key: "extended_catalog",
+        title: SHOP_EXTENDED_CATALOG_SECTION_LABEL,
+        groups: extendedCatalogGroups,
+      });
+    }
+    return sections;
+  }, [catalogGroupsByTier, extendedCatalogGroups]);
+
   const selectedCatalogGroup = useMemo(() => {
     for (const g of allCatalogGroups) {
       if (g.option.productId === listingProductId) return g;
@@ -1099,20 +1122,7 @@ export function ShopFirstListingRequestPanel(props: {
                   aria-label="Items from admin catalog"
                   aria-disabled={shopAtInReviewListingLimit ? true : undefined}
                 >
-                {(
-                  [
-                    {
-                      key: "phone_pic_safe",
-                      title: CATALOG_ARTWORK_SOURCE_TIER_LABELS.phone_pic_safe,
-                      groups: catalogGroupsByTier.phonePicSafe,
-                    },
-                    {
-                      key: "camera_or_vector_only",
-                      title: `${CATALOG_ARTWORK_SOURCE_TIER_LABELS.camera_or_vector_only} -- requires higher resolution images`,
-                      groups: catalogGroupsByTier.cameraOrVectorOnly,
-                    },
-                  ] as const
-                ).map((section) =>
+                {catalogPickerSections.map((section) =>
                   section.groups.length === 0 ? null : (
                     <li key={section.key} className="list-none">
                       <div className={CATALOG_PICKER_SECTION_ROW} aria-hidden>

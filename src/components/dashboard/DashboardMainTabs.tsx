@@ -118,6 +118,7 @@ export type DashboardSetupPanelProps = {
   shop: ShopSetupShopPayload;
   itemGuidelinesAcknowledged: boolean;
   catalogGroups: ShopSetupCatalogGroup[];
+  extendedCatalogGroups: ShopSetupCatalogGroup[];
   steps: ShopSetupSteps;
   incompleteSetupCount: number;
   r2Configured: boolean;
@@ -1385,6 +1386,7 @@ export function DashboardMainTabs(props: {
         ? {
             ...s,
             catalogGroups: rc.catalogGroups,
+            extendedCatalogGroups: rc.extendedCatalogGroups ?? [],
             listingPickerDiagnostics: { adminCatalogItemCount: rc.adminCatalogItemCount },
             unpaidPublicationFeeListings: rc.unpaidPublicationFeeListings,
             freeListingSlots: rc.freeListingSlots,
