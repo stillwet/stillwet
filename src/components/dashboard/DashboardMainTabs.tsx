@@ -28,6 +28,7 @@ import {
   listingFeeCentsForOrdinal,
   listingFeeFreeSlotCap,
 } from "@/lib/marketplace-constants";
+import { dashboardListingMinPriceHintCents } from "@/lib/listing-cart-price";
 import { navTabCountBadgeCircleClass } from "@/lib/nav-tab-count-badge";
 import type { UnpaidPublicationFeeListingRow } from "@/lib/listing-fee-unpaid-rows";
 import type { FreeListingRequestSlotsSummary } from "@/lib/marketplace-constants";

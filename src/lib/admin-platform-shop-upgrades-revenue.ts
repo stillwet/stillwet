@@ -61,7 +61,7 @@ export function giftedShopUpgradePurchaseWhere(gte: Date, lte: Date) {
       { googleShoppingCreditsGranted: { gt: 0 } },
       { shopFlairIncluded: true },
     ],
-  } as const;
+  };
 }
 
 export function promotionPurchaseMerchandiseCents(row: {

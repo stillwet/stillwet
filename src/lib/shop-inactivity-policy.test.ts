@@ -26,10 +26,12 @@ describe("shop inactivity policy", () => {
     assert.deepEqual(
       splitMerchandiseLineForInactiveShopCents({
         lineMerchandiseCents: 2500,
-        goodsServicesLineCents: 900,
+        cogsLineCents: 900,
+        productionFeeLineCents: 0,
       }),
       {
         goodsServicesCostCents: 900,
+        productionFeeCents: 0,
         platformCutCents: 1600,
         shopCutCents: 0,
       },
@@ -40,10 +42,12 @@ describe("shop inactivity policy", () => {
     assert.deepEqual(
       splitMerchandiseLineForInactiveShopCents({
         lineMerchandiseCents: 1000,
-        goodsServicesLineCents: 2000,
+        cogsLineCents: 2000,
+        productionFeeLineCents: 0,
       }),
       {
         goodsServicesCostCents: 1000,
+        productionFeeCents: 0,
         platformCutCents: 0,
         shopCutCents: 0,
       },
