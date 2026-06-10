@@ -10,10 +10,14 @@ import {
   merchandiseOrderTipProcessingFeeCents,
 } from "@/lib/admin-platform-sales-merged-lines";
 import {
+  mergedLineApplicationAmountCents,
   mergedLineCheckoutPaidCents,
+  mergedLineShopPayoutCents,
   mergedLineStripeBalanceFeeCents,
   platformCheckoutFullChargeCents,
 } from "@/lib/admin-platform-sales-merged-line-model";
+import { orderConnectApplicationFeeCents } from "@/lib/order-proceeds-splits";
+import { splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import { shopFlairPurchaseMerchandiseCents } from "@/lib/admin-platform-shop-upgrades-revenue";
 import {
@@ -111,6 +115,71 @@ describe("merchandise order admin line breakdown", () => {
     assert.equal(
       allocateMerchandiseLineStripeBalanceFeeCents(order, lineMerch),
       Math.round(stripeBalanceProcessingFeeCents(order.totalCents) / 2),
+    );
+  });
+
+  it("application amount is paid minus shop payout (Connect fee), not minus stripe balance fee", () => {
+    const subtotalCents = 2500;
+    const tipCents = 100;
+    const shippingCents = 500;
+    const processing = buyerPaymentProcessingFeeCents({
+      subtotalCents,
+      shippingCents,
+      tipCents,
+    });
+    const order = {
+      subtotalCents,
+      tipCents,
+      shippingCents,
+      totalCents: subtotalCents + tipCents + shippingCents + processing,
+    };
+    const split = splitMerchandiseLineWithItemCostCents({
+      lineMerchandiseCents: subtotalCents,
+      cogsLineCents: 900,
+      productionFeeLineCents: 115,
+    });
+    const line = {
+      kind: "merchandise" as const,
+      platformSaleCategory: "item" as const,
+      id: "line-1",
+      quantity: 1,
+      unitPriceCents: subtotalCents,
+      productName: "Test",
+      checkoutTotalCents: order.totalCents,
+      itemPriceCents: subtotalCents,
+      tipCents,
+      goodsServicesCostCents: split.goodsServicesCostCents,
+      productionFeeCents: split.productionFeeCents,
+      platformCutCents: split.platformCutCents,
+      shopCutCents: split.shopCutCents,
+      stripeFeeCents: merchandiseOrderStripeBalanceFeeCents(order),
+      tipProcessingFeeCents: PLATFORM_TIP_FEE_CENTS,
+      order: { id: "order-1", createdAt: new Date(), orderNumber: 1257 },
+      shop: null,
+      buyer: { email: null, shippingState: null, shippingCountry: null },
+      itemHref: null,
+    };
+
+    const applicationAmount = mergedLineApplicationAmountCents(line);
+    const connectApplicationFee = orderConnectApplicationFeeCents({
+      lines: [
+        {
+          goodsServicesCostCents: split.goodsServicesCostCents,
+          productionFeeCents: split.productionFeeCents,
+          platformCutCents: split.platformCutCents,
+        },
+      ],
+      tipCents,
+      paymentProcessingCents: processing,
+    });
+
+    assert.equal(mergedLineShopPayoutCents(line), split.shopCutCents + tipCents);
+    assert.equal(applicationAmount, order.totalCents - mergedLineShopPayoutCents(line));
+    assert.equal(applicationAmount, connectApplicationFee + shippingCents);
+    assert.ok(mergedLineStripeBalanceFeeCents(line) > 0);
+    assert.notEqual(
+      applicationAmount,
+      order.totalCents - mergedLineStripeBalanceFeeCents(line) - mergedLineShopPayoutCents(line),
     );
   });
 

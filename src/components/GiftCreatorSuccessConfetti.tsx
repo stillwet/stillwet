@@ -38,19 +38,12 @@ function buildConfettiPieces(): ConfettiPiece[] {
   }));
 }
 
-export function GiftCreatorSuccessHeader(props: { mode: "direct" | "setup" }) {
+export function GiftCreatorSuccessConfetti() {
   const pieces = useMemo(() => buildConfettiPieces(), []);
 
-  if (props.mode === "direct") {
-    return <h1 className="text-2xl font-semibold text-zinc-50">Gift sent</h1>;
-  }
-
   return (
-    <div className="relative pt-2">
-      <div
-        className="gift-confetti-burst pointer-events-none absolute -inset-x-6 -top-8 h-40 overflow-hidden"
-        aria-hidden
-      >
+    <div className="pointer-events-none relative -mt-2 mb-6 h-28 overflow-hidden" aria-hidden>
+      <div className="gift-confetti-burst absolute inset-x-0 top-0 h-40">
         {pieces.map((piece) => (
           <span
             key={piece.id}
@@ -68,7 +61,6 @@ export function GiftCreatorSuccessHeader(props: { mode: "direct" | "setup" }) {
           />
         ))}
       </div>
-      <h1 className="relative text-2xl font-semibold text-zinc-50">Woohoo! Gift is on the way!</h1>
     </div>
   );
 }

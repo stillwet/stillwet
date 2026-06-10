@@ -2,7 +2,11 @@ import Link from "next/link";
 import { ProductDetailAddToCart } from "@/components/ProductDetailAddToCart";
 import { productImageUrlsForShopListing } from "@/lib/product-media";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
-import { PRODUCT_HERO_GALLERY_WRAP_CLASS } from "@/lib/product-image-gallery-constants";
+import { ProductModalDetailGrid } from "@/components/ProductModalDetailGrid";
+import {
+  PRODUCT_HERO_GALLERY_MAX_WIDTH_CLASS,
+  PRODUCT_HERO_GALLERY_WRAP_CLASS,
+} from "@/lib/product-image-gallery-constants";
 import { StoreDocumentPanel } from "@/components/StoreDocumentPanel";
 import { SHOP_ALL_ROUTE } from "@/lib/constants";
 import type { StorefrontProduct } from "@/lib/product-storefront";
@@ -98,87 +102,106 @@ export function ProductDetailContent({
     </p>
   ) : null;
 
-  const grid = (
-    <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-8 xl:gap-x-10">
-      <div className={PRODUCT_HERO_GALLERY_WRAP_CLASS}>
-        <ProductImageGallery
-          images={images}
-          sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
-        />
-        {purchaseDisabled ? null : (
-          <ProductDetailAddToCart
-            productId={product.id}
-            shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
-            variant={variant}
-          />
-        )}
-      </div>
-      <div
-        className={
-          variant === "modal"
-            ? `${PRODUCT_HERO_GALLERY_WRAP_CLASS} aspect-square overflow-y-auto overscroll-contain rounded-xl bg-zinc-950/92 p-4 sm:p-5`
-            : undefined
-        }
-      >
-        {tenant ? (
-          <p className="m-0">
-            <Link
-              href={
-                shopSlug === PLATFORM_SHOP_SLUG
-                  ? allProductsHref
-                  : `/s/${encodeURIComponent(shopSlug)}`
-              }
-              className={SHOP_NAME_LINK_CLASS}
-            >
-              {tenant.shopDisplayName}
-            </Link>
-          </p>
-        ) : null}
-        {variant === "page" ? (
-          <h1
-            className={
-              tenant
-                ? "mt-1.5 text-sm font-medium leading-snug text-zinc-100 sm:mt-2 sm:text-base"
-                : "m-0 text-sm font-medium leading-snug text-zinc-100 sm:text-base"
+  const detailsColumn = (
+    <>
+      {tenant ? (
+        <p className="m-0">
+          <Link
+            href={
+              shopSlug === PLATFORM_SHOP_SLUG
+                ? allProductsHref
+                : `/s/${encodeURIComponent(shopSlug)}`
             }
+            className={SHOP_NAME_LINK_CLASS}
           >
-            {displayItemName}
-          </h1>
-        ) : null}
-        {variant === "page" ? adminCatalogSubtitle : null}
-        <p
+            {tenant.shopDisplayName}
+          </Link>
+        </p>
+      ) : null}
+      {variant === "page" ? (
+        <h1
           className={
-            variant === "page" || tenant
-              ? "mt-3 text-2xl text-blue-200/90"
-              : "text-2xl text-blue-200/90"
+            tenant
+              ? "mt-1.5 text-sm font-medium leading-snug text-zinc-100 sm:mt-2 sm:text-base"
+              : "m-0 text-sm font-medium leading-snug text-zinc-100 sm:text-base"
           }
         >
-          {formatPrice(displayPriceCents)}
+          {displayItemName}
+        </h1>
+      ) : null}
+      {variant === "page" ? adminCatalogSubtitle : null}
+      <p
+        className={
+          variant === "page" || tenant
+            ? "mt-3 text-2xl text-blue-200/90"
+            : "text-2xl text-blue-200/90"
+        }
+      >
+        {formatPrice(displayPriceCents)}
+      </p>
+      {blurbText ? (
+        <p className="mt-3 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">
+          {blurbText}
         </p>
-        {blurbText ? (
-          <p className="mt-6 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">
-            {blurbText}
-          </p>
+      ) : null}
+      <div className={blurbText ? "mt-5" : "mt-6"}>
+        <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Item details</h3>
+        {description ? (
+          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-zinc-400">{description}</p>
         ) : null}
-        <div className={blurbText ? "mt-5" : "mt-6"}>
-          <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Item details</h3>
-          {description ? (
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-zinc-400">{description}</p>
-          ) : null}
-          <p
-            className={`text-sm leading-relaxed text-zinc-500 ${description ? "mt-3" : "mt-2"}`}
-          >
-            Free shipping
-          </p>
-        </div>
-        {keywordsText ? (
-          <p className="mt-8 text-[11px] leading-relaxed text-zinc-600">
-            <span className="text-zinc-500">Keywords:</span> {keywordsText}
-          </p>
-        ) : null}
+        <p
+          className={`text-sm leading-relaxed text-zinc-500 ${description ? "mt-3" : "mt-2"}`}
+        >
+          Free shipping
+        </p>
       </div>
-    </div>
+      {keywordsText ? (
+        <p className="mt-8 text-[11px] leading-relaxed text-zinc-600">
+          <span className="text-zinc-500">Keywords:</span> {keywordsText}
+        </p>
+      ) : null}
+    </>
   );
+
+  const grid =
+    variant === "modal" ? (
+      <ProductModalDetailGrid
+        galleryHeightKey={images.join("\u001f")}
+        gallery={
+          <ProductImageGallery
+            images={images}
+            sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
+          />
+        }
+        details={detailsColumn}
+        addToCart={
+          purchaseDisabled ? null : (
+            <ProductDetailAddToCart
+              productId={product.id}
+              shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
+              variant={variant}
+            />
+          )
+        }
+      />
+    ) : (
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-8 xl:gap-x-10">
+        <div className={PRODUCT_HERO_GALLERY_MAX_WIDTH_CLASS}>
+          <ProductImageGallery
+            images={images}
+            sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
+          />
+          {purchaseDisabled ? null : (
+            <ProductDetailAddToCart
+              productId={product.id}
+              shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
+              variant={variant}
+            />
+          )}
+        </div>
+        <div>{detailsColumn}</div>
+      </div>
+    );
 
   if (variant === "page") {
     return (
@@ -188,6 +211,7 @@ export function ProductDetailContent({
         showBackLink={false}
         closeHref={allProductsHref}
         omitHeaderTitle
+        panelPaddingClass="px-5 sm:px-8 md:px-10"
       >
         {breadcrumb ? <div className="-mt-2">{breadcrumb}</div> : null}
         {grid}

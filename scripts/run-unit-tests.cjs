@@ -17,6 +17,7 @@ const tests = [
   "src/lib/creator-gift-code-expiration.test.ts",
   "src/lib/admin-announcements.test.ts",
   "src/lib/admin-platform-sales-stripe-fee.test.ts",
+  "src/lib/order-proceeds-splits.test.ts",
   "src/lib/shop-inactivity-policy.test.ts",
   "src/lib/promotion-placement-ui-pure.test.ts",
   "src/lib/stripe-connect-account-prefill.test.ts",

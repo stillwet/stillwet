@@ -1,10 +1,14 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { FulfillmentType } from "@/generated/prisma/enums";
-import { baselineGoodsServicesUnitCents } from "@/lib/baseline-goods-services-unit-cents";
+import {
+  baselineGoodsServicesUnitCents,
+  baselineItemCostUnitCents,
+} from "@/lib/baseline-goods-services-unit-cents";
 import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 
 export type AdminCatalogRowForDisplay = {
   itemGoodsServicesCostCents: number;
+  itemProductionFeeCents?: number;
 };
 
 export function formatMoneyServer(cents: number): string {
@@ -51,7 +55,7 @@ export function paidOrderLineGoodsServicesDisplayCents(
   return Math.min(merch, Math.max(0, unit) * line.quantity);
 }
 
-/** Unit COGS for profit estimates on a listing (same rules as checkout). */
+/** Unit item cost (COGS + production fee) for profit estimates — same rules as checkout. */
 export function listingGoodsServicesUnitCents(
   listing: {
     baselineCatalogPickEncoded: string | null;
@@ -66,7 +70,7 @@ export function listingGoodsServicesUnitCents(
   const pick = parseBaselinePick(listing.baselineCatalogPickEncoded ?? "");
   const row = pick ? adminCatalogById.get(pick.itemId) : undefined;
   if (!row) return 0;
-  return baselineGoodsServicesUnitCents({
+  return baselineItemCostUnitCents({
     baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
     catalogRow: row,
   });

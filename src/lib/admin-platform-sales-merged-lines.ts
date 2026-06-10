@@ -899,6 +899,7 @@ export function emptyPlatformSalesPeriodTotals(): PlatformSalesPeriodTotals {
     itemPlatformCents: 0,
     itemGoodsServicesCents: 0,
     itemShopCutCents: 0,
+    itemShopTipCents: 0,
     itemProductionFeeCents: 0,
     itemPlatformMerchandiseTakeCents: 0,
     listingPlatformCents: 0,
@@ -923,6 +924,7 @@ export function averagePlatformSalesPeriodTotals(
     itemPlatformCents: avg(totals.itemPlatformCents),
     itemGoodsServicesCents: avg(totals.itemGoodsServicesCents),
     itemShopCutCents: avg(totals.itemShopCutCents),
+    itemShopTipCents: avg(totals.itemShopTipCents),
     itemProductionFeeCents: avg(totals.itemProductionFeeCents),
     itemPlatformMerchandiseTakeCents: avg(totals.itemPlatformMerchandiseTakeCents),
     listingPlatformCents: avg(totals.listingPlatformCents),
@@ -949,6 +951,8 @@ export type PlatformSalesPeriodTotals = {
   itemGoodsServicesCents: number;
   /** Sum of `OrderLine.shopCutCents` for paid merchandise in the window. */
   itemShopCutCents: number;
+  /** Sum of cart `tipCents` on paid merchandise orders in the window (shop tip share). */
+  itemShopTipCents: number;
   /** Sum of `OrderLine.productionFeeCents` for paid merchandise in the window. */
   itemProductionFeeCents: number;
   /** Merchandise platform retention (COGS + production fee + platform fee). */
@@ -973,19 +977,37 @@ export type PlatformSalesYtdTotals = PlatformSalesPeriodTotals & {
   year: number;
 };
 
-/** Shop sales breakdown header: Paid − Shop cut − COGS − Stripe balance fee. */
+/** Shop payout total for period breakdowns: merchandise shop cut + cart tips. */
+export function periodShopPayoutCents(
+  totals: Pick<PlatformSalesPeriodTotals, "itemShopCutCents" | "itemShopTipCents">,
+): number {
+  return totals.itemShopCutCents + totals.itemShopTipCents;
+}
+
+/** Period Connect application amount: buyer paid merchandise total − shop payout. */
+export function periodApplicationAmountCents(
+  totals: Pick<
+    PlatformSalesPeriodTotals,
+    "itemCheckoutPaidCents" | "itemShopCutCents" | "itemShopTipCents"
+  >,
+): number {
+  return totals.itemCheckoutPaidCents - periodShopPayoutCents(totals);
+}
+
+/** Shop sales breakdown header: Paid − Shop payout − COGS − Stripe balance fee. */
 export function shopSalesPaidCogsStripeNetCents(
   totals: Pick<
     PlatformSalesPeriodTotals,
     | "itemCheckoutPaidCents"
     | "itemShopCutCents"
+    | "itemShopTipCents"
     | "itemGoodsServicesCents"
     | "shopSalesPaymentProcessingCents"
   >,
 ): number {
   return (
     totals.itemCheckoutPaidCents -
-    totals.itemShopCutCents -
+    periodShopPayoutCents(totals) -
     totals.itemGoodsServicesCents -
     totals.shopSalesPaymentProcessingCents
   );
@@ -1136,6 +1158,10 @@ export async function aggregatePlatformRevenueForUtcWindow(
     (sum, order) => sum + order.totalCents,
     0,
   );
+  const itemShopTipCents = paidMerchandiseOrders.reduce(
+    (sum, order) => sum + Math.max(0, order.tipCents),
+    0,
+  );
   const shopSalesPaymentProcessingCents = paidMerchandiseOrders.reduce(
     (sum, order) => sum + merchandiseOrderStripeBalanceFeeCents(order),
     0,
@@ -1205,6 +1231,7 @@ export async function aggregatePlatformRevenueForUtcWindow(
     itemPlatformCents,
     itemGoodsServicesCents,
     itemShopCutCents,
+    itemShopTipCents,
     itemProductionFeeCents,
     itemPlatformMerchandiseTakeCents:
       itemPlatformCents + itemGoodsServicesCents + itemProductionFeeCents,
@@ -1299,6 +1326,7 @@ function sumPlatformSalesPeriodTotals(
     itemPlatformCents: a.itemPlatformCents + b.itemPlatformCents,
     itemGoodsServicesCents: a.itemGoodsServicesCents + b.itemGoodsServicesCents,
     itemShopCutCents: a.itemShopCutCents + b.itemShopCutCents,
+    itemShopTipCents: a.itemShopTipCents + b.itemShopTipCents,
     itemProductionFeeCents: a.itemProductionFeeCents + b.itemProductionFeeCents,
     itemPlatformMerchandiseTakeCents: a.itemPlatformMerchandiseTakeCents + b.itemPlatformMerchandiseTakeCents,
     listingPlatformCents: a.listingPlatformCents + b.listingPlatformCents,

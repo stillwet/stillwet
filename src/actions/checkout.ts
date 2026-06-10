@@ -32,6 +32,7 @@ import {
   baselineProductionFeeUnitCents,
 } from "@/lib/baseline-goods-services-unit-cents";
 import { itemCostLineCents, splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
+import { orderConnectMerchandiseApplicationFeeCents } from "@/lib/order-proceeds-splits";
 import { formatBuyerOrderNumber } from "@/lib/buyer-order-number";
 import { allocatePlatformOrderNumber } from "@/lib/platform-transaction-reference";
 import {
@@ -430,10 +431,7 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
     process.env.MARKETPLACE_STRIPE_CONNECT === "1" &&
     shopRecord?.stripeConnectAccountId &&
     shopRecord.connectChargesEnabled;
-  const merchandiseApplicationFeeCents = lineInputs.reduce(
-    (s, x) => s + x.platformCutCents + x.goodsServicesCostCents + x.productionFeeCents,
-    0,
-  );
+  const merchandiseApplicationFeeCents = orderConnectMerchandiseApplicationFeeCents(lineInputs);
   const tipProcessingSurchargeCents = checkoutTipProcessingSurchargeCents(tipCents);
   const applicationFeeCents =
     checkoutApplicationFeeCents({

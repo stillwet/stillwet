@@ -15,7 +15,7 @@ export function ProductDetailAddToCart({
     <ProductAddToCartForm
       productId={productId}
       shopSlug={shopSlug}
-      closeAfterAdd={variant === "modal"}
+      closeAfterAdd
     />
   );
 }

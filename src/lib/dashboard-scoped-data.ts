@@ -737,7 +737,13 @@ export async function loadDashboardScopedChunks(
   }
 
   const adminCatalogById = new Map<string, AdminCatalogRowForDisplay>(
-    adminCatalogRows.map((r) => [r.id, { itemGoodsServicesCostCents: r.itemGoodsServicesCostCents }]),
+    adminCatalogRows.map((r) => [
+      r.id,
+      {
+        itemGoodsServicesCostCents: r.itemGoodsServicesCostCents,
+        itemProductionFeeCents: r.itemProductionFeeCents,
+      },
+    ]),
   );
 
   let allOwnerNotices: Awaited<ReturnType<typeof prisma.shopOwnerNotice.findMany>> = [];

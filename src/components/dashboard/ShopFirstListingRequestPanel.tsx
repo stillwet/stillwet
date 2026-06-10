@@ -65,6 +65,7 @@ import {
   normalizeListingArtworkSourceFileForCrop,
 } from "@/lib/listing-artwork-source-compress";
 import { exportedImageMeetsPrintDimensions } from "@/lib/listing-artwork-print-area";
+import { itemCostUnitCents } from "@/lib/item-cost-cents";
 import { expectedShopProfitMerchandiseUnitCents } from "@/lib/marketplace-fee";
 import { parseKeywordTokensFromStored } from "@/lib/search-keywords-normalize";
 import {
@@ -1251,12 +1252,18 @@ export function ShopFirstListingRequestPanel(props: {
                       listingProfitHint(
                         listingPrice,
                         selectedCatalogGroup.option.minPriceCents,
-                        selectedCatalogGroup.option.goodsServicesCostCents,
+                        itemCostUnitCents(
+                          selectedCatalogGroup.option.goodsServicesCostCents,
+                          selectedCatalogGroup.option.productionFeeCents,
+                        ),
                       ) ?? "Est. profit: —"
                     }
                     priceDollarsStr={listingPrice}
                     minPriceCents={selectedCatalogGroup.option.minPriceCents}
-                    goodsServicesUnitCents={selectedCatalogGroup.option.goodsServicesCostCents}
+                    goodsServicesUnitCents={itemCostUnitCents(
+                      selectedCatalogGroup.option.goodsServicesCostCents,
+                      selectedCatalogGroup.option.productionFeeCents,
+                    )}
                   />
                 </div>
               </label>

@@ -5,7 +5,12 @@ import type {
   PlatformSalesPeriodTotals,
   PlatformSalesYtdTotals,
 } from "@/lib/admin-platform-sales-merged-lines";
-import { mergedLineTransactionPartyLabel, shopSalesPaidCogsStripeNetCents } from "@/lib/admin-platform-sales-merged-lines";
+import {
+  mergedLineTransactionPartyLabel,
+  periodApplicationAmountCents,
+  periodShopPayoutCents,
+  shopSalesPaidCogsStripeNetCents,
+} from "@/lib/admin-platform-sales-merged-lines";
 import { mergedLineDetailsExport } from "@/lib/admin-platform-sales-merged-line-model";
 import { AdminClearPlatformSalesForm } from "@/components/admin/AdminClearPlatformSalesForm";
 import { AdminPlatformSalesLinesTable } from "@/components/admin/AdminPlatformSalesLinesTable";
@@ -71,6 +76,7 @@ function PlatformRevenueTotalsCard({
           <div className="mt-2 space-y-2">
             <PlatformRevenueBreakdownTable
               subtle={subtle}
+              tone="shop"
               sectionTitle="Shop sales - Profit"
               headerTotalCents={itemSalesCutHeaderCents}
               rows={[
@@ -80,43 +86,54 @@ function PlatformRevenueTotalsCard({
                   cents: totals.itemCheckoutPaidCents,
                 },
                 {
-                  label: "Shop cut",
-                  hint: "Creator shop share of merchandise sales",
-                  cents: -totals.itemShopCutCents,
+                  label: "Stripe fee",
+                  hint: "Stripe balance fee on item checkouts (2.9% + 30¢ on full charge, rounded).",
+                  hintPosition: "below",
+                  cents: -totals.shopSalesPaymentProcessingCents,
+                },
+                {
+                  label: "Shop payout",
+                  hint: "Creator shop merchandise profit + tip",
+                  cents: -periodShopPayoutCents(totals),
+                },
+                {
+                  label: "Application amount",
+                  hint: "Amount Stripe will payout to platform",
+                  cents: periodApplicationAmountCents(totals),
+                  subheader: true,
                 },
                 {
                   label: "COGS",
-                  hint: "Printify item cost + shipping cost",
+                  hint: "Amount Printify will bill",
                   cents: -totals.itemGoodsServicesCents,
-                },
-                {
-                  label: "Stripe fee",
-                  hint: "Stripe balance fee on item checkouts (2.9% + 30¢ on full charge, rounded).",
-                  hintPosition: "above",
-                  cents: -totals.shopSalesPaymentProcessingCents,
+                  nested: true,
                 },
                 {
                   label: "10% Cut",
                   hint: `${marketplacePlatformFeePercent()}% platform fee on merchandise`,
                   cents: totals.itemPlatformCents,
                   mutedValue: true,
+                  nested: true,
                 },
                 {
                   label: "Prod Fee",
-                  hint: "Printify production fee per item",
+                  hint: "Platform additional fees",
                   cents: totals.itemProductionFeeCents,
                   mutedValue: true,
+                  nested: true,
                 },
                 {
                   label: "Tip processing",
-                  hint: "25¢ platform surcharge if tipped",
+                  hint: "Reference only — not included in application amount",
                   cents: totals.cartTipPlatformCents,
                   mutedValue: true,
+                  referenceOnly: true,
                 },
               ]}
             />
             <PlatformRevenueBreakdownTable
               subtle={subtle}
+              tone="platform"
               sectionTitle="Platform sales - Profit"
               headerTotalCents={ancillaryPlatformCents}
               rows={[
@@ -260,7 +277,7 @@ export function AdminPlatformSalesTab(props: {
 
   return (
     <section aria-label="Platform sales">
-      <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Platform sales</h2>
+      <h2 className="text-sm font-medium uppercase tracking-wide text-blue-400/90">Platform sales</h2>
 
       {monthSummaries ? (
         <div className="mt-4 space-y-4">

@@ -3,7 +3,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { AdminPlatformSalesMergedLine } from "@/lib/admin-platform-sales-merged-line-model";
-import { mergedLineCheckoutPaidCents, mergedLinePaidCogsStripeNetCents, mergedLineStripeBalanceFeeCents } from "@/lib/admin-platform-sales-merged-line-model";
+import {
+  mergedLineApplicationAmountCents,
+  mergedLineCheckoutPaidCents,
+  mergedLinePaidCogsStripeNetCents,
+  mergedLineShopPayoutCents,
+  mergedLineStripeBalanceFeeCents,
+} from "@/lib/admin-platform-sales-merged-line-model";
 import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
 import { marketplacePlatformFeePercent } from "@/lib/marketplace-fee";
 import {
@@ -55,17 +61,6 @@ function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBre
     },
   ];
 
-  if (l.kind === "merchandise") {
-    rows.push({ label: "Shop cut", cents: -l.shopCutCents });
-    if (l.goodsServicesCostCents > 0) {
-      rows.push({
-        label: "COGS",
-        hint: "Printify item cost + shipping cost",
-        cents: -l.goodsServicesCostCents,
-      });
-    }
-  }
-
   if (mergedLineStripeBalanceFeeCents(l) > 0) {
     rows.push({
       label: "Stripe fee",
@@ -73,9 +68,31 @@ function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBre
         l.kind === "merchandise"
           ? "Stripe balance fee on this row's share of the checkout total (2.9% + 30¢)"
           : "Actual Stripe fee owed",
-      hintPosition: l.kind === "merchandise" ? "below" : "above",
+      hintPosition: "below",
       cents: -mergedLineStripeBalanceFeeCents(l),
     });
+  }
+
+  if (l.kind === "merchandise") {
+    rows.push({
+      label: "Shop payout",
+      hint: "Creator shop merchandise profit + tip",
+      cents: -mergedLineShopPayoutCents(l),
+    });
+    rows.push({
+      label: "Application amount",
+      hint: "Amount Stripe will payout to platform",
+      cents: mergedLineApplicationAmountCents(l),
+      subheader: true,
+    });
+    if (l.goodsServicesCostCents > 0) {
+      rows.push({
+        label: "COGS",
+        hint: "Amount Printify will bill",
+        cents: -l.goodsServicesCostCents,
+        nested: true,
+      });
+    }
   }
 
   if (l.kind === "merchandise" && l.platformCutCents > 0) {
@@ -84,24 +101,27 @@ function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBre
       hint: `${marketplacePlatformFeePercent()}% platform fee on merchandise`,
       cents: l.platformCutCents,
       mutedValue: true,
+      nested: true,
     });
   }
 
   if (l.kind === "merchandise") {
     rows.push({
       label: "Prod Fee",
-      hint: "Printify production fee per item",
+      hint: "Platform additional fees",
       cents: l.productionFeeCents,
       mutedValue: true,
+      nested: true,
     });
   }
 
   if (l.tipProcessingFeeCents > 0) {
     rows.push({
       label: "Tip Fee",
-      hint: "25¢ platform surcharge if tipped",
+      hint: "Reference only — not included in application amount",
       cents: l.tipProcessingFeeCents,
       mutedValue: true,
+      referenceOnly: true,
     });
   }
 
@@ -219,6 +239,7 @@ function SalesLineBreakdownHint({
         >
           <PlatformRevenueBreakdownTable
             solidBackground
+            tone={line.kind === "merchandise" ? "shop" : "platform"}
             sectionTitle={detail.sectionTitle}
             headerTotalCents={detail.headerTotalCents}
             rows={detail.rows}
@@ -248,7 +269,9 @@ export function AdminPlatformSalesLinesTable({ lines }: { lines: AdminPlatformSa
           <tr className="border-b border-zinc-800 text-zinc-500">
             <th className="overflow-hidden px-1 py-2 text-center font-medium">Date</th>
             <th className="overflow-hidden px-1 py-2 text-center font-medium">Order</th>
-            <th className="overflow-hidden px-1 py-2 text-center font-medium">Platform profit</th>
+            <th className="overflow-hidden px-1 py-2 text-center font-medium text-blue-400/90">
+              Platform profit
+            </th>
             <th className="overflow-hidden px-1 py-2 text-center font-medium">Details</th>
             <th className="overflow-hidden py-2 pl-4 pr-1 text-left font-medium">Item</th>
             <th className="overflow-hidden px-1 py-2 text-center font-medium">Qty</th>

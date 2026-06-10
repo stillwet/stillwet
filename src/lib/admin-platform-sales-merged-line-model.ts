@@ -153,10 +153,28 @@ export function mergedLineStripeBalanceFeeCents(l: AdminPlatformSalesMergedLine)
   return stripeBalanceProcessingFeeCents(platformCheckoutFullChargeCents(l));
 }
 
-/** Per-row shop/platform checkout breakdown header: Paid − Shop cut − COGS − Stripe balance fee. */
+/** Merchandise shop payout: line shop cut + allocated cart tip. */
+export function mergedLineShopPayoutCents(l: AdminPlatformSalesMergedLine): number {
+  if (l.kind !== "merchandise") return 0;
+  return l.shopCutCents + Math.max(0, l.tipCents);
+}
+
+/**
+ * Merchandise Connect application amount (platform share before COGS breakdown):
+ * buyer Paid − Shop payout. Matches Stripe `application_fee_amount` + shipping retained
+ * on the platform account; Stripe balance fees are separate.
+ */
+export function mergedLineApplicationAmountCents(l: AdminPlatformSalesMergedLine): number {
+  if (l.kind !== "merchandise") return 0;
+  return mergedLineCheckoutPaidCents(l) - mergedLineShopPayoutCents(l);
+}
+
+/** Per-row shop/platform checkout breakdown header: Paid − Shop payout − COGS − Stripe balance fee. */
 export function mergedLinePaidCogsStripeNetCents(l: AdminPlatformSalesMergedLine): number {
   let net = mergedLineCheckoutPaidCents(l) - mergedLineStripeBalanceFeeCents(l);
-  if (l.kind === "merchandise") net -= l.shopCutCents + l.goodsServicesCostCents;
+  if (l.kind === "merchandise") {
+    net -= mergedLineShopPayoutCents(l) + l.goodsServicesCostCents;
+  }
   return net;
 }
 

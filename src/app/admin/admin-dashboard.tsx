@@ -480,8 +480,8 @@ async function AdminDashboardPageBody({
                     aria-selected={inventoryTab === "sales"}
                     className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "sales"
-                        ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
-                        : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+                        ? "bg-zinc-900 text-blue-300 ring-1 ring-b-0 ring-blue-500/35"
+                        : "text-blue-400/70 hover:bg-zinc-900/60 hover:text-blue-300/90"
                     }`}
                   >
                     Platform sales

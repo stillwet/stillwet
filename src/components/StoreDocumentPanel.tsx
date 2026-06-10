@@ -18,7 +18,11 @@ type Props = {
   omitHeaderTitle?: boolean;
   /** Centered column like template “card” */
   narrow?: boolean;
+  /** Override horizontal padding (default document panel insets). */
+  panelPaddingClass?: string;
 };
+
+const DEFAULT_PANEL_PADDING_CLASS = "px-6 sm:px-12 md:px-14";
 
 export function StoreDocumentPanel({
   children,
@@ -30,13 +34,14 @@ export function StoreDocumentPanel({
   title,
   omitHeaderTitle = false,
   narrow = true,
+  panelPaddingClass = DEFAULT_PANEL_PADDING_CLASS,
 }: Props) {
   return (
     <article
-      className={`store-dimension-panel animate-store-panel-in relative px-6 py-10 sm:px-12 sm:py-12 md:px-14 ${narrow ? "mx-auto max-w-3xl" : ""}`}
+      className={`store-dimension-panel animate-store-panel-in relative pb-10 pt-0 sm:pb-12 ${panelPaddingClass} ${narrow ? "mx-auto max-w-3xl" : ""}`}
     >
-      <header className="mb-8 border-b border-zinc-800/80 pb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <header className="mb-8 flex min-h-20 items-center border-b border-zinc-800/80 sm:min-h-[5.5rem]">
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             {showBackLink ? (
               <Link

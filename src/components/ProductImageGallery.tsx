@@ -52,6 +52,13 @@ export function ProductImageGallery({
     : "";
   const showSizeReferenceCaption =
     Boolean(referenceKey && main && catalogImageUrlKey(main) === referenceKey);
+  const mainImageCaption = showSizeReferenceCaption
+    ? "FOR SIZE REFERENCE"
+    : main
+      ? "ITEM DESIGN"
+      : null;
+  const mainImageCaptionClass =
+    "mt-2 text-center text-[11px] font-semibold uppercase tracking-wide text-zinc-400 sm:text-xs";
 
   return (
     <>
@@ -69,15 +76,13 @@ export function ProductImageGallery({
           </div>
         )}
       </div>
-      {showSizeReferenceCaption ? (
-        <p className="mt-2 text-center text-[11px] font-semibold uppercase tracking-wide text-zinc-400 sm:text-xs">
-          FOR SIZE REFERENCE
-        </p>
+      {mainImageCaption ? (
+        <p className={mainImageCaptionClass}>{mainImageCaption}</p>
       ) : null}
       {list.length > 1 ? (
-        <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] justify-items-center gap-2 sm:grid-cols-[repeat(auto-fill,minmax(6rem,1fr))]">
+        <ul className="mt-3 flex flex-wrap items-center justify-center gap-2">
           {list.map((src, i) => (
-            <li key={`${src}-${i}`} className="flex justify-center">
+            <li key={`${src}-${i}`}>
               <button
                 type="button"
                 onClick={() => setMainIndex(i)}
@@ -91,7 +96,7 @@ export function ProductImageGallery({
                 <img
                   src={src}
                   alt=""
-                  className="h-24 w-24 rounded border border-zinc-700 object-cover"
+                  className="h-[4.8rem] w-[4.8rem] rounded border border-zinc-700 object-cover"
                 />
               </button>
             </li>

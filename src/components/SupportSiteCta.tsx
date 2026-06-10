@@ -65,6 +65,9 @@ export function SupportSiteCta({
             <p>
               Voluntary support helps keep the site running independently, and is genuinely appreciated.
             </p>
+            <p>
+              After you support, you&apos;ll get to vote for the thing you want to see most on the site.
+            </p>
             <div>
               <p className="font-medium text-zinc-200">Your donation supports upcoming goals</p>
               <ul className="mt-2 list-inside list-disc space-y-1 text-zinc-400">

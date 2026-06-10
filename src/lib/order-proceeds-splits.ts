@@ -138,4 +138,72 @@ export function orderConnectApplicationFeeCents(input: {
   );
 }
 
+/** Expected Stripe Connect transfer to the shop (shop cut + tip). */
+export function orderConnectShopTransferCents(input: {
+  lines: ReadonlyArray<Pick<OrderLineProceedsSplit, "shopCutCents">>;
+  tipCents?: number | null;
+}): number {
+  return orderShopProfitCents(input);
+}
+
+/**
+ * Reconcile persisted order lines against Stripe Connect amounts.
+ * `transferShortfallCents` > 0 means the connected account received more than expected
+ * (e.g. production fee omitted from `application_fee_amount`).
+ */
+export function orderConnectSplitVerification(input: {
+  lines: ReadonlyArray<
+    Pick<
+      OrderLineProceedsSplit,
+      "goodsServicesCostCents" | "productionFeeCents" | "platformCutCents" | "shopCutCents"
+    >
+  >;
+  tipCents?: number | null;
+  paymentProcessingCents?: number | null;
+  checkoutTotalCents: number;
+  stripeApplicationFeeCents: number;
+  stripeTransferCents: number;
+}): {
+  expectedApplicationFeeCents: number;
+  expectedShopTransferCents: number;
+  applicationFeeDeltaCents: number;
+  transferShortfallCents: number;
+  missingProductionFeeInAppFeeCents: number;
+  checkoutIdentityDeltaCents: number;
+} {
+  const expectedApplicationFeeCents = orderConnectApplicationFeeCents({
+    lines: input.lines,
+    tipCents: input.tipCents,
+    paymentProcessingCents: input.paymentProcessingCents,
+  });
+  const expectedShopTransferCents = orderConnectShopTransferCents({
+    lines: input.lines,
+    tipCents: input.tipCents,
+  });
+  const productionFeeTotalCents = input.lines.reduce(
+    (sum, line) => sum + Math.max(0, line.productionFeeCents ?? 0),
+    0,
+  );
+  const applicationFeeDeltaCents = input.stripeApplicationFeeCents - expectedApplicationFeeCents;
+  const transferShortfallCents =
+    input.stripeTransferCents - expectedShopTransferCents;
+  const missingProductionFeeInAppFeeCents =
+    applicationFeeDeltaCents === -productionFeeTotalCents && productionFeeTotalCents > 0
+      ? productionFeeTotalCents
+      : 0;
+  const checkoutIdentityDeltaCents =
+    input.checkoutTotalCents -
+    input.stripeApplicationFeeCents -
+    input.stripeTransferCents;
+
+  return {
+    expectedApplicationFeeCents,
+    expectedShopTransferCents,
+    applicationFeeDeltaCents,
+    transferShortfallCents,
+    missingProductionFeeInAppFeeCents,
+    checkoutIdentityDeltaCents,
+  };
+}
+
 export { orderLineItemCostCents } from "@/lib/item-cost-cents";
