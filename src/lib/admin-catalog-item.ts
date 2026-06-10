@@ -107,8 +107,15 @@ export function validateItemLevelWhenNoVariants(
   exampleListingUrl: string,
   minPriceDollars: string,
   itemGoodsServicesCostDollars = "",
+  itemProductionFeeDollars = "",
 ):
-  | { ok: true; exampleListingUrl: string | null; minPriceCents: number; itemGoodsServicesCostCents: number }
+  | {
+      ok: true;
+      exampleListingUrl: string | null;
+      minPriceCents: number;
+      itemGoodsServicesCostCents: number;
+      itemProductionFeeCents: number;
+    }
   | { ok: false; error: string } {
   const url = exampleListingUrl.trim();
   const n = parseFloat(minPriceDollars.replace(/[^0-9.]/g, ""));
@@ -130,11 +137,24 @@ export function validateItemLevelWhenNoVariants(
     }
     itemGoodsServicesCostCents = Math.round(gn * 100);
   }
+  const pfRaw = itemProductionFeeDollars.trim();
+  let itemProductionFeeCents = 0;
+  if (pfRaw.length > 0) {
+    const pn = parseFloat(pfRaw.replace(/[^0-9.]/g, ""));
+    if (!Number.isFinite(pn) || pn < 0) {
+      return {
+        ok: false,
+        error: "Enter a valid production fee in USD (or leave blank for none).",
+      };
+    }
+    itemProductionFeeCents = Math.round(pn * 100);
+  }
   return {
     ok: true,
     exampleListingUrl: url ? url.slice(0, 2048) : null,
     minPriceCents: Math.round(n * 100),
     itemGoodsServicesCostCents,
+    itemProductionFeeCents,
   };
 }
 

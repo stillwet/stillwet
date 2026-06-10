@@ -27,7 +27,7 @@ export function AdminCatalogItemSizeExampleFields({
         </div>
       ) : null}
       <label className="block min-w-0 text-[11px] text-zinc-500">
-        Image URL (optional — paste or upload below when editing)
+        Image URL (optional — paste here or upload below)
         <input
           type="url"
           value={sizeExampleImageUrl}

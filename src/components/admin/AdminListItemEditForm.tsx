@@ -37,7 +37,6 @@ import {
   type AdminListItemTag,
   type AdminListTagOption,
 } from "@/components/admin/AdminCatalogItemTagsEditor";
-import { adminCatalogItemHasAdvancedArtworkSettings, adminCatalogItemHasPictureSettings } from "@/lib/admin-catalog-advanced-fields";
 
 export type AdminListItemSerializable = {
   id: string;
@@ -48,6 +47,7 @@ export type AdminListItemSerializable = {
   itemSizeExampleImageUrl: string | null;
   itemMinPriceCents: number;
   itemGoodsServicesCostCents: number;
+  itemProductionFeeCents: number;
   itemImageRequirementLabel: string | null;
   itemPrintAreaWidthPx: number | null;
   itemPrintAreaHeightPx: number | null;
@@ -89,8 +89,8 @@ export function AdminListItemEditForm({
   const [editItemGoodsServicesCostDollars, setEditItemGoodsServicesCostDollars] = useState(
     dollarsStringFromCents(item.itemGoodsServicesCostCents),
   );
-  const [editItemImageRequirementLabel, setEditItemImageRequirementLabel] = useState(
-    item.itemImageRequirementLabel ?? "",
+  const [editItemProductionFeeDollars, setEditItemProductionFeeDollars] = useState(
+    dollarsStringFromCents(item.itemProductionFeeCents),
   );
   const [editItemPrintAreaWidthPx, setEditItemPrintAreaWidthPx] = useState(
     item.itemPrintAreaWidthPx != null ? String(item.itemPrintAreaWidthPx) : "",
@@ -142,13 +142,14 @@ export function AdminListItemEditForm({
       editItemExampleListingUrl,
       editItemMinPriceDollars,
       editItemGoodsServicesCostDollars,
+      editItemProductionFeeDollars,
     );
     if (!itemLevel.ok) {
       setClientError(itemLevel.error);
       return;
     }
     const ar = parseAdminCatalogItemArtworkForm(
-      editItemImageRequirementLabel,
+      item.itemImageRequirementLabel ?? "",
       editItemPrintAreaWidthPx,
       editItemPrintAreaHeightPx,
       editItemMinArtworkDpi,
@@ -168,7 +169,8 @@ export function AdminListItemEditForm({
     fd.set("itemSizeExampleImageUrl", editItemSizeExampleImageUrl);
     fd.set("itemMinPriceDollars", editItemMinPriceDollars);
     fd.set("itemGoodsServicesCostDollars", editItemGoodsServicesCostDollars);
-    fd.set("itemImageRequirementLabel", editItemImageRequirementLabel);
+    fd.set("itemProductionFeeDollars", editItemProductionFeeDollars);
+    fd.set("itemImageRequirementLabel", item.itemImageRequirementLabel ?? "");
     fd.set("itemPrintAreaWidthPx", editItemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", editItemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", editItemMinArtworkDpi);
@@ -187,8 +189,6 @@ export function AdminListItemEditForm({
   const serverError = saveState?.ok === false ? saveState.error : null;
   const displayError = clientError ?? serverError;
   const editFormId = `admin-catalog-item-edit-form-${item.id}`;
-  const advancedFieldsDefaultOpen = adminCatalogItemHasAdvancedArtworkSettings(item);
-  const picturesDefaultOpen = adminCatalogItemHasPictureSettings(item);
 
   return (
     <div className="relative mb-6 rounded-lg border border-amber-900/50 bg-amber-950/20 p-4">
@@ -211,12 +211,20 @@ export function AdminListItemEditForm({
           <AdminCatalogItemLevelFields
             minPriceDollars={editItemMinPriceDollars}
             goodsServicesCostDollars={editItemGoodsServicesCostDollars}
+            productionFeeDollars={editItemProductionFeeDollars}
             storefrontDescription={editStorefrontDescription}
+            printAreaWidthPx={editItemPrintAreaWidthPx}
+            printAreaHeightPx={editItemPrintAreaHeightPx}
+            minArtworkDpi={editItemMinArtworkDpi}
             onChangeMinPriceDollars={setEditItemMinPriceDollars}
             onChangeGoodsServicesCostDollars={setEditItemGoodsServicesCostDollars}
+            onChangeProductionFeeDollars={setEditItemProductionFeeDollars}
             onChangeStorefrontDescription={setEditStorefrontDescription}
+            onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
+            onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
+            onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
           />
-          <AdminCatalogPicturesExpand defaultOpen={picturesDefaultOpen}>
+          <AdminCatalogPicturesExpand>
             <AdminCatalogItemReferencePhotoFields
               exampleListingUrl={editItemExampleListingUrl}
               onChangeExampleListingUrl={setEditItemExampleListingUrl}
@@ -232,19 +240,14 @@ export function AdminListItemEditForm({
               r2Configured={r2Configured}
             />
           </AdminCatalogPicturesExpand>
+          <AdminCatalogItemTagsEditor itemId={item.id} linkedTags={item.tags} allTags={allTags} />
           <form id={editFormId} onSubmit={submitEdit} className="space-y-4">
-            <AdminCatalogAdvancedFieldsExpand defaultOpen={advancedFieldsDefaultOpen}>
-            <AdminCatalogArtworkRequirementFields
-              imageRequirementLabel={editItemImageRequirementLabel}
+            <AdminCatalogAdvancedFieldsExpand>
+              <AdminCatalogArtworkRequirementFields
               printAreaWidthPx={editItemPrintAreaWidthPx}
               printAreaHeightPx={editItemPrintAreaHeightPx}
-              minArtworkDpi={editItemMinArtworkDpi}
               artworkLetterboxFill={editItemArtworkLetterboxFill}
               artworkSourceTierOverride={editItemArtworkSourceTierOverride}
-              onChangeImageRequirementLabel={setEditItemImageRequirementLabel}
-              onChangePrintAreaWidthPx={setEditItemPrintAreaWidthPx}
-              onChangePrintAreaHeightPx={setEditItemPrintAreaHeightPx}
-              onChangeMinArtworkDpi={setEditItemMinArtworkDpi}
               onChangeArtworkLetterboxFill={setEditItemArtworkLetterboxFill}
               onChangeArtworkSourceTierOverride={setEditItemArtworkSourceTierOverride}
             />
@@ -254,13 +257,12 @@ export function AdminListItemEditForm({
               onChangeCanvasPresentationPreset={setEditCanvasPresentationPreset}
               onChangeArtworkTemplatePreset={setEditArtworkTemplatePreset}
             />
-          </AdminCatalogAdvancedFieldsExpand>
-            {displayError ? (
-              <p className="text-xs text-amber-200/90" role="alert">
-                {displayError}
-              </p>
-            ) : null}
-            <AdminCatalogItemTagsEditor itemId={item.id} linkedTags={item.tags} allTags={allTags} />
+              {displayError ? (
+                <p className="text-xs text-amber-200/90" role="alert">
+                  {displayError}
+                </p>
+              ) : null}
+            </AdminCatalogAdvancedFieldsExpand>
           </form>
         </div>
 

@@ -15,31 +15,99 @@ import {
   type CatalogArtworkSourceTierOverride,
 } from "@/lib/listing-artwork-source-tier";
 
-/** Per catalog item: optional print-area pixels, optional min DPI vs. reference, plus note for creators. */
-export function AdminCatalogArtworkRequirementFields({
-  imageRequirementLabel,
+/** Print area width, height, and min DPI — shown outside expand sections. */
+export function AdminCatalogPrintAreaFields({
+  embedded = false,
   printAreaWidthPx,
   printAreaHeightPx,
   minArtworkDpi,
-  artworkLetterboxFill,
-  artworkSourceTierOverride,
-  onChangeImageRequirementLabel,
   onChangePrintAreaWidthPx,
   onChangePrintAreaHeightPx,
   onChangeMinArtworkDpi,
-  onChangeArtworkLetterboxFill,
-  onChangeArtworkSourceTierOverride,
 }: {
-  imageRequirementLabel: string;
+  embedded?: boolean;
   printAreaWidthPx: string;
   printAreaHeightPx: string;
   minArtworkDpi: string;
-  artworkLetterboxFill: ListingArtworkLetterboxFill;
-  artworkSourceTierOverride: CatalogArtworkSourceTierOverride;
-  onChangeImageRequirementLabel: (v: string) => void;
   onChangePrintAreaWidthPx: (v: string) => void;
   onChangePrintAreaHeightPx: (v: string) => void;
   onChangeMinArtworkDpi: (v: string) => void;
+}) {
+  const labelClass = embedded ? "block max-w-[10rem] text-[11px] text-zinc-500" : "block text-xs text-zinc-500";
+  const inputClass = embedded
+    ? "mt-0.5 block w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 font-mono text-sm text-zinc-100"
+    : "mt-1 block w-full min-w-[10rem] max-w-xs rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm text-zinc-100";
+
+  const fields = (
+    <div className="flex flex-wrap gap-4">
+      <label className={labelClass}>
+        Print area width (px)
+        <input
+          type="text"
+          inputMode="numeric"
+          value={printAreaWidthPx}
+          onChange={(e) => onChangePrintAreaWidthPx(e.target.value)}
+          placeholder="e.g. 4500 — blank with height"
+          className={inputClass}
+        />
+      </label>
+      <label className={labelClass}>
+        Print area height (px)
+        <input
+          type="text"
+          inputMode="numeric"
+          value={printAreaHeightPx}
+          onChange={(e) => onChangePrintAreaHeightPx(e.target.value)}
+          placeholder="e.g. 5400"
+          className={inputClass}
+        />
+      </label>
+      <label className={labelClass}>
+        Minimum DPI (optional)
+        <input
+          type="text"
+          inputMode="numeric"
+          value={minArtworkDpi}
+          onChange={(e) => onChangeMinArtworkDpi(e.target.value)}
+          placeholder={`blank = ${PRINT_AREA_REFERENCE_DPI}`}
+          className={inputClass}
+        />
+      </label>
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <fieldset className="space-y-3 rounded border border-zinc-700/80 bg-zinc-900/30 p-3">
+        <legend className="px-1 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+          Print area
+        </legend>
+        {fields}
+      </fieldset>
+    );
+  }
+
+  return (
+    <div className="space-y-3 border-t border-zinc-800/80 pt-4">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Print area</p>
+      {fields}
+    </div>
+  );
+}
+
+/** Artwork source tier and letterbox — shown inside the advanced expand. */
+export function AdminCatalogArtworkRequirementFields({
+  printAreaWidthPx,
+  printAreaHeightPx,
+  artworkLetterboxFill,
+  artworkSourceTierOverride,
+  onChangeArtworkLetterboxFill,
+  onChangeArtworkSourceTierOverride,
+}: {
+  printAreaWidthPx: string;
+  printAreaHeightPx: string;
+  artworkLetterboxFill: ListingArtworkLetterboxFill;
+  artworkSourceTierOverride: CatalogArtworkSourceTierOverride;
   onChangeArtworkLetterboxFill: (v: ListingArtworkLetterboxFill) => void;
   onChangeArtworkSourceTierOverride: (v: CatalogArtworkSourceTierOverride) => void;
 }) {
@@ -55,57 +123,8 @@ export function AdminCatalogArtworkRequirementFields({
   }, [printAreaWidthPx, printAreaHeightPx]);
 
   return (
-    <div className="space-y-3 border-t border-zinc-800/80 pt-4">
+    <div className="space-y-3">
       <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Artwork / resolution</p>
-      <label className="block text-xs text-zinc-500">
-        Requirement note (optional)
-        <input
-          type="text"
-          value={imageRequirementLabel}
-          onChange={(e) => onChangeImageRequirementLabel(e.target.value)}
-          maxLength={400}
-          placeholder='e.g. 12" print @ 300 DPI'
-          className="mt-1 block w-full max-w-xl rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
-        />
-        <span className="mt-1 block text-[11px] text-zinc-600">
-          Shown to creators when they select this item in the listing request form.
-        </span>
-      </label>
-      <div className="flex flex-wrap gap-4">
-        <label className="block text-xs text-zinc-500">
-          Print area width (px)
-          <input
-            type="text"
-            inputMode="numeric"
-            value={printAreaWidthPx}
-            onChange={(e) => onChangePrintAreaWidthPx(e.target.value)}
-            placeholder="e.g. 4500 — blank with height"
-            className="mt-1 block w-full min-w-[10rem] max-w-xs rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm text-zinc-100"
-          />
-        </label>
-        <label className="block text-xs text-zinc-500">
-          Print area height (px)
-          <input
-            type="text"
-            inputMode="numeric"
-            value={printAreaHeightPx}
-            onChange={(e) => onChangePrintAreaHeightPx(e.target.value)}
-            placeholder="e.g. 5400"
-            className="mt-1 block w-full min-w-[10rem] max-w-xs rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm text-zinc-100"
-          />
-        </label>
-        <label className="block text-xs text-zinc-500">
-          Minimum DPI (optional)
-          <input
-            type="text"
-            inputMode="numeric"
-            value={minArtworkDpi}
-            onChange={(e) => onChangeMinArtworkDpi(e.target.value)}
-            placeholder={`blank = ${PRINT_AREA_REFERENCE_DPI}`}
-            className="mt-1 block w-full min-w-[10rem] max-w-xs rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-sm text-zinc-100"
-          />
-        </label>
-      </div>
       <label className="block text-xs text-zinc-500">
         Artwork source tier (shop picker)
         <select

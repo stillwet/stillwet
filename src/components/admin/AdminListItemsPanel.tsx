@@ -218,8 +218,11 @@ export function AdminListItemsPanel({
               <th className="p-3 font-medium">Tags</th>
               <th className="p-3 font-medium">Item image</th>
               <th className="p-3 font-medium whitespace-nowrap">Size Ex Pic</th>
-              <th className="p-3 font-medium whitespace-nowrap" title="Goods/services fulfillment cost per unit">
-                G/S cost
+              <th className="p-3 font-medium whitespace-nowrap" title="Printify item cost + shipping cost per unit">
+                COGS
+              </th>
+              <th className="p-3 font-medium whitespace-nowrap" title="Printify production fee per unit">
+                Prod fee
               </th>
               <th className="p-3 font-medium whitespace-nowrap">Min price</th>
               <th className="p-3 font-medium max-w-[12rem]">Artwork / DPI</th>
@@ -266,6 +269,9 @@ export function AdminListItemsPanel({
                 </td>
                 <td className="p-3 whitespace-nowrap tabular-nums text-zinc-400">
                   {formatMoney(item.itemGoodsServicesCostCents)}
+                </td>
+                <td className="p-3 whitespace-nowrap tabular-nums text-zinc-400">
+                  {formatMoney(item.itemProductionFeeCents)}
                 </td>
                 <td className="p-3 whitespace-nowrap tabular-nums text-zinc-400">
                   {minPriceDisplayText(item.itemMinPriceCents, item.itemExampleListingUrl ?? "")}

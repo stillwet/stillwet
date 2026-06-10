@@ -67,6 +67,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
       itemSizeExampleImageUrl: string | null;
       itemMinPriceCents: number;
       itemGoodsServicesCostCents: number;
+      itemProductionFeeCents: number;
       itemImageRequirementLabel: string | null;
       itemPrintAreaWidthPx: number | null;
       itemPrintAreaHeightPx: number | null;
@@ -80,7 +81,8 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
   const itemEx = String(formData.get("itemExampleListingUrl") ?? "");
   const itemPrice = String(formData.get("itemMinPriceDollars") ?? "");
   const itemGs = String(formData.get("itemGoodsServicesCostDollars") ?? "");
-  const v = validateItemLevelWhenNoVariants(itemEx, itemPrice, itemGs);
+  const itemPf = String(formData.get("itemProductionFeeDollars") ?? "");
+  const v = validateItemLevelWhenNoVariants(itemEx, itemPrice, itemGs, itemPf);
   if (!v.ok) return { ok: false, error: v.error };
   const ar = parseAdminCatalogItemArtworkForm(
     String(formData.get("itemImageRequirementLabel") ?? ""),
@@ -112,6 +114,7 @@ function itemLevelFromFormWhenNoVariants(formData: FormData):
     itemSizeExampleImageUrl,
     itemMinPriceCents: v.minPriceCents,
     itemGoodsServicesCostCents: v.itemGoodsServicesCostCents,
+    itemProductionFeeCents: v.itemProductionFeeCents,
     itemImageRequirementLabel: ar.itemImageRequirementLabel,
     itemPrintAreaWidthPx: ar.itemPrintAreaWidthPx,
     itemPrintAreaHeightPx: ar.itemPrintAreaHeightPx,
@@ -155,6 +158,7 @@ export async function adminAddCatalogItem(formData: FormData): Promise<AdminCata
         itemSizeExampleImageUrl: itemLevel.itemSizeExampleImageUrl,
         itemMinPriceCents: itemLevel.itemMinPriceCents,
         itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
+        itemProductionFeeCents: itemLevel.itemProductionFeeCents,
         itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
         itemMinArtworkLongEdgePx: null,
         itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,
@@ -207,6 +211,7 @@ export async function adminUpdateCatalogItem(
         itemSizeExampleImageUrl: itemLevel.itemSizeExampleImageUrl,
         itemMinPriceCents: itemLevel.itemMinPriceCents,
         itemGoodsServicesCostCents: itemLevel.itemGoodsServicesCostCents,
+        itemProductionFeeCents: itemLevel.itemProductionFeeCents,
         itemImageRequirementLabel: itemLevel.itemImageRequirementLabel,
         itemMinArtworkLongEdgePx: null,
         itemPrintAreaWidthPx: itemLevel.itemPrintAreaWidthPx,

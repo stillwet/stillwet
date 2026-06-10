@@ -32,10 +32,10 @@ export function adminCatalogItemHasAdvancedArtworkSettings(input: {
   return false;
 }
 
-/** True when either catalog image URL is set — expand Pictures on edit. */
+/** True when a picture URL is set — expand Pictures on edit. */
 export function adminCatalogItemHasPictureSettings(input: {
   itemExampleListingUrl: string | null;
-  itemSizeExampleImageUrl: string | null;
+  itemSizeExampleImageUrl?: string | null;
 }): boolean {
   return Boolean(input.itemExampleListingUrl?.trim() || input.itemSizeExampleImageUrl?.trim());
 }

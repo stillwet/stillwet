@@ -48,6 +48,7 @@ export async function AdminSecretMenuTab({
       itemSizeExampleImageUrl: item.itemSizeExampleImageUrl,
       itemMinPriceCents: item.itemMinPriceCents,
       itemGoodsServicesCostCents: item.itemGoodsServicesCostCents,
+      itemProductionFeeCents: item.itemProductionFeeCents,
       itemImageRequirementLabel: item.itemImageRequirementLabel,
       itemPrintAreaWidthPx: item.itemPrintAreaWidthPx,
       itemPrintAreaHeightPx: item.itemPrintAreaHeightPx,

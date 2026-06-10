@@ -53,7 +53,10 @@ export function AdminCatalogPicturesExpand({
   children: React.ReactNode;
 }) {
   return (
-    <AdminCatalogFieldsExpand label="Pictures" defaultOpen={defaultOpen}>
+    <AdminCatalogFieldsExpand
+      label="Expand for pictures — item image & size reference"
+      defaultOpen={defaultOpen}
+    >
       {children}
     </AdminCatalogFieldsExpand>
   );

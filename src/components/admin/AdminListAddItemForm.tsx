@@ -42,7 +42,7 @@ export function AdminListAddItemForm({
   const [itemSizeExampleImageUrl, setItemSizeExampleImageUrl] = useState("");
   const [itemMinPriceDollars, setItemMinPriceDollars] = useState("");
   const [itemGoodsServicesCostDollars, setItemGoodsServicesCostDollars] = useState("");
-  const [itemImageRequirementLabel, setItemImageRequirementLabel] = useState("");
+  const [itemProductionFeeDollars, setItemProductionFeeDollars] = useState("");
   const [itemPrintAreaWidthPx, setItemPrintAreaWidthPx] = useState("");
   const [itemPrintAreaHeightPx, setItemPrintAreaHeightPx] = useState("");
   const [itemMinArtworkDpi, setItemMinArtworkDpi] = useState("");
@@ -77,7 +77,7 @@ export function AdminListAddItemForm({
     setItemSizeExampleImageUrl("");
     setItemMinPriceDollars("");
     setItemGoodsServicesCostDollars("");
-    setItemImageRequirementLabel("");
+    setItemProductionFeeDollars("");
     setItemPrintAreaWidthPx("");
     setItemPrintAreaHeightPx("");
     setItemMinArtworkDpi("");
@@ -102,13 +102,14 @@ export function AdminListAddItemForm({
       itemExampleListingUrl,
       itemMinPriceDollars,
       itemGoodsServicesCostDollars,
+      itemProductionFeeDollars,
     );
     if (!itemLevel.ok) {
       setClientError(itemLevel.error);
       return;
     }
     const ar = parseAdminCatalogItemArtworkForm(
-      itemImageRequirementLabel,
+      "",
       itemPrintAreaWidthPx,
       itemPrintAreaHeightPx,
       itemMinArtworkDpi,
@@ -127,7 +128,8 @@ export function AdminListAddItemForm({
     fd.set("itemSizeExampleImageUrl", itemSizeExampleImageUrl);
     fd.set("itemMinPriceDollars", itemMinPriceDollars);
     fd.set("itemGoodsServicesCostDollars", itemGoodsServicesCostDollars);
-    fd.set("itemImageRequirementLabel", itemImageRequirementLabel);
+    fd.set("itemProductionFeeDollars", itemProductionFeeDollars);
+    fd.set("itemImageRequirementLabel", "");
     fd.set("itemPrintAreaWidthPx", itemPrintAreaWidthPx);
     fd.set("itemPrintAreaHeightPx", itemPrintAreaHeightPx);
     fd.set("itemMinArtworkDpi", itemMinArtworkDpi);
@@ -200,10 +202,18 @@ export function AdminListAddItemForm({
         <AdminCatalogItemLevelFields
           minPriceDollars={itemMinPriceDollars}
           goodsServicesCostDollars={itemGoodsServicesCostDollars}
+          productionFeeDollars={itemProductionFeeDollars}
           storefrontDescription={storefrontDescription}
+          printAreaWidthPx={itemPrintAreaWidthPx}
+          printAreaHeightPx={itemPrintAreaHeightPx}
+          minArtworkDpi={itemMinArtworkDpi}
           onChangeMinPriceDollars={setItemMinPriceDollars}
           onChangeGoodsServicesCostDollars={setItemGoodsServicesCostDollars}
+          onChangeProductionFeeDollars={setItemProductionFeeDollars}
           onChangeStorefrontDescription={setStorefrontDescription}
+          onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
+          onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
+          onChangeMinArtworkDpi={setItemMinArtworkDpi}
         />
         <AdminCatalogPicturesExpand>
           <AdminCatalogItemReferencePhotoFields
@@ -217,16 +227,10 @@ export function AdminListAddItemForm({
         </AdminCatalogPicturesExpand>
         <AdminCatalogAdvancedFieldsExpand>
           <AdminCatalogArtworkRequirementFields
-            imageRequirementLabel={itemImageRequirementLabel}
             printAreaWidthPx={itemPrintAreaWidthPx}
             printAreaHeightPx={itemPrintAreaHeightPx}
-            minArtworkDpi={itemMinArtworkDpi}
             artworkLetterboxFill={itemArtworkLetterboxFill}
             artworkSourceTierOverride={itemArtworkSourceTierOverride}
-            onChangeImageRequirementLabel={setItemImageRequirementLabel}
-            onChangePrintAreaWidthPx={setItemPrintAreaWidthPx}
-            onChangePrintAreaHeightPx={setItemPrintAreaHeightPx}
-            onChangeMinArtworkDpi={setItemMinArtworkDpi}
             onChangeArtworkLetterboxFill={setItemArtworkLetterboxFill}
             onChangeArtworkSourceTierOverride={setItemArtworkSourceTierOverride}
           />
