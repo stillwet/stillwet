@@ -9,6 +9,25 @@ export function isPrismaMissingRelationError(e: unknown): boolean {
   return /does not exist|relation\s+"|no such table|undefined table|Unknown table/i.test(msg);
 }
 
+/** Feature poll follow-up columns/client fields missing (follow-up migration not deployed yet). */
+export function isFeaturePollFollowUpSchemaDriftError(e: unknown): boolean {
+  if (e instanceof Prisma.PrismaClientValidationError) {
+    return /followUpAnswer|followUpKind|followUpPrompt|followUpChoices|Unknown field/.test(e.message);
+  }
+  if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
+    const column = String((e.meta as { column?: string } | undefined)?.column ?? "");
+    return /followUpAnswer|followUpKind|followUpPrompt|followUpChoices|FeaturePollOptionFollowUpKind/i.test(column);
+  }
+  const msg = e instanceof Error ? e.message : String(e);
+  const name = e instanceof Error ? e.name : "";
+  if (name === "PrismaClientValidationError") {
+    return /followUpAnswer|followUpKind|followUpPrompt|followUpChoices|Unknown field/.test(msg);
+  }
+  return /followUpAnswer|followUpKind|followUpPrompt|followUpChoices|FeaturePollOptionFollowUpKind|Unknown field `followUp/i.test(
+    msg,
+  );
+}
+
 /** User-facing hint when dashboard tab API hits Prisma schema/client drift. */
 export function dashboardTabPrismaErrorMessage(e: unknown): string | null {
   if (e instanceof Prisma.PrismaClientValidationError) {

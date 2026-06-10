@@ -423,6 +423,57 @@ export type EnumSupportMessageAuthorWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumSupportMessageAuthorFilter<$PrismaModel>
 }
 
+export type EnumFeaturePollOptionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionStatus | Prisma.EnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionStatusFilter<$PrismaModel> | $Enums.FeaturePollOptionStatus
+}
+
+export type EnumFeaturePollOptionFollowUpKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionFollowUpKind | Prisma.EnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel> | $Enums.FeaturePollOptionFollowUpKind
+}
+
+export type EnumFeaturePollOptionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionStatus | Prisma.EnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionStatusWithAggregatesFilter<$PrismaModel> | $Enums.FeaturePollOptionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFeaturePollOptionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFeaturePollOptionStatusFilter<$PrismaModel>
+}
+
+export type EnumFeaturePollOptionFollowUpKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionFollowUpKind | Prisma.EnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionFollowUpKindWithAggregatesFilter<$PrismaModel> | $Enums.FeaturePollOptionFollowUpKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel>
+}
+
+export type EnumFeaturePollVoterKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollVoterKind | Prisma.EnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollVoterKindFilter<$PrismaModel> | $Enums.FeaturePollVoterKind
+}
+
+export type EnumFeaturePollVoterKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollVoterKind | Prisma.EnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollVoterKindWithAggregatesFilter<$PrismaModel> | $Enums.FeaturePollVoterKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFeaturePollVoterKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFeaturePollVoterKindFilter<$PrismaModel>
+}
+
 export type EnumShopUserRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.ShopUserRole | Prisma.EnumShopUserRoleFieldRefInput<$PrismaModel>
   in?: $Enums.ShopUserRole[] | Prisma.ListEnumShopUserRoleFieldRefInput<$PrismaModel>
@@ -1146,6 +1197,57 @@ export type NestedEnumSupportMessageAuthorWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSupportMessageAuthorFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSupportMessageAuthorFilter<$PrismaModel>
+}
+
+export type NestedEnumFeaturePollOptionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionStatus | Prisma.EnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionStatusFilter<$PrismaModel> | $Enums.FeaturePollOptionStatus
+}
+
+export type NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionFollowUpKind | Prisma.EnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel> | $Enums.FeaturePollOptionFollowUpKind
+}
+
+export type NestedEnumFeaturePollOptionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionStatus | Prisma.EnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionStatus[] | Prisma.ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionStatusWithAggregatesFilter<$PrismaModel> | $Enums.FeaturePollOptionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFeaturePollOptionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFeaturePollOptionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFeaturePollOptionFollowUpKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollOptionFollowUpKind | Prisma.EnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollOptionFollowUpKind[] | Prisma.ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollOptionFollowUpKindWithAggregatesFilter<$PrismaModel> | $Enums.FeaturePollOptionFollowUpKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFeaturePollOptionFollowUpKindFilter<$PrismaModel>
+}
+
+export type NestedEnumFeaturePollVoterKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollVoterKind | Prisma.EnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollVoterKindFilter<$PrismaModel> | $Enums.FeaturePollVoterKind
+}
+
+export type NestedEnumFeaturePollVoterKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FeaturePollVoterKind | Prisma.EnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FeaturePollVoterKind[] | Prisma.ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFeaturePollVoterKindWithAggregatesFilter<$PrismaModel> | $Enums.FeaturePollVoterKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFeaturePollVoterKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFeaturePollVoterKindFilter<$PrismaModel>
 }
 
 export type NestedEnumShopUserRoleFilter<$PrismaModel = never> = {

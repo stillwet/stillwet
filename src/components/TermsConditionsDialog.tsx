@@ -3,6 +3,7 @@
 import { useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { TermsConditionsContent } from "@/components/TermsConditionsContent";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 
 export function TermsConditionsDialog({
   open,
@@ -44,14 +45,7 @@ export function TermsConditionsDialog({
         className="relative z-[5001] flex max-h-[min(85dvh,48rem)] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md border border-zinc-600 bg-zinc-900/90 text-lg leading-none text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-800 hover:text-zinc-100"
-        >
-          ×
-        </button>
+        <StorePanelCloseButton onClick={onClose} />
         <div id={titleId} className="sr-only">
           Terms and conditions
         </div>

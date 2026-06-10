@@ -49,6 +49,24 @@ enum PromotionKind {
   FEATURED_SHOP_HOME
 }
 
+enum FeaturePollOptionStatus {
+  active
+  completed
+  removed
+}
+
+enum FeaturePollOptionFollowUpKind {
+  none
+  free_text
+  country_select
+  radio_select
+}
+
+enum FeaturePollVoterKind {
+  shop
+  donor
+}
+
 enum PromotionPurchaseStatus {
   pending
   paid
@@ -247,6 +265,7 @@ model Shop {
   listings                 ShopListing[]  @relation("ShopListings")
   ownerNotices             ShopOwnerNotice[]
   bugFeedbackReports       BugFeedbackReport[]
+  featurePollVotes         FeaturePollVote[]
   orders                   Order[]
   orderLines               OrderLine[]
   supportThread            SupportThread?
@@ -493,9 +512,70 @@ model SupportTip {
   transactionNumber       Int?
   amountCents             Int
   currency                String   @default("usd")
+  /** Donor email from Stripe Checkout (for feature poll attribution). */
+  donorEmail              String?
+  /** When Stripe checkout completed (distinct from row creation). */
+  paidAt                  DateTime?
   createdAt               DateTime @default(now())
+  featurePollVotes        FeaturePollVote[]
 
   @@index([createdAt])
+  @@index([donorEmail])
+}
+
+model FeaturePollQuestion {
+  id        String              @id @default(cuid())
+  prompt    String              @db.VarChar(500)
+  sortOrder Int                 @default(0)
+  active    Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  options   FeaturePollOption[]
+  votes     FeaturePollVote[]
+
+  @@index([active, sortOrder])
+}
+
+model FeaturePollOption {
+  id             String                         @id @default(cuid())
+  questionId     String
+  question       FeaturePollQuestion            @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  label          String                         @db.VarChar(300)
+  sortOrder      Int                            @default(0)
+  status         FeaturePollOptionStatus        @default(active)
+  followUpKind     FeaturePollOptionFollowUpKind  @default(none)
+  followUpPrompt   String?                        @db.VarChar(500)
+  /** Newline-separated labels when followUpKind is radio_select. */
+  followUpChoices  String?                        @db.Text
+  createdAt      DateTime                       @default(now())
+  updatedAt      DateTime                       @updatedAt
+  votes          FeaturePollVote[]
+
+  @@index([questionId, sortOrder])
+  @@index([questionId, status])
+}
+
+model FeaturePollVote {
+  id               String               @id @default(cuid())
+  questionId       String
+  question         FeaturePollQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionId         String
+  option           FeaturePollOption    @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  voterKind        FeaturePollVoterKind
+  shopId           String?
+  shop             Shop?                @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  shopDisplayName  String?              @db.VarChar(200)
+  donorEmail       String?              @db.VarChar(320)
+  supportTipId     String?
+  supportTip       SupportTip?          @relation(fields: [supportTipId], references: [id], onDelete: SetNull)
+  followUpAnswer   String?              @db.VarChar(500)
+  createdAt        DateTime             @default(now())
+
+  @@index([optionId])
+  @@index([questionId])
+  @@index([shopId, questionId])
+  @@index([donorEmail])
+  @@unique([supportTipId])
 }
 
 /** Shared platform order counter (`global` key): buyer orders and all checkout types from #1253. */

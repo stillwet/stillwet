@@ -66,6 +66,9 @@ export const ModelName = {
   SupportThread: 'SupportThread',
   SupportMessage: 'SupportMessage',
   SupportTip: 'SupportTip',
+  FeaturePollQuestion: 'FeaturePollQuestion',
+  FeaturePollOption: 'FeaturePollOption',
+  FeaturePollVote: 'FeaturePollVote',
   PlatformTransactionSequence: 'PlatformTransactionSequence',
   ShopOwnerNotice: 'ShopOwnerNotice',
   BugFeedbackReport: 'BugFeedbackReport',
@@ -354,10 +357,56 @@ export const SupportTipScalarFieldEnum = {
   transactionNumber: 'transactionNumber',
   amountCents: 'amountCents',
   currency: 'currency',
+  donorEmail: 'donorEmail',
+  paidAt: 'paidAt',
   createdAt: 'createdAt'
 } as const
 
 export type SupportTipScalarFieldEnum = (typeof SupportTipScalarFieldEnum)[keyof typeof SupportTipScalarFieldEnum]
+
+
+export const FeaturePollQuestionScalarFieldEnum = {
+  id: 'id',
+  prompt: 'prompt',
+  sortOrder: 'sortOrder',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeaturePollQuestionScalarFieldEnum = (typeof FeaturePollQuestionScalarFieldEnum)[keyof typeof FeaturePollQuestionScalarFieldEnum]
+
+
+export const FeaturePollOptionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  label: 'label',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  followUpKind: 'followUpKind',
+  followUpPrompt: 'followUpPrompt',
+  followUpChoices: 'followUpChoices',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeaturePollOptionScalarFieldEnum = (typeof FeaturePollOptionScalarFieldEnum)[keyof typeof FeaturePollOptionScalarFieldEnum]
+
+
+export const FeaturePollVoteScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  optionId: 'optionId',
+  voterKind: 'voterKind',
+  shopId: 'shopId',
+  shopDisplayName: 'shopDisplayName',
+  donorEmail: 'donorEmail',
+  supportTipId: 'supportTipId',
+  followUpAnswer: 'followUpAnswer',
+  createdAt: 'createdAt'
+} as const
+
+export type FeaturePollVoteScalarFieldEnum = (typeof FeaturePollVoteScalarFieldEnum)[keyof typeof FeaturePollVoteScalarFieldEnum]
 
 
 export const PlatformTransactionSequenceScalarFieldEnum = {

@@ -64,6 +64,33 @@ export const PromotionKind = {
 export type PromotionKind = (typeof PromotionKind)[keyof typeof PromotionKind]
 
 
+export const FeaturePollOptionStatus = {
+  active: 'active',
+  completed: 'completed',
+  removed: 'removed'
+} as const
+
+export type FeaturePollOptionStatus = (typeof FeaturePollOptionStatus)[keyof typeof FeaturePollOptionStatus]
+
+
+export const FeaturePollOptionFollowUpKind = {
+  none: 'none',
+  free_text: 'free_text',
+  country_select: 'country_select',
+  radio_select: 'radio_select'
+} as const
+
+export type FeaturePollOptionFollowUpKind = (typeof FeaturePollOptionFollowUpKind)[keyof typeof FeaturePollOptionFollowUpKind]
+
+
+export const FeaturePollVoterKind = {
+  shop: 'shop',
+  donor: 'donor'
+} as const
+
+export type FeaturePollVoterKind = (typeof FeaturePollVoterKind)[keyof typeof FeaturePollVoterKind]
+
+
 export const PromotionPurchaseStatus = {
   pending: 'pending',
   paid: 'paid',

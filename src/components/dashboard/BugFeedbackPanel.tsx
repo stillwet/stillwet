@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { featurePollShopViewPath } from "@/lib/feature-poll-path";
 
 export function BugFeedbackPanel({ embedded = false }: { embedded?: boolean }) {
   const router = useRouter();
@@ -59,79 +61,95 @@ export function BugFeedbackPanel({ embedded = false }: { embedded?: boolean }) {
   );
 
   return (
-    <section className={`rounded-xl border border-zinc-800 bg-zinc-950/50 p-4 sm:p-6 ${embedded ? "mt-0" : "mt-8"}`}>
-      <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Bug / Feedback</h2>
-      <p className="mt-2 text-sm text-zinc-300">
-        Tell us what went wrong and what you expected. Screenshots help.
-      </p>
-
-      {message?.tone === "err" ? (
-        <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90" role="alert">
-          {message.text}
+    <>
+      <section
+        className={`rounded-xl border border-zinc-800 bg-zinc-950/50 p-4 sm:p-6 ${embedded ? "mt-0" : "mt-8"}`}
+      >
+        <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+          Upcoming Features
+        </h2>
+        <p className="mt-2 text-sm text-zinc-400">
+          <Link href={featurePollShopViewPath()} className="text-blue-400/90 hover:underline">
+            Vote on upcoming features
+          </Link>
+          .
         </p>
-      ) : message?.tone === "ok" ? (
-        <p className="mt-4 rounded-lg border border-emerald-900/40 bg-emerald-950/20 px-3 py-2 text-xs text-emerald-200/90" role="status">
-          {message.text}
+      </section>
+
+      <section className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/50 p-4 sm:p-6 sm:mt-6">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Bug / Feedback</h2>
+        <p className="mt-2 text-sm text-zinc-300">
+          Tell us what went wrong and what you expected. Screenshots help.
         </p>
-      ) : null}
 
-      <form className="mt-6 space-y-4" onSubmit={onSubmit} encType="multipart/form-data">
-        <label className="block text-xs text-zinc-500">
-          What happened?
-          <textarea
-            required
-            rows={4}
-            value={happened}
-            onChange={(e) => setHappened(e.target.value)}
-            placeholder="Describe what you did and what you saw…"
-            className="mt-1 block w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600"
-          />
-        </label>
+        {message?.tone === "err" ? (
+          <p className="mt-4 rounded-lg border border-amber-900/50 bg-amber-950/25 px-3 py-2 text-xs text-amber-200/90" role="alert">
+            {message.text}
+          </p>
+        ) : message?.tone === "ok" ? (
+          <p className="mt-4 rounded-lg border border-emerald-900/40 bg-emerald-950/20 px-3 py-2 text-xs text-emerald-200/90" role="status">
+            {message.text}
+          </p>
+        ) : null}
 
-        <label className="block text-xs text-zinc-500">
-          What did you expect?
-          <textarea
-            required
-            rows={3}
-            value={expected}
-            onChange={(e) => setExpected(e.target.value)}
-            placeholder="What should have happened instead?"
-            className="mt-1 block w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600"
-          />
-        </label>
+        <form className="mt-6 space-y-4" onSubmit={onSubmit} encType="multipart/form-data">
+          <label className="block text-xs text-zinc-500">
+            What happened?
+            <textarea
+              required
+              rows={4}
+              value={happened}
+              onChange={(e) => setHappened(e.target.value)}
+              placeholder="Describe what you did and what you saw…"
+              className="mt-1 block w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600"
+            />
+          </label>
 
-        <label className="block text-xs text-zinc-500">
-          Feedback / ideas (optional)
-          <textarea
-            rows={3}
-            value={steps}
-            onChange={(e) => setSteps(e.target.value)}
-            placeholder="Extra context, suggestions, or numbered steps…"
-            className="mt-1 block w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600"
-          />
-        </label>
+          <label className="block text-xs text-zinc-500">
+            What did you expect?
+            <textarea
+              required
+              rows={3}
+              value={expected}
+              onChange={(e) => setExpected(e.target.value)}
+              placeholder="What should have happened instead?"
+              className="mt-1 block w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600"
+            />
+          </label>
 
-        <div className="space-y-1">
-          <p className="text-xs text-zinc-500">Screenshot (optional)</p>
-          <input
-            ref={fileRef}
-            type="file"
-            name="image"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="max-w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
-          />
-          <p className="text-[11px] text-zinc-600">Images are compressed to about 100 KiB.</p>
-        </div>
+          <label className="block text-xs text-zinc-500">
+            Feedback / ideas (optional)
+            <textarea
+              rows={3}
+              value={steps}
+              onChange={(e) => setSteps(e.target.value)}
+              placeholder="Extra context, suggestions, or numbered steps…"
+              className="mt-1 block w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm leading-snug text-zinc-100 placeholder:text-zinc-600"
+            />
+          </label>
 
-        <button
-          type="submit"
-          disabled={pending || !dirty}
-          className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {pending ? "Sending…" : "Send report"}
-        </button>
-      </form>
-    </section>
+          <div className="space-y-1">
+            <p className="text-xs text-zinc-500">Screenshot (optional)</p>
+            <input
+              ref={fileRef}
+              type="file"
+              name="image"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="max-w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
+            />
+            <p className="text-[11px] text-zinc-600">Images are compressed to about 100 KiB.</p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={pending || !dirty}
+            className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {pending ? "Sending…" : "Send report"}
+          </button>
+        </form>
+      </section>
+    </>
   );
 }
 

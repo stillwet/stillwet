@@ -23,6 +23,7 @@ import { AdminShopWatchTabLoader } from "@/components/admin/AdminShopWatchTabLoa
 import { AdminPromotionListsTabLoader } from "@/components/admin/AdminPromotionListsTabLoader";
 import { AdminPlatformSalesTabLoader } from "@/components/admin/AdminPlatformSalesTabLoader";
 import { AdminNexusPlanningTabLoader } from "@/components/admin/AdminNexusPlanningTabLoader";
+import { AdminFeatureVotesTabLoader } from "@/components/admin/AdminFeatureVotesTabLoader";
 import { printifyHookBannerFromSearchParams } from "@/lib/admin-printify-hook-banner";
 import { PrintifyApiTab } from "./printify-api-tab";
 import { PrintifyAuxTab, printifyAuxTabPropsFromSearchParams } from "./printify-aux-tab";
@@ -130,6 +131,7 @@ async function AdminDashboardPageBody({
     "cron-jobs",
     "keyword-triggers",
     "tags",
+    "feature-votes",
     "printify-api",
     "printify-aux",
   ] as const;
@@ -480,8 +482,8 @@ async function AdminDashboardPageBody({
                     aria-selected={inventoryTab === "sales"}
                     className={`flex min-h-10 min-w-0 items-center justify-center rounded-t-lg px-2 py-3 text-center text-sm font-medium leading-tight transition ${
                       inventoryTab === "sales"
-                        ? "bg-zinc-900 text-blue-300 ring-1 ring-b-0 ring-blue-500/35"
-                        : "text-blue-400/70 hover:bg-zinc-900/60 hover:text-blue-300/90"
+                        ? "bg-blue-900 text-white ring-1 ring-b-0 ring-blue-600/60"
+                        : "bg-blue-950/50 text-blue-200 hover:bg-blue-900/70 hover:text-white"
                     }`}
                   >
                     Platform sales
@@ -579,6 +581,18 @@ async function AdminDashboardPageBody({
               </div>
               <div className="border-t border-zinc-800/80 pt-2">
                 <div className="flex flex-wrap gap-1">
+          <Link
+            href={`${basePath}?tab=feature-votes`}
+            role="tab"
+            aria-selected={inventoryTab === "feature-votes"}
+            className={`shrink-0 rounded-t-lg px-4 py-2.5 text-sm font-medium transition ${
+              inventoryTab === "feature-votes"
+                ? "bg-zinc-900 text-zinc-100 ring-1 ring-b-0 ring-zinc-700"
+                : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
+            }`}
+          >
+            Feature votes
+          </Link>
           <Link
             href={`${basePath}?tab=removed`}
             role="tab"
@@ -703,6 +717,13 @@ async function AdminDashboardPageBody({
           ) : adminSection === "backend" && inventoryTab === "flairs" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>
               <AdminShopFlairsTabLoader />
+            </Suspense>
+          ) : adminSection === "backend" && inventoryTab === "feature-votes" ? (
+            <Suspense fallback={<AdminDashboardTabPanelFallback />}>
+              <AdminFeatureVotesTabLoader
+                fpErr={typeof sp.fp_err === "string" ? sp.fp_err : undefined}
+                fpSaved={typeof sp.fp_saved === "string" ? sp.fp_saved : undefined}
+              />
             </Suspense>
           ) : adminSection === "backend" && inventoryTab === "google-shopping" ? (
             <Suspense fallback={<AdminDashboardTabPanelFallback />}>

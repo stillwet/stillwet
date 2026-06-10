@@ -1,5 +1,8 @@
+/** Minimum voluntary tip (USD). */
+export const MIN_SUPPORT_TIP_USD = 1;
+
 /** Minimum voluntary tip (USD cents). */
-const MIN_SUPPORT_TIP_CENTS = 100;
+const MIN_SUPPORT_TIP_CENTS = MIN_SUPPORT_TIP_USD * 100;
 /** Upper bound for voluntary tip (USD cents); avoids absurd Checkout amounts. */
 const MAX_SUPPORT_TIP_CENTS = 99_999_00;
 
@@ -16,6 +19,19 @@ export function normalizeSupportTipUsdToCents(raw: unknown): number | null {
   const cents = Math.round(dollars * 100);
   if (cents < MIN_SUPPORT_TIP_CENTS || cents > MAX_SUPPORT_TIP_CENTS) return null;
   return cents;
+}
+
+/** Client-side copy for support tip field validation (replaces browser-native bubbles). */
+export function supportTipInputError(raw: unknown): string | null {
+  const s = typeof raw === "string" ? raw.trim() : raw != null ? String(raw).trim() : "";
+  if (!s) return "Enter an amount to continue.";
+  if (normalizeSupportTipUsdToCents(raw) != null) return null;
+  const cleaned = s.replace(/,/g, "");
+  const dollars = parseFloat(cleaned);
+  if (Number.isFinite(dollars) && Math.round(dollars * 100) < MIN_SUPPORT_TIP_CENTS) {
+    return `Minimum tip is $${MIN_SUPPORT_TIP_USD.toFixed(2)}.`;
+  }
+  return "Enter a valid dollar amount.";
 }
 
 export function isSupportCheckoutConfigured(): boolean {

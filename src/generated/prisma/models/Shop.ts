@@ -497,6 +497,7 @@ export type ShopWhereInput = {
   listings?: Prisma.ShopListingListRelationFilter
   ownerNotices?: Prisma.ShopOwnerNoticeListRelationFilter
   bugFeedbackReports?: Prisma.BugFeedbackReportListRelationFilter
+  featurePollVotes?: Prisma.FeaturePollVoteListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   orderLines?: Prisma.OrderLineListRelationFilter
   supportThread?: Prisma.XOR<Prisma.SupportThreadNullableScalarRelationFilter, Prisma.SupportThreadWhereInput> | null
@@ -563,6 +564,7 @@ export type ShopOrderByWithRelationInput = {
   listings?: Prisma.ShopListingOrderByRelationAggregateInput
   ownerNotices?: Prisma.ShopOwnerNoticeOrderByRelationAggregateInput
   bugFeedbackReports?: Prisma.BugFeedbackReportOrderByRelationAggregateInput
+  featurePollVotes?: Prisma.FeaturePollVoteOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
   orderLines?: Prisma.OrderLineOrderByRelationAggregateInput
   supportThread?: Prisma.SupportThreadOrderByWithRelationInput
@@ -632,6 +634,7 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   listings?: Prisma.ShopListingListRelationFilter
   ownerNotices?: Prisma.ShopOwnerNoticeListRelationFilter
   bugFeedbackReports?: Prisma.BugFeedbackReportListRelationFilter
+  featurePollVotes?: Prisma.FeaturePollVoteListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   orderLines?: Prisma.OrderLineListRelationFilter
   supportThread?: Prisma.XOR<Prisma.SupportThreadNullableScalarRelationFilter, Prisma.SupportThreadWhereInput> | null
@@ -790,6 +793,7 @@ export type ShopCreateInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -855,6 +859,7 @@ export type ShopUncheckedCreateInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -918,6 +923,7 @@ export type ShopUpdateInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -983,6 +989,7 @@ export type ShopUncheckedUpdateInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -1440,6 +1447,22 @@ export type ShopUpdateOneRequiredWithoutSupportThreadNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutSupportThreadInput, Prisma.ShopUpdateWithoutSupportThreadInput>, Prisma.ShopUncheckedUpdateWithoutSupportThreadInput>
 }
 
+export type ShopCreateNestedOneWithoutFeaturePollVotesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutFeaturePollVotesInput, Prisma.ShopUncheckedCreateWithoutFeaturePollVotesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutFeaturePollVotesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneWithoutFeaturePollVotesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutFeaturePollVotesInput, Prisma.ShopUncheckedCreateWithoutFeaturePollVotesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutFeaturePollVotesInput
+  upsert?: Prisma.ShopUpsertWithoutFeaturePollVotesInput
+  disconnect?: Prisma.ShopWhereInput | boolean
+  delete?: Prisma.ShopWhereInput | boolean
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutFeaturePollVotesInput, Prisma.ShopUpdateWithoutFeaturePollVotesInput>, Prisma.ShopUncheckedUpdateWithoutFeaturePollVotesInput>
+}
+
 export type ShopCreateNestedOneWithoutOwnerNoticesInput = {
   create?: Prisma.XOR<Prisma.ShopCreateWithoutOwnerNoticesInput, Prisma.ShopUncheckedCreateWithoutOwnerNoticesInput>
   connectOrCreate?: Prisma.ShopCreateOrConnectWithoutOwnerNoticesInput
@@ -1722,6 +1745,7 @@ export type ShopCreateWithoutFlairTypeInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -1785,6 +1809,7 @@ export type ShopUncheckedCreateWithoutFlairTypeInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -1920,6 +1945,7 @@ export type ShopCreateWithoutFlairPurchasesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -1984,6 +2010,7 @@ export type ShopUncheckedCreateWithoutFlairPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -2062,6 +2089,7 @@ export type ShopUpdateWithoutFlairPurchasesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -2126,6 +2154,7 @@ export type ShopUncheckedUpdateWithoutFlairPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -2188,6 +2217,7 @@ export type ShopCreateWithoutGoogleShoppingPurchasesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -2252,6 +2282,7 @@ export type ShopUncheckedCreateWithoutGoogleShoppingPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -2330,6 +2361,7 @@ export type ShopUpdateWithoutGoogleShoppingPurchasesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -2394,6 +2426,7 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -2456,6 +2489,7 @@ export type ShopCreateWithoutGoogleShoppingEnrollmentsInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -2520,6 +2554,7 @@ export type ShopUncheckedCreateWithoutGoogleShoppingEnrollmentsInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -2598,6 +2633,7 @@ export type ShopUpdateWithoutGoogleShoppingEnrollmentsInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -2662,6 +2698,7 @@ export type ShopUncheckedUpdateWithoutGoogleShoppingEnrollmentsInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -2724,6 +2761,7 @@ export type ShopCreateWithoutPromotionsDashboardSnapshotInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -2788,6 +2826,7 @@ export type ShopUncheckedCreateWithoutPromotionsDashboardSnapshotInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -2866,6 +2905,7 @@ export type ShopUpdateWithoutPromotionsDashboardSnapshotInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -2930,6 +2970,7 @@ export type ShopUncheckedUpdateWithoutPromotionsDashboardSnapshotInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -2992,6 +3033,7 @@ export type ShopCreateWithoutSalesDashboardSnapshotInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -3056,6 +3098,7 @@ export type ShopUncheckedCreateWithoutSalesDashboardSnapshotInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -3134,6 +3177,7 @@ export type ShopUpdateWithoutSalesDashboardSnapshotInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -3198,6 +3242,7 @@ export type ShopUncheckedUpdateWithoutSalesDashboardSnapshotInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -3260,6 +3305,7 @@ export type ShopCreateWithoutListingSlotPromoRedemptionsInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -3324,6 +3370,7 @@ export type ShopUncheckedCreateWithoutListingSlotPromoRedemptionsInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -3402,6 +3449,7 @@ export type ShopUpdateWithoutListingSlotPromoRedemptionsInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -3466,6 +3514,7 @@ export type ShopUncheckedUpdateWithoutListingSlotPromoRedemptionsInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -3528,6 +3577,7 @@ export type ShopCreateWithoutSupportThreadInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
@@ -3592,6 +3642,7 @@ export type ShopUncheckedCreateWithoutSupportThreadInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
@@ -3670,6 +3721,7 @@ export type ShopUpdateWithoutSupportThreadInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
@@ -3734,8 +3786,281 @@ export type ShopUncheckedUpdateWithoutSupportThreadInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedUpdateManyWithoutRecipientShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedUpdateOneWithoutShopNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutFeaturePollVotesInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  homeFeaturedListing?: Prisma.ShopListingCreateNestedOneWithoutShopHomeFeaturedInput
+  users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseCreateNestedManyWithoutRecipientShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotCreateNestedOneWithoutShopInput
+  flairType?: Prisma.ShopFlairTypeCreateNestedOneWithoutShopsInput
+  flairPurchases?: Prisma.ShopFlairPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutFeaturePollVotesInput = {
+  id?: string
+  slug: string
+  displayName: string
+  profileImageUrl?: string | null
+  bio?: string | null
+  welcomeMessage?: string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: boolean
+  listedOnShopsBrowse?: boolean
+  stripeConnectAccountId?: string | null
+  connectChargesEnabled?: boolean
+  payoutsEnabled?: boolean
+  editorialPriority?: number | null
+  editorialPinnedUntil?: Date | string | null
+  totalSalesCents?: number
+  storefrontViewCount?: number
+  ownerPausedShopAt?: Date | string | null
+  accountDeletionRequestedAt?: Date | string | null
+  accountDeletionEmailConfirmedAt?: Date | string | null
+  inactivityWarningSentAt?: Date | string | null
+  inactivityDeactivatedAt?: Date | string | null
+  adminFrozenAt?: Date | string | null
+  inactivityDeletionTriggeredAt?: Date | string | null
+  homeFeaturedListingId?: string | null
+  itemGuidelinesAcknowledgedAt?: Date | string | null
+  listingFeeBonusFreeSlots?: number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: string | null
+  flairPurchasedAt?: Date | string | null
+  googleShoppingCredits?: number
+  betaTesterAt?: Date | string | null
+  betaTesterOnboardingStatus?: $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Date | string | null
+  betaTesterOnboardingCompletedAt?: Date | string | null
+  secretMenuAccessGrantedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
+  listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
+  orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
+  supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
+  promotionPurchases?: Prisma.PromotionPurchaseUncheckedCreateNestedManyWithoutShopInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedCreateNestedManyWithoutShopInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUncheckedCreateNestedManyWithoutShopInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUncheckedCreateNestedManyWithoutShopInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUncheckedCreateNestedManyWithoutRedeemedByShopInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUncheckedCreateNestedManyWithoutRecipientShopInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUncheckedCreateNestedOneWithoutShopInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUncheckedCreateNestedManyWithoutShopInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUncheckedCreateNestedManyWithoutShopInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUncheckedCreateNestedManyWithoutShopInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutFeaturePollVotesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutFeaturePollVotesInput, Prisma.ShopUncheckedCreateWithoutFeaturePollVotesInput>
+}
+
+export type ShopUpsertWithoutFeaturePollVotesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutFeaturePollVotesInput, Prisma.ShopUncheckedUpdateWithoutFeaturePollVotesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutFeaturePollVotesInput, Prisma.ShopUncheckedCreateWithoutFeaturePollVotesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutFeaturePollVotesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutFeaturePollVotesInput, Prisma.ShopUncheckedUpdateWithoutFeaturePollVotesInput>
+}
+
+export type ShopUpdateWithoutFeaturePollVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  homeFeaturedListing?: Prisma.ShopListingUpdateOneWithoutShopHomeFeaturedNestedInput
+  users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
+  listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
+  promotionPurchases?: Prisma.PromotionPurchaseUpdateManyWithoutShopNestedInput
+  listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUpdateManyWithoutShopNestedInput
+  setupFeePurchases?: Prisma.ShopSetupFeePurchaseUpdateManyWithoutShopNestedInput
+  reactivationPurchases?: Prisma.ShopReactivationPurchaseUpdateManyWithoutShopNestedInput
+  creatorGiftCodesRedeemed?: Prisma.CreatorGiftCodeUpdateManyWithoutRedeemedByShopNestedInput
+  creatorGiftPurchasesReceived?: Prisma.CreatorGiftPurchaseUpdateManyWithoutRecipientShopNestedInput
+  promotionsDashboardSnapshot?: Prisma.ShopPromotionsDashboardSnapshotUpdateOneWithoutShopNestedInput
+  salesDashboardSnapshot?: Prisma.ShopSalesDashboardSnapshotUpdateOneWithoutShopNestedInput
+  flairType?: Prisma.ShopFlairTypeUpdateOneWithoutShopsNestedInput
+  flairPurchases?: Prisma.ShopFlairPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingPurchases?: Prisma.ShopGoogleShoppingPurchaseUpdateManyWithoutShopNestedInput
+  googleShoppingEnrollments?: Prisma.ShopListingGoogleShoppingEnrollmentUpdateManyWithoutShopNestedInput
+  promotionCreditBalances?: Prisma.ShopPromotionCreditBalanceUpdateManyWithoutShopNestedInput
+  adminAwardGrants?: Prisma.ShopAdminAwardGrantUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutFeaturePollVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinks?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  listedOnShopsBrowse?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeConnectAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectChargesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  payoutsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  editorialPriority?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  editorialPinnedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalSalesCents?: Prisma.IntFieldUpdateOperationsInput | number
+  storefrontViewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerPausedShopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountDeletionEmailConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityWarningSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminFrozenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inactivityDeletionTriggeredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  homeFeaturedListingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  itemGuidelinesAcknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  listingFeeBonusFreeSlots?: Prisma.IntFieldUpdateOperationsInput | number
+  browseAllPageFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  homeHotCarouselFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  popularItemsFeaturedProductIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  browseShopsPageFeaturedShopIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  flairTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flairPurchasedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  googleShoppingCredits?: Prisma.IntFieldUpdateOperationsInput | number
+  betaTesterAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingStatus?: Prisma.NullableEnumBetaTesterOnboardingStatusFieldUpdateOperationsInput | $Enums.BetaTesterOnboardingStatus | null
+  betaTesterOnboardingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  betaTesterOnboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  secretMenuAccessGrantedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
+  listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
+  ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
+  bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
+  orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
+  supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
   promotionPurchases?: Prisma.PromotionPurchaseUncheckedUpdateManyWithoutShopNestedInput
   listingCreditPackPurchases?: Prisma.ListingCreditPackPurchaseUncheckedUpdateManyWithoutShopNestedInput
@@ -3795,6 +4120,7 @@ export type ShopCreateWithoutOwnerNoticesInput = {
   users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -3859,6 +4185,7 @@ export type ShopUncheckedCreateWithoutOwnerNoticesInput = {
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -3937,6 +4264,7 @@ export type ShopUpdateWithoutOwnerNoticesInput = {
   users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -4001,6 +4329,7 @@ export type ShopUncheckedUpdateWithoutOwnerNoticesInput = {
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -4063,6 +4392,7 @@ export type ShopCreateWithoutBugFeedbackReportsInput = {
   users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -4127,6 +4457,7 @@ export type ShopUncheckedCreateWithoutBugFeedbackReportsInput = {
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -4205,6 +4536,7 @@ export type ShopUpdateWithoutBugFeedbackReportsInput = {
   users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -4269,6 +4601,7 @@ export type ShopUncheckedUpdateWithoutBugFeedbackReportsInput = {
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -4331,6 +4664,7 @@ export type ShopCreateWithoutUsersInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -4395,6 +4729,7 @@ export type ShopUncheckedCreateWithoutUsersInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -4473,6 +4808,7 @@ export type ShopUpdateWithoutUsersInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -4537,6 +4873,7 @@ export type ShopUncheckedUpdateWithoutUsersInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -4599,6 +4936,7 @@ export type ShopCreateWithoutListingsInput = {
   users?: Prisma.ShopUserCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -4663,6 +5001,7 @@ export type ShopUncheckedCreateWithoutListingsInput = {
   users?: Prisma.ShopUserUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -4730,6 +5069,7 @@ export type ShopCreateWithoutHomeFeaturedListingInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -4794,6 +5134,7 @@ export type ShopUncheckedCreateWithoutHomeFeaturedListingInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -4872,6 +5213,7 @@ export type ShopUpdateWithoutListingsInput = {
   users?: Prisma.ShopUserUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -4936,6 +5278,7 @@ export type ShopUncheckedUpdateWithoutListingsInput = {
   users?: Prisma.ShopUserUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -5009,6 +5352,7 @@ export type ShopUpdateWithoutHomeFeaturedListingInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -5073,6 +5417,7 @@ export type ShopUncheckedUpdateWithoutHomeFeaturedListingInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -5136,6 +5481,7 @@ export type ShopCreateWithoutPromotionPurchasesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -5200,6 +5546,7 @@ export type ShopUncheckedCreateWithoutPromotionPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -5278,6 +5625,7 @@ export type ShopUpdateWithoutPromotionPurchasesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -5342,6 +5690,7 @@ export type ShopUncheckedUpdateWithoutPromotionPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -5404,6 +5753,7 @@ export type ShopCreateWithoutPromotionCreditBalancesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -5468,6 +5818,7 @@ export type ShopUncheckedCreateWithoutPromotionCreditBalancesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -5546,6 +5897,7 @@ export type ShopUpdateWithoutPromotionCreditBalancesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -5610,6 +5962,7 @@ export type ShopUncheckedUpdateWithoutPromotionCreditBalancesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -5672,6 +6025,7 @@ export type ShopCreateWithoutAdminAwardGrantsInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -5736,6 +6090,7 @@ export type ShopUncheckedCreateWithoutAdminAwardGrantsInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -5814,6 +6169,7 @@ export type ShopUpdateWithoutAdminAwardGrantsInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -5878,6 +6234,7 @@ export type ShopUncheckedUpdateWithoutAdminAwardGrantsInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -5940,6 +6297,7 @@ export type ShopCreateWithoutListingCreditPackPurchasesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -6004,6 +6362,7 @@ export type ShopUncheckedCreateWithoutListingCreditPackPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -6082,6 +6441,7 @@ export type ShopUpdateWithoutListingCreditPackPurchasesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -6146,6 +6506,7 @@ export type ShopUncheckedUpdateWithoutListingCreditPackPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -6208,6 +6569,7 @@ export type ShopCreateWithoutSetupFeePurchasesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -6272,6 +6634,7 @@ export type ShopUncheckedCreateWithoutSetupFeePurchasesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -6350,6 +6713,7 @@ export type ShopUpdateWithoutSetupFeePurchasesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -6414,6 +6778,7 @@ export type ShopUncheckedUpdateWithoutSetupFeePurchasesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -6476,6 +6841,7 @@ export type ShopCreateWithoutReactivationPurchasesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -6540,6 +6906,7 @@ export type ShopUncheckedCreateWithoutReactivationPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -6618,6 +6985,7 @@ export type ShopUpdateWithoutReactivationPurchasesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -6682,6 +7050,7 @@ export type ShopUncheckedUpdateWithoutReactivationPurchasesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -6744,6 +7113,7 @@ export type ShopCreateWithoutCreatorGiftPurchasesReceivedInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -6808,6 +7178,7 @@ export type ShopUncheckedCreateWithoutCreatorGiftPurchasesReceivedInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -6886,6 +7257,7 @@ export type ShopUpdateWithoutCreatorGiftPurchasesReceivedInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -6950,6 +7322,7 @@ export type ShopUncheckedUpdateWithoutCreatorGiftPurchasesReceivedInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -7012,6 +7385,7 @@ export type ShopCreateWithoutCreatorGiftCodesRedeemedInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
@@ -7076,6 +7450,7 @@ export type ShopUncheckedCreateWithoutCreatorGiftCodesRedeemedInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
@@ -7154,6 +7529,7 @@ export type ShopUpdateWithoutCreatorGiftCodesRedeemedInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -7218,6 +7594,7 @@ export type ShopUncheckedUpdateWithoutCreatorGiftCodesRedeemedInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -7280,6 +7657,7 @@ export type ShopCreateWithoutOrdersInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
@@ -7344,6 +7722,7 @@ export type ShopUncheckedCreateWithoutOrdersInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orderLines?: Prisma.OrderLineUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
@@ -7422,6 +7801,7 @@ export type ShopUpdateWithoutOrdersInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
@@ -7486,6 +7866,7 @@ export type ShopUncheckedUpdateWithoutOrdersInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
@@ -7548,6 +7929,7 @@ export type ShopCreateWithoutOrderLinesInput = {
   listings?: Prisma.ShopListingCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadCreateNestedOneWithoutShopInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionCreateNestedManyWithoutShopInput
@@ -7612,6 +7994,7 @@ export type ShopUncheckedCreateWithoutOrderLinesInput = {
   listings?: Prisma.ShopListingUncheckedCreateNestedManyWithoutShopInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedCreateNestedManyWithoutShopInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedCreateNestedManyWithoutShopInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutShopInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutShopInput
   supportThread?: Prisma.SupportThreadUncheckedCreateNestedOneWithoutShopInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedCreateNestedManyWithoutShopInput
@@ -7690,6 +8073,7 @@ export type ShopUpdateWithoutOrderLinesInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUpdateManyWithoutShopNestedInput
@@ -7754,6 +8138,7 @@ export type ShopUncheckedUpdateWithoutOrderLinesInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
   listingSlotPromoRedemptions?: Prisma.ShopListingSlotPromoRedemptionUncheckedUpdateManyWithoutShopNestedInput
@@ -7858,6 +8243,7 @@ export type ShopUpdateWithoutFlairTypeInput = {
   listings?: Prisma.ShopListingUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUpdateOneWithoutShopNestedInput
@@ -7921,6 +8307,7 @@ export type ShopUncheckedUpdateWithoutFlairTypeInput = {
   listings?: Prisma.ShopListingUncheckedUpdateManyWithoutShopNestedInput
   ownerNotices?: Prisma.ShopOwnerNoticeUncheckedUpdateManyWithoutShopNestedInput
   bugFeedbackReports?: Prisma.BugFeedbackReportUncheckedUpdateManyWithoutShopNestedInput
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutShopNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutShopNestedInput
   orderLines?: Prisma.OrderLineUncheckedUpdateManyWithoutShopNestedInput
   supportThread?: Prisma.SupportThreadUncheckedUpdateOneWithoutShopNestedInput
@@ -7992,6 +8379,7 @@ export type ShopCountOutputType = {
   listings: number
   ownerNotices: number
   bugFeedbackReports: number
+  featurePollVotes: number
   orders: number
   orderLines: number
   listingSlotPromoRedemptions: number
@@ -8013,6 +8401,7 @@ export type ShopCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   listings?: boolean | ShopCountOutputTypeCountListingsArgs
   ownerNotices?: boolean | ShopCountOutputTypeCountOwnerNoticesArgs
   bugFeedbackReports?: boolean | ShopCountOutputTypeCountBugFeedbackReportsArgs
+  featurePollVotes?: boolean | ShopCountOutputTypeCountFeaturePollVotesArgs
   orders?: boolean | ShopCountOutputTypeCountOrdersArgs
   orderLines?: boolean | ShopCountOutputTypeCountOrderLinesArgs
   listingSlotPromoRedemptions?: boolean | ShopCountOutputTypeCountListingSlotPromoRedemptionsArgs
@@ -8065,6 +8454,13 @@ export type ShopCountOutputTypeCountOwnerNoticesArgs<ExtArgs extends runtime.Typ
  */
 export type ShopCountOutputTypeCountBugFeedbackReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BugFeedbackReportWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountFeaturePollVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FeaturePollVoteWhereInput
 }
 
 /**
@@ -8212,6 +8608,7 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   listings?: boolean | Prisma.Shop$listingsArgs<ExtArgs>
   ownerNotices?: boolean | Prisma.Shop$ownerNoticesArgs<ExtArgs>
   bugFeedbackReports?: boolean | Prisma.Shop$bugFeedbackReportsArgs<ExtArgs>
+  featurePollVotes?: boolean | Prisma.Shop$featurePollVotesArgs<ExtArgs>
   orders?: boolean | Prisma.Shop$ordersArgs<ExtArgs>
   orderLines?: boolean | Prisma.Shop$orderLinesArgs<ExtArgs>
   supportThread?: boolean | Prisma.Shop$supportThreadArgs<ExtArgs>
@@ -8373,6 +8770,7 @@ export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   listings?: boolean | Prisma.Shop$listingsArgs<ExtArgs>
   ownerNotices?: boolean | Prisma.Shop$ownerNoticesArgs<ExtArgs>
   bugFeedbackReports?: boolean | Prisma.Shop$bugFeedbackReportsArgs<ExtArgs>
+  featurePollVotes?: boolean | Prisma.Shop$featurePollVotesArgs<ExtArgs>
   orders?: boolean | Prisma.Shop$ordersArgs<ExtArgs>
   orderLines?: boolean | Prisma.Shop$orderLinesArgs<ExtArgs>
   supportThread?: boolean | Prisma.Shop$supportThreadArgs<ExtArgs>
@@ -8410,6 +8808,7 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     listings: Prisma.$ShopListingPayload<ExtArgs>[]
     ownerNotices: Prisma.$ShopOwnerNoticePayload<ExtArgs>[]
     bugFeedbackReports: Prisma.$BugFeedbackReportPayload<ExtArgs>[]
+    featurePollVotes: Prisma.$FeaturePollVotePayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
     orderLines: Prisma.$OrderLinePayload<ExtArgs>[]
     supportThread: Prisma.$SupportThreadPayload<ExtArgs> | null
@@ -8962,6 +9361,7 @@ export interface Prisma__ShopClient<T, Null = never, ExtArgs extends runtime.Typ
   listings<T extends Prisma.Shop$listingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$listingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownerNotices<T extends Prisma.Shop$ownerNoticesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$ownerNoticesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShopOwnerNoticePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bugFeedbackReports<T extends Prisma.Shop$bugFeedbackReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$bugFeedbackReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BugFeedbackReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  featurePollVotes<T extends Prisma.Shop$featurePollVotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$featurePollVotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeaturePollVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Shop$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderLines<T extends Prisma.Shop$orderLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$orderLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   supportThread<T extends Prisma.Shop$supportThreadArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$supportThreadArgs<ExtArgs>>): Prisma.Prisma__SupportThreadClient<runtime.Types.Result.GetResult<Prisma.$SupportThreadPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -9562,6 +9962,30 @@ export type Shop$bugFeedbackReportsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.BugFeedbackReportScalarFieldEnum | Prisma.BugFeedbackReportScalarFieldEnum[]
+}
+
+/**
+ * Shop.featurePollVotes
+ */
+export type Shop$featurePollVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FeaturePollVote
+   */
+  select?: Prisma.FeaturePollVoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FeaturePollVote
+   */
+  omit?: Prisma.FeaturePollVoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FeaturePollVoteInclude<ExtArgs> | null
+  where?: Prisma.FeaturePollVoteWhereInput
+  orderBy?: Prisma.FeaturePollVoteOrderByWithRelationInput | Prisma.FeaturePollVoteOrderByWithRelationInput[]
+  cursor?: Prisma.FeaturePollVoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FeaturePollVoteScalarFieldEnum | Prisma.FeaturePollVoteScalarFieldEnum[]
 }
 
 /**

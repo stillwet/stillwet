@@ -122,6 +122,21 @@ export type SupportMessage = Prisma.SupportMessageModel
  */
 export type SupportTip = Prisma.SupportTipModel
 /**
+ * Model FeaturePollQuestion
+ * 
+ */
+export type FeaturePollQuestion = Prisma.FeaturePollQuestionModel
+/**
+ * Model FeaturePollOption
+ * 
+ */
+export type FeaturePollOption = Prisma.FeaturePollOptionModel
+/**
+ * Model FeaturePollVote
+ * 
+ */
+export type FeaturePollVote = Prisma.FeaturePollVoteModel
+/**
  * Model PlatformTransactionSequence
  * * Shared platform order counter (`global` key): buyer orders and all checkout types from #1253.
  */

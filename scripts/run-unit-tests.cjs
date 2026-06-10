@@ -18,6 +18,8 @@ const tests = [
   "src/lib/admin-announcements.test.ts",
   "src/lib/admin-platform-sales-stripe-fee.test.ts",
   "src/lib/order-proceeds-splits.test.ts",
+  "src/lib/feature-poll-vote-eligibility.test.ts",
+  "src/lib/world-countries.test.ts",
   "src/lib/shop-inactivity-policy.test.ts",
   "src/lib/promotion-placement-ui-pure.test.ts",
   "src/lib/stripe-connect-account-prefill.test.ts",

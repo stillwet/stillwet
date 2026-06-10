@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 
 type AdminProductPreviewButtonProps = {
   slug: string;
@@ -62,27 +63,22 @@ export function AdminProductPreviewButton({
             aria-labelledby={titleId}
             className="relative z-[5001] flex min-h-0 h-[calc(100dvh-1rem)] w-[calc(100dvw-1rem)] max-w-none flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl sm:h-[calc(100dvh-2rem)] sm:w-[calc(100dvw-2rem)] md:h-[calc(100dvh-3rem)] md:w-[calc(100dvw-3rem)]"
           >
-            <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-zinc-800 bg-zinc-900/90 px-3 py-2.5 sm:px-4">
+            <StorePanelCloseButton
+              onClick={() => setOpen(false)}
+              aria-label="Close item details"
+            />
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-zinc-800 bg-zinc-900/90 px-3 py-2.5 pr-14 sm:px-4 sm:pr-16">
               <h2 id={titleId} className="text-sm font-medium text-zinc-200">
                 Item details
               </h2>
-              <div className="flex items-center gap-2">
-                <a
-                  href={productPath}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-blue-400/90 underline-offset-2 hover:underline"
-                >
-                  Open full page
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="rounded-md border border-zinc-600 bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-700"
-                >
-                  Close
-                </button>
-              </div>
+              <a
+                href={productPath}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-blue-400/90 underline-offset-2 hover:underline"
+              >
+                Open full page
+              </a>
             </div>
             <iframe
               title={`Item details: ${productName}`}

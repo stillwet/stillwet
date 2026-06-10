@@ -40,10 +40,14 @@ export function GiftCreatorSuccessShell({
           closeHref={HOME_HREF}
           title={title}
         >
-          <div className="text-center">
-            {showConfetti ? <GiftCreatorSuccessConfetti /> : null}
-            {children}
-          </div>
+          {showConfetti ? (
+            <div className="relative flex min-h-[min(18rem,52vh)] flex-col items-center justify-center text-center">
+              <GiftCreatorSuccessConfetti overlay />
+              <div className="relative z-10 w-full max-w-lg px-2">{children}</div>
+            </div>
+          ) : (
+            <div className="text-center">{children}</div>
+          )}
         </StoreDocumentPanel>
       </div>
       <div className="mx-auto max-w-[1124px] px-4 pb-10 sm:px-6">

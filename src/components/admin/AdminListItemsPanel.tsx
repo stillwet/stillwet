@@ -8,6 +8,7 @@ import {
   AdminListItemEditForm,
   type AdminListItemSerializable,
 } from "@/components/admin/AdminListItemEditForm";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 import {
   LISTING_REQUEST_ARTWORK_STORED_MAX_MB,
   LISTING_REQUEST_ARTWORK_UPLOAD_MAX_MB,
@@ -91,14 +92,10 @@ function AdminCatalogItemImageCell({ url }: { url: string }) {
               className="relative max-w-[min(80vw,560px)] rounded-xl border border-zinc-700 bg-zinc-950 p-3 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                type="button"
-                aria-label="Close image preview"
-                className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-md text-lg leading-none text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+              <StorePanelCloseButton
                 onClick={() => setLightboxOpen(false)}
-              >
-                ×
-              </button>
+                aria-label="Close image preview"
+              />
               {/* eslint-disable-next-line @next/next/no-img-element -- admin catalog reference URL */}
               <img
                 src={t}

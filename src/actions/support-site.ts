@@ -83,7 +83,7 @@ export async function startSupportSiteCheckout(formData: FormData) {
       description: refFields.description,
       metadata: refFields.metadata,
     },
-    success_url: `${base.replace(/\/$/, "")}/support-thanks`,
+    success_url: `${base.replace(/\/$/, "")}/support-thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${base.replace(/\/$/, "")}/?support=cancelled`,
   });
 

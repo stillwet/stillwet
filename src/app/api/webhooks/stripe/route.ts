@@ -130,6 +130,12 @@ async function fulfillSupportTipCheckout(session: Stripe.Checkout.Session): Prom
       : "usd";
   if (cents <= 0) return true;
 
+  const donorEmail =
+    session.customer_details?.email?.trim().toLowerCase() ||
+    session.customer_email?.trim().toLowerCase() ||
+    null;
+  const paidAt = new Date((session.created ?? Math.floor(Date.now() / 1000)) * 1000);
+
   const supportTipId = session.metadata?.supportTipId?.trim();
   if (supportTipId) {
     await prisma.supportTip.updateMany({
@@ -138,6 +144,8 @@ async function fulfillSupportTipCheckout(session: Stripe.Checkout.Session): Prom
         stripeCheckoutSessionId: session.id,
         amountCents: cents,
         currency,
+        donorEmail,
+        paidAt,
       },
     });
     return true;
@@ -150,9 +158,16 @@ async function fulfillSupportTipCheckout(session: Stripe.Checkout.Session): Prom
       stripeCheckoutSessionId: session.id,
       amountCents: cents,
       currency,
-      createdAt: new Date((session.created ?? Math.floor(Date.now() / 1000)) * 1000),
+      donorEmail,
+      paidAt,
+      createdAt: paidAt,
     },
-    update: {},
+    update: {
+      amountCents: cents,
+      currency,
+      donorEmail,
+      paidAt,
+    },
   });
   return true;
 }

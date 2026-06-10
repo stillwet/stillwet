@@ -7,6 +7,7 @@ import nextDynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
 import { dashQueryParamForTabId } from "@/lib/dashboard-dash-query";
 import { useDashboardTabFetch, type DashboardTabLoadedFlags } from "@/components/dashboard/useDashboardTabFetch";
@@ -923,14 +924,7 @@ function ListingCard({
                 aria-modal="true"
                 aria-labelledby={previewTitleId}
               >
-                <button
-                  type="button"
-                  onClick={() => setPreviewOpen(false)}
-                  aria-label="Close"
-                  className="absolute right-2 top-2 z-10 flex h-10 w-10 items-center justify-center rounded-md border border-zinc-700/80 bg-zinc-950/90 text-lg leading-none text-zinc-400 shadow-sm backdrop-blur-sm transition hover:border-zinc-600 hover:bg-zinc-900 hover:text-zinc-100 sm:right-3 sm:top-3"
-                >
-                  ×
-                </button>
+                <StorePanelCloseButton onClick={() => setPreviewOpen(false)} />
                 <div className="store-product-modal-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-10 pr-14 sm:px-10 sm:pb-10 sm:pt-6 sm:pr-16">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <h2 id={previewTitleId} className="text-xs font-medium uppercase tracking-wide text-zinc-500">

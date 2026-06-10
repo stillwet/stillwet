@@ -257,6 +257,21 @@ h6 {
     animation: gift-confetti-fall ease-in forwards;
     animation-iteration-count: infinite;
   }
+
+  .gift-confetti-overlay .gift-confetti-piece {
+    animation-name: gift-confetti-fall-overlay;
+  }
+}
+
+@keyframes gift-confetti-fall-overlay {
+  0% {
+    transform: translateY(-12px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(280px) rotate(540deg);
+    opacity: 0;
+  }
 }
 
 @keyframes shop-signup-confetti-fall {

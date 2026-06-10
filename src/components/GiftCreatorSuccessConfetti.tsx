@@ -38,8 +38,41 @@ function buildConfettiPieces(): ConfettiPiece[] {
   }));
 }
 
-export function GiftCreatorSuccessConfetti() {
+export function GiftCreatorSuccessConfetti({
+  overlay = false,
+}: {
+  /** When true, fills the parent (absolute inset-0) so confetti falls over centered content. */
+  overlay?: boolean;
+}) {
   const pieces = useMemo(() => buildConfettiPieces(), []);
+
+  if (overlay) {
+    return (
+      <div
+        className="gift-confetti-overlay pointer-events-none absolute inset-0 overflow-visible"
+        aria-hidden
+      >
+        <div className="gift-confetti-burst absolute inset-0">
+          {pieces.map((piece) => (
+            <span
+              key={piece.id}
+              className="gift-confetti-piece absolute top-0 block opacity-90"
+              style={{
+                left: piece.left,
+                width: piece.w,
+                height: piece.h,
+                backgroundColor: piece.color,
+                borderRadius: piece.circle ? "9999px" : "1px",
+                transform: `rotate(${piece.rotate}deg)`,
+                animationDelay: piece.delay,
+                animationDuration: piece.duration,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pointer-events-none relative -mt-2 mb-6 h-28 overflow-hidden" aria-hidden>

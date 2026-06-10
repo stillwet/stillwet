@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 
 type Props = {
   open: boolean;
@@ -132,15 +133,7 @@ export function StripeEmbeddedCheckoutOverlay({
         onClick={onClose}
       />
       <div className="relative z-[5001] flex h-[calc(100dvh-0.5rem-env(safe-area-inset-top,0px))] max-h-[calc(100dvh-0.5rem-env(safe-area-inset-top,0px))] w-full max-w-lg min-h-0 flex-col rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl sm:h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-1rem)]">
-        <div className="flex shrink-0 justify-end px-2 py-1">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md px-2 py-0.5 text-[11px] text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
-          >
-            Close
-          </button>
-        </div>
+        <StorePanelCloseButton onClick={onClose} aria-label="Close checkout" />
         <div
           ref={bodyRef}
           className="stripe-embedded-checkout-body min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import type { CartCheckoutState } from "@/lib/cart-checkout-state";
 import { CartAndCheckoutClient } from "@/components/CartAndCheckoutClient";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 
 const DRAWER_SEED: CartCheckoutState = {
   lines: [],
@@ -58,20 +59,14 @@ export function CartDrawer({
         aria-modal="true"
         aria-labelledby="cart-drawer-title"
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/95 px-6 py-4 backdrop-blur-md">
+        <StorePanelCloseButton onClick={onClose} aria-label="Close cart" />
+        <div className="sticky top-0 z-10 border-b border-zinc-800/80 bg-zinc-950/95 px-6 py-4 pr-14 backdrop-blur-md">
           <h2
             id="cart-drawer-title"
             className="text-lg font-semibold tracking-tight text-zinc-50"
           >
             Cart &amp; Checkout
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="store-kicker rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800/80 hover:text-zinc-200"
-          >
-            Close
-          </button>
         </div>
         <CartAndCheckoutClient
           mode="drawer"

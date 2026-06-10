@@ -399,6 +399,9 @@ export const ModelName = {
   SupportThread: 'SupportThread',
   SupportMessage: 'SupportMessage',
   SupportTip: 'SupportTip',
+  FeaturePollQuestion: 'FeaturePollQuestion',
+  FeaturePollOption: 'FeaturePollOption',
+  FeaturePollVote: 'FeaturePollVote',
   PlatformTransactionSequence: 'PlatformTransactionSequence',
   ShopOwnerNotice: 'ShopOwnerNotice',
   BugFeedbackReport: 'BugFeedbackReport',
@@ -451,7 +454,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "platformTransactionSequence" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
+    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "featurePollQuestion" | "featurePollOption" | "featurePollVote" | "platformTransactionSequence" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1562,6 +1565,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SupportTipCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SupportTipCountAggregateOutputType> | number
+        }
+      }
+    }
+    FeaturePollQuestion: {
+      payload: Prisma.$FeaturePollQuestionPayload<ExtArgs>
+      fields: Prisma.FeaturePollQuestionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FeaturePollQuestionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FeaturePollQuestionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>
+        }
+        findFirst: {
+          args: Prisma.FeaturePollQuestionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FeaturePollQuestionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>
+        }
+        findMany: {
+          args: Prisma.FeaturePollQuestionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>[]
+        }
+        create: {
+          args: Prisma.FeaturePollQuestionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>
+        }
+        createMany: {
+          args: Prisma.FeaturePollQuestionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FeaturePollQuestionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>[]
+        }
+        delete: {
+          args: Prisma.FeaturePollQuestionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>
+        }
+        update: {
+          args: Prisma.FeaturePollQuestionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>
+        }
+        deleteMany: {
+          args: Prisma.FeaturePollQuestionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FeaturePollQuestionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FeaturePollQuestionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>[]
+        }
+        upsert: {
+          args: Prisma.FeaturePollQuestionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollQuestionPayload>
+        }
+        aggregate: {
+          args: Prisma.FeaturePollQuestionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFeaturePollQuestion>
+        }
+        groupBy: {
+          args: Prisma.FeaturePollQuestionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeaturePollQuestionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FeaturePollQuestionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeaturePollQuestionCountAggregateOutputType> | number
+        }
+      }
+    }
+    FeaturePollOption: {
+      payload: Prisma.$FeaturePollOptionPayload<ExtArgs>
+      fields: Prisma.FeaturePollOptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FeaturePollOptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FeaturePollOptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>
+        }
+        findFirst: {
+          args: Prisma.FeaturePollOptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FeaturePollOptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>
+        }
+        findMany: {
+          args: Prisma.FeaturePollOptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>[]
+        }
+        create: {
+          args: Prisma.FeaturePollOptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>
+        }
+        createMany: {
+          args: Prisma.FeaturePollOptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FeaturePollOptionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>[]
+        }
+        delete: {
+          args: Prisma.FeaturePollOptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>
+        }
+        update: {
+          args: Prisma.FeaturePollOptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.FeaturePollOptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FeaturePollOptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FeaturePollOptionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>[]
+        }
+        upsert: {
+          args: Prisma.FeaturePollOptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollOptionPayload>
+        }
+        aggregate: {
+          args: Prisma.FeaturePollOptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFeaturePollOption>
+        }
+        groupBy: {
+          args: Prisma.FeaturePollOptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeaturePollOptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FeaturePollOptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeaturePollOptionCountAggregateOutputType> | number
+        }
+      }
+    }
+    FeaturePollVote: {
+      payload: Prisma.$FeaturePollVotePayload<ExtArgs>
+      fields: Prisma.FeaturePollVoteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FeaturePollVoteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FeaturePollVoteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>
+        }
+        findFirst: {
+          args: Prisma.FeaturePollVoteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FeaturePollVoteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>
+        }
+        findMany: {
+          args: Prisma.FeaturePollVoteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>[]
+        }
+        create: {
+          args: Prisma.FeaturePollVoteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>
+        }
+        createMany: {
+          args: Prisma.FeaturePollVoteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FeaturePollVoteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>[]
+        }
+        delete: {
+          args: Prisma.FeaturePollVoteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>
+        }
+        update: {
+          args: Prisma.FeaturePollVoteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>
+        }
+        deleteMany: {
+          args: Prisma.FeaturePollVoteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FeaturePollVoteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FeaturePollVoteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>[]
+        }
+        upsert: {
+          args: Prisma.FeaturePollVoteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeaturePollVotePayload>
+        }
+        aggregate: {
+          args: Prisma.FeaturePollVoteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFeaturePollVote>
+        }
+        groupBy: {
+          args: Prisma.FeaturePollVoteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeaturePollVoteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FeaturePollVoteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeaturePollVoteCountAggregateOutputType> | number
         }
       }
     }
@@ -4575,10 +4800,56 @@ export const SupportTipScalarFieldEnum = {
   transactionNumber: 'transactionNumber',
   amountCents: 'amountCents',
   currency: 'currency',
+  donorEmail: 'donorEmail',
+  paidAt: 'paidAt',
   createdAt: 'createdAt'
 } as const
 
 export type SupportTipScalarFieldEnum = (typeof SupportTipScalarFieldEnum)[keyof typeof SupportTipScalarFieldEnum]
+
+
+export const FeaturePollQuestionScalarFieldEnum = {
+  id: 'id',
+  prompt: 'prompt',
+  sortOrder: 'sortOrder',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeaturePollQuestionScalarFieldEnum = (typeof FeaturePollQuestionScalarFieldEnum)[keyof typeof FeaturePollQuestionScalarFieldEnum]
+
+
+export const FeaturePollOptionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  label: 'label',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  followUpKind: 'followUpKind',
+  followUpPrompt: 'followUpPrompt',
+  followUpChoices: 'followUpChoices',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeaturePollOptionScalarFieldEnum = (typeof FeaturePollOptionScalarFieldEnum)[keyof typeof FeaturePollOptionScalarFieldEnum]
+
+
+export const FeaturePollVoteScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  optionId: 'optionId',
+  voterKind: 'voterKind',
+  shopId: 'shopId',
+  shopDisplayName: 'shopDisplayName',
+  donorEmail: 'donorEmail',
+  supportTipId: 'supportTipId',
+  followUpAnswer: 'followUpAnswer',
+  createdAt: 'createdAt'
+} as const
+
+export type FeaturePollVoteScalarFieldEnum = (typeof FeaturePollVoteScalarFieldEnum)[keyof typeof FeaturePollVoteScalarFieldEnum]
 
 
 export const PlatformTransactionSequenceScalarFieldEnum = {
@@ -5383,6 +5654,48 @@ export type ListEnumSupportMessageAuthorFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'FeaturePollOptionStatus'
+ */
+export type EnumFeaturePollOptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeaturePollOptionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FeaturePollOptionStatus[]'
+ */
+export type ListEnumFeaturePollOptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeaturePollOptionStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FeaturePollOptionFollowUpKind'
+ */
+export type EnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeaturePollOptionFollowUpKind'>
+    
+
+
+/**
+ * Reference to a field of type 'FeaturePollOptionFollowUpKind[]'
+ */
+export type ListEnumFeaturePollOptionFollowUpKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeaturePollOptionFollowUpKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FeaturePollVoterKind'
+ */
+export type EnumFeaturePollVoterKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeaturePollVoterKind'>
+    
+
+
+/**
+ * Reference to a field of type 'FeaturePollVoterKind[]'
+ */
+export type ListEnumFeaturePollVoterKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeaturePollVoterKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'ShopUserRole'
  */
 export type EnumShopUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShopUserRole'>
@@ -5785,6 +6098,9 @@ export type GlobalOmitConfig = {
   supportThread?: Prisma.SupportThreadOmit
   supportMessage?: Prisma.SupportMessageOmit
   supportTip?: Prisma.SupportTipOmit
+  featurePollQuestion?: Prisma.FeaturePollQuestionOmit
+  featurePollOption?: Prisma.FeaturePollOptionOmit
+  featurePollVote?: Prisma.FeaturePollVoteOmit
   platformTransactionSequence?: Prisma.PlatformTransactionSequenceOmit
   shopOwnerNotice?: Prisma.ShopOwnerNoticeOmit
   bugFeedbackReport?: Prisma.BugFeedbackReportOmit

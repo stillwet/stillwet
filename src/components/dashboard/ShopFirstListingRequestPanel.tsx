@@ -9,6 +9,7 @@ import {
   type ShopSetupActionResult,
 } from "@/actions/dashboard-shop-setup";
 import { ItemGuidelinesPopup } from "@/components/ItemGuidelinesPopup";
+import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 import { ListingSearchKeywordsChipInput } from "@/components/dashboard/ListingSearchKeywordsChipInput";
 import { ListingArtworkCropDialog } from "@/components/dashboard/ListingArtworkCropDialog";
 import { ListingArtworkComposeDialog } from "@/components/dashboard/ListingArtworkComposeDialog";
@@ -164,14 +165,7 @@ function CatalogItemPhotoLink({ href }: { href: string }) {
                 className="relative z-[61] max-w-[min(80vw,480px)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 p-2 shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <button
-                  type="button"
-                  aria-label="Close"
-                  className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-md bg-black/70 text-lg leading-none text-zinc-100 hover:bg-black/85"
-                  onClick={() => setOpen(false)}
-                >
-                  ×
-                </button>
+                <StorePanelCloseButton onClick={() => setOpen(false)} aria-label="Close item photo preview" />
                 <h3 id={titleId} className="sr-only">
                   Item photo
                 </h3>

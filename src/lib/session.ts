@@ -253,3 +253,58 @@ export async function getShopOwnerSessionReadonly(): Promise<ShopOwnerSession> {
     return {};
   }
 }
+
+export type FeaturePollDonorSession = {
+  donorEmail?: string;
+  activeSupportTipId?: string;
+};
+
+const featurePollDonorBase: Omit<SessionOptions, "password"> = {
+  cookieName: "stillwet_feature_poll_donor",
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  },
+};
+
+export async function getFeaturePollDonorSession() {
+  return getIronSession<FeaturePollDonorSession>(await cookies(), {
+    ...featurePollDonorBase,
+    password: requireSessionSecret(),
+  });
+}
+
+export async function getFeaturePollDonorSessionReadonly(): Promise<FeaturePollDonorSession> {
+  try {
+    return await getIronSession<FeaturePollDonorSession>(await cookies(), {
+      ...featurePollDonorBase,
+      password: requireSessionSecret(),
+    });
+  } catch (e) {
+    console.error("[getFeaturePollDonorSessionReadonly]", e);
+    return {};
+  }
+}
+
+export async function establishFeaturePollDonorSession(
+  email: string,
+  supportTipId: string,
+): Promise<void> {
+  const normalized = email.trim().toLowerCase();
+  const tipId = supportTipId.trim();
+  if (!normalized || !tipId) return;
+  const session = await getFeaturePollDonorSession();
+  session.donorEmail = normalized;
+  session.activeSupportTipId = tipId;
+  await session.save();
+}
+
+export async function clearFeaturePollDonorSession(): Promise<void> {
+  const session = await getFeaturePollDonorSession();
+  session.donorEmail = undefined;
+  session.activeSupportTipId = undefined;
+  await session.destroy();
+}

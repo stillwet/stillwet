@@ -3,6 +3,24 @@
 import { type ReactNode, useEffect, useId, useState } from "react";
 import { createPortal, useFormStatus } from "react-dom";
 import { startSupportSiteCheckout } from "@/actions/support-site";
+import { MIN_SUPPORT_TIP_USD, supportTipInputError } from "@/lib/support-site";
+
+function SupportTipValidationBubble({ message }: { message: string }) {
+  return (
+    <div
+      role="alert"
+      className="pointer-events-none absolute bottom-full left-0 z-10 mb-2 flex max-w-[16rem] items-start gap-2 rounded-lg border border-blue-500/30 bg-zinc-950 px-2.5 py-2 text-xs leading-snug text-zinc-200 shadow-lg shadow-black/40 ring-1 ring-blue-500/15"
+    >
+      <span
+        className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-blue-500/40 bg-blue-950/60 text-[10px] font-semibold leading-none text-blue-300"
+        aria-hidden
+      >
+        !
+      </span>
+      <span>{message}</span>
+    </div>
+  );
+}
 
 function CheckoutSubmitButton() {
   const { pending } = useFormStatus();
@@ -27,6 +45,7 @@ export function SupportSiteCta({
   children?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [tipFieldError, setTipFieldError] = useState<string | null>(null);
   const titleId = useId();
   const descId = useId();
   const panelId = useId();
@@ -38,6 +57,10 @@ export function SupportSiteCta({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) setTipFieldError(null);
   }, [open]);
 
   const modal =
@@ -59,32 +82,43 @@ export function SupportSiteCta({
           onMouseDown={(e) => e.stopPropagation()}
         >
           <h3 id={titleId} className="text-base font-semibold text-zinc-100">
-            Support the site
+            Support The Site
           </h3>
           <div id={descId} className="mt-3 space-y-3 text-left text-sm leading-relaxed text-zinc-300">
             <p>
-              Voluntary support helps keep the site running independently, and is genuinely appreciated.
-            </p>
-            <p>
-              After you support, you&apos;ll get to vote for the thing you want to see most on the site.
+              Supporting gets you a{" "}
+              <span className="font-medium text-blue-400/90">VOTE</span> on upcoming feature priority!
             </p>
             <div>
-              <p className="font-medium text-zinc-200">Your donation supports upcoming goals</p>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-zinc-400">
-                <li>Mobile App (Android)</li>
-                <li>Mobile App (iOS)</li>
-                <li>Expanded features</li>
-                <li>Expanding shipping countries</li>
+              <ul className="list-inside list-disc space-y-1 text-zinc-400">
+                <li>Expanding shop ownership / shipping to other countries</li>
+                <li>Expanded features (more item types, off-site marketing, etc.)</li>
+                <li>Mobile App (Android & iOS)</li>
               </ul>
             </div>
           </div>
 
-          <form action={startSupportSiteCheckout} className="mt-5 space-y-3">
+          <form
+            action={startSupportSiteCheckout}
+            noValidate
+            className="mt-5 space-y-3"
+            onSubmit={(e) => {
+              const fd = new FormData(e.currentTarget);
+              const error = supportTipInputError(fd.get("tipUsd"));
+              if (error) {
+                e.preventDefault();
+                setTipFieldError(error);
+                return;
+              }
+              setTipFieldError(null);
+            }}
+          >
             <div>
               <label htmlFor={`${panelId}-tip-usd`} className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Amount (USD)
               </label>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="relative mt-2 flex items-center gap-2">
+                {tipFieldError ? <SupportTipValidationBubble message={tipFieldError} /> : null}
                 <span className="select-none text-sm text-zinc-500" aria-hidden>
                   $
                 </span>
@@ -93,13 +127,26 @@ export function SupportSiteCta({
                   type="number"
                   name="tipUsd"
                   inputMode="decimal"
-                  min={1}
+                  min={MIN_SUPPORT_TIP_USD}
                   step={0.01}
-                  required
                   placeholder="Enter amount"
                   autoComplete="transaction-amount"
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none ring-blue-500/0 transition placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-blue-500/30"
+                  aria-invalid={tipFieldError ? true : undefined}
+                  aria-describedby={tipFieldError ? `${panelId}-tip-error` : undefined}
+                  onChange={() => {
+                    if (tipFieldError) setTipFieldError(null);
+                  }}
+                  className={`w-full rounded-lg border bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none ring-blue-500/0 transition placeholder:text-zinc-600 focus:ring-2 focus:ring-blue-500/30 ${
+                    tipFieldError
+                      ? "border-blue-500/45 focus:border-blue-500/55"
+                      : "border-zinc-700 focus:border-zinc-500"
+                  }`}
                 />
+                {tipFieldError ? (
+                  <span id={`${panelId}-tip-error`} className="sr-only">
+                    {tipFieldError}
+                  </span>
+                ) : null}
               </div>
             </div>
             <CheckoutSubmitButton />

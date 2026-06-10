@@ -42,6 +42,8 @@ export type SupportTipMinAggregateOutputType = {
   transactionNumber: number | null
   amountCents: number | null
   currency: string | null
+  donorEmail: string | null
+  paidAt: Date | null
   createdAt: Date | null
 }
 
@@ -51,6 +53,8 @@ export type SupportTipMaxAggregateOutputType = {
   transactionNumber: number | null
   amountCents: number | null
   currency: string | null
+  donorEmail: string | null
+  paidAt: Date | null
   createdAt: Date | null
 }
 
@@ -60,6 +64,8 @@ export type SupportTipCountAggregateOutputType = {
   transactionNumber: number
   amountCents: number
   currency: number
+  donorEmail: number
+  paidAt: number
   createdAt: number
   _all: number
 }
@@ -81,6 +87,8 @@ export type SupportTipMinAggregateInputType = {
   transactionNumber?: true
   amountCents?: true
   currency?: true
+  donorEmail?: true
+  paidAt?: true
   createdAt?: true
 }
 
@@ -90,6 +98,8 @@ export type SupportTipMaxAggregateInputType = {
   transactionNumber?: true
   amountCents?: true
   currency?: true
+  donorEmail?: true
+  paidAt?: true
   createdAt?: true
 }
 
@@ -99,6 +109,8 @@ export type SupportTipCountAggregateInputType = {
   transactionNumber?: true
   amountCents?: true
   currency?: true
+  donorEmail?: true
+  paidAt?: true
   createdAt?: true
   _all?: true
 }
@@ -195,6 +207,8 @@ export type SupportTipGroupByOutputType = {
   transactionNumber: number | null
   amountCents: number
   currency: string
+  donorEmail: string | null
+  paidAt: Date | null
   createdAt: Date
   _count: SupportTipCountAggregateOutputType | null
   _avg: SupportTipAvgAggregateOutputType | null
@@ -227,7 +241,10 @@ export type SupportTipWhereInput = {
   transactionNumber?: Prisma.IntNullableFilter<"SupportTip"> | number | null
   amountCents?: Prisma.IntFilter<"SupportTip"> | number
   currency?: Prisma.StringFilter<"SupportTip"> | string
+  donorEmail?: Prisma.StringNullableFilter<"SupportTip"> | string | null
+  paidAt?: Prisma.DateTimeNullableFilter<"SupportTip"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"SupportTip"> | Date | string
+  featurePollVotes?: Prisma.FeaturePollVoteListRelationFilter
 }
 
 export type SupportTipOrderByWithRelationInput = {
@@ -236,7 +253,10 @@ export type SupportTipOrderByWithRelationInput = {
   transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  donorEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  featurePollVotes?: Prisma.FeaturePollVoteOrderByRelationAggregateInput
 }
 
 export type SupportTipWhereUniqueInput = Prisma.AtLeast<{
@@ -248,7 +268,10 @@ export type SupportTipWhereUniqueInput = Prisma.AtLeast<{
   transactionNumber?: Prisma.IntNullableFilter<"SupportTip"> | number | null
   amountCents?: Prisma.IntFilter<"SupportTip"> | number
   currency?: Prisma.StringFilter<"SupportTip"> | string
+  donorEmail?: Prisma.StringNullableFilter<"SupportTip"> | string | null
+  paidAt?: Prisma.DateTimeNullableFilter<"SupportTip"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"SupportTip"> | Date | string
+  featurePollVotes?: Prisma.FeaturePollVoteListRelationFilter
 }, "id" | "stripeCheckoutSessionId">
 
 export type SupportTipOrderByWithAggregationInput = {
@@ -257,6 +280,8 @@ export type SupportTipOrderByWithAggregationInput = {
   transactionNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  donorEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.SupportTipCountOrderByAggregateInput
   _avg?: Prisma.SupportTipAvgOrderByAggregateInput
@@ -274,6 +299,8 @@ export type SupportTipScalarWhereWithAggregatesInput = {
   transactionNumber?: Prisma.IntNullableWithAggregatesFilter<"SupportTip"> | number | null
   amountCents?: Prisma.IntWithAggregatesFilter<"SupportTip"> | number
   currency?: Prisma.StringWithAggregatesFilter<"SupportTip"> | string
+  donorEmail?: Prisma.StringNullableWithAggregatesFilter<"SupportTip"> | string | null
+  paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SupportTip"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SupportTip"> | Date | string
 }
 
@@ -283,7 +310,10 @@ export type SupportTipCreateInput = {
   transactionNumber?: number | null
   amountCents: number
   currency?: string
+  donorEmail?: string | null
+  paidAt?: Date | string | null
   createdAt?: Date | string
+  featurePollVotes?: Prisma.FeaturePollVoteCreateNestedManyWithoutSupportTipInput
 }
 
 export type SupportTipUncheckedCreateInput = {
@@ -292,7 +322,10 @@ export type SupportTipUncheckedCreateInput = {
   transactionNumber?: number | null
   amountCents: number
   currency?: string
+  donorEmail?: string | null
+  paidAt?: Date | string | null
   createdAt?: Date | string
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedCreateNestedManyWithoutSupportTipInput
 }
 
 export type SupportTipUpdateInput = {
@@ -301,7 +334,10 @@ export type SupportTipUpdateInput = {
   transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  donorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  featurePollVotes?: Prisma.FeaturePollVoteUpdateManyWithoutSupportTipNestedInput
 }
 
 export type SupportTipUncheckedUpdateInput = {
@@ -310,7 +346,10 @@ export type SupportTipUncheckedUpdateInput = {
   transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  donorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  featurePollVotes?: Prisma.FeaturePollVoteUncheckedUpdateManyWithoutSupportTipNestedInput
 }
 
 export type SupportTipCreateManyInput = {
@@ -319,6 +358,8 @@ export type SupportTipCreateManyInput = {
   transactionNumber?: number | null
   amountCents: number
   currency?: string
+  donorEmail?: string | null
+  paidAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -328,6 +369,8 @@ export type SupportTipUpdateManyMutationInput = {
   transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  donorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -337,6 +380,8 @@ export type SupportTipUncheckedUpdateManyInput = {
   transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amountCents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  donorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -346,6 +391,8 @@ export type SupportTipCountOrderByAggregateInput = {
   transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  donorEmail?: Prisma.SortOrder
+  paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -360,6 +407,8 @@ export type SupportTipMaxOrderByAggregateInput = {
   transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  donorEmail?: Prisma.SortOrder
+  paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -369,6 +418,8 @@ export type SupportTipMinOrderByAggregateInput = {
   transactionNumber?: Prisma.SortOrder
   amountCents?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  donorEmail?: Prisma.SortOrder
+  paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -377,6 +428,116 @@ export type SupportTipSumOrderByAggregateInput = {
   amountCents?: Prisma.SortOrder
 }
 
+export type SupportTipNullableScalarRelationFilter = {
+  is?: Prisma.SupportTipWhereInput | null
+  isNot?: Prisma.SupportTipWhereInput | null
+}
+
+export type SupportTipCreateNestedOneWithoutFeaturePollVotesInput = {
+  create?: Prisma.XOR<Prisma.SupportTipCreateWithoutFeaturePollVotesInput, Prisma.SupportTipUncheckedCreateWithoutFeaturePollVotesInput>
+  connectOrCreate?: Prisma.SupportTipCreateOrConnectWithoutFeaturePollVotesInput
+  connect?: Prisma.SupportTipWhereUniqueInput
+}
+
+export type SupportTipUpdateOneWithoutFeaturePollVotesNestedInput = {
+  create?: Prisma.XOR<Prisma.SupportTipCreateWithoutFeaturePollVotesInput, Prisma.SupportTipUncheckedCreateWithoutFeaturePollVotesInput>
+  connectOrCreate?: Prisma.SupportTipCreateOrConnectWithoutFeaturePollVotesInput
+  upsert?: Prisma.SupportTipUpsertWithoutFeaturePollVotesInput
+  disconnect?: Prisma.SupportTipWhereInput | boolean
+  delete?: Prisma.SupportTipWhereInput | boolean
+  connect?: Prisma.SupportTipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SupportTipUpdateToOneWithWhereWithoutFeaturePollVotesInput, Prisma.SupportTipUpdateWithoutFeaturePollVotesInput>, Prisma.SupportTipUncheckedUpdateWithoutFeaturePollVotesInput>
+}
+
+export type SupportTipCreateWithoutFeaturePollVotesInput = {
+  id?: string
+  stripeCheckoutSessionId?: string | null
+  transactionNumber?: number | null
+  amountCents: number
+  currency?: string
+  donorEmail?: string | null
+  paidAt?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type SupportTipUncheckedCreateWithoutFeaturePollVotesInput = {
+  id?: string
+  stripeCheckoutSessionId?: string | null
+  transactionNumber?: number | null
+  amountCents: number
+  currency?: string
+  donorEmail?: string | null
+  paidAt?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type SupportTipCreateOrConnectWithoutFeaturePollVotesInput = {
+  where: Prisma.SupportTipWhereUniqueInput
+  create: Prisma.XOR<Prisma.SupportTipCreateWithoutFeaturePollVotesInput, Prisma.SupportTipUncheckedCreateWithoutFeaturePollVotesInput>
+}
+
+export type SupportTipUpsertWithoutFeaturePollVotesInput = {
+  update: Prisma.XOR<Prisma.SupportTipUpdateWithoutFeaturePollVotesInput, Prisma.SupportTipUncheckedUpdateWithoutFeaturePollVotesInput>
+  create: Prisma.XOR<Prisma.SupportTipCreateWithoutFeaturePollVotesInput, Prisma.SupportTipUncheckedCreateWithoutFeaturePollVotesInput>
+  where?: Prisma.SupportTipWhereInput
+}
+
+export type SupportTipUpdateToOneWithWhereWithoutFeaturePollVotesInput = {
+  where?: Prisma.SupportTipWhereInput
+  data: Prisma.XOR<Prisma.SupportTipUpdateWithoutFeaturePollVotesInput, Prisma.SupportTipUncheckedUpdateWithoutFeaturePollVotesInput>
+}
+
+export type SupportTipUpdateWithoutFeaturePollVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  amountCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  donorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SupportTipUncheckedUpdateWithoutFeaturePollVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  stripeCheckoutSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transactionNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  amountCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  donorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type SupportTipCountOutputType
+ */
+
+export type SupportTipCountOutputType = {
+  featurePollVotes: number
+}
+
+export type SupportTipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  featurePollVotes?: boolean | SupportTipCountOutputTypeCountFeaturePollVotesArgs
+}
+
+/**
+ * SupportTipCountOutputType without action
+ */
+export type SupportTipCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SupportTipCountOutputType
+   */
+  select?: Prisma.SupportTipCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SupportTipCountOutputType without action
+ */
+export type SupportTipCountOutputTypeCountFeaturePollVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FeaturePollVoteWhereInput
+}
 
 
 export type SupportTipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -385,7 +546,11 @@ export type SupportTipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
+  donorEmail?: boolean
+  paidAt?: boolean
   createdAt?: boolean
+  featurePollVotes?: boolean | Prisma.SupportTip$featurePollVotesArgs<ExtArgs>
+  _count?: boolean | Prisma.SupportTipCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["supportTip"]>
 
 export type SupportTipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -394,6 +559,8 @@ export type SupportTipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
+  donorEmail?: boolean
+  paidAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["supportTip"]>
 
@@ -403,6 +570,8 @@ export type SupportTipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
+  donorEmail?: boolean
+  paidAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["supportTip"]>
 
@@ -412,14 +581,24 @@ export type SupportTipSelectScalar = {
   transactionNumber?: boolean
   amountCents?: boolean
   currency?: boolean
+  donorEmail?: boolean
+  paidAt?: boolean
   createdAt?: boolean
 }
 
-export type SupportTipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stripeCheckoutSessionId" | "transactionNumber" | "amountCents" | "currency" | "createdAt", ExtArgs["result"]["supportTip"]>
+export type SupportTipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stripeCheckoutSessionId" | "transactionNumber" | "amountCents" | "currency" | "donorEmail" | "paidAt" | "createdAt", ExtArgs["result"]["supportTip"]>
+export type SupportTipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  featurePollVotes?: boolean | Prisma.SupportTip$featurePollVotesArgs<ExtArgs>
+  _count?: boolean | Prisma.SupportTipCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type SupportTipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type SupportTipIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $SupportTipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SupportTip"
-  objects: {}
+  objects: {
+    featurePollVotes: Prisma.$FeaturePollVotePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     stripeCheckoutSessionId: string | null
@@ -429,6 +608,14 @@ export type $SupportTipPayload<ExtArgs extends runtime.Types.Extensions.Internal
     transactionNumber: number | null
     amountCents: number
     currency: string
+    /**
+     * * Donor email from Stripe Checkout (for feature poll attribution).
+     */
+    donorEmail: string | null
+    /**
+     * * When Stripe checkout completed (distinct from row creation).
+     */
+    paidAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["supportTip"]>
   composites: {}
@@ -824,6 +1011,7 @@ readonly fields: SupportTipFieldRefs;
  */
 export interface Prisma__SupportTipClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  featurePollVotes<T extends Prisma.SupportTip$featurePollVotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SupportTip$featurePollVotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeaturePollVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -858,6 +1046,8 @@ export interface SupportTipFieldRefs {
   readonly transactionNumber: Prisma.FieldRef<"SupportTip", 'Int'>
   readonly amountCents: Prisma.FieldRef<"SupportTip", 'Int'>
   readonly currency: Prisma.FieldRef<"SupportTip", 'String'>
+  readonly donorEmail: Prisma.FieldRef<"SupportTip", 'String'>
+  readonly paidAt: Prisma.FieldRef<"SupportTip", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"SupportTip", 'DateTime'>
 }
     
@@ -875,6 +1065,10 @@ export type SupportTipFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the SupportTip
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
   /**
    * Filter, which SupportTip to fetch.
    */
@@ -894,6 +1088,10 @@ export type SupportTipFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
+  /**
    * Filter, which SupportTip to fetch.
    */
   where: Prisma.SupportTipWhereUniqueInput
@@ -911,6 +1109,10 @@ export type SupportTipFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the SupportTip
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
   /**
    * Filter, which SupportTip to fetch.
    */
@@ -960,6 +1162,10 @@ export type SupportTipFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
+  /**
    * Filter, which SupportTip to fetch.
    */
   where?: Prisma.SupportTipWhereInput
@@ -1007,6 +1213,10 @@ export type SupportTipFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the SupportTip
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
   /**
    * Filter, which SupportTips to fetch.
    */
@@ -1056,6 +1266,10 @@ export type SupportTipCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
+  /**
    * The data needed to create a SupportTip.
    */
   data: Prisma.XOR<Prisma.SupportTipCreateInput, Prisma.SupportTipUncheckedCreateInput>
@@ -1103,6 +1317,10 @@ export type SupportTipUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the SupportTip
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
   /**
    * The data needed to update a SupportTip.
    */
@@ -1170,6 +1388,10 @@ export type SupportTipUpsertArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
+  /**
    * The filter to search for the SupportTip to update in case it exists.
    */
   where: Prisma.SupportTipWhereUniqueInput
@@ -1196,6 +1418,10 @@ export type SupportTipDeleteArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
+  /**
    * Filter which SupportTip to delete.
    */
   where: Prisma.SupportTipWhereUniqueInput
@@ -1216,6 +1442,30 @@ export type SupportTipDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * SupportTip.featurePollVotes
+ */
+export type SupportTip$featurePollVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FeaturePollVote
+   */
+  select?: Prisma.FeaturePollVoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FeaturePollVote
+   */
+  omit?: Prisma.FeaturePollVoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FeaturePollVoteInclude<ExtArgs> | null
+  where?: Prisma.FeaturePollVoteWhereInput
+  orderBy?: Prisma.FeaturePollVoteOrderByWithRelationInput | Prisma.FeaturePollVoteOrderByWithRelationInput[]
+  cursor?: Prisma.FeaturePollVoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FeaturePollVoteScalarFieldEnum | Prisma.FeaturePollVoteScalarFieldEnum[]
+}
+
+/**
  * SupportTip without action
  */
 export type SupportTipDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1227,4 +1477,8 @@ export type SupportTipDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SupportTip
    */
   omit?: Prisma.SupportTipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupportTipInclude<ExtArgs> | null
 }
