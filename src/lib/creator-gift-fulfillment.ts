@@ -10,10 +10,7 @@ import {
 } from "@/generated/prisma/enums";
 import { generateCreatorGiftCode } from "@/lib/creator-gift-codes";
 import {
-  notifyCreatorGiftGoogleShoppingCredits,
-  notifyCreatorGiftListingCredits,
-  notifyCreatorGiftPromotionCredits,
-  notifyCreatorGiftShopFlair,
+  notifyCreatorGiftReceived,
 } from "@/lib/creator-gift-notices";
 import { defaultGiftRedemptionEmailVars } from "@/lib/gift-redemption-code-email-html";
 import {
@@ -150,29 +147,17 @@ async function fulfillCreatorGiftPurchaseRecord(
 
       if (purchase.listingCreditsGranted > 0) {
         await syncFreeListingFeeWaivers(shopId);
-        await notifyCreatorGiftListingCredits({
-          shopId,
-          creditsGranted: purchase.listingCreditsGranted,
-          giftFromName,
-        });
       }
-      if (purchase.promotionCreditsGranted > 0 && purchase.promotionKind) {
-        await notifyCreatorGiftPromotionCredits({
-          shopId,
-          kind: purchase.promotionKind,
-          creditsGranted: purchase.promotionCreditsGranted,
-          giftFromName,
-        });
-      }
-      if (purchase.googleShoppingCreditsGranted > 0) {
-        await notifyCreatorGiftGoogleShoppingCredits({
-          shopId,
-          creditsGranted: purchase.googleShoppingCreditsGranted,
-          giftFromName,
-        });
-      }
+      await notifyCreatorGiftReceived({
+        shopId,
+        giftFromName,
+        listingCreditsGranted: purchase.listingCreditsGranted,
+        promotionKind: purchase.promotionKind,
+        promotionCreditsGranted: purchase.promotionCreditsGranted,
+        googleShoppingCreditsGranted: purchase.googleShoppingCreditsGranted,
+        shopFlairIncluded: purchase.shopFlairIncluded,
+      });
       if (purchase.shopFlairIncluded) {
-        await notifyCreatorGiftShopFlair({ shopId, giftFromName });
         revalidateShopUpgradesDashboardPaths();
       }
     }

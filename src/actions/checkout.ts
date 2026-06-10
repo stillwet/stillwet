@@ -33,6 +33,7 @@ import {
 } from "@/lib/baseline-goods-services-unit-cents";
 import { itemCostLineCents, splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
 import { formatBuyerOrderNumber } from "@/lib/buyer-order-number";
+import { allocatePlatformOrderNumber } from "@/lib/platform-transaction-reference";
 import {
   shopIsInactivityDeactivated,
   splitMerchandiseLineForInactiveShopCents,
@@ -336,8 +337,10 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
   }
 
   const order = await prisma.$transaction(async (tx) => {
+    const orderNumber = await allocatePlatformOrderNumber(tx);
     const o = await tx.order.create({
       data: {
+        orderNumber,
         shopId,
         status: OrderStatus.pending_payment,
         subtotalCents,

@@ -11,10 +11,13 @@ const ADDED_MS = 2200;
 export function ProductAddToCartForm({
   productId,
   shopSlug,
+  closeAfterAdd = false,
 }: {
   productId: string;
   /** When set, resolves the listing in this shop (required for non-platform shops). */
   shopSlug?: string;
+  /** Product detail modal — dismiss overlay after a successful add. */
+  closeAfterAdd?: boolean;
 }) {
   const router = useRouter();
   const closeProductModal = useCloseProductModalOnAddToCart();
@@ -37,11 +40,11 @@ export function ProductAddToCartForm({
           const r = await addToCart(productId, 1, undefined, shopSlug ?? undefined);
           if (!r.ok) return;
           notifyCartHeaderChanged();
-          router.refresh();
-          if (closeProductModal) {
-            closeProductModal();
+          if (closeAfterAdd || closeProductModal) {
+            closeProductModal?.() ?? router.back();
             return;
           }
+          router.refresh();
           setAdded(true);
           if (timerRef.current) clearTimeout(timerRef.current);
           timerRef.current = setTimeout(() => setAdded(false), ADDED_MS);

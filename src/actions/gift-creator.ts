@@ -12,7 +12,8 @@ import { prisma } from "@/lib/prisma";
 import { publicAppBaseUrl } from "@/lib/public-app-url";
 import {
   PLATFORM_TRANSACTION_PRODUCT,
-  allocatePlatformTransactionNumber,
+  allocatePlatformOrderNumber,
+  formatMultipleGiftsTransactionReference,
   promotionKindToPlatformTransactionProduct,
   stripePlatformTransactionReferenceFields,
   type PlatformTransactionProduct,
@@ -214,6 +215,17 @@ function buildExistingShopLineItems(
   return lineItems;
 }
 
+function existingShopGiftCategoryCount(
+  options: ReturnType<typeof parseExistingShopGiftOptions>,
+): number {
+  let count = 0;
+  if (options.listingPack) count += 1;
+  if (options.googlePack) count += 1;
+  if (options.promotionKind && options.promotionCredits > 0) count += 1;
+  if (options.includeShopFlair) count += 1;
+  return count;
+}
+
 type ExistingShopGiftLineLabels = {
   listingCredits?: string;
   googleShopping?: string;
@@ -226,30 +238,32 @@ async function allocateExistingShopGiftLineLabels(
 ): Promise<{ lineLabels: ExistingShopGiftLineLabels; primaryTransactionNumber: number | null }> {
   return prisma.$transaction(async (tx) => {
     const lineLabels: ExistingShopGiftLineLabels = {};
-    let primaryTransactionNumber: number | null = null;
+    const categoryCount = existingShopGiftCategoryCount(options);
+    const primaryTransactionNumber = await allocatePlatformOrderNumber(tx);
+    const multipleGiftsLabel = formatMultipleGiftsTransactionReference(primaryTransactionNumber);
 
-    const allocateGiftLine = async (product: PlatformTransactionProduct) => {
-      const transactionNumber = await allocatePlatformTransactionNumber(tx, product);
-      if (primaryTransactionNumber == null) primaryTransactionNumber = transactionNumber;
-      return stripePlatformTransactionReferenceFields(product, transactionNumber, { gift: true })
-        .lineItemName;
+    const giftLineLabel = (product: PlatformTransactionProduct) => {
+      if (categoryCount > 1) return multipleGiftsLabel;
+      return stripePlatformTransactionReferenceFields(product, primaryTransactionNumber, {
+        gift: true,
+      }).lineItemName;
     };
 
     if (options.listingPack) {
-      lineLabels.listingCredits = await allocateGiftLine(PLATFORM_TRANSACTION_PRODUCT.listing_credits);
+      lineLabels.listingCredits = giftLineLabel(PLATFORM_TRANSACTION_PRODUCT.listing_credits);
     }
     if (options.googlePack) {
-      lineLabels.googleShopping = await allocateGiftLine(
+      lineLabels.googleShopping = giftLineLabel(
         PLATFORM_TRANSACTION_PRODUCT.gshop_listing_upgrade,
       );
     }
     if (options.promotionKind && options.promotionCredits > 0) {
-      lineLabels.promotion = await allocateGiftLine(
+      lineLabels.promotion = giftLineLabel(
         promotionKindToPlatformTransactionProduct(options.promotionKind),
       );
     }
     if (options.includeShopFlair) {
-      lineLabels.shopFlair = await allocateGiftLine(PLATFORM_TRANSACTION_PRODUCT.shop_flair);
+      lineLabels.shopFlair = giftLineLabel(PLATFORM_TRANSACTION_PRODUCT.shop_flair);
     }
 
     return { lineLabels, primaryTransactionNumber };
@@ -284,10 +298,7 @@ export async function startCreatorGiftCheckout(
   });
 
   const { purchaseId, refFields } = await prisma.$transaction(async (tx) => {
-    const transactionNumber = await allocatePlatformTransactionNumber(
-      tx,
-      PLATFORM_TRANSACTION_PRODUCT.shop_creation_fee,
-    );
+    const transactionNumber = await allocatePlatformOrderNumber(tx);
     const fields = stripePlatformTransactionReferenceFields(
       PLATFORM_TRANSACTION_PRODUCT.shop_creation_fee,
       transactionNumber,
@@ -417,11 +428,13 @@ export async function startCreatorGiftExistingShopCheckout(
 
   const { lineLabels, primaryTransactionNumber } = await allocateExistingShopGiftLineLabels(options);
   const piDescription =
-    lineLabels.listingCredits ??
-    lineLabels.googleShopping ??
-    lineLabels.promotion ??
-    lineLabels.shopFlair ??
-    "Creator gift";
+    existingShopGiftCategoryCount(options) > 1 && primaryTransactionNumber != null
+      ? formatMultipleGiftsTransactionReference(primaryTransactionNumber)
+      : (lineLabels.listingCredits ??
+        lineLabels.googleShopping ??
+        lineLabels.promotion ??
+        lineLabels.shopFlair ??
+        "Creator gift");
 
   const purchase = await prisma.creatorGiftPurchase.create({
     data: {

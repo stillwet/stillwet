@@ -108,6 +108,18 @@ export function merchandiseSubtotalFromCheckoutTotalCents(checkoutTotalCents: nu
   return lo;
 }
 
+/**
+ * Stripe balance fee on a card charge (2.9% + 30¢ on the full amount, rounded to nearest cent).
+ * Use for admin reconciliation against Stripe Dashboard — not the naive fee on merchandise alone.
+ */
+export function stripeBalanceProcessingFeeCents(chargeCents: number): number {
+  const charge = Math.max(0, Math.round(chargeCents));
+  if (charge <= 0) return 0;
+  return Math.round(
+    charge * STRIPE_CARD_PROCESSING_PERCENT + STRIPE_CARD_PROCESSING_FIXED_CENTS,
+  );
+}
+
 /** Buyer-paid Stripe pass-through on a checkout total (merchandise subtotal when known). */
 export function checkoutProcessingFeeFromTotal(
   checkoutTotalCents: number,

@@ -2,6 +2,23 @@ import { unstable_cache } from "next/cache";
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import type {
+  AdminPlatformSaleCategory,
+  AdminPlatformSalesMergedLine,
+} from "@/lib/admin-platform-sales-merged-line-model";
+export type {
+  AdminPlatformSalesBuyer,
+  AdminPlatformSaleCategory,
+  AdminPlatformSalesMergedLine,
+} from "@/lib/admin-platform-sales-merged-line-model";
+export {
+  isPlatformCheckoutMergedLine,
+  mergedLineCheckoutPaidCents,
+  mergedLinePaidCogsStripeNetCents,
+  mergedLineStripeBalanceFeeCents,
+  mergedLineTransactionPartyLabel,
+  platformCheckoutFullChargeCents,
+} from "@/lib/admin-platform-sales-merged-line-model";
 import {
   CreatorGiftPurchaseStatus,
   ListingCreditPackPurchaseStatus,
@@ -32,7 +49,8 @@ import {
 } from "@/lib/admin-platform-shop-upgrades-revenue";
 import {
   buyerPaymentProcessingFeeCents,
-  checkoutProcessingFeeFromTotal,
+  buyerCheckoutTotalCents,
+  stripeBalanceProcessingFeeCents,
 } from "@/lib/stripe-card-processing-fee";
 
 const orderLineInclude = {
@@ -55,12 +73,6 @@ const orderLineInclude = {
   product: { select: { slug: true } },
 } as const;
 
-export type AdminPlatformSalesBuyer = {
-  email: string | null;
-  shippingState: string | null;
-  shippingCountry: string | null;
-};
-
 function orderLineDisplayName(l: AdminPlatformSalesOrderLineRow): string {
   const item = l.shopListing?.requestItemName?.trim();
   if (item) return item;
@@ -70,108 +82,6 @@ function orderLineDisplayName(l: AdminPlatformSalesOrderLineRow): string {
 export type AdminPlatformSalesOrderLineRow = Prisma.OrderLineGetPayload<{
   include: typeof orderLineInclude;
 }>;
-
-/** Row filters for the Platform sales lines table. */
-export type AdminPlatformSaleCategory =
-  | "listing"
-  | "item"
-  | "support"
-  | "promotion"
-  | "shop_creation";
-
-/** Platform checkout rows (not buyer merchandise lines). Merch / G/S columns show —. */
-export function isPlatformCheckoutMergedLine(l: AdminPlatformSalesMergedLine): boolean {
-  return l.kind !== "merchandise";
-}
-
-/** Shop display name for shop checkouts, otherwise the transaction email. */
-export function mergedLineTransactionPartyLabel(l: AdminPlatformSalesMergedLine): string {
-  if (l.kind === "merchandise") {
-    return l.buyer.email?.trim() || "—";
-  }
-  if (l.kind === "creator_gift_purchase") {
-    return l.transactionEmail?.trim() || "—";
-  }
-  const shopName = l.shop?.displayName?.trim();
-  if (shopName) return shopName;
-  return l.transactionEmail?.trim() || "—";
-}
-
-type PlatformCheckoutMergedLineBase = {
-  quantity: number;
-  unitPriceCents: number;
-  productName: string;
-  goodsServicesCostCents: number;
-  productionFeeCents: number;
-  platformCutCents: number;
-  shopCutCents: number;
-  stripeFeeCents: number;
-  order: { id: string; createdAt: Date };
-  shop: { displayName: string; slug: string } | null;
-  /** Checkout email when there is no purchasing shop row (gifts, pre-shop signup). */
-  transactionEmail: string | null;
-  itemHref: string | null;
-};
-
-export type AdminPlatformSalesMergedLine =
-  | {
-      kind: "merchandise";
-      platformSaleCategory: "item";
-      id: string;
-      quantity: number;
-      unitPriceCents: number;
-      productName: string;
-      goodsServicesCostCents: number;
-      productionFeeCents: number;
-      platformCutCents: number;
-      shopCutCents: number;
-      /** Buyer-paid Stripe pass-through allocated to this row. */
-      stripeFeeCents: number;
-      order: { id: string; createdAt: Date; orderNumber: number };
-      shop: { displayName: string; slug: string } | null;
-      buyer: AdminPlatformSalesBuyer;
-      itemHref: string | null;
-    }
-  | ({
-      kind: "listing_credit_pack_purchase";
-      platformSaleCategory: "listing";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "support_tip";
-      platformSaleCategory: "support";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "promotion_purchase";
-      platformSaleCategory: "promotion";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "shop_setup_fee_purchase";
-      platformSaleCategory: "shop_creation";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "shop_reactivation_purchase";
-      platformSaleCategory: "shop_creation";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "shop_flair_purchase";
-      platformSaleCategory: "promotion";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "shop_google_shopping_purchase";
-      platformSaleCategory: "promotion";
-      id: string;
-    } & PlatformCheckoutMergedLineBase)
-  | ({
-      kind: "creator_gift_purchase";
-      platformSaleCategory: "shop_creation" | "listing" | "promotion";
-      id: string;
-    } & PlatformCheckoutMergedLineBase);
 
 function promotionPaidAtWhere(
   salesOrderCreatedAt: { gte?: Date; lte?: Date } | undefined,
@@ -202,21 +112,42 @@ function googleShoppingMergedLabel(packId: string): string {
   return pack ? `Google Shopping — ${pack.label}` : "Google Shopping credits";
 }
 
+const CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL = "Gift - Multiple Promo Credits";
+
+function creatorGiftPromotionPartCount(row: CreatorGiftShopUpgradeRevenueRow): number {
+  let count = 0;
+  if (row.promotionKind && row.promotionCreditsGranted > 0) count += 1;
+  if (row.googleShoppingCreditsGranted > 0 || row.googleShoppingCreditPackId) count += 1;
+  if (row.shopFlairIncluded) count += 1;
+  return count;
+}
+
 function creatorGiftListingLabel(row: CreatorGiftShopUpgradeRevenueRow): string {
   const pack = row.listingCreditPackId ? listingCreditPackById(row.listingCreditPackId) : null;
-  return pack ? `Creator gift — ${pack.label}` : "Creator gift — listing credits";
+  const credits = pack?.credits ?? row.listingCreditsGranted;
+  if (credits > 0) return `Gift - Listings - ${credits} Credits`;
+  return "Gift - Listings";
 }
 
 function creatorGiftPromotionLabel(row: CreatorGiftShopUpgradeRevenueRow): string {
-  const parts: string[] = [];
+  const partCount = creatorGiftPromotionPartCount(row);
+  if (partCount > 1) return CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL;
+  if (partCount === 0) return "Gift - Promotions";
   if (row.promotionKind && row.promotionCreditsGranted > 0) {
-    parts.push(promotionKindLabel(row.promotionKind));
+    return `Gift - Promotions - ${promotionKindLabel(row.promotionKind)}`;
   }
-  if (row.googleShoppingCreditsGranted > 0 || row.googleShoppingCreditPackId) {
-    parts.push("Google Shopping credits");
+  if (row.shopFlairIncluded) return "Gift - Shop Flair";
+  return "Gift - Google Shopping";
+}
+
+function creatorGiftMergedLineProductName(
+  row: CreatorGiftShopUpgradeRevenueRow,
+  seg: { category: AdminPlatformSaleCategory; label: string },
+): string {
+  if (seg.category === "promotion" && creatorGiftPromotionPartCount(row) > 1) {
+    return CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL;
   }
-  if (row.shopFlairIncluded) parts.push("Shop flair");
-  return parts.length > 0 ? `Creator gift — ${parts.join(", ")}` : "Creator gift — shop upgrades";
+  return seg.label;
 }
 
 function allocateCheckoutStripeFeeCents(
@@ -227,7 +158,7 @@ function allocateCheckoutStripeFeeCents(
   if (checkoutTotalCents <= 0 || totalMerchandiseCents <= 0 || segmentMerchandiseCents <= 0) {
     return 0;
   }
-  const totalFee = checkoutProcessingFeeFromTotal(checkoutTotalCents, totalMerchandiseCents);
+  const totalFee = stripeBalanceProcessingFeeCents(checkoutTotalCents);
   return Math.round((totalFee * segmentMerchandiseCents) / totalMerchandiseCents);
 }
 
@@ -244,25 +175,40 @@ function platformCheckoutMergedLine<K extends AdminPlatformSalesMergedLine["kind
     itemHref: string | null;
     stripeFeeCents?: number;
     transactionEmail?: string | null;
+    orderNumber?: number | null;
   },
 ): Extract<AdminPlatformSalesMergedLine, { kind: K }> {
+  const merchandiseCents = Math.max(0, params.merchandiseCents);
+  const checkoutTotalCents = (() => {
+    const stored = Math.max(0, params.checkoutTotalCents);
+    if (merchandiseCents <= 0) return stored;
+    if (stored === merchandiseCents) return buyerCheckoutTotalCents(merchandiseCents);
+    return stored;
+  })();
   const stripeFeeCents =
-    params.stripeFeeCents ??
-    checkoutProcessingFeeFromTotal(params.checkoutTotalCents, params.merchandiseCents);
+    params.stripeFeeCents ?? stripeBalanceProcessingFeeCents(checkoutTotalCents);
   return {
     kind,
     platformSaleCategory,
     id: params.id,
     quantity: 1,
-    unitPriceCents: params.checkoutTotalCents,
+    unitPriceCents: checkoutTotalCents,
     productName: params.productName,
+    checkoutTotalCents,
+    itemPriceCents: params.merchandiseCents,
+    tipCents: 0,
     goodsServicesCostCents: 0,
     productionFeeCents: 0,
     /** Platform merchandise revenue (excludes buyer Stripe pass-through in the adjacent column). */
     platformCutCents: params.merchandiseCents,
     shopCutCents: 0,
     stripeFeeCents,
-    order: { id: params.id, createdAt: params.paidAt },
+    tipProcessingFeeCents: 0,
+    order: {
+      id: params.id,
+      createdAt: params.paidAt,
+      orderNumber: params.orderNumber ?? null,
+    },
     shop: params.shop,
     transactionEmail: params.transactionEmail ?? null,
     itemHref: params.itemHref,
@@ -273,6 +219,7 @@ type CreatorGiftPurchaseMergedRow = CreatorGiftShopUpgradeRevenueRow & {
   id: string;
   amountCents: number;
   paidAt: Date | null;
+  transactionNumber: number | null;
   purchaserEmail: string | null;
   setupFeeIncluded: boolean;
   isBetaTesterBatch: boolean;
@@ -305,7 +252,7 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
   ) {
     segments.push({
       category: "shop_creation",
-      label: "Creator gift — shop setup",
+      label: "Gift - Shop Setup",
       merchandiseCents: SHOP_SETUP_FEE_CENTS,
     });
   }
@@ -339,12 +286,12 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
       ? row.amountCents
       : Math.round((row.amountCents * seg.merchandiseCents) / totalMerch);
     const stripeFeeCents = isSingle
-      ? checkoutProcessingFeeFromTotal(row.amountCents, totalMerch)
+      ? stripeBalanceProcessingFeeCents(row.amountCents)
       : allocateCheckoutStripeFeeCents(row.amountCents, totalMerch, seg.merchandiseCents);
 
     return platformCheckoutMergedLine("creator_gift_purchase", seg.category, {
       id: `creator_gift_purchase:${row.id}:${seg.category}`,
-      productName: seg.label,
+      productName: creatorGiftMergedLineProductName(row, seg),
       checkoutTotalCents,
       merchandiseCents: seg.merchandiseCents,
       paidAt: row.paidAt!,
@@ -352,6 +299,7 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
       itemHref: null,
       stripeFeeCents,
       transactionEmail: row.purchaserEmail,
+      orderNumber: row.transactionNumber,
     });
   });
 }
@@ -429,20 +377,69 @@ export function merchandiseOrderPaymentProcessingCents(order: {
   );
 }
 
-function allocateMerchandiseLineStripeFeeCents(
+/** Stripe balance fee (2.9% + 30¢ on full charge) for a paid merchandise order. */
+export function merchandiseOrderStripeBalanceFeeCents(order: { totalCents: number }): number {
+  return stripeBalanceProcessingFeeCents(order.totalCents);
+}
+
+/**
+ * Stripe pass-through portion of the payment-processing line (excludes the flat
+ * cart-tip platform surcharge, which is tracked as {@link checkoutTipProcessingSurchargeCents}).
+ */
+export function merchandiseOrderStripePassThroughCents(order: {
+  subtotalCents: number;
+  tipCents: number;
+  shippingCents: number;
+  totalCents: number;
+}): number {
+  const processing = merchandiseOrderPaymentProcessingCents(order);
+  const tipSurcharge = checkoutTipProcessingSurchargeCents(order.tipCents);
+  return Math.max(0, processing - tipSurcharge);
+}
+
+/** Flat cart-tip platform surcharge on the buyer payment-processing line (not paid to Stripe). */
+export function merchandiseOrderTipProcessingFeeCents(order: {
+  tipCents: number;
+}): number {
+  return checkoutTipProcessingSurchargeCents(order.tipCents);
+}
+
+/** Proportional share of an order-level cents field across merchandise lines. */
+export function allocateMerchandiseOrderLineShareCents(
+  order: { subtotalCents: number },
+  lineMerchandiseCents: number,
+  orderLevelCents: number,
+): number {
+  if (orderLevelCents <= 0 || order.subtotalCents <= 0) return 0;
+  const lineMerch = Math.max(0, lineMerchandiseCents);
+  if (lineMerch <= 0) return 0;
+  return Math.round((orderLevelCents * lineMerch) / order.subtotalCents);
+}
+
+/** Stripe balance fee (2.9% + 30¢ on full charge) allocated to a merchandise line. */
+export function allocateMerchandiseLineStripeBalanceFeeCents(
+  order: { subtotalCents: number; totalCents: number },
+  lineMerchandiseCents: number,
+): number {
+  return allocateMerchandiseOrderLineShareCents(
+    order,
+    lineMerchandiseCents,
+    stripeBalanceProcessingFeeCents(order.totalCents),
+  );
+}
+
+function allocateMerchandiseLineTipProcessingFeeCents(
   order: {
     subtotalCents: number;
     tipCents: number;
-    shippingCents: number;
-    totalCents: number;
   },
   lineMerchandiseCents: number,
 ): number {
-  const orderStripeFee = merchandiseOrderPaymentProcessingCents(order);
-  if (orderStripeFee <= 0 || order.subtotalCents <= 0) return 0;
+  const orderTipFee = merchandiseOrderTipProcessingFeeCents(order);
+  if (orderTipFee <= 0 || order.subtotalCents <= 0) return 0;
   const lineMerch = Math.max(0, lineMerchandiseCents);
   if (lineMerch <= 0) return 0;
-  return Math.round((orderStripeFee * lineMerch) / order.subtotalCents);
+  return Math.round((orderTipFee * lineMerch) / order.subtotalCents);
 }
 
 /**
@@ -495,7 +492,7 @@ export async function loadMergedPlatformSalesLines(
       where: supportTipWhere,
       orderBy: { createdAt: "desc" },
       take: perSourceCap,
-      select: { id: true, amountCents: true, createdAt: true },
+      select: { id: true, amountCents: true, createdAt: true, transactionNumber: true },
     }),
     prisma.supportTip.count({ where: supportTipWhere }),
     prisma.promotionPurchase.findMany({
@@ -511,6 +508,7 @@ export async function loadMergedPlatformSalesLines(
         amountCents: true,
         paidViaPromotionCredit: true,
         paidAt: true,
+        transactionNumber: true,
         shop: { select: { displayName: true, slug: true } },
         shopListing: {
           select: {
@@ -532,6 +530,7 @@ export async function loadMergedPlatformSalesLines(
         packId: true,
         amountCents: true,
         paidAt: true,
+        transactionNumber: true,
         shop: { select: { displayName: true, slug: true } },
       },
     }),
@@ -547,6 +546,7 @@ export async function loadMergedPlatformSalesLines(
         id: true,
         amountCents: true,
         paidAt: true,
+        transactionNumber: true,
         shop: { select: { displayName: true, slug: true } },
         pendingSignup: { select: { email: true } },
       },
@@ -563,6 +563,7 @@ export async function loadMergedPlatformSalesLines(
         id: true,
         amountCents: true,
         paidAt: true,
+        transactionNumber: true,
         shop: { select: { displayName: true, slug: true } },
       },
     }),
@@ -578,6 +579,7 @@ export async function loadMergedPlatformSalesLines(
         id: true,
         amountCents: true,
         paidAt: true,
+        transactionNumber: true,
         shop: { select: { displayName: true, slug: true } },
       },
     }),
@@ -594,6 +596,7 @@ export async function loadMergedPlatformSalesLines(
         packId: true,
         amountCents: true,
         paidAt: true,
+        transactionNumber: true,
         shop: { select: { displayName: true, slug: true } },
       },
     }),
@@ -609,6 +612,7 @@ export async function loadMergedPlatformSalesLines(
         id: true,
         amountCents: true,
         paidAt: true,
+        transactionNumber: true,
         setupFeeIncluded: true,
         isBetaTesterBatch: true,
         isWaivedShopFeeBatch: true,
@@ -629,20 +633,30 @@ export async function loadMergedPlatformSalesLines(
 
   const orderLines = orderLinesRaw as AdminPlatformSalesOrderLineRow[];
 
-  const merchLines: AdminPlatformSalesMergedLine[] = orderLines.map((l) => ({
+  const merchLines: AdminPlatformSalesMergedLine[] = orderLines.map((l) => {
+    const lineMerch = l.unitPriceCents * l.quantity;
+    return {
     kind: "merchandise" as const,
     platformSaleCategory: "item" as const,
     id: l.id,
     quantity: l.quantity,
     unitPriceCents: l.unitPriceCents,
     productName: orderLineDisplayName(l),
+    checkoutTotalCents: allocateMerchandiseOrderLineShareCents(
+      l.order,
+      lineMerch,
+      l.order.totalCents,
+    ),
+    itemPriceCents: lineMerch,
+    tipCents: allocateMerchandiseOrderLineShareCents(l.order, lineMerch, l.order.tipCents),
     goodsServicesCostCents: l.goodsServicesCostCents,
     productionFeeCents: mergedLineProductionFeeCents(l),
     platformCutCents: l.platformCutCents,
     shopCutCents: l.shopCutCents,
-    stripeFeeCents: allocateMerchandiseLineStripeFeeCents(
+    stripeFeeCents: allocateMerchandiseLineStripeBalanceFeeCents(l.order, lineMerch),
+    tipProcessingFeeCents: allocateMerchandiseLineTipProcessingFeeCents(
       l.order,
-      l.unitPriceCents * l.quantity,
+      lineMerch,
     ),
     order: { id: l.order.id, createdAt: l.order.createdAt, orderNumber: l.order.orderNumber },
     shop: l.shop,
@@ -653,20 +667,23 @@ export async function loadMergedPlatformSalesLines(
     },
     itemHref:
       l.shop && l.product.slug ? productHref(l.shop.slug, l.product.slug) : null,
-  }));
+  };
+  });
 
-  const supportLines: AdminPlatformSalesMergedLine[] = supportTips.map((t) =>
-    platformCheckoutMergedLine("support_tip", "support", {
+  const supportLines: AdminPlatformSalesMergedLine[] = supportTips.map((t) => {
+    const processingCents = buyerPaymentProcessingFeeCents({ subtotalCents: t.amountCents });
+    return platformCheckoutMergedLine("support_tip", "support", {
       id: `support_tip:${t.id}`,
-      productName: "Support tip",
-      checkoutTotalCents: t.amountCents,
+      productName: "Support <3",
+      checkoutTotalCents: t.amountCents + processingCents,
       merchandiseCents: t.amountCents,
       paidAt: t.createdAt,
       shop: null,
       itemHref: null,
-      stripeFeeCents: buyerPaymentProcessingFeeCents({ subtotalCents: t.amountCents }),
-    }),
-  );
+      stripeFeeCents: stripeBalanceProcessingFeeCents(t.amountCents + processingCents),
+      orderNumber: t.transactionNumber,
+    });
+  });
 
   const promotionLines: AdminPlatformSalesMergedLine[] = promotionRows
     .filter((row): row is typeof row & { paidAt: Date } => row.paidAt != null)
@@ -682,6 +699,7 @@ export async function loadMergedPlatformSalesLines(
           row.shopListing?.product.slug != null
             ? productHref(row.shop.slug, row.shopListing.product.slug)
             : null,
+        orderNumber: row.transactionNumber,
       }),
     );
 
@@ -696,6 +714,7 @@ export async function loadMergedPlatformSalesLines(
         paidAt: row.paidAt,
         shop: row.shop,
         itemHref: null,
+        orderNumber: row.transactionNumber,
       }),
     );
 
@@ -711,6 +730,7 @@ export async function loadMergedPlatformSalesLines(
         shop: row.shop,
         itemHref: null,
         transactionEmail: row.pendingSignup.email,
+        orderNumber: row.transactionNumber,
       }),
     );
 
@@ -725,6 +745,7 @@ export async function loadMergedPlatformSalesLines(
         paidAt: row.paidAt,
         shop: row.shop,
         itemHref: null,
+        orderNumber: row.transactionNumber,
       }),
     );
 
@@ -733,12 +754,13 @@ export async function loadMergedPlatformSalesLines(
     .map((row) =>
       platformCheckoutMergedLine("shop_flair_purchase", "promotion", {
         id: `shop_flair_purchase:${row.id}`,
-        productName: "Shop flair access",
+        productName: "Shop Flair",
         checkoutTotalCents: row.amountCents,
         merchandiseCents: shopFlairPurchaseMerchandiseCents(row),
         paidAt: row.paidAt,
         shop: row.shop,
         itemHref: null,
+        orderNumber: row.transactionNumber,
       }),
     );
 
@@ -753,6 +775,7 @@ export async function loadMergedPlatformSalesLines(
         paidAt: row.paidAt,
         shop: row.shop,
         itemHref: null,
+        orderNumber: row.transactionNumber,
       }),
     );
 
@@ -872,9 +895,10 @@ export function utcPlatformSalesLifetimeRangeThrough(through: Date): { gte: Date
 
 export function emptyPlatformSalesPeriodTotals(): PlatformSalesPeriodTotals {
   return {
-    itemMerchandiseSoldCents: 0,
+    itemCheckoutPaidCents: 0,
     itemPlatformCents: 0,
     itemGoodsServicesCents: 0,
+    itemShopCutCents: 0,
     itemProductionFeeCents: 0,
     itemPlatformMerchandiseTakeCents: 0,
     listingPlatformCents: 0,
@@ -895,9 +919,10 @@ export function averagePlatformSalesPeriodTotals(
   if (monthCount <= 0) return emptyPlatformSalesPeriodTotals();
   const avg = (n: number) => Math.round(n / monthCount);
   return {
-    itemMerchandiseSoldCents: avg(totals.itemMerchandiseSoldCents),
+    itemCheckoutPaidCents: avg(totals.itemCheckoutPaidCents),
     itemPlatformCents: avg(totals.itemPlatformCents),
     itemGoodsServicesCents: avg(totals.itemGoodsServicesCents),
+    itemShopCutCents: avg(totals.itemShopCutCents),
     itemProductionFeeCents: avg(totals.itemProductionFeeCents),
     itemPlatformMerchandiseTakeCents: avg(totals.itemPlatformMerchandiseTakeCents),
     listingPlatformCents: avg(totals.listingPlatformCents),
@@ -916,12 +941,14 @@ export type PlatformSalesMonthlyAverageSummary = {
 };
 
 export type PlatformSalesPeriodTotals = {
-  /** Sum of paid-order `subtotalCents` (buyer merchandise before tip, shipping, and Stripe). */
-  itemMerchandiseSoldCents: number;
+  /** Sum of paid-order `totalCents` (buyer checkout; matches item-row Paid column, pre–sales-tax). */
+  itemCheckoutPaidCents: number;
   /** Sum of `OrderLine.platformCutCents` for paid orders in the window. */
   itemPlatformCents: number;
   /** Sum of `OrderLine.goodsServicesCostCents` for paid merchandise in the window. */
   itemGoodsServicesCents: number;
+  /** Sum of `OrderLine.shopCutCents` for paid merchandise in the window. */
+  itemShopCutCents: number;
   /** Sum of `OrderLine.productionFeeCents` for paid merchandise in the window. */
   itemProductionFeeCents: number;
   /** Merchandise platform retention (COGS + production fee + platform fee). */
@@ -938,13 +965,31 @@ export type PlatformSalesPeriodTotals = {
   cartTipPlatformCents: number;
   /** Stripe pass-through on platform checkouts (not paid buyer `Order` rows). */
   platformSalesPaymentProcessingCents: number;
-  /** Stripe pass-through on paid `Order` checkouts only (not shop setup / platform sales). */
+  /** Stripe balance fee on paid `Order` checkouts only (2.9% + 30¢ on full charge; not buyer gross-up). */
   shopSalesPaymentProcessingCents: number;
 };
 
 export type PlatformSalesYtdTotals = PlatformSalesPeriodTotals & {
   year: number;
 };
+
+/** Shop sales breakdown header: Paid − Shop cut − COGS − Stripe balance fee. */
+export function shopSalesPaidCogsStripeNetCents(
+  totals: Pick<
+    PlatformSalesPeriodTotals,
+    | "itemCheckoutPaidCents"
+    | "itemShopCutCents"
+    | "itemGoodsServicesCents"
+    | "shopSalesPaymentProcessingCents"
+  >,
+): number {
+  return (
+    totals.itemCheckoutPaidCents -
+    totals.itemShopCutCents -
+    totals.itemGoodsServicesCents -
+    totals.shopSalesPaymentProcessingCents
+  );
+}
 
 const paidOrderLinesInWindowWhere = (gte: Date, lte: Date) => ({
   order: {
@@ -1066,11 +1111,13 @@ export async function aggregatePlatformRevenueForUtcWindow(
     _sum: {
       platformCutCents: true,
       goodsServicesCostCents: true,
+      shopCutCents: true,
     },
   });
 
   const itemPlatformCents = orderLineSum._sum.platformCutCents ?? 0;
   const itemGoodsServicesCents = orderLineSum._sum.goodsServicesCostCents ?? 0;
+  const itemShopCutCents = orderLineSum._sum.shopCutCents ?? 0;
   const itemProductionFeeCents = await sumPaidOrderLineProductionFeeCents(prisma, gte, lte);
 
   const paidMerchandiseOrders = await prisma.order.findMany({
@@ -1085,12 +1132,12 @@ export async function aggregatePlatformRevenueForUtcWindow(
       totalCents: true,
     },
   });
-  const itemMerchandiseSoldCents = paidMerchandiseOrders.reduce(
-    (sum, order) => sum + order.subtotalCents,
+  const itemCheckoutPaidCents = paidMerchandiseOrders.reduce(
+    (sum, order) => sum + order.totalCents,
     0,
   );
   const shopSalesPaymentProcessingCents = paidMerchandiseOrders.reduce(
-    (sum, order) => sum + merchandiseOrderPaymentProcessingCents(order),
+    (sum, order) => sum + merchandiseOrderStripeBalanceFeeCents(order),
     0,
   );
 
@@ -1122,17 +1169,11 @@ export async function aggregatePlatformRevenueForUtcWindow(
   let shopCreationPlatformCents = 0;
   for (const row of [...shopSetupRows, ...giftedSetupRows]) {
     shopCreationPlatformCents += SHOP_SETUP_FEE_CENTS;
-    platformSalesPaymentProcessingCents += checkoutProcessingFeeFromTotal(
-      row.amountCents,
-      SHOP_SETUP_FEE_CENTS,
-    );
+    platformSalesPaymentProcessingCents += stripeBalanceProcessingFeeCents(row.amountCents);
   }
   for (const row of shopReactivationRows) {
     shopCreationPlatformCents += SHOP_REACTIVATION_FEE_CENTS;
-    platformSalesPaymentProcessingCents += checkoutProcessingFeeFromTotal(
-      row.amountCents,
-      SHOP_REACTIVATION_FEE_CENTS,
-    );
+    platformSalesPaymentProcessingCents += stripeBalanceProcessingFeeCents(row.amountCents);
   }
 
   const listingPlatformCents = shopUpgradesRevenue.listingMerchandiseCents;
@@ -1140,9 +1181,10 @@ export async function aggregatePlatformRevenueForUtcWindow(
   platformSalesPaymentProcessingCents += shopUpgradesRevenue.paymentProcessingCents;
 
   for (const row of supportTipsInWindow) {
-    platformSalesPaymentProcessingCents += buyerPaymentProcessingFeeCents({
-      subtotalCents: row.amountCents,
-    });
+    const processingCents = buyerPaymentProcessingFeeCents({ subtotalCents: row.amountCents });
+    platformSalesPaymentProcessingCents += stripeBalanceProcessingFeeCents(
+      row.amountCents + processingCents,
+    );
   }
 
   const tippedOrders = await prisma.order.findMany({
@@ -1159,9 +1201,10 @@ export async function aggregatePlatformRevenueForUtcWindow(
   );
 
   return {
-    itemMerchandiseSoldCents,
+    itemCheckoutPaidCents,
     itemPlatformCents,
     itemGoodsServicesCents,
+    itemShopCutCents,
     itemProductionFeeCents,
     itemPlatformMerchandiseTakeCents:
       itemPlatformCents + itemGoodsServicesCents + itemProductionFeeCents,
@@ -1252,9 +1295,10 @@ function sumPlatformSalesPeriodTotals(
   b: PlatformSalesPeriodTotals,
 ): PlatformSalesPeriodTotals {
   return {
-    itemMerchandiseSoldCents: a.itemMerchandiseSoldCents + b.itemMerchandiseSoldCents,
+    itemCheckoutPaidCents: a.itemCheckoutPaidCents + b.itemCheckoutPaidCents,
     itemPlatformCents: a.itemPlatformCents + b.itemPlatformCents,
     itemGoodsServicesCents: a.itemGoodsServicesCents + b.itemGoodsServicesCents,
+    itemShopCutCents: a.itemShopCutCents + b.itemShopCutCents,
     itemProductionFeeCents: a.itemProductionFeeCents + b.itemProductionFeeCents,
     itemPlatformMerchandiseTakeCents: a.itemPlatformMerchandiseTakeCents + b.itemPlatformMerchandiseTakeCents,
     listingPlatformCents: a.listingPlatformCents + b.listingPlatformCents,

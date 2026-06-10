@@ -14,8 +14,8 @@ import { promotionPriceCentsForKind } from "@/lib/promotions";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import {
   buyerCheckoutTotalCents,
-  checkoutProcessingFeeFromTotal,
   merchandiseSubtotalFromCheckoutTotalCents,
+  stripeBalanceProcessingFeeCents,
 } from "@/lib/stripe-card-processing-fee";
 
 /**
@@ -86,6 +86,7 @@ export function listingCreditPackPurchaseMerchandiseCents(row: {
 
 export function shopFlairPurchaseMerchandiseCents(row: { amountCents: number }): number {
   if (row.amountCents <= 0) return 0;
+  if (row.amountCents === SHOP_FLAIR_ACCESS_PRICE_CENTS) return SHOP_FLAIR_ACCESS_PRICE_CENTS;
   if (row.amountCents >= buyerCheckoutTotalCents(SHOP_FLAIR_ACCESS_PRICE_CENTS)) {
     return SHOP_FLAIR_ACCESS_PRICE_CENTS;
   }
@@ -133,10 +134,7 @@ function foldListingCheckout(
 ): void {
   if (merchandiseSubtotalCents <= 0) return;
   totals.listingMerchandiseCents += merchandiseSubtotalCents;
-  totals.paymentProcessingCents += checkoutProcessingFeeFromTotal(
-    checkoutTotalCents,
-    merchandiseSubtotalCents,
-  );
+  totals.paymentProcessingCents += stripeBalanceProcessingFeeCents(checkoutTotalCents);
 }
 
 function foldPromotionCheckout(
@@ -146,10 +144,7 @@ function foldPromotionCheckout(
 ): void {
   if (merchandiseSubtotalCents <= 0) return;
   totals.promotionMerchandiseCents += merchandiseSubtotalCents;
-  totals.paymentProcessingCents += checkoutProcessingFeeFromTotal(
-    checkoutTotalCents,
-    merchandiseSubtotalCents,
-  );
+  totals.paymentProcessingCents += stripeBalanceProcessingFeeCents(checkoutTotalCents);
 }
 
 /**
@@ -256,10 +251,7 @@ export async function aggregateShopUpgradesPlatformRevenue(
 
     totals.listingMerchandiseCents += listingMerchandiseCents;
     totals.promotionMerchandiseCents += promotionMerchandiseCents;
-    totals.paymentProcessingCents += checkoutProcessingFeeFromTotal(
-      row.amountCents,
-      totalMerchandiseCents,
-    );
+    totals.paymentProcessingCents += stripeBalanceProcessingFeeCents(row.amountCents);
   }
 
   return totals;

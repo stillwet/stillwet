@@ -123,7 +123,7 @@ export type SupportMessage = Prisma.SupportMessageModel
 export type SupportTip = Prisma.SupportTipModel
 /**
  * Model PlatformTransactionSequence
- * * Per-product platform-wide transaction counters (`{Product} - #{N}` labels).
+ * * Shared platform order counter (`global` key): buyer orders and all checkout types from #1253.
  */
 export type PlatformTransactionSequence = Prisma.PlatformTransactionSequenceModel
 /**

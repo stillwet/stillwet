@@ -18,6 +18,7 @@ import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { shopDemoPurchaseFeatureEnabled } from "@/lib/shop-demo-purchase-feature";
 import { storefrontShopListingWhere } from "@/lib/shop-listing-storefront-visibility";
 import { getShippingFlatCents } from "@/lib/shipping";
+import { allocatePlatformOrderNumber } from "@/lib/platform-transaction-reference";
 
 export type SimulateShopDemoPurchaseResult = { ok: true } | { ok: false; error: string };
 
@@ -135,8 +136,10 @@ export async function simulateShopDemoPurchase(): Promise<SimulateShopDemoPurcha
     const stripeSessionId = `demo_${randomUUID()}`;
 
     const createdOrder = await prisma.$transaction(async (tx) => {
+      const orderNumber = await allocatePlatformOrderNumber(tx);
       const o = await tx.order.create({
         data: {
+          orderNumber,
           shopId: user.shopId,
           status: OrderStatus.paid,
           stripeSessionId,

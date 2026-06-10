@@ -1,7 +1,11 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { PromotionKind } from "@/generated/prisma/enums";
 
-/** Stable keys for platform-wide per-product transaction sequences. */
+/** First number assigned to new buyer orders and platform checkouts (shared global sequence). */
+export const PLATFORM_ORDER_NUMBER_FIRST = 1253;
+
+/** `PlatformTransactionSequence.productKey` for the single shared counter. */
+export const PLATFORM_ORDER_NUMBER_SEQUENCE_KEY = "global";
 export const PLATFORM_TRANSACTION_PRODUCT = {
   support_platform: "support_platform",
   shop_creation_fee: "shop_creation_fee",
@@ -62,27 +66,40 @@ export function formatPlatformTransactionReference(
   return options?.gift ? `${base} (Gift)` : base;
 }
 
+/** Creator gift checkout when more than one upgrade category is in the cart. */
+export function formatMultipleGiftsTransactionReference(transactionNumber: number): string {
+  return `Multiple Gifts - #${transactionNumber}`;
+}
+
 type TransactionClient = Pick<
   Prisma.TransactionClient,
   "platformTransactionSequence"
 >;
 
-/** Atomically allocate the next platform-wide number for a product type. */
-export async function allocatePlatformTransactionNumber(
-  tx: TransactionClient,
-  product: PlatformTransactionProduct,
-): Promise<number> {
+/** Atomically allocate the next shared order / transaction number (1253+). */
+export async function allocatePlatformOrderNumber(tx: TransactionClient): Promise<number> {
   await tx.platformTransactionSequence.upsert({
-    where: { productKey: product },
-    create: { productKey: product, lastNumber: 0 },
+    where: { productKey: PLATFORM_ORDER_NUMBER_SEQUENCE_KEY },
+    create: {
+      productKey: PLATFORM_ORDER_NUMBER_SEQUENCE_KEY,
+      lastNumber: PLATFORM_ORDER_NUMBER_FIRST - 1,
+    },
     update: {},
   });
   const row = await tx.platformTransactionSequence.update({
-    where: { productKey: product },
+    where: { productKey: PLATFORM_ORDER_NUMBER_SEQUENCE_KEY },
     data: { lastNumber: { increment: 1 } },
     select: { lastNumber: true },
   });
   return row.lastNumber;
+}
+
+/** Atomically allocate the next platform-wide checkout number (same sequence as buyer `Order.orderNumber`). */
+export async function allocatePlatformTransactionNumber(
+  tx: TransactionClient,
+  _product: PlatformTransactionProduct,
+): Promise<number> {
+  return allocatePlatformOrderNumber(tx);
 }
 
 export function stripePlatformTransactionMetadata(

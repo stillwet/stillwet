@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model PlatformTransactionSequence
- * * Per-product platform-wide transaction counters (`{Product} - #{N}` labels).
+ * * Shared platform order counter (`global` key): buyer orders and all checkout types from #1253.
  */
 export type PlatformTransactionSequenceModel = runtime.Types.Result.DefaultSelection<Prisma.$PlatformTransactionSequencePayload>
 

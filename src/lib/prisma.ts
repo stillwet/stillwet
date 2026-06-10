@@ -20,7 +20,7 @@ export type PrismaOrderReturnClaimDelegate = PrismaClient["orderReturnClaim"];
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v94-production-fee-cents";
+  "postgres-adapter-v95-unified-order-number";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

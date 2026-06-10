@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProductAddToCartForm } from "@/components/ProductAddToCartForm";
+import { ProductDetailAddToCart } from "@/components/ProductDetailAddToCart";
 import { productImageUrlsForShopListing } from "@/lib/product-media";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { PRODUCT_HERO_GALLERY_WRAP_CLASS } from "@/lib/product-image-gallery-constants";
@@ -106,9 +106,10 @@ export function ProductDetailContent({
           sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
         />
         {purchaseDisabled ? null : (
-          <ProductAddToCartForm
+          <ProductDetailAddToCart
             productId={product.id}
             shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
+            variant={variant}
           />
         )}
       </div>

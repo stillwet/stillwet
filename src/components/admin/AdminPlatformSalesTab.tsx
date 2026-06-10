@@ -5,107 +5,18 @@ import type {
   PlatformSalesPeriodTotals,
   PlatformSalesYtdTotals,
 } from "@/lib/admin-platform-sales-merged-lines";
-import { isPlatformCheckoutMergedLine, mergedLineTransactionPartyLabel } from "@/lib/admin-platform-sales-merged-lines";
+import { mergedLineTransactionPartyLabel, shopSalesPaidCogsStripeNetCents } from "@/lib/admin-platform-sales-merged-lines";
+import { mergedLineDetailsExport } from "@/lib/admin-platform-sales-merged-line-model";
 import { AdminClearPlatformSalesForm } from "@/components/admin/AdminClearPlatformSalesForm";
-import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
+import { AdminPlatformSalesLinesTable } from "@/components/admin/AdminPlatformSalesLinesTable";
+import {
+  formatAdminPlatformSalesPrice,
+  PlatformRevenueBreakdownTable,
+} from "@/components/admin/admin-platform-sales-breakdown";
 import { marketplacePlatformFeePercent } from "@/lib/marketplace-fee";
 
 function formatPrice(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
-}
-
-function BreakdownLabelHint({
-  label,
-  hint,
-  hintPosition = "below",
-}: {
-  label: string;
-  hint: string;
-  hintPosition?: "above" | "below";
-}) {
-  const hintClass =
-    hintPosition === "above"
-      ? "absolute bottom-full left-0 z-20 mb-1 w-max max-w-[14rem] rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[10px] normal-case tracking-normal text-zinc-300 shadow-lg"
-      : "absolute left-0 top-full z-20 mt-1 w-max max-w-[14rem] rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[10px] normal-case tracking-normal text-zinc-300 shadow-lg";
-
-  return (
-    <span className="inline-flex items-center gap-1">
-      {label}
-      <details className="relative inline-block">
-        <summary
-          className="inline-flex h-3.5 w-3.5 cursor-help list-none items-center justify-center rounded-full border border-zinc-600 text-[9px] font-semibold leading-none text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 [&::-webkit-details-marker]:hidden"
-          aria-label={`About ${label}`}
-        >
-          ?
-        </summary>
-        <p className={hintClass}>{hint}</p>
-      </details>
-    </span>
-  );
-}
-
-function PlatformRevenueBreakdownTable({
-  subtle,
-  sectionTitle,
-  headerTotalCents,
-  rows,
-}: {
-  subtle: boolean;
-  sectionTitle: string;
-  headerTotalCents?: number;
-  rows: { label: string; cents: number; emphasize?: boolean; hint?: string; hintPosition?: "above" | "below" }[];
-}) {
-  const wrapClass = subtle
-    ? "overflow-hidden rounded-md border border-zinc-800/40"
-    : "overflow-hidden rounded-md border border-zinc-800/70";
-  const headerWrapClass = subtle
-    ? "border-b border-blue-500/25 bg-blue-950/20 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
-    : "border-b border-blue-500/45 bg-blue-950/35 px-2 py-1 text-[10px] font-medium uppercase tracking-wide";
-  const headerTitleClass = subtle ? "text-blue-400/55" : "text-blue-400/90";
-  const headerTotalClass = subtle ? "tabular-nums text-blue-200/75" : "tabular-nums text-blue-100";
-  const labelClass = subtle
-    ? "text-[10px] uppercase tracking-wide text-zinc-600"
-    : "text-[10px] uppercase tracking-wide text-zinc-600";
-  const valueClass = subtle ? "tabular-nums text-zinc-400" : "tabular-nums text-zinc-200";
-  const rowBorder = subtle ? "border-zinc-800/35" : "border-zinc-800/50";
-  const emphasizeRow = subtle ? "bg-zinc-950/25" : "bg-zinc-950/40";
-
-  return (
-    <div className={wrapClass}>
-      <div className={`${headerWrapClass} flex items-baseline justify-between gap-2`}>
-        <span className={headerTitleClass}>{sectionTitle}</span>
-        {headerTotalCents != null ? (
-          <span className={headerTotalClass}>{formatPrice(headerTotalCents)}</span>
-        ) : null}
-      </div>
-      <table className="w-full border-collapse text-xs">
-        <tbody>
-          {rows.map((row) => (
-            <tr
-              key={row.label}
-              className={`border-b ${rowBorder} last:border-b-0 ${row.emphasize ? emphasizeRow : ""}`}
-            >
-              <td className={`px-2 py-1.5 ${labelClass}`}>
-                {row.hint ? (
-                  <BreakdownLabelHint
-                    label={row.label}
-                    hint={row.hint}
-                    hintPosition={row.hintPosition}
-                  />
-                ) : (
-                  row.label
-                )}
-              </td>
-              <td className={`px-2 py-1.5 text-right ${valueClass}`}>{formatPrice(row.cents)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return formatAdminPlatformSalesPrice(cents);
 }
 
 function PlatformRevenueTotalsCard({
@@ -125,13 +36,8 @@ function PlatformRevenueTotalsCard({
     totals.promotionPlatformCents +
     totals.supportPlatformCents -
     totals.platformSalesPaymentProcessingCents;
-  /** Expand breakdown: COGS and Stripe fees are platform charges, not revenue. */
-  const itemSalesCutHeaderCents =
-    totals.itemPlatformCents -
-    totals.itemGoodsServicesCents +
-    totals.itemProductionFeeCents +
-    totals.cartTipPlatformCents -
-    totals.shopSalesPaymentProcessingCents;
+  /** Shop sales breakdown header total (Paid − Shop cut − COGS − Stripe fee). */
+  const itemSalesCutHeaderCents = shopSalesPaidCogsStripeNetCents(totals);
   const combined = itemSalesCutHeaderCents + ancillaryPlatformCents;
   const subtle = tone === "subtle";
   const cardClass = subtle
@@ -169,19 +75,14 @@ function PlatformRevenueTotalsCard({
               headerTotalCents={itemSalesCutHeaderCents}
               rows={[
                 {
-                  label: "Cost of sale",
-                  hint: "Total buyer merchandise charged on purchased items (excludes tips and Stripe fees; before platform, COGS, and production fee splits).",
-                  cents: totals.itemMerchandiseSoldCents,
+                  label: "Paid",
+                  hint: "Total amount paid, including tip, and payment processing fee (stripe est. + tip fee)",
+                  cents: totals.itemCheckoutPaidCents,
                 },
                 {
-                  label: "Platform cut",
-                  hint: `Production cost + ${marketplacePlatformFeePercent()}% platform fee`,
-                  cents: totals.itemPlatformCents + totals.itemProductionFeeCents,
-                },
-                {
-                  label: "Tip fees",
-                  hint: "25¢ platform surcharge on buyer cart tips",
-                  cents: totals.cartTipPlatformCents,
+                  label: "Shop cut",
+                  hint: "Creator shop share of merchandise sales",
+                  cents: -totals.itemShopCutCents,
                 },
                 {
                   label: "COGS",
@@ -189,10 +90,28 @@ function PlatformRevenueTotalsCard({
                   cents: -totals.itemGoodsServicesCents,
                 },
                 {
-                  label: "Stripe fees",
-                  hint: "Stripe pass-through on buyer item checkouts only (merchandise, shipping, and cart tips). Excludes shop setup, listings, promotions, and other platform checkouts.",
+                  label: "Stripe fee",
+                  hint: "Stripe balance fee on item checkouts (2.9% + 30¢ on full charge, rounded).",
                   hintPosition: "above",
                   cents: -totals.shopSalesPaymentProcessingCents,
+                },
+                {
+                  label: "10% Cut",
+                  hint: `${marketplacePlatformFeePercent()}% platform fee on merchandise`,
+                  cents: totals.itemPlatformCents,
+                  mutedValue: true,
+                },
+                {
+                  label: "Prod Fee",
+                  hint: "Printify production fee per item",
+                  cents: totals.itemProductionFeeCents,
+                  mutedValue: true,
+                },
+                {
+                  label: "Tip processing",
+                  hint: "25¢ platform surcharge if tipped",
+                  cents: totals.cartTipPlatformCents,
+                  mutedValue: true,
                 },
               ]}
             />
@@ -217,12 +136,6 @@ function PlatformRevenueTotalsCard({
                   cents: totals.promotionPlatformCents,
                 },
                 { label: "Support <3", cents: totals.supportPlatformCents },
-                {
-                  label: "Stripe fees",
-                  hint: "Stripe pass-through on platform checkouts only (shop setup, reactivation, shop upgrades, support donations, and gifted platform purchases). Excludes buyer item purchases and cart tips on item checkouts.",
-                  hintPosition: "above",
-                  cents: -totals.platformSalesPaymentProcessingCents,
-                },
               ]}
             />
           </div>
@@ -230,14 +143,6 @@ function PlatformRevenueTotalsCard({
       </dl>
     </div>
   );
-}
-
-/** Local calendar date for table display (e.g. `04/25/26`). */
-function formatDateMMDDYY(d: Date): string {
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const yy = String(d.getFullYear() % 100).padStart(2, "0");
-  return `${mm}/${dd}/${yy}`;
 }
 
 function escapeCsvCell(v: string) {
@@ -268,15 +173,6 @@ function formatBuyerShipTo(l: AdminPlatformSalesMergedLine): string {
   return country || "—";
 }
 
-function formatMerchandiseOrderNumber(l: AdminPlatformSalesMergedLine): string {
-  if (l.kind !== "merchandise") return "—";
-  return formatBuyerOrderNumberShort(l.order.orderNumber);
-}
-
-function formatOptionalFeeCents(cents: number): string {
-  return cents > 0 ? formatPrice(cents) : "—";
-}
-
 export function AdminPlatformSalesTab(props: {
   lines: AdminPlatformSalesMergedLine[];
   salesFromValue: string;
@@ -297,27 +193,31 @@ export function AdminPlatformSalesTab(props: {
 
   const csvBody = lines
     .map((l) => {
-      const isPlatformCheckout = isPlatformCheckoutMergedLine(l);
-      const merch = isPlatformCheckout ? 0 : l.unitPriceCents * l.quantity;
       const shopName = l.shop?.displayName ?? "";
       const shopSlug = l.shop?.slug ?? "";
       const transactionParty = mergedLineTransactionPartyLabel(l);
       const transactionPartyCsv = transactionParty === "—" ? "" : transactionParty;
       const buyerShipTo = l.kind === "merchandise" ? formatBuyerShipTo(l) : "";
       const buyerShipToCsv = buyerShipTo === "—" ? "" : buyerShipTo;
-      const orderNumber = l.kind === "merchandise" ? String(l.order.orderNumber) : "";
+      const orderNumber =
+        l.order.orderNumber != null && Number.isFinite(l.order.orderNumber) && l.order.orderNumber > 0
+          ? String(l.order.orderNumber)
+          : "";
+      const details = mergedLineDetailsExport(l);
       return [
         l.order.createdAt.toISOString(),
         orderNumber,
         l.order.id,
         l.productName,
         String(l.quantity),
-        String(merch),
-        String(l.goodsServicesCostCents),
-        String(l.stripeFeeCents),
-        String(l.platformCutCents),
-        String(l.productionFeeCents),
-        String(l.shopCutCents),
+        String(details.platformProfitCents),
+        String(details.paidCents),
+        String(details.shopCutCents),
+        String(details.cogsCents),
+        String(details.stripeBalanceFeeCents),
+        String(details.platformCutCents),
+        String(details.productionFeeCents),
+        String(details.tipProcessingFeeCents),
         shopName,
         shopSlug,
         transactionPartyCsv,
@@ -328,7 +228,7 @@ export function AdminPlatformSalesTab(props: {
     })
     .join("\n");
   const csv =
-    "date,order_number,order_id,item,qty,merchandise_cents,cogs_cents,stripe_fee_cents,platform_fee_cents,production_fee_cents,shop_cut_cents,shop_name,shop_slug,buyer,buyer_ship_to\n" +
+    "date,order_number,order_id,item,qty,platform_profit_cents,paid_cents,shop_cut_cents,cogs_cents,stripe_balance_fee_cents,platform_cut_cents,production_fee_cents,tip_processing_fee_cents,shop_name,shop_slug,buyer,buyer_ship_to\n" +
     csvBody;
   const csvHref = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
 
@@ -441,108 +341,11 @@ export function AdminPlatformSalesTab(props: {
       </form>
 
       <p className="mt-3 text-[11px] text-zinc-600">
-        All platform and shop transactions: buyer item sales, shop setup and reactivation, listing fees and
-        credits, promotions, flair, Google Shopping, creator gifts, and support tips. Buyer shows the
-        purchasing shop or checkout email; item sales also include ship-to.
+        Checkout totals are pre–sales-tax. Use Details on each row for Paid, fees, and profit breakdown.
+        CSV export includes the same per-row details columns (platform profit, paid, shop cut, COGS, Stripe fee, and fee lines).
       </p>
 
-      <div className="mt-4 min-w-0">
-        <table className="w-full table-fixed border-collapse text-xs">
-          <colgroup>
-            <col className="w-[7%]" />
-            <col className="w-[5%]" />
-            <col className="w-[14%]" />
-            <col className="w-[4%]" />
-            <col className="w-[7%]" />
-            <col className="w-[7%]" />
-            <col className="w-[7%]" />
-            <col className="w-[5%]" />
-            <col className="w-[5%]" />
-            <col className="w-[7%]" />
-            <col className="w-[17%]" />
-            <col className="w-[8%]" />
-          </colgroup>
-          <thead>
-            <tr className="border-b border-zinc-800 text-zinc-500">
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">Date</th>
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">Order</th>
-              <th className="overflow-hidden px-1 py-2 text-left font-medium">Item</th>
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">Qty</th>
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">Merch</th>
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">G/S</th>
-              <th className="px-0.5 py-2 text-center text-[10px] font-normal leading-tight whitespace-normal">
-                <span className="block">Stripe</span>
-                <span className="block">fee</span>
-              </th>
-              <th className="px-0.5 py-2 text-center text-[10px] font-normal leading-tight whitespace-normal">
-                <span className="block">Platform</span>
-                <span className="block">fee</span>
-              </th>
-              <th className="px-0.5 py-2 text-center text-[10px] font-normal leading-tight whitespace-normal">
-                <span className="block">Production</span>
-                <span className="block">cost</span>
-              </th>
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">Shop cut</th>
-              <th className="overflow-hidden px-1 py-2 text-left font-medium">Buyer</th>
-              <th className="overflow-hidden px-1 py-2 text-center font-medium">Ship-to</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lines.map((l) => {
-              const isPlatformCheckout = isPlatformCheckoutMergedLine(l);
-              const merch = isPlatformCheckout ? 0 : l.unitPriceCents * l.quantity;
-              const transactionParty = mergedLineTransactionPartyLabel(l);
-              return (
-                <tr key={l.id} className="border-b border-zinc-900 text-zinc-300">
-                  <td className="overflow-hidden px-1 py-2 text-center font-mono text-[10px] text-zinc-500">
-                    {formatDateMMDDYY(l.order.createdAt)}
-                  </td>
-                  <td className="overflow-hidden px-1 py-2 text-center font-mono text-[10px] tabular-nums text-zinc-400">
-                    {formatMerchandiseOrderNumber(l)}
-                  </td>
-                  <td className="overflow-hidden px-1 py-2" title={l.productName}>
-                    {l.itemHref ? (
-                      <Link
-                        href={l.itemHref}
-                        className="block truncate text-zinc-300 hover:text-blue-300 hover:underline"
-                      >
-                        {l.productName}
-                      </Link>
-                    ) : (
-                      <span className="block truncate">{l.productName}</span>
-                    )}
-                  </td>
-                  <td className="overflow-hidden px-1 py-2 text-center tabular-nums">{l.quantity}</td>
-                  <td className="overflow-hidden whitespace-nowrap px-1 py-2 text-center tabular-nums">
-                    {isPlatformCheckout ? "—" : formatPrice(merch)}
-                  </td>
-                  <td className="overflow-hidden whitespace-nowrap px-1 py-2 text-center tabular-nums">
-                    {isPlatformCheckout ? "—" : formatPrice(l.goodsServicesCostCents)}
-                  </td>
-                  <td className="overflow-hidden whitespace-nowrap px-1 py-2 text-center tabular-nums">
-                    {l.stripeFeeCents > 0 ? formatPrice(l.stripeFeeCents) : "—"}
-                  </td>
-                  <td className="overflow-hidden whitespace-nowrap px-1 py-2 text-center tabular-nums">
-                    {formatOptionalFeeCents(l.platformCutCents)}
-                  </td>
-                  <td className="overflow-hidden whitespace-nowrap px-1 py-2 text-center tabular-nums">
-                    {l.kind === "merchandise" ? formatOptionalFeeCents(l.productionFeeCents) : "—"}
-                  </td>
-                  <td className="overflow-hidden whitespace-nowrap px-1 py-2 text-center tabular-nums">
-                    {formatPrice(l.shopCutCents)}
-                  </td>
-                  <td className="overflow-hidden px-1 py-2 text-zinc-400" title={transactionParty}>
-                    <span className="block truncate">{transactionParty}</span>
-                  </td>
-                  <td className="overflow-hidden px-1 py-2 text-center font-mono text-[10px] text-zinc-400">
-                    <span className="block truncate">{formatBuyerShipTo(l)}</span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <AdminPlatformSalesLinesTable lines={lines} />
       {lines.length === 0 ? (
         <p className="mt-4 text-sm text-zinc-600">No matching platform or shop transactions.</p>
       ) : null}

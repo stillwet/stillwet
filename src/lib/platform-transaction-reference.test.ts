@@ -2,12 +2,26 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { PromotionKind } from "@/generated/prisma/enums";
 import {
+  PLATFORM_ORDER_NUMBER_FIRST,
   PLATFORM_TRANSACTION_PRODUCT,
+  formatMultipleGiftsTransactionReference,
   formatPlatformTransactionReference,
   platformTransactionDisplayName,
   promotionKindToPlatformTransactionProduct,
   stripePlatformTransactionReferenceFields,
 } from "@/lib/platform-transaction-reference";
+
+describe("PLATFORM_ORDER_NUMBER_FIRST", () => {
+  it("starts the shared sequence at 1253", () => {
+    assert.equal(PLATFORM_ORDER_NUMBER_FIRST, 1253);
+  });
+});
+
+describe("formatMultipleGiftsTransactionReference", () => {
+  it("labels multi-category creator gifts", () => {
+    assert.equal(formatMultipleGiftsTransactionReference(1253), "Multiple Gifts - #1253");
+  });
+});
 
 describe("formatPlatformTransactionReference", () => {
   it("formats product label with number", () => {

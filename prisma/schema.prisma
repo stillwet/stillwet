@@ -498,7 +498,7 @@ model SupportTip {
   @@index([createdAt])
 }
 
-/** Per-product platform-wide transaction counters (`{Product} - #{N}` labels). */
+/** Shared platform order counter (`global` key): buyer orders and all checkout types from #1253. */
 model PlatformTransactionSequence {
   productKey String @id
   lastNumber Int    @default(0)
@@ -968,7 +968,7 @@ enum OrderStatus {
 
 model Order {
   id                    String            @id @default(cuid())
-  orderNumber           Int               @unique @default(autoincrement())
+  orderNumber           Int               @unique
   shopId                String?
   shop                  Shop?             @relation(fields: [shopId], references: [id], onDelete: SetNull)
   stripeSessionId       String?           @unique

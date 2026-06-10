@@ -507,7 +507,7 @@ export type OrderScalarWhereWithAggregatesInput = {
 
 export type OrderCreateInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -536,7 +536,7 @@ export type OrderCreateInput = {
 
 export type OrderUncheckedCreateInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   shopId?: string | null
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
@@ -565,6 +565,7 @@ export type OrderUncheckedCreateInput = {
 
 export type OrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
   stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -622,7 +623,7 @@ export type OrderUncheckedUpdateInput = {
 
 export type OrderCreateManyInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   shopId?: string | null
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
@@ -648,6 +649,7 @@ export type OrderCreateManyInput = {
 
 export type OrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
   stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -899,7 +901,7 @@ export type OrderUpdateOneRequiredWithoutFulfillmentJobsNestedInput = {
 
 export type OrderCreateWithoutShopInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -927,7 +929,7 @@ export type OrderCreateWithoutShopInput = {
 
 export type OrderUncheckedCreateWithoutShopInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -1010,7 +1012,7 @@ export type OrderScalarWhereInput = {
 
 export type OrderCreateWithoutReturnClaimsInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -1038,7 +1040,7 @@ export type OrderCreateWithoutReturnClaimsInput = {
 
 export type OrderUncheckedCreateWithoutReturnClaimsInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   shopId?: string | null
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
@@ -1082,6 +1084,7 @@ export type OrderUpdateToOneWithWhereWithoutReturnClaimsInput = {
 
 export type OrderUpdateWithoutReturnClaimsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
   stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1137,7 +1140,7 @@ export type OrderUncheckedUpdateWithoutReturnClaimsInput = {
 
 export type OrderCreateWithoutLinesInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -1165,7 +1168,7 @@ export type OrderCreateWithoutLinesInput = {
 
 export type OrderUncheckedCreateWithoutLinesInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   shopId?: string | null
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
@@ -1209,6 +1212,7 @@ export type OrderUpdateToOneWithWhereWithoutLinesInput = {
 
 export type OrderUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
   stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1264,7 +1268,7 @@ export type OrderUncheckedUpdateWithoutLinesInput = {
 
 export type OrderCreateWithoutFulfillmentJobsInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -1292,7 +1296,7 @@ export type OrderCreateWithoutFulfillmentJobsInput = {
 
 export type OrderUncheckedCreateWithoutFulfillmentJobsInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   shopId?: string | null
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
@@ -1336,6 +1340,7 @@ export type OrderUpdateToOneWithWhereWithoutFulfillmentJobsInput = {
 
 export type OrderUpdateWithoutFulfillmentJobsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
   stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1391,7 +1396,7 @@ export type OrderUncheckedUpdateWithoutFulfillmentJobsInput = {
 
 export type OrderCreateManyShopInput = {
   id?: string
-  orderNumber?: number
+  orderNumber: number
   stripeSessionId?: string | null
   stripePaymentIntentId?: string | null
   email?: string | null
@@ -1416,6 +1421,7 @@ export type OrderCreateManyShopInput = {
 
 export type OrderUpdateWithoutShopInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
   stripeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
