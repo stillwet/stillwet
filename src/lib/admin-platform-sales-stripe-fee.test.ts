@@ -118,7 +118,7 @@ describe("merchandise order admin line breakdown", () => {
     );
   });
 
-  it("application amount is COGS + production fee + platform cut (merchandise only)", () => {
+  it("application amount is COGS + production fee + platform cut + stripe pass-through", () => {
     const subtotalCents = 2500;
     const tipCents = 100;
     const shippingCents = 500;
@@ -166,12 +166,13 @@ describe("merchandise order admin line breakdown", () => {
     };
 
     const applicationAmount = mergedLineApplicationAmountCents(line);
+    const linePassThrough = mergedLineBuyerPaymentProcessingPassThroughCents(line);
     const merchandiseApplication =
       split.goodsServicesCostCents + split.productionFeeCents + split.platformCutCents;
 
     assert.equal(mergedLineShopPayoutCents(line), split.shopCutCents + tipCents);
-    assert.equal(applicationAmount, merchandiseApplication);
-    assert.notEqual(applicationAmount, order.totalCents - mergedLineShopPayoutCents(line));
+    assert.equal(applicationAmount, merchandiseApplication + linePassThrough);
+    assert.ok(linePassThrough > 0);
     assert.ok(mergedLineStripeBalanceFeeCents(line) > 0);
   });
 
@@ -221,12 +222,15 @@ describe("merchandise order admin line breakdown", () => {
     assert.equal(mergedLineBuyerPaymentProcessingPassThroughCents(line), processing);
     assert.equal(
       mergedLineApplicationAmountCents(line),
-      split.goodsServicesCostCents + split.productionFeeCents + split.platformCutCents,
+      split.goodsServicesCostCents +
+        split.productionFeeCents +
+        split.platformCutCents +
+        processing,
     );
-    assert.equal(mergedLineApplicationAmountCents(line), 1796);
+    assert.equal(mergedLineApplicationAmountCents(line), 1902);
   });
 
-  it("$25 mug with COGS 1192 and prod 575 shows $18.40 application amount", () => {
+  it("$25 mug with COGS 1192 and prod 575 shows $19.46 application amount", () => {
     const subtotalCents = 2500;
     const split = splitMerchandiseLineWithItemCostCents({
       lineMerchandiseCents: subtotalCents,
@@ -256,7 +260,8 @@ describe("merchandise order admin line breakdown", () => {
     };
 
     assert.equal(split.shopCutCents, 660);
-    assert.equal(mergedLineApplicationAmountCents(line), 1840);
+    assert.equal(mergedLineBuyerPaymentProcessingPassThroughCents(line), 106);
+    assert.equal(mergedLineApplicationAmountCents(line), 1946);
   });
 
   it("stripe balance fee uses full checkout total, not buyer pass-through gross-up", () => {

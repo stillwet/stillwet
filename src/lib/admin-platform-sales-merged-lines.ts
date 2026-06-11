@@ -990,6 +990,7 @@ export function emptyPlatformSalesPeriodTotals(): PlatformSalesPeriodTotals {
     itemShopTipCents: 0,
     itemProductionFeeCents: 0,
     itemPlatformMerchandiseTakeCents: 0,
+    itemBuyerStripePassThroughCents: 0,
     listingPlatformCents: 0,
     shopCreationPlatformCents: 0,
     promotionPlatformCents: 0,
@@ -1015,6 +1016,7 @@ export function averagePlatformSalesPeriodTotals(
     itemShopTipCents: avg(totals.itemShopTipCents),
     itemProductionFeeCents: avg(totals.itemProductionFeeCents),
     itemPlatformMerchandiseTakeCents: avg(totals.itemPlatformMerchandiseTakeCents),
+    itemBuyerStripePassThroughCents: avg(totals.itemBuyerStripePassThroughCents),
     listingPlatformCents: avg(totals.listingPlatformCents),
     shopCreationPlatformCents: avg(totals.shopCreationPlatformCents),
     promotionPlatformCents: avg(totals.promotionPlatformCents),
@@ -1045,6 +1047,8 @@ export type PlatformSalesPeriodTotals = {
   itemProductionFeeCents: number;
   /** Merchandise platform retention (COGS + production fee + platform fee). */
   itemPlatformMerchandiseTakeCents: number;
+  /** Buyer Stripe payment-processing pass-through on paid merchandise orders. */
+  itemBuyerStripePassThroughCents: number;
   /** Listing credit packs bought on shop upgrades and gifted listing credits. */
   listingPlatformCents: number;
   /** Shop setup and reactivation fee merchandise (self signup, setup gift, or reactivation checkout). */
@@ -1072,11 +1076,14 @@ export function periodShopPayoutCents(
   return totals.itemShopCutCents + totals.itemShopTipCents;
 }
 
-/** Period merchandise Connect application amount: COGS + production fee + platform cut. */
+/** Period Connect application amount: merchandise take + buyer Stripe pass-through. */
 export function periodApplicationAmountCents(
-  totals: Pick<PlatformSalesPeriodTotals, "itemPlatformMerchandiseTakeCents">,
+  totals: Pick<
+    PlatformSalesPeriodTotals,
+    "itemPlatformMerchandiseTakeCents" | "itemBuyerStripePassThroughCents"
+  >,
 ): number {
-  return totals.itemPlatformMerchandiseTakeCents;
+  return totals.itemPlatformMerchandiseTakeCents + totals.itemBuyerStripePassThroughCents;
 }
 
 /** Shop sales breakdown header: Paid − Shop payout − COGS − Stripe balance fee. */
@@ -1251,6 +1258,10 @@ export async function aggregatePlatformRevenueForUtcWindow(
     (sum, order) => sum + merchandiseOrderStripeBalanceFeeCents(order),
     0,
   );
+  const itemBuyerStripePassThroughCents = paidMerchandiseOrders.reduce(
+    (sum, order) => sum + merchandiseOrderStripePassThroughCents(order),
+    0,
+  );
 
   const supportTipsInWindow = await prisma.supportTip.findMany({
     where: { createdAt: { gte, lte } },
@@ -1323,6 +1334,7 @@ export async function aggregatePlatformRevenueForUtcWindow(
     itemProductionFeeCents,
     itemPlatformMerchandiseTakeCents:
       itemPlatformCents + itemGoodsServicesCents + itemProductionFeeCents,
+    itemBuyerStripePassThroughCents,
     listingPlatformCents,
     shopCreationPlatformCents,
     promotionPlatformCents,
@@ -1417,6 +1429,8 @@ function sumPlatformSalesPeriodTotals(
     itemShopTipCents: a.itemShopTipCents + b.itemShopTipCents,
     itemProductionFeeCents: a.itemProductionFeeCents + b.itemProductionFeeCents,
     itemPlatformMerchandiseTakeCents: a.itemPlatformMerchandiseTakeCents + b.itemPlatformMerchandiseTakeCents,
+    itemBuyerStripePassThroughCents:
+      a.itemBuyerStripePassThroughCents + b.itemBuyerStripePassThroughCents,
     listingPlatformCents: a.listingPlatformCents + b.listingPlatformCents,
     shopCreationPlatformCents: a.shopCreationPlatformCents + b.shopCreationPlatformCents,
     promotionPlatformCents: a.promotionPlatformCents + b.promotionPlatformCents,

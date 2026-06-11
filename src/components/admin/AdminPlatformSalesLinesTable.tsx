@@ -100,7 +100,7 @@ function mergedLineDetailRows(
     }
     rows.push({
       label: "Application amount",
-      hint: "Merchandise platform share (COGS + production fee + platform cut)",
+      hint: "COGS + production fee + platform cut + buyer Stripe payment-processing pass-through",
       cents: mergedLineApplicationAmountCents(l),
       subheader: true,
     });

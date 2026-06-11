@@ -191,11 +191,15 @@ export function mergedLineBuyerPaymentProcessingPassThroughCents(
 }
 
 /**
- * Merchandise Connect application amount (COGS + production fee + platform cut only).
- * Excludes buyer payment-processing pass-through shown in Paid.
+ * Merchandise Connect application amount: COGS + production fee + platform cut
+ * + buyer Stripe payment-processing pass-through.
  */
 export function mergedLineApplicationAmountCents(l: AdminPlatformSalesMergedLine): number {
-  return mergedLineMerchandiseApplicationAmountCents(l);
+  if (l.kind !== "merchandise") return 0;
+  return (
+    mergedLineMerchandiseApplicationAmountCents(l) +
+    mergedLineBuyerPaymentProcessingPassThroughCents(l)
+  );
 }
 
 /** COGS + production fee + platform cut for one merchandise row. */
