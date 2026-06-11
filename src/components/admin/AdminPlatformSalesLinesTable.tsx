@@ -6,7 +6,6 @@ import type { AdminPlatformSalesMergedLine } from "@/lib/admin-platform-sales-me
 import {
   isCreatorGiftListingSplitProfitOnlyLine,
   mergedLineApplicationAmountCents,
-  mergedLineBuyerPaymentProcessingPassThroughCents,
   mergedLineCheckoutPaidCents,
   mergedLinePaidCogsStripeNetCents,
   mergedLineShopPayoutCents,
@@ -120,16 +119,6 @@ function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBre
     });
   }
 
-  if (l.kind === "merchandise" && mergedLineBuyerPaymentProcessingPassThroughCents(l) > 0) {
-    rows.push({
-      label: "Payment Processing",
-      hint: "Buyer pass-through included in Stripe application fee",
-      cents: mergedLineBuyerPaymentProcessingPassThroughCents(l),
-      mutedValue: true,
-      nested: true,
-    });
-  }
-
   if (l.tipProcessingFeeCents > 0) {
     rows.push({
       label: "Tip Fee",
@@ -147,7 +136,7 @@ function mergedLineDetailSection(l: AdminPlatformSalesMergedLine) {
   const isMerchandise = l.kind === "merchandise";
   const rows = mergedLineDetailRows(l);
   return {
-    sectionTitle: isMerchandise ? "Shop sales - Profit" : "Platform sales - Profit",
+    sectionTitle: isMerchandise ? "Item Sales - Profit" : "Platform sales - Profit",
     headerTotalCents: mergedLinePaidCogsStripeNetCents(l),
     rows,
   };

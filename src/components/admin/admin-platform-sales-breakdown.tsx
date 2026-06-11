@@ -102,7 +102,7 @@ export function PlatformRevenueBreakdownTable({
               <td
                 className={`px-2 py-1.5 text-right tabular-nums ${
                   row.subheader
-                    ? "font-medium text-zinc-100"
+                    ? "text-zinc-500"
                     : row.mutedValue
                       ? "text-zinc-500"
                       : subtle

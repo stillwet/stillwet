@@ -43,7 +43,7 @@ export async function adminClearPlatformSalesHistoryAction(
     // Buyer merchandise (cascades order lines, fulfillment jobs, return claims).
     await tx.order.deleteMany({});
 
-    // Platform checkout history (Shop sales - Profit / Platform sales - Profit breakdowns).
+    // Platform checkout history (Item Sales - Profit / Platform sales - Profit breakdowns).
     await tx.supportTip.deleteMany({});
     await tx.promotionPurchase.deleteMany({});
     await tx.listingCreditPackPurchase.deleteMany({});

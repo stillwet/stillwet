@@ -77,7 +77,7 @@ function PlatformRevenueTotalsCard({
             <PlatformRevenueBreakdownTable
               subtle={subtle}
               tone="shop"
-              sectionTitle="Shop sales - Profit"
+              sectionTitle="Item Sales - Profit"
               headerTotalCents={itemSalesCutHeaderCents}
               rows={[
                 {
