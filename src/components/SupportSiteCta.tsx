@@ -2,25 +2,9 @@
 
 import { type ReactNode, useEffect, useId, useState } from "react";
 import { createPortal, useFormStatus } from "react-dom";
+import { FormFieldValidationBubble } from "@/components/FormFieldValidationBubble";
 import { startSupportSiteCheckout } from "@/actions/support-site";
 import { MIN_SUPPORT_TIP_USD, supportTipInputError } from "@/lib/support-site";
-
-function SupportTipValidationBubble({ message }: { message: string }) {
-  return (
-    <div
-      role="alert"
-      className="pointer-events-none absolute bottom-full left-0 z-10 mb-2 flex max-w-[16rem] items-start gap-2 rounded-lg border border-blue-500/30 bg-zinc-950 px-2.5 py-2 text-xs leading-snug text-zinc-200 shadow-lg shadow-black/40 ring-1 ring-blue-500/15"
-    >
-      <span
-        className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-blue-500/40 bg-blue-950/60 text-[10px] font-semibold leading-none text-blue-300"
-        aria-hidden
-      >
-        !
-      </span>
-      <span>{message}</span>
-    </div>
-  );
-}
 
 function CheckoutSubmitButton() {
   const { pending } = useFormStatus();
@@ -118,7 +102,7 @@ export function SupportSiteCta({
                 Amount (USD)
               </label>
               <div className="relative mt-2 flex items-center gap-2">
-                {tipFieldError ? <SupportTipValidationBubble message={tipFieldError} /> : null}
+                {tipFieldError ? <FormFieldValidationBubble message={tipFieldError} /> : null}
                 <span className="select-none text-sm text-zinc-500" aria-hidden>
                   $
                 </span>

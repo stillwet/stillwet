@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { SHOP_ALL_ROUTE } from "@/lib/constants";
 import { CART_MAX_PRINTIFY_LINE_QTY } from "@/lib/cart-limits";
@@ -20,6 +20,101 @@ function formatPrice(cents: number) {
   }).format(cents / 100);
 }
 
+function CartCheckoutSavingOverlay(props: {
+  busy: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`relative ${props.className ?? ""}`}>
+      <div className={props.busy ? "pointer-events-none opacity-50" : undefined}>{props.children}</div>
+      {props.busy ? (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950/50"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <span
+            className="size-8 animate-spin rounded-full border-2 border-zinc-600 border-t-zinc-200"
+            role="status"
+            aria-label="Updating cart"
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CartLineQtyField(props: {
+  listingId: string;
+  productId: string;
+  quantity: number;
+  maxQty: number;
+  onSave: (formData: FormData) => void;
+}) {
+  const [draft, setDraft] = useState(String(props.quantity));
+  const lastSavedRef = useRef(props.quantity);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setDraft(String(props.quantity));
+    lastSavedRef.current = props.quantity;
+  }, [props.quantity]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const commitQty = useCallback(
+    (raw: string) => {
+      const qty = Number.parseInt(raw, 10);
+      if (!Number.isFinite(qty) || qty < 1 || qty > props.maxQty) {
+        setDraft(String(lastSavedRef.current));
+        return;
+      }
+      if (qty === lastSavedRef.current) return;
+
+      const fd = new FormData();
+      fd.set("listingId", props.listingId);
+      fd.set("productId", props.productId);
+      fd.set("qty", String(qty));
+      props.onSave(fd);
+      lastSavedRef.current = qty;
+      setDraft(String(qty));
+    },
+    [props.listingId, props.maxQty, props.onSave, props.productId],
+  );
+
+  const scheduleSave = (raw: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => commitQty(raw), 400);
+  };
+
+  return (
+    <label className="store-kicker text-zinc-500">
+      Qty
+      <input
+        type="number"
+        name="qty"
+        min={1}
+        max={props.maxQty}
+        value={draft}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          scheduleSave(e.target.value);
+        }}
+        onBlur={() => {
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          commitQty(draft);
+        }}
+        className="ml-2 w-16 rounded border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-sm text-zinc-100"
+      />
+    </label>
+  );
+}
+
 export function CartAndCheckoutClient({
   mode,
   initialState,
@@ -36,7 +131,8 @@ export function CartAndCheckoutClient({
   const router = useRouter();
   const [state, setState] = useState<CartCheckoutState>(initialState);
   const [loading, setLoading] = useState(mode === "drawer");
-  const [pending, startTransition] = useTransition();
+  const [qtySavingListingId, setQtySavingListingId] = useState<string | null>(null);
+  const [removePending, startRemoveTransition] = useTransition();
 
   const refetch = useCallback(async () => {
     try {
@@ -65,23 +161,37 @@ export function CartAndCheckoutClient({
   const subtotal = state.subtotalCents;
   const shippingCents = state.shippingCents;
 
-  const handleQtySubmit = (formData: FormData) => {
-    startTransition(async () => {
-      await updateCartLineFromForm(formData);
-      notifyCartHeaderChanged();
-      if (mode === "drawer") await refetch();
-      router.refresh();
-    });
-  };
+  const handleQtySubmit = useCallback(
+    (formData: FormData) => {
+      const listingId = String(formData.get("listingId") ?? "").trim();
+      if (!listingId) return;
 
-  const handleRemoveSubmit = (formData: FormData) => {
-    startTransition(async () => {
-      await removeCartLineFromForm(formData);
-      notifyCartHeaderChanged();
-      if (mode === "drawer") await refetch();
-      router.refresh();
-    });
-  };
+      setQtySavingListingId(listingId);
+      void (async () => {
+        try {
+          await updateCartLineFromForm(formData);
+          notifyCartHeaderChanged();
+          if (mode === "drawer") await refetch();
+          router.refresh();
+        } finally {
+          setQtySavingListingId((current) => (current === listingId ? null : current));
+        }
+      })();
+    },
+    [mode, refetch, router],
+  );
+
+  const handleRemoveSubmit = useCallback(
+    (formData: FormData) => {
+      startRemoveTransition(async () => {
+        await removeCartLineFromForm(formData);
+        notifyCartHeaderChanged();
+        if (mode === "drawer") await refetch();
+        router.refresh();
+      });
+    },
+    [mode, refetch, router],
+  );
 
   if (mode === "drawer" && loading) {
     return <p className="px-6 py-8 text-sm text-zinc-500">Loading cart…</p>;
@@ -103,6 +213,8 @@ export function CartAndCheckoutClient({
       </div>
     );
   }
+
+  const qtySaving = qtySavingListingId != null;
 
   const inner = (
     <>
@@ -140,34 +252,13 @@ export function CartAndCheckoutClient({
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleQtySubmit(new FormData(e.currentTarget));
-                  }}
-                  className="flex items-center gap-3"
-                >
-                  <input type="hidden" name="listingId" value={l.listingId} />
-                  <input type="hidden" name="productId" value={l.productId} />
-                  <label className="store-kicker text-zinc-500">
-                    Qty
-                    <input
-                      type="number"
-                      name="qty"
-                      min={1}
-                      max={maxQty}
-                      defaultValue={l.quantity}
-                      className="ml-2 w-16 rounded border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-sm text-zinc-100"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={pending}
-                    className="store-kicker rounded-lg border border-transparent bg-zinc-800/90 px-3 py-1.5 text-zinc-300 hover:bg-zinc-700 disabled:opacity-50"
-                  >
-                    Update
-                  </button>
-                </form>
+                <CartLineQtyField
+                  listingId={l.listingId}
+                  productId={l.productId}
+                  quantity={l.quantity}
+                  maxQty={maxQty}
+                  onSave={handleQtySubmit}
+                />
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -180,7 +271,7 @@ export function CartAndCheckoutClient({
                   <input type="hidden" name="slug" value={l.slug} />
                   <button
                     type="submit"
-                    disabled={pending}
+                    disabled={removePending || qtySaving}
                     className="store-kicker rounded-lg border border-zinc-700 px-3 py-1.5 text-blue-400/90 hover:border-blue-800/80 hover:bg-blue-950/40 disabled:opacity-50"
                   >
                     Remove
@@ -215,8 +306,12 @@ export function CartAndCheckoutClient({
   );
 
   if (mode === "drawer") {
-    return <div className="px-6 pb-8 pt-2">{inner}</div>;
+    return (
+      <CartCheckoutSavingOverlay busy={qtySaving} className="px-6 pb-8 pt-2">
+        {inner}
+      </CartCheckoutSavingOverlay>
+    );
   }
 
-  return <>{inner}</>;
+  return <CartCheckoutSavingOverlay busy={qtySaving}>{inner}</CartCheckoutSavingOverlay>;
 }

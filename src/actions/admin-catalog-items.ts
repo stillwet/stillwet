@@ -9,7 +9,10 @@ import {
   parseAdminCatalogItemArtworkForm,
   validateItemLevelWhenNoVariants,
 } from "@/lib/admin-catalog-item";
-import { syncProductTagsFromAdminCatalogItemId } from "@/lib/baseline-listing-product-tags-sync";
+import {
+  syncBaselineListingsFromAdminCatalogItemId,
+  syncProductTagsFromAdminCatalogItemId,
+} from "@/lib/baseline-listing-product-tags-sync";
 import type { ListingArtworkLetterboxFill } from "@/lib/listing-artwork-letterbox-fill";
 import type { CatalogArtworkSourceTierOverride } from "@/lib/listing-artwork-source-tier";
 import type { CatalogArtworkTemplate } from "@/lib/admin-catalog-artwork-template";
@@ -235,6 +238,11 @@ export async function adminUpdateCatalogItem(
       return { ok: false, error: "That catalog item no longer exists." };
     }
     return { ok: false, error: catalogItemSaveErrorFromUnknown(e, "adminUpdateCatalogItem") };
+  }
+  try {
+    await syncBaselineListingsFromAdminCatalogItemId(id);
+  } catch (e) {
+    console.error("[adminUpdateCatalogItem] baseline listing sync", e);
   }
   revalidateAdminViews();
   return { ok: true };

@@ -6,12 +6,15 @@ import type {
   AdminPlatformSaleCategory,
   AdminPlatformSalesMergedLine,
 } from "@/lib/admin-platform-sales-merged-line-model";
+import { CREATOR_GIFT_LISTING_SPLIT_LABEL } from "@/lib/admin-platform-sales-merged-line-model";
 export type {
   AdminPlatformSalesBuyer,
   AdminPlatformSaleCategory,
   AdminPlatformSalesMergedLine,
 } from "@/lib/admin-platform-sales-merged-line-model";
 export {
+  CREATOR_GIFT_LISTING_SPLIT_LABEL,
+  isCreatorGiftListingSplitProfitOnlyLine,
   isPlatformCheckoutMergedLine,
   mergedLineCheckoutPaidCents,
   mergedLinePaidCogsStripeNetCents,
@@ -35,6 +38,11 @@ import { productHref } from "@/lib/marketplace-constants";
 import { SHOP_SETUP_FEE_CENTS, SHOP_SETUP_FEE_LABEL } from "@/lib/creator-gift-codes";
 import { SHOP_REACTIVATION_FEE_CENTS, SHOP_REACTIVATION_FEE_LABEL } from "@/lib/shop-inactivity-policy";
 import { checkoutTipProcessingSurchargeCents } from "@/lib/checkout-tip";
+import {
+  promotionGrantsFromPurchase,
+  promotionGrantsTotalCredits,
+  promotionGrantsDistinctKindCount,
+} from "@/lib/creator-gift-promotion-grants";
 import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
 import { promotionKindLabel } from "@/lib/promotions";
 import {
@@ -48,10 +56,10 @@ import {
   type CreatorGiftShopUpgradeRevenueRow,
 } from "@/lib/admin-platform-shop-upgrades-revenue";
 import {
-  buyerPaymentProcessingFeeCents,
   buyerCheckoutTotalCents,
   stripeBalanceProcessingFeeCents,
 } from "@/lib/stripe-card-processing-fee";
+import { supportTipMerchandiseCents } from "@/lib/support-site";
 
 const orderLineInclude = {
   order: {
@@ -116,10 +124,20 @@ const CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL = "Gift - Multiple Promo Credits
 
 function creatorGiftPromotionPartCount(row: CreatorGiftShopUpgradeRevenueRow): number {
   let count = 0;
-  if (row.promotionKind && row.promotionCreditsGranted > 0) count += 1;
+  if (promotionGrantsFromPurchase(row).length > 0) count += 1;
   if (row.googleShoppingCreditsGranted > 0 || row.googleShoppingCreditPackId) count += 1;
   if (row.shopFlairIncluded) count += 1;
   return count;
+}
+
+/** Purchased units on creator-gift promotion rows (credits + one per pack/flair add-on). */
+function creatorGiftPromotionSegmentQuantity(row: CreatorGiftShopUpgradeRevenueRow): number {
+  let qty = promotionGrantsTotalCredits(promotionGrantsFromPurchase(row));
+  if (row.googleShoppingCreditPackId || row.googleShoppingCreditsGranted > 0) {
+    qty += 1;
+  }
+  if (row.shopFlairIncluded) qty += 1;
+  return qty;
 }
 
 function creatorGiftListingLabel(row: CreatorGiftShopUpgradeRevenueRow): string {
@@ -130,11 +148,15 @@ function creatorGiftListingLabel(row: CreatorGiftShopUpgradeRevenueRow): string 
 }
 
 function creatorGiftPromotionLabel(row: CreatorGiftShopUpgradeRevenueRow): string {
+  const promotionGrants = promotionGrantsFromPurchase(row);
   const partCount = creatorGiftPromotionPartCount(row);
   if (partCount > 1) return CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL;
   if (partCount === 0) return "Gift - Promotions";
-  if (row.promotionKind && row.promotionCreditsGranted > 0) {
-    return `Gift - Promotions - ${promotionKindLabel(row.promotionKind)}`;
+  if (promotionGrants.length > 0) {
+    if (promotionGrantsDistinctKindCount(promotionGrants) > 1) {
+      return CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL;
+    }
+    return `Gift - Promotions - ${promotionKindLabel(promotionGrants[0]!.kind)}`;
   }
   if (row.shopFlairIncluded) return "Gift - Shop Flair";
   return "Gift - Google Shopping";
@@ -144,7 +166,11 @@ function creatorGiftMergedLineProductName(
   row: CreatorGiftShopUpgradeRevenueRow,
   seg: { category: AdminPlatformSaleCategory; label: string },
 ): string {
-  if (seg.category === "promotion" && creatorGiftPromotionPartCount(row) > 1) {
+  if (
+    seg.category === "promotion" &&
+    (creatorGiftPromotionPartCount(row) > 1 ||
+      promotionGrantsDistinctKindCount(promotionGrantsFromPurchase(row)) > 1)
+  ) {
     return CREATOR_GIFT_MULTIPLE_PROMO_CREDITS_LABEL;
   }
   return seg.label;
@@ -176,6 +202,8 @@ function platformCheckoutMergedLine<K extends AdminPlatformSalesMergedLine["kind
     stripeFeeCents?: number;
     transactionEmail?: string | null;
     orderNumber?: number | null;
+    creatorGiftSplitPart?: "listing" | "promotion";
+    quantity?: number;
   },
 ): Extract<AdminPlatformSalesMergedLine, { kind: K }> {
   const merchandiseCents = Math.max(0, params.merchandiseCents);
@@ -191,7 +219,7 @@ function platformCheckoutMergedLine<K extends AdminPlatformSalesMergedLine["kind
     kind,
     platformSaleCategory,
     id: params.id,
-    quantity: 1,
+    quantity: Math.max(1, params.quantity ?? 1),
     unitPriceCents: checkoutTotalCents,
     productName: params.productName,
     checkoutTotalCents,
@@ -212,6 +240,7 @@ function platformCheckoutMergedLine<K extends AdminPlatformSalesMergedLine["kind
     shop: params.shop,
     transactionEmail: params.transactionEmail ?? null,
     itemHref: params.itemHref,
+    ...(params.creatorGiftSplitPart ? { creatorGiftSplitPart: params.creatorGiftSplitPart } : {}),
   } as Extract<AdminPlatformSalesMergedLine, { kind: K }>;
 }
 
@@ -236,6 +265,7 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
     category: AdminPlatformSaleCategory;
     label: string;
     merchandiseCents: number;
+    quantity: number;
   }[] = [];
 
   if (
@@ -254,6 +284,7 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
       category: "shop_creation",
       label: "Gift - Shop Setup",
       merchandiseCents: SHOP_SETUP_FEE_CENTS,
+      quantity: 1,
     });
   }
 
@@ -263,6 +294,7 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
       category: "listing",
       label: creatorGiftListingLabel(row),
       merchandiseCents: listingMerch,
+      quantity: 1,
     });
   }
 
@@ -272,6 +304,7 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
       category: "promotion",
       label: creatorGiftPromotionLabel(row),
       merchandiseCents: promotionMerch,
+      quantity: creatorGiftPromotionSegmentQuantity(row),
     });
   }
 
@@ -279,14 +312,53 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
 
   const totalMerch = segments.reduce((sum, seg) => sum + seg.merchandiseCents, 0);
   const shop = row.recipientShop;
+  const hasListingPromotionSplit =
+    segments.some((seg) => seg.category === "listing") &&
+    segments.some((seg) => seg.category === "promotion");
+  const fullStripeFeeCents = stripeBalanceProcessingFeeCents(row.amountCents);
 
   return segments.map((seg) => {
     const isSingle = segments.length === 1;
+
+    if (hasListingPromotionSplit && seg.category === "promotion") {
+      return platformCheckoutMergedLine("creator_gift_purchase", seg.category, {
+        id: `creator_gift_purchase:${row.id}:${seg.category}`,
+        productName: creatorGiftMergedLineProductName(row, seg),
+        checkoutTotalCents: row.amountCents,
+        merchandiseCents: seg.merchandiseCents,
+        paidAt: row.paidAt!,
+        shop,
+        itemHref: null,
+        stripeFeeCents: fullStripeFeeCents,
+        transactionEmail: row.purchaserEmail,
+        orderNumber: row.transactionNumber,
+        creatorGiftSplitPart: "promotion",
+        quantity: seg.quantity,
+      });
+    }
+
+    if (hasListingPromotionSplit && seg.category === "listing") {
+      return platformCheckoutMergedLine("creator_gift_purchase", seg.category, {
+        id: `creator_gift_purchase:${row.id}:${seg.category}`,
+        productName: CREATOR_GIFT_LISTING_SPLIT_LABEL,
+        checkoutTotalCents: 0,
+        merchandiseCents: seg.merchandiseCents,
+        paidAt: row.paidAt!,
+        shop,
+        itemHref: null,
+        stripeFeeCents: 0,
+        transactionEmail: row.purchaserEmail,
+        orderNumber: row.transactionNumber,
+        creatorGiftSplitPart: "listing",
+        quantity: seg.quantity,
+      });
+    }
+
     const checkoutTotalCents = isSingle
       ? row.amountCents
       : Math.round((row.amountCents * seg.merchandiseCents) / totalMerch);
     const stripeFeeCents = isSingle
-      ? stripeBalanceProcessingFeeCents(row.amountCents)
+      ? fullStripeFeeCents
       : allocateCheckoutStripeFeeCents(row.amountCents, totalMerch, seg.merchandiseCents);
 
     return platformCheckoutMergedLine("creator_gift_purchase", seg.category, {
@@ -300,8 +372,16 @@ function creatorGiftPurchaseToMergedLines(row: CreatorGiftPurchaseMergedRow): Ad
       stripeFeeCents,
       transactionEmail: row.purchaserEmail,
       orderNumber: row.transactionNumber,
+      quantity: seg.quantity,
     });
   });
+}
+
+/** @internal Exported for unit tests. */
+export function buildCreatorGiftPurchaseMergedLines(
+  row: CreatorGiftPurchaseMergedRow,
+): AdminPlatformSalesMergedLine[] {
+  return creatorGiftPurchaseToMergedLines(row);
 }
 
 /**
@@ -624,6 +704,7 @@ export async function loadMergedPlatformSalesLines(
         googleShoppingCreditsGranted: true,
         promotionKind: true,
         promotionCreditsGranted: true,
+        promotionGrants: { select: { kind: true, credits: true } },
         shopFlairIncluded: true,
         purchaserEmail: true,
         recipientShop: { select: { displayName: true, slug: true } },
@@ -671,16 +752,17 @@ export async function loadMergedPlatformSalesLines(
   });
 
   const supportLines: AdminPlatformSalesMergedLine[] = supportTips.map((t) => {
-    const processingCents = buyerPaymentProcessingFeeCents({ subtotalCents: t.amountCents });
+    const merchandiseCents = supportTipMerchandiseCents(t);
+    const checkoutTotalCents = buyerCheckoutTotalCents(merchandiseCents);
     return platformCheckoutMergedLine("support_tip", "support", {
       id: `support_tip:${t.id}`,
       productName: "Support <3",
-      checkoutTotalCents: t.amountCents + processingCents,
-      merchandiseCents: t.amountCents,
+      checkoutTotalCents,
+      merchandiseCents,
       paidAt: t.createdAt,
       shop: null,
       itemHref: null,
-      stripeFeeCents: stripeBalanceProcessingFeeCents(t.amountCents + processingCents),
+      stripeFeeCents: stripeBalanceProcessingFeeCents(checkoutTotalCents),
       orderNumber: t.transactionNumber,
     });
   });
@@ -1171,7 +1253,10 @@ export async function aggregatePlatformRevenueForUtcWindow(
     where: { createdAt: { gte, lte } },
     select: { amountCents: true },
   });
-  const supportPlatformCents = supportTipsInWindow.reduce((sum, row) => sum + row.amountCents, 0);
+  const supportPlatformCents = supportTipsInWindow.reduce(
+    (sum, row) => sum + supportTipMerchandiseCents(row),
+    0,
+  );
 
   const shopSetupRows = await prisma.shopSetupFeePurchase.findMany({
     where: shopSetupFeePurchaseRevenueWhere(gte, lte),
@@ -1207,9 +1292,9 @@ export async function aggregatePlatformRevenueForUtcWindow(
   platformSalesPaymentProcessingCents += shopUpgradesRevenue.paymentProcessingCents;
 
   for (const row of supportTipsInWindow) {
-    const processingCents = buyerPaymentProcessingFeeCents({ subtotalCents: row.amountCents });
+    const merchandiseCents = supportTipMerchandiseCents(row);
     platformSalesPaymentProcessingCents += stripeBalanceProcessingFeeCents(
-      row.amountCents + processingCents,
+      buyerCheckoutTotalCents(merchandiseCents),
     );
   }
 

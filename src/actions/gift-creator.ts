@@ -1,11 +1,19 @@
 "use server";
 
 import { CreatorGiftFulfillmentMode, CreatorGiftPurchaseStatus } from "@/generated/prisma/enums";
+import type { PromotionKind } from "@/generated/prisma/enums";
 import { verifyGiftRecipientShop } from "@/actions/gift-creator-shop-search";
 import { isMockCheckoutEnabled } from "@/lib/checkout-mock";
 import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
 import { creatorGiftMockSessionId } from "@/lib/creator-gift-mock-checkout";
 import { normalizeGiftFromName } from "@/lib/creator-gift-notices";
+import {
+  type CreatorGiftPromotionGrantLine,
+  legacyPromotionFieldsFromGrants,
+  parsePromotionGrantsFromFormData,
+  validatePromotionGrants,
+} from "@/lib/creator-gift-promotion-grants";
+import { existingShopGiftMerchandiseSubtotalCents } from "@/lib/creator-gift-existing-shop-merchandise";
 import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
 import { prisma } from "@/lib/prisma";
@@ -22,8 +30,6 @@ import {
   SHOP_FLAIR_ACCESS_PRICE_CENTS,
 } from "@/lib/shop-flair";
 import {
-  PROMOTION_KIND_OPTIONS,
-  parsePromotionKind,
   promotionKindLabel,
   promotionPriceCentsForKind,
 } from "@/lib/promotions";
@@ -36,9 +42,6 @@ import {
 export type StartCreatorGiftCheckoutResult =
   | { ok: true; url: string }
   | { ok: false; error: string };
-
-const PROMOTION_GIFT_KINDS = PROMOTION_KIND_OPTIONS.map((o) => o.kind);
-const MAX_PROMOTION_GIFT_CREDITS = 10;
 
 type CheckoutLineItem = {
   quantity: number;
@@ -63,10 +66,9 @@ function parseExistingShopGiftOptions(formData: FormData) {
   const googlePack =
     includeGoogleShoppingCredits && googlePackId ? googleShoppingCreditPackById(googlePackId) : null;
 
-  const promotionKindRaw = String(formData.get("promotionKind") ?? "").trim();
-  const promotionKind = includePromotionCredits ? parsePromotionKind(promotionKindRaw) : null;
-  const promotionCreditsRaw = String(formData.get("promotionCredits") ?? "1").trim();
-  const promotionCredits = includePromotionCredits ? Number.parseInt(promotionCreditsRaw, 10) : 0;
+  const promotionGrants = includePromotionCredits
+    ? parsePromotionGrantsFromFormData(formData)
+    : [];
 
   return {
     includeListingCredits,
@@ -75,8 +77,7 @@ function parseExistingShopGiftOptions(formData: FormData) {
     includeShopFlair,
     listingPack,
     googlePack,
-    promotionKind,
-    promotionCredits,
+    promotionGrants,
   };
 }
 
@@ -90,8 +91,7 @@ function validateExistingShopGiftOptions(
     includeShopFlair,
     listingPack,
     googlePack,
-    promotionKind,
-    promotionCredits,
+    promotionGrants,
   } = options;
 
   if (includeListingCredits && !listingPack) {
@@ -100,33 +100,23 @@ function validateExistingShopGiftOptions(
   if (includeGoogleShoppingCredits && !googlePack) {
     return { ok: false, error: "Choose a valid Google Shopping credit pack." };
   }
-  if (includePromotionCredits) {
-    if (!promotionKind || !PROMOTION_GIFT_KINDS.includes(promotionKind)) {
-      return { ok: false, error: "Choose a valid promotion type." };
-    }
-    if (
-      !Number.isFinite(promotionCredits) ||
-      promotionCredits < 1 ||
-      promotionCredits > MAX_PROMOTION_GIFT_CREDITS
-    ) {
-      return {
-        ok: false,
-        error: `Enter promotion credits between 1 and ${MAX_PROMOTION_GIFT_CREDITS}.`,
-      };
-    }
+
+  const promotionError = validatePromotionGrants(promotionGrants, includePromotionCredits);
+  if (promotionError) {
+    return { ok: false, error: promotionError };
   }
 
   const hasAnyGift =
     (listingPack != null && listingPack.credits > 0) ||
     (googlePack != null && googlePack.credits > 0) ||
-    (promotionKind != null && promotionCredits > 0) ||
+    promotionGrants.length > 0 ||
     includeShopFlair;
 
   if (!hasAnyGift) {
     return {
       ok: false,
       error:
-        "Choose at least one gift option (listing credits, promotion credits, Google Shopping credits, or shop flair).",
+        "Choose at least one gift option (listing credits, upgrade credits, Google Shopping credits, or shop flair).",
     };
   }
 
@@ -136,18 +126,68 @@ function validateExistingShopGiftOptions(
 function existingShopMerchandiseSubtotalCents(
   options: ReturnType<typeof parseExistingShopGiftOptions>,
 ): number {
-  const promotionSubtotalCents =
-    options.promotionKind && options.promotionCredits > 0
-      ? promotionPriceCentsForKind(options.promotionKind) * options.promotionCredits
-      : 0;
-
-  return (
-    (options.listingPack?.priceCents ?? 0) +
-    (options.googlePack?.priceCents ?? 0) +
-    promotionSubtotalCents +
-    (options.includeShopFlair ? SHOP_FLAIR_ACCESS_PRICE_CENTS : 0)
-  );
+  return existingShopGiftMerchandiseSubtotalCents({
+    listingPackPriceCents: options.listingPack?.priceCents ?? 0,
+    googlePackPriceCents: options.googlePack?.priceCents ?? 0,
+    promotionGrants: options.promotionGrants,
+    includeShopFlair: options.includeShopFlair,
+  });
 }
+
+async function createPendingExistingShopGiftPurchase(args: {
+  recipientShopId: string;
+  giftFromName: string | null;
+  includeShopFlair: boolean;
+  listingPack: ReturnType<typeof parseExistingShopGiftOptions>["listingPack"];
+  googlePack: ReturnType<typeof parseExistingShopGiftOptions>["googlePack"];
+  legacyPromotion: ReturnType<typeof legacyPromotionFieldsFromGrants>;
+  checkoutTotalCents: number;
+  primaryTransactionNumber: number | null;
+  promotionGrants: CreatorGiftPromotionGrantLine[];
+}): Promise<{ id: string }> {
+  return prisma.$transaction(async (tx) => {
+    const purchase = await tx.creatorGiftPurchase.create({
+      data: {
+        purchaserEmail: null,
+        fulfillmentMode: CreatorGiftFulfillmentMode.direct_to_shop,
+        recipientShopId: args.recipientShopId,
+        giftFromName: args.giftFromName,
+        setupFeeIncluded: false,
+        shopFlairIncluded: args.includeShopFlair,
+        listingCreditPackId: args.listingPack?.id ?? null,
+        listingCreditsGranted: args.listingPack?.credits ?? 0,
+        googleShoppingCreditPackId: args.googlePack?.id ?? null,
+        googleShoppingCreditsGranted: args.googlePack?.credits ?? 0,
+        promotionKind: args.legacyPromotion.promotionKind,
+        promotionCreditsGranted: args.legacyPromotion.promotionCreditsGranted,
+        amountCents: args.checkoutTotalCents,
+        currency: "usd",
+        status: CreatorGiftPurchaseStatus.pending,
+        transactionNumber: args.primaryTransactionNumber,
+      },
+      select: { id: true },
+    });
+
+    if (args.promotionGrants.length > 0) {
+      await tx.creatorGiftPromotionGrant.createMany({
+        data: args.promotionGrants.map((grant) => ({
+          purchaseId: purchase.id,
+          kind: grant.kind,
+          credits: grant.credits,
+        })),
+      });
+    }
+
+    return purchase;
+  });
+}
+
+type ExistingShopGiftLineLabels = {
+  listingCredits?: string;
+  googleShopping?: string;
+  promotionByKind: Partial<Record<PromotionKind, string>>;
+  shopFlair?: string;
+};
 
 function buildExistingShopLineItems(
   options: ReturnType<typeof parseExistingShopGiftOptions>,
@@ -155,7 +195,7 @@ function buildExistingShopLineItems(
   lineLabels: ExistingShopGiftLineLabels,
 ): CheckoutLineItem[] {
   const lineItems: CheckoutLineItem[] = [];
-  const { listingPack, googlePack, promotionKind, promotionCredits, includeShopFlair } = options;
+  const { listingPack, googlePack, promotionGrants, includeShopFlair } = options;
 
   if (listingPack && lineLabels.listingCredits) {
     lineItems.push({
@@ -183,16 +223,18 @@ function buildExistingShopLineItems(
       },
     });
   }
-  if (promotionKind && promotionCredits > 0 && lineLabels.promotion) {
-    const unitCents = promotionPriceCentsForKind(promotionKind);
+  for (const grant of promotionGrants) {
+    const label = lineLabels.promotionByKind[grant.kind];
+    if (!label) continue;
+    const unitCents = promotionPriceCentsForKind(grant.kind);
     lineItems.push({
-      quantity: promotionCredits,
+      quantity: grant.credits,
       price_data: {
         currency: "usd",
         unit_amount: unitCents,
         product_data: {
-          name: lineLabels.promotion,
-          description: `Gift ${promotionKindLabel(promotionKind).toLowerCase()} placement credit.`,
+          name: label,
+          description: `Gift ${promotionKindLabel(grant.kind).toLowerCase()} placement credit.`,
         },
       },
     });
@@ -221,23 +263,16 @@ function existingShopGiftCategoryCount(
   let count = 0;
   if (options.listingPack) count += 1;
   if (options.googlePack) count += 1;
-  if (options.promotionKind && options.promotionCredits > 0) count += 1;
+  count += options.promotionGrants.length;
   if (options.includeShopFlair) count += 1;
   return count;
 }
-
-type ExistingShopGiftLineLabels = {
-  listingCredits?: string;
-  googleShopping?: string;
-  promotion?: string;
-  shopFlair?: string;
-};
 
 async function allocateExistingShopGiftLineLabels(
   options: ReturnType<typeof parseExistingShopGiftOptions>,
 ): Promise<{ lineLabels: ExistingShopGiftLineLabels; primaryTransactionNumber: number | null }> {
   return prisma.$transaction(async (tx) => {
-    const lineLabels: ExistingShopGiftLineLabels = {};
+    const lineLabels: ExistingShopGiftLineLabels = { promotionByKind: {} };
     const categoryCount = existingShopGiftCategoryCount(options);
     const primaryTransactionNumber = await allocatePlatformOrderNumber(tx);
     const multipleGiftsLabel = formatMultipleGiftsTransactionReference(primaryTransactionNumber);
@@ -257,9 +292,9 @@ async function allocateExistingShopGiftLineLabels(
         PLATFORM_TRANSACTION_PRODUCT.gshop_listing_upgrade,
       );
     }
-    if (options.promotionKind && options.promotionCredits > 0) {
-      lineLabels.promotion = giftLineLabel(
-        promotionKindToPlatformTransactionProduct(options.promotionKind),
+    for (const grant of options.promotionGrants) {
+      lineLabels.promotionByKind[grant.kind] = giftLineLabel(
+        promotionKindToPlatformTransactionProduct(grant.kind),
       );
     }
     if (options.includeShopFlair) {
@@ -275,6 +310,10 @@ async function markGiftCheckoutFailed(purchaseId: string): Promise<void> {
     where: { id: purchaseId },
     data: { status: CreatorGiftPurchaseStatus.failed },
   });
+}
+
+function serializePromotionGrantsMetadata(grants: CreatorGiftPromotionGrantLine[]): string {
+  return JSON.stringify(grants.map((g) => ({ kind: g.kind, credits: g.credits })));
 }
 
 /** Setup fee only — emails a redemption code to the purchaser. */
@@ -424,7 +463,8 @@ export async function startCreatorGiftExistingShopCheckout(
   const processingLine = stripeCheckoutPaymentProcessingLineItem({
     subtotalCents: merchandiseSubtotalCents,
   });
-  const { listingPack, googlePack, promotionKind, promotionCredits, includeShopFlair } = options;
+  const { listingPack, googlePack, promotionGrants, includeShopFlair } = options;
+  const legacyPromotion = legacyPromotionFieldsFromGrants(promotionGrants);
 
   const { lineLabels, primaryTransactionNumber } = await allocateExistingShopGiftLineLabels(options);
   const piDescription =
@@ -432,30 +472,20 @@ export async function startCreatorGiftExistingShopCheckout(
       ? formatMultipleGiftsTransactionReference(primaryTransactionNumber)
       : (lineLabels.listingCredits ??
         lineLabels.googleShopping ??
-        lineLabels.promotion ??
+        Object.values(lineLabels.promotionByKind)[0] ??
         lineLabels.shopFlair ??
         "Creator gift");
 
-  const purchase = await prisma.creatorGiftPurchase.create({
-    data: {
-      purchaserEmail: null,
-      fulfillmentMode: CreatorGiftFulfillmentMode.direct_to_shop,
-      recipientShopId: shopResult.shop.id,
-      giftFromName,
-      setupFeeIncluded: false,
-      shopFlairIncluded: includeShopFlair,
-      listingCreditPackId: listingPack?.id ?? null,
-      listingCreditsGranted: listingPack?.credits ?? 0,
-      googleShoppingCreditPackId: googlePack?.id ?? null,
-      googleShoppingCreditsGranted: googlePack?.credits ?? 0,
-      promotionKind: promotionKind ?? null,
-      promotionCreditsGranted: promotionKind && promotionCredits > 0 ? promotionCredits : 0,
-      amountCents: checkoutTotalCents,
-      currency: "usd",
-      status: CreatorGiftPurchaseStatus.pending,
-      transactionNumber: primaryTransactionNumber,
-    },
-    select: { id: true },
+  const purchase = await createPendingExistingShopGiftPurchase({
+    recipientShopId: shopResult.shop.id,
+    giftFromName,
+    includeShopFlair,
+    listingPack,
+    googlePack,
+    legacyPromotion,
+    checkoutTotalCents,
+    primaryTransactionNumber,
+    promotionGrants,
   });
 
   try {
@@ -489,8 +519,9 @@ export async function startCreatorGiftExistingShopCheckout(
         listingCreditsGranted: String(listingPack?.credits ?? 0),
         googleShoppingCreditPackId: googlePack?.id ?? "",
         googleShoppingCreditsGranted: String(googlePack?.credits ?? 0),
-        promotionKind: promotionKind ?? "",
-        promotionCreditsGranted: String(promotionCredits > 0 ? promotionCredits : 0),
+        promotionGrantsJson: serializePromotionGrantsMetadata(promotionGrants),
+        promotionKind: legacyPromotion.promotionKind ?? "",
+        promotionCreditsGranted: String(legacyPromotion.promotionCreditsGranted),
         shopFlairIncluded: includeShopFlair ? "1" : "0",
         subtotalCents: String(merchandiseSubtotalCents),
         amountCents: String(checkoutTotalCents),

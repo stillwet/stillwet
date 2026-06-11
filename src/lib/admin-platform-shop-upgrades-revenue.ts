@@ -10,6 +10,11 @@ import {
 import { DASHBOARD_PROMOTIONS_PATH } from "@/lib/dashboard-promotions-path";
 import { googleShoppingCreditPackById } from "@/lib/google-shopping-credit-packs";
 import { listingCreditPackById } from "@/lib/listing-credit-packs";
+import {
+  promotionGrantsFromPurchase,
+  promotionGrantsMerchandiseCents,
+  type CreatorGiftPromotionGrantLine,
+} from "@/lib/creator-gift-promotion-grants";
 import { promotionPriceCentsForKind } from "@/lib/promotions";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import {
@@ -45,6 +50,7 @@ export type CreatorGiftShopUpgradeRevenueRow = {
   googleShoppingCreditsGranted: number;
   promotionKind: PromotionKind | null;
   promotionCreditsGranted: number;
+  promotionGrants?: CreatorGiftPromotionGrantLine[];
   shopFlairIncluded: boolean;
 };
 
@@ -58,6 +64,7 @@ export function giftedShopUpgradePurchaseWhere(gte: Date, lte: Date) {
     OR: [
       { listingCreditsGranted: { gt: 0 } },
       { promotionCreditsGranted: { gt: 0 } },
+      { promotionGrants: { some: { credits: { gt: 0 } } } },
       { googleShoppingCreditsGranted: { gt: 0 } },
       { shopFlairIncluded: true },
     ],
@@ -110,8 +117,7 @@ export function creatorGiftListingMerchandiseCents(row: CreatorGiftShopUpgradeRe
 }
 
 function creatorGiftPromotionMerchandiseCents(row: CreatorGiftShopUpgradeRevenueRow): number {
-  if (!row.promotionKind || row.promotionCreditsGranted <= 0) return 0;
-  return promotionPriceCentsForKind(row.promotionKind) * row.promotionCreditsGranted;
+  return promotionGrantsMerchandiseCents(promotionGrantsFromPurchase(row));
 }
 
 export function creatorGiftNonListingShopUpgradeMerchandiseCents(
@@ -204,6 +210,7 @@ export async function aggregateShopUpgradesPlatformRevenue(
         googleShoppingCreditsGranted: true,
         promotionKind: true,
         promotionCreditsGranted: true,
+        promotionGrants: { select: { kind: true, credits: true } },
         shopFlairIncluded: true,
       },
     }),

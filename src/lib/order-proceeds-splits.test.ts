@@ -164,6 +164,52 @@ describe("orderConnect split ($25 item + $3 tip)", () => {
   });
 });
 
+/** 11oz mug reference: $25 sale, COGS $14.18, production fee $3.00 → shop $7.04. */
+describe("11oz mug reference split", () => {
+  it("matches spreadsheet shop cut and Connect application fee", () => {
+    const subtotalCents = 2500;
+    const cogsLineCents = 1418;
+    const productionFeeLineCents = 300;
+    const split = splitMerchandiseLineWithItemCostCents({
+      lineMerchandiseCents: subtotalCents,
+      cogsLineCents,
+      productionFeeLineCents,
+    });
+    assert.equal(split.goodsServicesCostCents, cogsLineCents);
+    assert.equal(split.productionFeeCents, productionFeeLineCents);
+    assert.equal(split.platformCutCents, 78);
+    assert.equal(split.shopCutCents, 704);
+
+    const lines = [
+      {
+        unitPriceCents: subtotalCents,
+        quantity: 1,
+        goodsServicesCostCents: split.goodsServicesCostCents,
+        productionFeeCents: split.productionFeeCents,
+        platformCutCents: split.platformCutCents,
+        shopCutCents: split.shopCutCents,
+      },
+    ];
+    assert.equal(orderConnectMerchandiseApplicationFeeCents(lines), 1796);
+
+    const paymentProcessingCents = buyerPaymentProcessingFeeCents({
+      subtotalCents,
+      shippingCents: 0,
+      tipCents: 0,
+    });
+    const checkoutTotalCents = subtotalCents + paymentProcessingCents;
+    const applicationFeeCents = orderConnectApplicationFeeCents({
+      lines,
+      tipCents: 0,
+      paymentProcessingCents,
+    });
+    assert.equal(paymentProcessingCents, 106);
+    assert.equal(applicationFeeCents, 1902);
+    assert.equal(orderConnectShopTransferCents({ lines, tipCents: 0 }), 704);
+    assert.equal(checkoutTotalCents - applicationFeeCents, 704);
+  });
+});
+
 describe("orderMerchandiseBreakdownTotals", () => {
   it("preserves sale = item cost + platform + shop identity", () => {
     const split = splitMerchandiseLineWithItemCostCents({

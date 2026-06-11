@@ -2,6 +2,7 @@ import { FeaturePollVoterKind } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { normalizeFeaturePollDonorEmail } from "@/lib/feature-poll-vote-eligibility";
 import { getStripe } from "@/lib/stripe";
+import { supportTipMerchandiseCentsFromCheckoutSession } from "@/lib/support-site";
 import type { FeaturePollView } from "@/lib/feature-poll-path";
 import {
   establishFeaturePollDonorSession,
@@ -37,10 +38,9 @@ async function finalizeSupportTipFromStripeSession(sessionId: string): Promise<{
       null;
     if (!donorEmail) return null;
     const paidAt = new Date((session.created ?? Math.floor(Date.now() / 1000)) * 1000);
+    const merchandiseFromSession = supportTipMerchandiseCentsFromCheckoutSession(session);
     const amountCents =
-      typeof session.amount_total === "number" && Number.isFinite(session.amount_total)
-        ? session.amount_total
-        : tip.amountCents;
+      merchandiseFromSession > 0 ? merchandiseFromSession : tip.amountCents;
     await prisma.supportTip.update({
       where: { id: tip.id },
       data: { donorEmail, paidAt, amountCents },

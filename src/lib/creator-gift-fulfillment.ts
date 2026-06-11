@@ -1,4 +1,5 @@
 import type Stripe from "stripe";
+import { after } from "next/server";
 import type { Prisma } from "@/generated/prisma/client";
 import {
   CreatorGiftCodeType,
@@ -9,6 +10,10 @@ import {
   ShopUserRole,
 } from "@/generated/prisma/enums";
 import { generateCreatorGiftCode } from "@/lib/creator-gift-codes";
+import {
+  promotionGrantsFromPurchase,
+  type CreatorGiftPromotionGrantLine,
+} from "@/lib/creator-gift-promotion-grants";
 import {
   notifyCreatorGiftReceived,
 } from "@/lib/creator-gift-notices";
@@ -101,7 +106,10 @@ async function fulfillCreatorGiftPurchaseRecord(
 ): Promise<boolean> {
   const purchase = await prisma.creatorGiftPurchase.findUnique({
     where: { id: purchaseId },
-    include: { codes: true },
+    include: {
+      codes: true,
+      promotionGrants: { select: { kind: true, credits: true } },
+    },
   });
   if (!purchase) return false;
   if (
@@ -152,13 +160,18 @@ async function fulfillCreatorGiftPurchaseRecord(
         shopId,
         giftFromName,
         listingCreditsGranted: purchase.listingCreditsGranted,
-        promotionKind: purchase.promotionKind,
-        promotionCreditsGranted: purchase.promotionCreditsGranted,
+        promotionGrants: promotionGrantsFromPurchase(purchase),
         googleShoppingCreditsGranted: purchase.googleShoppingCreditsGranted,
         shopFlairIncluded: purchase.shopFlairIncluded,
       });
       if (purchase.shopFlairIncluded) {
-        revalidateShopUpgradesDashboardPaths();
+        after(() => {
+          try {
+            revalidateShopUpgradesDashboardPaths();
+          } catch (e) {
+            console.error("[creator-gift] revalidate shop upgrades failed", e);
+          }
+        });
       }
     }
     return true;
@@ -276,6 +289,7 @@ async function applyDirectToShopCredits(
     googleShoppingCreditsGranted: number;
     promotionKind: PromotionKind | null;
     promotionCreditsGranted: number;
+    promotionGrants?: CreatorGiftPromotionGrantLine[];
     shopFlairIncluded: boolean;
   },
 ): Promise<{ ok: true; shopId: string } | { ok: false }> {
@@ -293,11 +307,11 @@ async function applyDirectToShopCredits(
     });
   }
 
-  if (purchase.promotionCreditsGranted > 0 && purchase.promotionKind) {
+  for (const grant of promotionGrantsFromPurchase(purchase)) {
     await tx.shopPromotionCreditBalance.upsert({
-      where: { shopId_kind: { shopId, kind: purchase.promotionKind } },
-      create: { shopId, kind: purchase.promotionKind, credits: purchase.promotionCreditsGranted },
-      update: { credits: { increment: purchase.promotionCreditsGranted } },
+      where: { shopId_kind: { shopId, kind: grant.kind } },
+      create: { shopId, kind: grant.kind, credits: grant.credits },
+      update: { credits: { increment: grant.credits } },
     });
   }
 

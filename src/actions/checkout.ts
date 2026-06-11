@@ -214,6 +214,16 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
       baselineCatalogPickEncoded: listing.baselineCatalogPickEncoded,
       catalogRow,
     });
+    if (p.fulfillmentType === FulfillmentType.printify && (!pick || !catalogRow)) {
+      const label = storefrontListingDisplayTitle({
+        requestItemName: listing.requestItemName,
+        product: p,
+      });
+      return {
+        ok: false,
+        error: `“${label}” is missing admin baseline catalog costs. Contact support before checking out.`,
+      };
+    }
     const { cogsLineCents, productionFeeLineCents, itemCostLineCents: itemCostTotal } =
       itemCostLineCents({
         cogsUnitCents: cogsUnit,

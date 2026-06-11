@@ -14,6 +14,7 @@ import { fulfillPromotionPurchasePaidIfPending } from "@/lib/promotion-fulfillme
 import { fulfillShopSetupFeeCheckoutSession } from "@/lib/shop-setup-fee-fulfillment";
 import { fulfillCreatorGiftCheckoutSession } from "@/lib/creator-gift-fulfillment";
 import { fulfillShopReactivationCheckoutSession } from "@/lib/shop-reactivation-fulfillment";
+import { supportTipMerchandiseCentsFromCheckoutSession } from "@/lib/support-site";
 
 export const runtime = "nodejs";
 
@@ -120,15 +121,12 @@ async function fulfillPromotionPaymentIntent(pi: Stripe.PaymentIntent): Promise<
 
 async function fulfillSupportTipCheckout(session: Stripe.Checkout.Session): Promise<boolean> {
   if (session.metadata?.kind !== "support_tip") return false;
-  const cents =
-    typeof session.amount_total === "number" && Number.isFinite(session.amount_total)
-      ? session.amount_total
-      : 0;
+  const merchandiseCents = supportTipMerchandiseCentsFromCheckoutSession(session);
   const currency =
     typeof session.currency === "string" && session.currency.trim()
       ? session.currency.trim().toLowerCase()
       : "usd";
-  if (cents <= 0) return true;
+  if (merchandiseCents <= 0) return true;
 
   const donorEmail =
     session.customer_details?.email?.trim().toLowerCase() ||
@@ -142,7 +140,7 @@ async function fulfillSupportTipCheckout(session: Stripe.Checkout.Session): Prom
       where: { id: supportTipId },
       data: {
         stripeCheckoutSessionId: session.id,
-        amountCents: cents,
+        amountCents: merchandiseCents,
         currency,
         donorEmail,
         paidAt,
@@ -156,14 +154,14 @@ async function fulfillSupportTipCheckout(session: Stripe.Checkout.Session): Prom
     where: { stripeCheckoutSessionId: session.id },
     create: {
       stripeCheckoutSessionId: session.id,
-      amountCents: cents,
+      amountCents: merchandiseCents,
       currency,
       donorEmail,
       paidAt,
       createdAt: paidAt,
     },
     update: {
-      amountCents: cents,
+      amountCents: merchandiseCents,
       currency,
       donorEmail,
       paidAt,

@@ -2,7 +2,6 @@
 
 import {
   buyerCheckoutTotalCents,
-  stripeBalanceProcessingFeeCents,
 } from "@/lib/stripe-card-processing-fee";
 
 export type AdminPlatformSalesBuyer = {
@@ -42,6 +41,8 @@ type PlatformCheckoutMergedLineBase = {
   /** Checkout email when there is no purchasing shop row (gifts, pre-shop signup). */
   transactionEmail: string | null;
   itemHref: string | null;
+  /** Listing + promotion creator gift on one checkout: primary vs profit-only row. */
+  creatorGiftSplitPart?: "listing" | "promotion";
 };
 
 export type AdminPlatformSalesMergedLine =
@@ -139,9 +140,18 @@ export function platformCheckoutFullChargeCents(line: {
   return stored;
 }
 
+/** Listing + promotion creator gift split: profit-only listing row label. */
+export const CREATOR_GIFT_LISTING_SPLIT_LABEL = "Multiple - Listings Split";
+
+/** Creator gift listing row in a listing + promotion split (no paid / Stripe in popup). */
+export function isCreatorGiftListingSplitProfitOnlyLine(l: AdminPlatformSalesMergedLine): boolean {
+  return l.kind === "creator_gift_purchase" && l.creatorGiftSplitPart === "listing";
+}
+
 /** Buyer-paid checkout total for this row (service price + Stripe fee on platform checkouts). */
 export function mergedLineCheckoutPaidCents(l: AdminPlatformSalesMergedLine): number {
   if (l.kind === "merchandise") return l.checkoutTotalCents;
+  if (isCreatorGiftListingSplitProfitOnlyLine(l)) return 0;
   const fullCharge = platformCheckoutFullChargeCents(l);
   const decomposed = l.itemPriceCents + mergedLineStripeBalanceFeeCents(l);
   return Math.max(fullCharge, decomposed);
@@ -150,13 +160,28 @@ export function mergedLineCheckoutPaidCents(l: AdminPlatformSalesMergedLine): nu
 /** Stripe balance fee (2.9% + 30¢ on full charge) — admin reconciliation, not buyer pass-through. */
 export function mergedLineStripeBalanceFeeCents(l: AdminPlatformSalesMergedLine): number {
   if (l.kind === "merchandise") return l.stripeFeeCents;
-  return stripeBalanceProcessingFeeCents(platformCheckoutFullChargeCents(l));
+  if (isCreatorGiftListingSplitProfitOnlyLine(l)) return 0;
+  return l.stripeFeeCents;
 }
 
 /** Merchandise shop payout: line shop cut + allocated cart tip. */
 export function mergedLineShopPayoutCents(l: AdminPlatformSalesMergedLine): number {
   if (l.kind !== "merchandise") return 0;
   return l.shopCutCents + Math.max(0, l.tipCents);
+}
+
+/**
+ * Buyer payment-processing pass-through on a merchandise row (in Stripe application fee).
+ * `Paid − merchandise − tip` for the row's allocated checkout share.
+ */
+export function mergedLineBuyerPaymentProcessingPassThroughCents(
+  l: AdminPlatformSalesMergedLine,
+): number {
+  if (l.kind !== "merchandise") return 0;
+  const paid = mergedLineCheckoutPaidCents(l);
+  const merch = Math.max(0, l.itemPriceCents);
+  const tip = Math.max(0, l.tipCents);
+  return Math.max(0, paid - merch - tip);
 }
 
 /**
@@ -171,6 +196,9 @@ export function mergedLineApplicationAmountCents(l: AdminPlatformSalesMergedLine
 
 /** Per-row shop/platform checkout breakdown header: Paid − Shop payout − COGS − Stripe balance fee. */
 export function mergedLinePaidCogsStripeNetCents(l: AdminPlatformSalesMergedLine): number {
+  if (l.kind === "creator_gift_purchase" && l.creatorGiftSplitPart) {
+    return l.platformCutCents;
+  }
   let net = mergedLineCheckoutPaidCents(l) - mergedLineStripeBalanceFeeCents(l);
   if (l.kind === "merchandise") {
     net -= mergedLineShopPayoutCents(l) + l.goodsServicesCostCents;

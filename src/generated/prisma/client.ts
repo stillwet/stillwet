@@ -229,6 +229,11 @@ export type ShopReactivationPurchase = Prisma.ShopReactivationPurchaseModel
  */
 export type CreatorGiftPurchase = Prisma.CreatorGiftPurchaseModel
 /**
+ * Model CreatorGiftPromotionGrant
+ * * Per-promotion-kind credits on a creator gift checkout (multi-kind gifts).
+ */
+export type CreatorGiftPromotionGrant = Prisma.CreatorGiftPromotionGrantModel
+/**
  * Model CreatorGiftCode
  * 
  */

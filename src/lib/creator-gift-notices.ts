@@ -1,6 +1,11 @@
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
-import { PromotionKind } from "@/generated/prisma/enums";
+import type { PromotionKind } from "@/generated/prisma/enums";
 import { promotionKindLabel } from "@/lib/promotions";
+import {
+  promotionGrantsFromPurchase,
+  type CreatorGiftPromotionGrantLine,
+} from "@/lib/creator-gift-promotion-grants";
 import { prisma } from "@/lib/prisma";
 
 export const CREATOR_GIFT_RECEIVED_NOTICE_KIND = "creator_gift_received";
@@ -67,8 +72,9 @@ export function formatCreatorGiftRollupNoticeBody(args: {
 
 export function buildCreatorGiftRollupItems(args: {
   listingCreditsGranted: number;
-  promotionKind: PromotionKind | null;
-  promotionCreditsGranted: number;
+  promotionKind?: PromotionKind | null;
+  promotionCreditsGranted?: number;
+  promotionGrants?: CreatorGiftPromotionGrantLine[];
   googleShoppingCreditsGranted: number;
   shopFlairIncluded: boolean;
 }): CreatorGiftRollupItem[] {
@@ -79,10 +85,10 @@ export function buildCreatorGiftRollupItems(args: {
       giftLabel: listingCreditGiftLabel(),
     });
   }
-  if (args.promotionCreditsGranted > 0 && args.promotionKind) {
+  for (const grant of promotionGrantsFromPurchase(args)) {
     items.push({
-      quantity: args.promotionCreditsGranted,
-      giftLabel: promotionCreditGiftLabel(args.promotionKind),
+      quantity: grant.credits,
+      giftLabel: promotionCreditGiftLabel(grant.kind),
     });
   }
   if (args.googleShoppingCreditsGranted > 0) {
@@ -97,13 +103,24 @@ export function buildCreatorGiftRollupItems(args: {
   return items;
 }
 
+function scheduleDashboardRevalidationAfterCreatorGiftNotice(): void {
+  after(() => {
+    try {
+      revalidatePath("/dashboard");
+    } catch (e) {
+      console.error("[creator-gift-notices] revalidatePath failed", e);
+    }
+  });
+}
+
 /** Single dashboard notice summarizing every upgrade in one direct-to-shop gift. */
 export async function notifyCreatorGiftReceived(args: {
   shopId: string;
   giftFromName?: string | null;
   listingCreditsGranted: number;
-  promotionKind: PromotionKind | null;
-  promotionCreditsGranted: number;
+  promotionKind?: PromotionKind | null;
+  promotionCreditsGranted?: number;
+  promotionGrants?: CreatorGiftPromotionGrantLine[];
   googleShoppingCreditsGranted: number;
   shopFlairIncluded: boolean;
 }): Promise<void> {
@@ -123,5 +140,5 @@ export async function notifyCreatorGiftReceived(args: {
       body,
     },
   });
-  revalidatePath("/dashboard");
+  scheduleDashboardRevalidationAfterCreatorGiftNotice();
 }

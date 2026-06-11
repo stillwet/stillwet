@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { createShopFromSignup } from "@/actions/shop-auth";
 import { TermsConditionsDialog } from "@/components/TermsConditionsDialog";
+import { FormValidationAlert } from "@/components/FormFieldValidationBubble";
 import { PasswordInput } from "@/components/PasswordInput";
+import { emailFieldError, requiredFieldError } from "@/lib/form-field-validation";
 import { SHOP_SETUP_FEE_CENTS } from "@/lib/creator-gift-codes";
 
 export function CreateShopForm() {
   const [error, setError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [setupMethod, setSetupMethod] = useState<"pay" | "code" | "">("");
   const [setupCode, setSetupCode] = useState("");
@@ -21,9 +24,23 @@ export function CreateShopForm() {
   return (
     <form
       className="mt-8 space-y-4"
+      noValidate
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null);
+        const fd = new FormData(e.currentTarget);
+        const passwordValue = fd.get("password");
+        const validationError =
+          emailFieldError(fd.get("email")) ??
+          requiredFieldError(passwordValue, "a password") ??
+          (typeof passwordValue === "string" && passwordValue.length < 10
+            ? "Password must be at least 10 characters."
+            : null);
+        if (validationError) {
+          setFieldError(validationError);
+          return;
+        }
+        setFieldError(null);
         setPending(true);
         try {
           const fd = new FormData(e.currentTarget);
@@ -40,8 +57,8 @@ export function CreateShopForm() {
         <input
           type="email"
           name="email"
-          required
           autoComplete="email"
+          onChange={() => setFieldError(null)}
           className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
         />
       </label>
@@ -49,9 +66,9 @@ export function CreateShopForm() {
         Password
         <PasswordInput
           name="password"
-          required
           minLength={10}
           autoComplete="new-password"
+          onChange={() => setFieldError(null)}
           className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
         />
       </label>
@@ -133,11 +150,8 @@ export function CreateShopForm() {
         </span>
       </label>
       <TermsConditionsDialog open={termsDialogOpen} onClose={() => setTermsDialogOpen(false)} />
-      {error ? (
-        <p className="text-sm text-amber-400" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {fieldError ? <FormValidationAlert message={fieldError} /> : null}
+      {error ? <FormValidationAlert message={error} /> : null}
       <button
         type="submit"
         disabled={pending || !canSubmit}

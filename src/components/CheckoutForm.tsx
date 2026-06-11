@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { startCheckout } from "@/actions/checkout";
+import { FormFieldValidationBubble } from "@/components/FormFieldValidationBubble";
 import { StripeEmbeddedCheckoutOverlay } from "@/components/StripeEmbeddedCheckoutOverlay";
 import {
   MAX_CHECKOUT_TIP_CENTS,
@@ -181,12 +182,10 @@ export function CheckoutForm({
             </div>
             <div className="relative shrink-0 self-center">
               {tipMaxNotice ? (
-                <div
-                  role="status"
-                  className="pointer-events-none absolute bottom-full right-0 z-10 mb-1 whitespace-nowrap rounded border border-zinc-700 bg-zinc-950 px-1.5 py-0.5 text-[10px] leading-none text-amber-200/90 shadow-md"
-                >
-                  ${MAX_CHECKOUT_TIP_CENTS / 100} max tip
-                </div>
+                <FormFieldValidationBubble
+                  message={`$${MAX_CHECKOUT_TIP_CENTS / 100} max tip`}
+                  className="left-auto right-0 whitespace-nowrap"
+                />
               ) : null}
               <input
                 id="checkout-tip"

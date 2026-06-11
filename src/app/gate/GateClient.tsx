@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { StillWetLogo } from "@/components/StillWetLogo";
+import { FormFieldValidationBubble, FormValidationAlert } from "@/components/FormFieldValidationBubble";
 import { PasswordInput } from "@/components/PasswordInput";
+import { requiredFieldError } from "@/lib/form-field-validation";
 
 function safeRedirectPath(from: string | null): string {
   if (!from || !from.startsWith("/") || from.startsWith("//")) {
@@ -13,6 +15,7 @@ function safeRedirectPath(from: string | null): string {
 
 export function GateClient({ redirectFrom }: { redirectFrom: string | null }) {
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   /** Hide password UI once auth succeeded; avoids a flash of the form while the document navigates. */
@@ -21,6 +24,12 @@ export function GateClient({ redirectFrom }: { redirectFrom: string | null }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const validationError = requiredFieldError(password, "the password");
+    if (validationError) {
+      setPasswordError(validationError);
+      return;
+    }
+    setPasswordError(null);
     setPending(true);
     let success = false;
     try {
@@ -76,23 +85,27 @@ export function GateClient({ redirectFrom }: { redirectFrom: string | null }) {
         <p className="mt-2 text-center text-sm text-zinc-500">
           This shop is private. Ask the site owner for access.
         </p>
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+        <form onSubmit={onSubmit} noValidate className="mt-8 space-y-4">
           <label className="block text-sm text-zinc-400">
             Password
-            <PasswordInput
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-              wrapperClassName="mt-1.5"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-zinc-100 outline-none ring-blue-500/30 focus:border-blue-600 focus:ring-2"
-            />
+            <div className="relative mt-1.5">
+              {passwordError ? <FormFieldValidationBubble message={passwordError} /> : null}
+              <PasswordInput
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError(null);
+                }}
+                autoComplete="current-password"
+                wrapperClassName=""
+                aria-invalid={passwordError != null}
+                className={`w-full rounded-lg border bg-zinc-900 px-3 py-2.5 text-zinc-100 outline-none ring-blue-500/30 focus:border-blue-600 focus:ring-2 ${
+                  passwordError ? "border-blue-500/50" : "border-zinc-700"
+                }`}
+              />
+            </div>
           </label>
-          {error && (
-            <p className="text-sm text-amber-400" role="alert">
-              {error}
-            </p>
-          )}
+          {error ? <FormValidationAlert message={error} /> : null}
           <button
             type="submit"
             disabled={pending}

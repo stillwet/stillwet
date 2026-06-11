@@ -87,6 +87,7 @@ export const ModelName = {
   ShopSetupFeePurchase: 'ShopSetupFeePurchase',
   ShopReactivationPurchase: 'ShopReactivationPurchase',
   CreatorGiftPurchase: 'CreatorGiftPurchase',
+  CreatorGiftPromotionGrant: 'CreatorGiftPromotionGrant',
   CreatorGiftCode: 'CreatorGiftCode',
   Order: 'Order',
   OrderReturnClaim: 'OrderReturnClaim',
@@ -711,6 +712,17 @@ export const CreatorGiftPurchaseScalarFieldEnum = {
 } as const
 
 export type CreatorGiftPurchaseScalarFieldEnum = (typeof CreatorGiftPurchaseScalarFieldEnum)[keyof typeof CreatorGiftPurchaseScalarFieldEnum]
+
+
+export const CreatorGiftPromotionGrantScalarFieldEnum = {
+  id: 'id',
+  purchaseId: 'purchaseId',
+  kind: 'kind',
+  credits: 'credits',
+  createdAt: 'createdAt'
+} as const
+
+export type CreatorGiftPromotionGrantScalarFieldEnum = (typeof CreatorGiftPromotionGrantScalarFieldEnum)[keyof typeof CreatorGiftPromotionGrantScalarFieldEnum]
 
 
 export const CreatorGiftCodeScalarFieldEnum = {

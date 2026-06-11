@@ -420,6 +420,7 @@ export const ModelName = {
   ShopSetupFeePurchase: 'ShopSetupFeePurchase',
   ShopReactivationPurchase: 'ShopReactivationPurchase',
   CreatorGiftPurchase: 'CreatorGiftPurchase',
+  CreatorGiftPromotionGrant: 'CreatorGiftPromotionGrant',
   CreatorGiftCode: 'CreatorGiftCode',
   Order: 'Order',
   OrderReturnClaim: 'OrderReturnClaim',
@@ -454,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "featurePollQuestion" | "featurePollOption" | "featurePollVote" | "platformTransactionSequence" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
+    modelProps: "moderationKeyword" | "tag" | "productTag" | "product" | "shop" | "shopFlairType" | "shopFlairPurchase" | "shopGoogleShoppingPurchase" | "shopListingGoogleShoppingEnrollment" | "shopPromotionsDashboardSnapshot" | "shopSalesDashboardSnapshot" | "shopListingSlotPromoRedemption" | "supportThread" | "supportMessage" | "supportTip" | "featurePollQuestion" | "featurePollOption" | "featurePollVote" | "platformTransactionSequence" | "shopOwnerNotice" | "bugFeedbackReport" | "shopUser" | "shopTwoFactorLoginChallenge" | "shopTrustedDevice" | "shopAccountDeletionToken" | "shopPasswordResetToken" | "shopEmailVerificationToken" | "shopListing" | "promotionPurchase" | "shopPromotionCreditBalance" | "shopAdminAwardGrant" | "listingCreditPackPurchase" | "pendingShopSignup" | "shopSetupFeePurchase" | "shopReactivationPurchase" | "creatorGiftPurchase" | "creatorGiftPromotionGrant" | "creatorGiftCode" | "order" | "orderReturnClaim" | "orderReturnClaimImage" | "orderLine" | "fulfillmentJob" | "processedStripeEvent" | "adminCatalogItem" | "adminCatalogItemTag" | "adminInboundEmail" | "siteEmailTemplate" | "adminSummaryEmailSettings" | "platformBrowseHotItemsSnapshot" | "platformFeaturedShopsSnapshot" | "platformPopularListingOrderSnapshot" | "platformStoreTagsSnapshot" | "adminNexusRegistrationDates" | "storefrontViewEvent" | "comment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3122,6 +3123,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CreatorGiftPromotionGrant: {
+      payload: Prisma.$CreatorGiftPromotionGrantPayload<ExtArgs>
+      fields: Prisma.CreatorGiftPromotionGrantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CreatorGiftPromotionGrantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CreatorGiftPromotionGrantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>
+        }
+        findFirst: {
+          args: Prisma.CreatorGiftPromotionGrantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CreatorGiftPromotionGrantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>
+        }
+        findMany: {
+          args: Prisma.CreatorGiftPromotionGrantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>[]
+        }
+        create: {
+          args: Prisma.CreatorGiftPromotionGrantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>
+        }
+        createMany: {
+          args: Prisma.CreatorGiftPromotionGrantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CreatorGiftPromotionGrantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>[]
+        }
+        delete: {
+          args: Prisma.CreatorGiftPromotionGrantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>
+        }
+        update: {
+          args: Prisma.CreatorGiftPromotionGrantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>
+        }
+        deleteMany: {
+          args: Prisma.CreatorGiftPromotionGrantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CreatorGiftPromotionGrantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CreatorGiftPromotionGrantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>[]
+        }
+        upsert: {
+          args: Prisma.CreatorGiftPromotionGrantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CreatorGiftPromotionGrantPayload>
+        }
+        aggregate: {
+          args: Prisma.CreatorGiftPromotionGrantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCreatorGiftPromotionGrant>
+        }
+        groupBy: {
+          args: Prisma.CreatorGiftPromotionGrantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CreatorGiftPromotionGrantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CreatorGiftPromotionGrantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CreatorGiftPromotionGrantCountAggregateOutputType> | number
+        }
+      }
+    }
     CreatorGiftCode: {
       payload: Prisma.$CreatorGiftCodePayload<ExtArgs>
       fields: Prisma.CreatorGiftCodeFieldRefs
@@ -5156,6 +5231,17 @@ export const CreatorGiftPurchaseScalarFieldEnum = {
 export type CreatorGiftPurchaseScalarFieldEnum = (typeof CreatorGiftPurchaseScalarFieldEnum)[keyof typeof CreatorGiftPurchaseScalarFieldEnum]
 
 
+export const CreatorGiftPromotionGrantScalarFieldEnum = {
+  id: 'id',
+  purchaseId: 'purchaseId',
+  kind: 'kind',
+  credits: 'credits',
+  createdAt: 'createdAt'
+} as const
+
+export type CreatorGiftPromotionGrantScalarFieldEnum = (typeof CreatorGiftPromotionGrantScalarFieldEnum)[keyof typeof CreatorGiftPromotionGrantScalarFieldEnum]
+
+
 export const CreatorGiftCodeScalarFieldEnum = {
   id: 'id',
   purchaseId: 'purchaseId',
@@ -6119,6 +6205,7 @@ export type GlobalOmitConfig = {
   shopSetupFeePurchase?: Prisma.ShopSetupFeePurchaseOmit
   shopReactivationPurchase?: Prisma.ShopReactivationPurchaseOmit
   creatorGiftPurchase?: Prisma.CreatorGiftPurchaseOmit
+  creatorGiftPromotionGrant?: Prisma.CreatorGiftPromotionGrantOmit
   creatorGiftCode?: Prisma.CreatorGiftCodeOmit
   order?: Prisma.OrderOmit
   orderReturnClaim?: Prisma.OrderReturnClaimOmit

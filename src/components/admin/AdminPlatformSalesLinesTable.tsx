@@ -4,7 +4,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { AdminPlatformSalesMergedLine } from "@/lib/admin-platform-sales-merged-line-model";
 import {
+  isCreatorGiftListingSplitProfitOnlyLine,
   mergedLineApplicationAmountCents,
+  mergedLineBuyerPaymentProcessingPassThroughCents,
   mergedLineCheckoutPaidCents,
   mergedLinePaidCogsStripeNetCents,
   mergedLineShopPayoutCents,
@@ -50,18 +52,21 @@ function SalesTableCellContent({ value }: { value: string }) {
 }
 
 function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBreakdownRow[] {
-  const rows: PlatformSalesBreakdownRow[] = [
-    {
+  const profitOnlyListingSplit = isCreatorGiftListingSplitProfitOnlyLine(l);
+  const rows: PlatformSalesBreakdownRow[] = [];
+
+  if (!profitOnlyListingSplit) {
+    rows.push({
       label: "Paid",
       hint:
         l.kind === "merchandise"
           ? "Total amount paid, including tip, and payment processing fee (stripe est. + tip fee)"
           : "Total transaction (promotion + Est. Stripe fee)",
       cents: mergedLineCheckoutPaidCents(l),
-    },
-  ];
+    });
+  }
 
-  if (mergedLineStripeBalanceFeeCents(l) > 0) {
+  if (!profitOnlyListingSplit && mergedLineStripeBalanceFeeCents(l) > 0) {
     rows.push({
       label: "Stripe fee",
       hint:
@@ -76,12 +81,12 @@ function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBre
   if (l.kind === "merchandise") {
     rows.push({
       label: "Shop payout",
-      hint: "Creator shop merchandise profit + tip",
+      hint: "Stripe Connect transfer to the shop (merchandise shop cut + tip)",
       cents: -mergedLineShopPayoutCents(l),
     });
     rows.push({
       label: "Application amount",
-      hint: "Amount Stripe will payout to platform",
+      hint: "Stripe Connect application fee (platform share + buyer payment processing pass-through)",
       cents: mergedLineApplicationAmountCents(l),
       subheader: true,
     });
@@ -110,6 +115,16 @@ function mergedLineDetailRows(l: AdminPlatformSalesMergedLine): PlatformSalesBre
       label: "Prod Fee",
       hint: "Platform additional fees",
       cents: l.productionFeeCents,
+      mutedValue: true,
+      nested: true,
+    });
+  }
+
+  if (l.kind === "merchandise" && mergedLineBuyerPaymentProcessingPassThroughCents(l) > 0) {
+    rows.push({
+      label: "Payment Processing",
+      hint: "Buyer pass-through included in Stripe application fee",
+      cents: mergedLineBuyerPaymentProcessingPassThroughCents(l),
       mutedValue: true,
       nested: true,
     });

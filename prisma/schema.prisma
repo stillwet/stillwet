@@ -1008,10 +1008,24 @@ model CreatorGiftPurchase {
   updatedAt                    DateTime                   @updatedAt
 
   codes CreatorGiftCode[]
+  promotionGrants CreatorGiftPromotionGrant[]
 
   @@index([purchaserEmail])
   @@index([recipientShopId])
   @@index([status, paidAt])
+}
+
+/** Per-promotion-kind credits on a creator gift checkout (multi-kind gifts). */
+model CreatorGiftPromotionGrant {
+  id         String              @id @default(cuid())
+  purchaseId String
+  purchase   CreatorGiftPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  kind       PromotionKind
+  credits    Int
+  createdAt  DateTime            @default(now())
+
+  @@unique([purchaseId, kind])
+  @@index([purchaseId])
 }
 
 model CreatorGiftCode {

@@ -20,7 +20,7 @@ export type PrismaOrderReturnClaimDelegate = PrismaClient["orderReturnClaim"];
  * (or delete `.next`) if needed.
  */
 const PRISMA_SINGLETON_STAMP =
-  "postgres-adapter-v100-feature-poll-one-vote-per-tip";
+  "postgres-adapter-v102-creator-gift-promotion-grants-split-create";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -74,11 +74,13 @@ function clientHasRequiredDelegates(client: PrismaClient): boolean {
     promotionPurchase?: { findMany?: unknown };
     shopPromotionCreditBalance?: { findMany?: unknown };
     shopAdminAwardGrant?: { findMany?: unknown };
+    creatorGiftPromotionGrant?: { createMany?: unknown };
   };
   return (
     typeof c.promotionPurchase?.findMany === "function" &&
     typeof c.shopPromotionCreditBalance?.findMany === "function" &&
-    typeof c.shopAdminAwardGrant?.findMany === "function"
+    typeof c.shopAdminAwardGrant?.findMany === "function" &&
+    typeof c.creatorGiftPromotionGrant?.createMany === "function"
   );
 }
 
@@ -95,7 +97,7 @@ function reconcilePrismaSingleton(): PrismaClient {
     client = createPrisma();
     if (!clientHasRequiredDelegates(client)) {
       throw new Error(
-        "PrismaClient is missing required delegates (promotionPurchase, shopPromotionCreditBalance, shopAdminAwardGrant). Run `npx prisma generate`, ensure src/generated/prisma is up to date, and restart the server.",
+        "PrismaClient is missing required delegates (promotionPurchase, shopPromotionCreditBalance, shopAdminAwardGrant, creatorGiftPromotionGrant). Run `npx prisma generate`, ensure src/generated/prisma is up to date, and restart the server.",
       );
     }
   }

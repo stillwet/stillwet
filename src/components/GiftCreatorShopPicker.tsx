@@ -6,6 +6,7 @@ import {
   verifyGiftRecipientShop,
   type GiftRecipientShopPick,
 } from "@/actions/gift-creator-shop-search";
+import { FormFieldValidationBubble } from "@/components/FormFieldValidationBubble";
 import { normalizeShopSlugInput } from "@/lib/normalize-shop-slug-input";
 
 const SEARCH_DEBOUNCE_MS = 220;
@@ -13,6 +14,7 @@ const SEARCH_DEBOUNCE_MS = 220;
 export function GiftCreatorShopPicker(props: {
   name?: string;
   onSelectedChange?: (shop: GiftRecipientShopPick | null) => void;
+  fieldError?: string | null;
 }) {
   const fieldName = props.name ?? "recipientShopSlug";
   const listId = useId();
@@ -26,9 +28,9 @@ export function GiftCreatorShopPicker(props: {
   const [highlightIdx, setHighlightIdx] = useState(0);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [searching, setSearching] = useState(false);
-  const [clientError, setClientError] = useState<string | null>(null);
 
   const normalizedInput = normalizeShopSlugInput(input);
+  const showFieldError = Boolean(props.fieldError?.trim());
   const showList =
     suggestionsOpen && (suggestions.length > 0 || (input.trim() !== "" && !selectedShop));
 
@@ -44,7 +46,6 @@ export function GiftCreatorShopPicker(props: {
       setSelectedShop(shop);
       setInput(shop.displayName);
       setSuggestionsOpen(false);
-      setClientError(null);
       props.onSelectedChange?.(shop);
     },
     [props.onSelectedChange],
@@ -88,7 +89,6 @@ export function GiftCreatorShopPicker(props: {
   function onInputChange(value: string) {
     setInput(value);
     setSelectedShop(null);
-    setClientError(null);
     setHighlightIdx(0);
     setSuggestionsOpen(true);
     props.onSelectedChange?.(null);
@@ -120,12 +120,12 @@ export function GiftCreatorShopPicker(props: {
       <label className="block text-sm text-zinc-400">
         Shop name
         <div className="relative mt-1">
+          {showFieldError ? <FormFieldValidationBubble message={props.fieldError!} /> : null}
           <input
             ref={inputRef}
             type="text"
             name={`${fieldName}Display`}
             value={input}
-            required
             autoComplete="off"
             spellCheck={false}
             placeholder="Search by shop name"
@@ -133,7 +133,7 @@ export function GiftCreatorShopPicker(props: {
             aria-autocomplete="list"
             aria-expanded={showList}
             aria-controls={listId}
-            aria-invalid={clientError != null || (input.trim() !== "" && !selectedShop)}
+            aria-invalid={showFieldError || (input.trim() !== "" && !selectedShop)}
             onChange={(e) => onInputChange(e.target.value)}
             onFocus={() => {
               clearBlurTimer();
@@ -157,8 +157,8 @@ export function GiftCreatorShopPicker(props: {
             className={`w-full rounded-lg border bg-zinc-900 px-3 py-2 text-zinc-100 ${
               selectedShop
                 ? "border-emerald-800/60"
-                : clientError || (input.trim() && !selectedShop)
-                  ? "border-amber-800/70"
+                : showFieldError || (input.trim() && !selectedShop)
+                  ? "border-blue-500/50"
                   : "border-zinc-700"
             }`}
           />
@@ -196,11 +196,6 @@ export function GiftCreatorShopPicker(props: {
           ) : null}
         </div>
       </label>
-      {clientError ? (
-        <p className="mt-2 text-sm text-amber-400" role="alert">
-          {clientError}
-        </p>
-      ) : null}
     </div>
   );
 }

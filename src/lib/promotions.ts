@@ -15,7 +15,7 @@ export const PROMOTION_KIND_OPTIONS: PromotionKindUiRow[] = [
     label: "Popular item",
     amountCents: 500,
   },
-  { kind: PromotionKind.FEATURED_SHOP_HOME, label: "Featured shop", amountCents: 5000 },
+  { kind: PromotionKind.FEATURED_SHOP_HOME, label: "Featured shop", amountCents: 3000 },
 ];
 
 const KIND_TO_CENTS = new Map<PromotionKind, number>(

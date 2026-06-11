@@ -44,6 +44,7 @@ const tests = [
   "src/lib/listing-request-review-limit.test.ts",
   "src/lib/admin-catalog-upload-policy.test.ts",
   "src/lib/admin-catalog-canvas-presentation.test.ts",
+  "src/lib/baseline-listing-catalog-sync.test.ts",
 ];
 
 const cwd = path.join(__dirname, "..");

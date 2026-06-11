@@ -2,6 +2,8 @@ import Link from "next/link";
 import { GiftCreatorSuccessShell } from "@/components/GiftCreatorSuccessShell";
 import { featurePollPathWithSupportSession } from "@/lib/feature-poll-path";
 
+export const dynamic = "force-dynamic";
+
 const VOTE_CTA_CLASS =
   "mt-8 inline-block rounded-xl bg-blue-900/90 px-6 py-3 text-sm font-medium text-white hover:bg-blue-800";
 
@@ -14,7 +16,7 @@ export default async function SupportThanksPage({ searchParams }: Props) {
   const voteHref = featurePollPathWithSupportSession(sessionId?.trim() ?? "");
 
   return (
-    <GiftCreatorSuccessShell showConfetti title="Thank you">
+    <GiftCreatorSuccessShell showConfetti title="Woohoo!">
       <p className="text-base font-medium text-zinc-100">
         Your support means a lot. Every bit of support helps keep the site running and improving.
       </p>

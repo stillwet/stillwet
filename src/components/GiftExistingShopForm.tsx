@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { PromotionKind } from "@/generated/prisma/enums";
 import {
   startCreatorGiftExistingShopCheckout,
@@ -10,9 +10,15 @@ import {
   ensureGiftRecipientShopSelected,
   GiftCreatorShopPicker,
 } from "@/components/GiftCreatorShopPicker";
+import { FormValidationAlert } from "@/components/FormFieldValidationBubble";
 import type { GiftRecipientShopPick } from "@/actions/gift-creator-shop-search";
-import { GOOGLE_SHOPPING_CREDIT_PACKS } from "@/lib/google-shopping-credit-packs";
-import { LISTING_CREDIT_PACKS } from "@/lib/listing-credit-packs";
+import { promotionGrantFormFieldName } from "@/lib/creator-gift-promotion-grants";
+import { existingShopGiftMerchandiseSubtotalCents } from "@/lib/creator-gift-existing-shop-merchandise";
+import {
+  GOOGLE_SHOPPING_CREDIT_PACKS,
+  googleShoppingCreditPackById,
+} from "@/lib/google-shopping-credit-packs";
+import { LISTING_CREDIT_PACKS, listingCreditPackById } from "@/lib/listing-credit-packs";
 import {
   PROMOTION_KIND_OPTIONS,
   promotionKindLabel,
@@ -24,18 +30,47 @@ function formatUsd(cents: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
+const INITIAL_PROMOTION_QTY: Record<PromotionKind, string> = Object.fromEntries(
+  PROMOTION_KIND_OPTIONS.map((o) => [o.kind, "0"]),
+) as Record<PromotionKind, string>;
+
+const GIFT_PROMOTION_ROW_LABEL: Partial<Record<PromotionKind, string>> = {
+  [PromotionKind.HOT_FEATURED_ITEM]: "Hot Item Promo",
+  [PromotionKind.MOST_POPULAR_OF_TAG_ITEM]: "Popular Item Promo",
+  [PromotionKind.FEATURED_SHOP_HOME]: "Featured Shop Promo",
+};
+
+function giftPromotionPriceLabel(cents: number): string {
+  return cents % 100 === 0 ? `$${cents / 100}` : formatUsd(cents);
+}
+
+const GIFT_OPTION_ROW_CLASS =
+  "flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-1.5";
+const GIFT_PROMOTION_QTY_INPUT_CLASS =
+  "w-14 shrink-0 rounded-lg border border-zinc-700 bg-zinc-900 py-1 text-center text-sm tabular-nums text-zinc-100 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield] disabled:cursor-not-allowed disabled:opacity-50";
+const GIFT_OPTION_ROW_SELECT_CLASS =
+  "w-full min-w-0 cursor-pointer rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none [color-scheme:dark]";
+
+function giftCreditPackOptionLabel(credits: number, priceCents: number): string {
+  return `${credits} credits — ${giftPromotionPriceLabel(priceCents)}`;
+}
+
 export function GiftExistingShopForm(props: { onBack: () => void }) {
   const [includeListingCredits, setIncludeListingCredits] = useState(false);
+  const [listingCreditPackId, setListingCreditPackId] = useState(
+    LISTING_CREDIT_PACKS[0]?.id ?? "",
+  );
   const [includePromotionCredits, setIncludePromotionCredits] = useState(false);
   const [includeGoogleShoppingCredits, setIncludeGoogleShoppingCredits] = useState(false);
-  const [includeShopFlair, setIncludeShopFlair] = useState(false);
-  const [promotionKind, setPromotionKind] = useState<PromotionKind>(
-    PROMOTION_KIND_OPTIONS[0]?.kind ?? PromotionKind.HOT_FEATURED_ITEM,
+  const [googleShoppingCreditPackId, setGoogleShoppingCreditPackId] = useState(
+    GOOGLE_SHOPPING_CREDIT_PACKS[0]?.id ?? "",
   );
-  const [promotionCredits, setPromotionCredits] = useState("1");
+  const [includeShopFlair, setIncludeShopFlair] = useState(false);
+  const [promotionQtyByKind, setPromotionQtyByKind] =
+    useState<Record<PromotionKind, string>>(INITIAL_PROMOTION_QTY);
   const [selectedShop, setSelectedShop] = useState<GiftRecipientShopPick | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [, startTransition] = useTransition();
 
   const [state, action, pending] = useActionState<
     StartCreatorGiftCheckoutResult | undefined,
@@ -46,15 +81,47 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
     if (state?.ok) window.location.href = state.url;
   }, [state]);
 
-  const selectedPromotion = PROMOTION_KIND_OPTIONS.find((o) => o.kind === promotionKind);
-  const promotionUnitCents = selectedPromotion
-    ? promotionPriceCentsForKind(selectedPromotion.kind)
-    : 0;
-  const promotionQty = Number.parseInt(promotionCredits, 10);
-  const promotionGiftLabel =
-    includePromotionCredits && selectedPromotion && Number.isFinite(promotionQty) && promotionQty > 0
-      ? `${promotionQty} × ${promotionKindLabel(selectedPromotion.kind)} — ${formatUsd(promotionUnitCents * promotionQty)}`
+  const promotionSummaryLines = useMemo(() => {
+    if (!includePromotionCredits) return [];
+    return PROMOTION_KIND_OPTIONS.flatMap((option) => {
+      const qty = Number.parseInt(promotionQtyByKind[option.kind] ?? "0", 10);
+      if (!Number.isFinite(qty) || qty <= 0) return [];
+      const subtotalCents = promotionPriceCentsForKind(option.kind) * qty;
+      return [`${qty} × ${promotionKindLabel(option.kind)} — ${formatUsd(subtotalCents)}`];
+    });
+  }, [includePromotionCredits, promotionQtyByKind]);
+
+  const giftTotalMerchCents = useMemo(() => {
+    const promotionGrants = includePromotionCredits
+      ? PROMOTION_KIND_OPTIONS.flatMap((option) => {
+          const credits = Number.parseInt(promotionQtyByKind[option.kind] ?? "0", 10);
+          if (!Number.isFinite(credits) || credits <= 0) return [];
+          return [{ kind: option.kind, credits }];
+        })
+      : [];
+
+    const listingPack = includeListingCredits
+      ? listingCreditPackById(listingCreditPackId)
       : null;
+    const googlePack = includeGoogleShoppingCredits
+      ? googleShoppingCreditPackById(googleShoppingCreditPackId)
+      : null;
+
+    return existingShopGiftMerchandiseSubtotalCents({
+      listingPackPriceCents: listingPack?.priceCents ?? 0,
+      googlePackPriceCents: googlePack?.priceCents ?? 0,
+      promotionGrants,
+      includeShopFlair,
+    });
+  }, [
+    includeListingCredits,
+    listingCreditPackId,
+    includePromotionCredits,
+    promotionQtyByKind,
+    includeGoogleShoppingCredits,
+    googleShoppingCreditPackId,
+    includeShopFlair,
+  ]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -73,15 +140,12 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
 
     const fd = new FormData(form);
     fd.set("recipientShopSlug", resolved.shop.slug);
-    setSubmitting(true);
-    try {
-      await action(fd);
-    } finally {
-      setSubmitting(false);
-    }
+    startTransition(() => {
+      action(fd);
+    });
   }
 
-  const isPending = pending || submitting || state?.ok;
+  const isPending = pending || state?.ok;
 
   return (
     <div className="mt-8">
@@ -93,13 +157,14 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
         ← Back
       </button>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-5">
+      <form onSubmit={onSubmit} noValidate className="mt-6 space-y-5">
         <p className="text-sm leading-relaxed text-zinc-400">
           Gift credits are sent directly to the shop for use, with a notification that you gifted
           them.
         </p>
 
         <GiftCreatorShopPicker
+          fieldError={clientError}
           onSelectedChange={(shop) => {
             setSelectedShop(shop);
             setClientError(null);
@@ -137,18 +202,27 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
                 </span>
               </span>
             </label>
-            <select
-              name="listingCreditPackId"
-              disabled={!includeListingCredits}
-              defaultValue={LISTING_CREDIT_PACKS[0]?.id ?? ""}
-              className="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {LISTING_CREDIT_PACKS.map((pack) => (
-                <option key={pack.id} value={pack.id}>
-                  {pack.label}
-                </option>
-              ))}
-            </select>
+            <ul className="mt-3 space-y-2">
+              <li>
+                <select
+                  name="listingCreditPackId"
+                  value={listingCreditPackId}
+                  aria-label="Listing credit pack"
+                  className={GIFT_OPTION_ROW_SELECT_CLASS}
+                  onFocus={() => setIncludeListingCredits(true)}
+                  onChange={(e) => {
+                    setListingCreditPackId(e.target.value);
+                    setIncludeListingCredits(true);
+                  }}
+                >
+                  {LISTING_CREDIT_PACKS.map((pack) => (
+                    <option key={pack.id} value={pack.id}>
+                      {giftCreditPackOptionLabel(pack.credits, pack.priceCents)}
+                    </option>
+                  ))}
+                </select>
+              </li>
+            </ul>
           </div>
 
           <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 text-sm text-zinc-300">
@@ -161,39 +235,51 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
                 className="mt-1"
               />
               <span>
-                <span className="block font-medium text-zinc-100">Still Wet Visibility</span>
+                <span className="block font-medium text-zinc-100">Upgrades</span>
                 <span className="mt-1 block text-xs leading-relaxed text-zinc-500">
                   Promotions help boost shop/item visibility for two week periods.
                 </span>
               </span>
             </label>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <select
-                name="promotionKind"
-                disabled={!includePromotionCredits}
-                value={promotionKind}
-                onChange={(e) => setPromotionKind(e.target.value as PromotionKind)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {PROMOTION_KIND_OPTIONS.map((o) => (
-                  <option key={o.kind} value={o.kind}>
-                    {o.label} — {formatUsd(o.amountCents)} each
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                name="promotionCredits"
-                min={1}
-                max={10}
-                disabled={!includePromotionCredits}
-                value={promotionCredits}
-                onChange={(e) => setPromotionCredits(e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-            {promotionGiftLabel ? (
-              <p className="mt-2 text-xs text-zinc-500">{promotionGiftLabel}</p>
+            <ul className="mt-3 space-y-2">
+              {PROMOTION_KIND_OPTIONS.map((option) => (
+                <li
+                  key={option.kind}
+                  className={GIFT_OPTION_ROW_CLASS}
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm text-zinc-200">
+                    {GIFT_PROMOTION_ROW_LABEL[option.kind] ?? option.label} —{" "}
+                    <span className="tabular-nums text-zinc-500">
+                      {giftPromotionPriceLabel(option.amountCents)}
+                    </span>
+                  </span>
+                  <input
+                    type="number"
+                    name={promotionGrantFormFieldName(option.kind)}
+                    min={0}
+                    max={10}
+                    value={promotionQtyByKind[option.kind]}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setPromotionQtyByKind((prev) => ({
+                        ...prev,
+                        [option.kind]: value,
+                      }));
+                      const qty = Number.parseInt(value, 10);
+                      if (Number.isFinite(qty) && qty >= 1) {
+                        setIncludePromotionCredits(true);
+                      }
+                    }}
+                    aria-label={`${GIFT_PROMOTION_ROW_LABEL[option.kind] ?? option.label} quantity`}
+                    className={GIFT_PROMOTION_QTY_INPUT_CLASS}
+                  />
+                </li>
+              ))}
+            </ul>
+            {promotionSummaryLines.length > 0 ? (
+              <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+                {promotionSummaryLines.join(", ")}
+              </p>
             ) : null}
           </div>
 
@@ -209,22 +295,31 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
               <span>
                 <span className="block font-medium text-zinc-100">Google Visibility</span>
                 <span className="mt-1 block text-xs leading-relaxed text-zinc-500">
-                  Help drive Google traffic to a shop.
+                  Help drive Google traffic to a shop with Google Shopping.
                 </span>
               </span>
             </label>
-            <select
-              name="googleShoppingCreditPackId"
-              disabled={!includeGoogleShoppingCredits}
-              defaultValue={GOOGLE_SHOPPING_CREDIT_PACKS[0]?.id ?? ""}
-              className="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {GOOGLE_SHOPPING_CREDIT_PACKS.map((pack) => (
-                <option key={pack.id} value={pack.id}>
-                  {pack.label}
-                </option>
-              ))}
-            </select>
+            <ul className="mt-3 space-y-2">
+              <li>
+                <select
+                  name="googleShoppingCreditPackId"
+                  value={googleShoppingCreditPackId}
+                  aria-label="Google Shopping credit pack"
+                  className={GIFT_OPTION_ROW_SELECT_CLASS}
+                  onFocus={() => setIncludeGoogleShoppingCredits(true)}
+                  onChange={(e) => {
+                    setGoogleShoppingCreditPackId(e.target.value);
+                    setIncludeGoogleShoppingCredits(true);
+                  }}
+                >
+                  {GOOGLE_SHOPPING_CREDIT_PACKS.map((pack) => (
+                    <option key={pack.id} value={pack.id}>
+                      {giftCreditPackOptionLabel(pack.credits, pack.priceCents)}
+                    </option>
+                  ))}
+                </select>
+              </li>
+            </ul>
           </div>
 
           <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 text-sm text-zinc-300">
@@ -243,33 +338,36 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
                 </span>
               </span>
             </label>
-            <div
-              className={`mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 ${
-                !includeShopFlair ? "cursor-not-allowed opacity-50" : ""
-              }`}
-            >
-              1 flair — {formatUsd(SHOP_FLAIR_ACCESS_PRICE_CENTS).replace(".00", "")}
-            </div>
+            <ul className="mt-3 space-y-2">
+              <li
+                className={`${GIFT_OPTION_ROW_CLASS} ${
+                  !includeShopFlair ? "cursor-not-allowed opacity-50" : ""
+                }`}
+              >
+                <span className="min-w-0 flex-1 truncate text-sm text-zinc-200">
+                  Shop Flair —{" "}
+                  <span className="tabular-nums text-zinc-500">
+                    {giftPromotionPriceLabel(SHOP_FLAIR_ACCESS_PRICE_CENTS)}
+                  </span>
+                </span>
+              </li>
+            </ul>
           </div>
         </fieldset>
 
-        {clientError ? (
-          <p className="text-sm text-amber-400" role="alert">
-            {clientError}
-          </p>
-        ) : null}
-        {state && !state.ok ? (
-          <p className="text-sm text-amber-400" role="alert">
-            {state.error}
-          </p>
-        ) : null}
+        {state && !state.ok ? <FormValidationAlert message={state.error} /> : null}
 
         <button
           type="submit"
           disabled={isPending}
-          className="w-full rounded-lg border border-zinc-600 bg-zinc-800 py-2.5 text-sm font-medium text-zinc-100 hover:bg-zinc-700 disabled:opacity-50"
+          className="flex w-full items-center justify-between gap-3 rounded-lg border border-zinc-600 bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-100 hover:bg-zinc-700 disabled:opacity-50"
         >
-          {isPending ? "Starting checkout…" : "Continue to checkout"}
+          <span>{isPending ? "Starting checkout…" : "Continue to checkout"}</span>
+          {!isPending ? (
+            <span className="shrink-0 tabular-nums text-zinc-400">
+              Gift Total {formatUsd(giftTotalMerchCents)}
+            </span>
+          ) : null}
         </button>
       </form>
     </div>
