@@ -16,6 +16,8 @@ export type PlatformSalesBreakdownRow = {
   emphasize?: boolean;
   /** Muted gray amount (platform fee lines below Paid/COGS/Stripe). */
   mutedValue?: boolean;
+  /** Full-brightness amount (e.g. shop payout subheader). */
+  brightValue?: boolean;
   /** Mid-table group header (e.g. application amount before COGS). */
   subheader?: boolean;
   /** Indented row under a subheader. */
@@ -47,20 +49,37 @@ export function PlatformRevenueBreakdownTable({
   rows: PlatformSalesBreakdownRow[];
 }) {
   const subtleTone = subtle;
+  const shopHeader = tone === "shop";
   const wrapClass = solidBackground
     ? "overflow-visible rounded-md border border-zinc-800 bg-zinc-950"
     : subtle
       ? "overflow-hidden rounded-md border border-zinc-800/40"
       : "overflow-hidden rounded-md border border-zinc-800/70";
-  const headerWrapClass = solidBackground
-    ? "border-b border-blue-500/45 bg-zinc-900 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+  const headerWrapClass = shopHeader
+    ? solidBackground
+      ? "border-b border-blue-500/55 bg-blue-950/55 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+      : subtleTone
+        ? "border-b border-blue-500/40 bg-blue-950/35 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+        : "border-b border-blue-500/55 bg-blue-950/45 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+    : solidBackground
+      ? "border-b border-blue-500/45 bg-zinc-900 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+      : subtleTone
+        ? "border-b border-blue-500/25 bg-blue-950/20 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+        : "border-b border-blue-500/45 bg-blue-950/35 px-2 py-1 text-[10px] font-medium uppercase tracking-wide";
+  const headerTitleClass = shopHeader
+    ? subtleTone
+      ? "text-blue-400/90"
+      : "text-blue-400"
     : subtleTone
-      ? "border-b border-blue-500/25 bg-blue-950/20 px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
-      : "border-b border-blue-500/45 bg-blue-950/35 px-2 py-1 text-[10px] font-medium uppercase tracking-wide";
-  const headerTitleClass = subtleTone ? "text-blue-400/55" : "text-blue-400/90";
-  const headerTotalClass = subtleTone
-    ? "text-xs normal-case tabular-nums text-blue-200/75"
-    : "text-xs normal-case tabular-nums text-blue-100";
+      ? "text-blue-400/55"
+      : "text-blue-400/90";
+  const headerTotalClass = shopHeader
+    ? subtleTone
+      ? "text-xs normal-case tabular-nums text-blue-300/90"
+      : "text-xs normal-case tabular-nums text-blue-200"
+    : subtleTone
+      ? "text-xs normal-case tabular-nums text-blue-200/75"
+      : "text-xs normal-case tabular-nums text-blue-100";
   const labelClass = "text-right text-[10px] uppercase tracking-wide text-zinc-600";
   const nestedLabelClass = "text-right text-[10px] uppercase tracking-wide text-zinc-600 pl-3";
   const subheaderLabelClass =
@@ -77,6 +96,7 @@ export function PlatformRevenueBreakdownTable({
   }
 
   function rowValueClass(row: PlatformSalesBreakdownRow) {
+    if (row.brightValue) return "text-white";
     if (row.subheader || row.mutedValue) return "text-zinc-500";
     if (subtle) return "text-zinc-400";
     return "text-zinc-200";

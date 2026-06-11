@@ -82,12 +82,12 @@ function PlatformRevenueTotalsCard({
               rows={[
                 {
                   label: "Paid",
-                  hint: "Total amount paid, including tip, and payment processing fee (stripe est. + tip fee)",
+                  hint: "Total amount charged to the card",
                   cents: totals.itemCheckoutPaidCents,
                 },
                 {
                   label: "Stripe fee",
-                  hint: "Stripe balance fee on item checkouts (2.9% + 30¢ on full charge, rounded).",
+                  hint: "Stripe's fee (2.9% + .30)",
                   hintPosition: "below",
                   cents: -totals.shopSalesPaymentProcessingCents,
                 },
@@ -95,10 +95,11 @@ function PlatformRevenueTotalsCard({
                   label: "Shop payout",
                   hint: "Creator shop merchandise profit + tip",
                   cents: -periodShopPayoutCents(totals),
+                  brightValue: true,
                 },
                 {
                   label: "Application amount",
-                  hint: "COGS + production fee + platform cut + buyer Stripe payment-processing pass-through",
+                  hint: "Stripe deducts this from Paid to calculate shop payouts",
                   cents: periodApplicationAmountCents(totals),
                   subheader: true,
                 },

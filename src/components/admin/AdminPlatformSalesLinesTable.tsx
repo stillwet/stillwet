@@ -61,31 +61,65 @@ function mergedLineDetailRows(
   if (!profitOnlyListingSplit) {
     rows.push({
       label: "Paid",
-      hint:
-        l.kind === "merchandise"
-          ? "Total amount paid, including tip, and payment processing fee (stripe est. + tip fee)"
-          : "Total transaction (promotion + Est. Stripe fee)",
+      hint: "Total amount charged to the card",
       cents: mergedLineCheckoutPaidCents(l),
-    });
-  }
-
-  if (!profitOnlyListingSplit && mergedLineStripeBalanceFeeCents(l) > 0) {
-    rows.push({
-      label: "Stripe fee",
-      hint:
-        l.kind === "merchandise"
-          ? "Stripe balance fee on this row's share of the checkout total (2.9% + 30¢)"
-          : "Actual Stripe fee owed",
-      hintPosition: "below",
-      cents: -mergedLineStripeBalanceFeeCents(l),
     });
   }
 
   if (l.kind === "merchandise") {
     rows.push({
+      label: "Application amount",
+      hint: "Stripe deducts this from Paid to calculate shop payouts",
+      cents: mergedLineApplicationAmountCents(l),
+      subheader: true,
+    });
+    if (!profitOnlyListingSplit && mergedLineStripeBalanceFeeCents(l) > 0) {
+      rows.push({
+        label: "Stripe fee",
+        hint: "Stripe's fee (2.9% + .30)",
+        hintPosition: "below",
+        cents: -mergedLineStripeBalanceFeeCents(l),
+      });
+    }
+    if (l.goodsServicesCostCents > 0) {
+      rows.push({
+        label: "COGS",
+        hint: "Amount Printify will bill",
+        cents: -l.goodsServicesCostCents,
+        nested: true,
+      });
+    }
+    rows.push({
+      label: "Prod Fee",
+      hint: "Platform additional fees",
+      cents: l.productionFeeCents,
+      mutedValue: true,
+      nested: true,
+    });
+    if (l.platformCutCents > 0) {
+      rows.push({
+        label: "10% Cut",
+        hint: `${marketplacePlatformFeePercent()}% platform fee on merchandise`,
+        cents: l.platformCutCents,
+        mutedValue: true,
+        nested: true,
+      });
+    }
+    if (l.tipProcessingFeeCents > 0) {
+      rows.push({
+        label: "Tip Fee",
+        hint: "Reference only — not included in application amount",
+        cents: l.tipProcessingFeeCents,
+        mutedValue: true,
+        referenceOnly: true,
+      });
+    }
+    rows.push({
       label: "Shop payout",
       hint: "Expected Stripe Connect transfer to the shop (merchandise shop cut + tip)",
       cents: -mergedLineShopPayoutCents(l),
+      subheader: true,
+      brightValue: true,
     });
     if (
       stripeShopTransferCents != null &&
@@ -96,45 +130,19 @@ function mergedLineDetailRows(
         hint: "Actual Connect transfer from Stripe (differs from persisted shop cut at checkout)",
         cents: -stripeShopTransferCents,
         mutedValue: true,
-      });
-    }
-    rows.push({
-      label: "Application amount",
-      hint: "COGS + production fee + platform cut + buyer Stripe payment-processing pass-through",
-      cents: mergedLineApplicationAmountCents(l),
-      subheader: true,
-    });
-    if (l.goodsServicesCostCents > 0) {
-      rows.push({
-        label: "COGS",
-        hint: "Amount Printify will bill",
-        cents: -l.goodsServicesCostCents,
         nested: true,
       });
     }
-  }
-
-  if (l.kind === "merchandise" && l.platformCutCents > 0) {
+  } else if (!profitOnlyListingSplit && mergedLineStripeBalanceFeeCents(l) > 0) {
     rows.push({
-      label: "10% Cut",
-      hint: `${marketplacePlatformFeePercent()}% platform fee on merchandise`,
-      cents: l.platformCutCents,
-      mutedValue: true,
-      nested: true,
+      label: "Stripe fee",
+      hint: "Stripe's fee (2.9% + .30)",
+      hintPosition: "below",
+      cents: -mergedLineStripeBalanceFeeCents(l),
     });
   }
 
-  if (l.kind === "merchandise") {
-    rows.push({
-      label: "Prod Fee",
-      hint: "Platform additional fees",
-      cents: l.productionFeeCents,
-      mutedValue: true,
-      nested: true,
-    });
-  }
-
-  if (l.tipProcessingFeeCents > 0) {
+  if (l.kind !== "merchandise" && l.tipProcessingFeeCents > 0) {
     rows.push({
       label: "Tip Fee",
       hint: "Reference only — not included in application amount",
