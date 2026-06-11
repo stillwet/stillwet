@@ -17,8 +17,13 @@ import { existingShopGiftMerchandiseSubtotalCents } from "@/lib/creator-gift-exi
 import {
   GOOGLE_SHOPPING_CREDIT_PACKS,
   googleShoppingCreditPackById,
+  parseGoogleShoppingCreditPackId,
 } from "@/lib/google-shopping-credit-packs";
-import { LISTING_CREDIT_PACKS, listingCreditPackById } from "@/lib/listing-credit-packs";
+import {
+  LISTING_CREDIT_PACKS,
+  listingCreditPackById,
+  parseListingCreditPackId,
+} from "@/lib/listing-credit-packs";
 import {
   PROMOTION_KIND_OPTIONS,
   promotionKindLabel,
@@ -57,13 +62,11 @@ function giftCreditPackOptionLabel(credits: number, priceCents: number): string 
 
 export function GiftExistingShopForm(props: { onBack: () => void }) {
   const [includeListingCredits, setIncludeListingCredits] = useState(false);
-  const [listingCreditPackId, setListingCreditPackId] = useState(
-    LISTING_CREDIT_PACKS[0]?.id ?? "",
-  );
+  const [listingCreditPackId, setListingCreditPackId] = useState(LISTING_CREDIT_PACKS[0]!.id);
   const [includePromotionCredits, setIncludePromotionCredits] = useState(false);
   const [includeGoogleShoppingCredits, setIncludeGoogleShoppingCredits] = useState(false);
   const [googleShoppingCreditPackId, setGoogleShoppingCreditPackId] = useState(
-    GOOGLE_SHOPPING_CREDIT_PACKS[0]?.id ?? "",
+    GOOGLE_SHOPPING_CREDIT_PACKS[0]!.id,
   );
   const [includeShopFlair, setIncludeShopFlair] = useState(false);
   const [promotionQtyByKind, setPromotionQtyByKind] =
@@ -211,7 +214,9 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
                   className={GIFT_OPTION_ROW_SELECT_CLASS}
                   onFocus={() => setIncludeListingCredits(true)}
                   onChange={(e) => {
-                    setListingCreditPackId(e.target.value);
+                    const next = parseListingCreditPackId(e.target.value);
+                    if (!next) return;
+                    setListingCreditPackId(next);
                     setIncludeListingCredits(true);
                   }}
                 >
@@ -308,7 +313,9 @@ export function GiftExistingShopForm(props: { onBack: () => void }) {
                   className={GIFT_OPTION_ROW_SELECT_CLASS}
                   onFocus={() => setIncludeGoogleShoppingCredits(true)}
                   onChange={(e) => {
-                    setGoogleShoppingCreditPackId(e.target.value);
+                    const next = parseGoogleShoppingCreditPackId(e.target.value);
+                    if (!next) return;
+                    setGoogleShoppingCreditPackId(next);
                     setIncludeGoogleShoppingCredits(true);
                   }}
                 >
