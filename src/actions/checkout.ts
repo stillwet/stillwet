@@ -32,7 +32,10 @@ import {
   baselineProductionFeeUnitCents,
 } from "@/lib/baseline-goods-services-unit-cents";
 import { itemCostLineCents, splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
-import { orderConnectMerchandiseApplicationFeeCents } from "@/lib/order-proceeds-splits";
+import {
+  orderConnectMerchandiseApplicationFeeCents,
+  orderConnectShopTransferCents,
+} from "@/lib/order-proceeds-splits";
 import { formatBuyerOrderNumber } from "@/lib/buyer-order-number";
 import { allocatePlatformOrderNumber } from "@/lib/platform-transaction-reference";
 import {
@@ -448,6 +451,10 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
       merchandiseApplicationFeeCents,
       tipCents,
     }) + (useStripeConnect ? paymentProcessingCents : 0);
+  const expectedShopTransferCents = orderConnectShopTransferCents({
+    lines: lineInputs,
+    tipCents,
+  });
   const connectAccountId = useStripeConnect ? shopRecord!.stripeConnectAccountId! : null;
   const orderNumberMeta = String(order.orderNumber);
   const paymentIntentData: {
@@ -465,6 +472,15 @@ async function startCheckoutInner(formData: FormData): Promise<CheckoutResult> {
             tipCents: String(tipCents),
             tipProcessingSurchargeCents: String(tipProcessingSurchargeCents),
             paymentProcessingCents: String(paymentProcessingCents),
+            expectedApplicationFeeCents: String(applicationFeeCents),
+            expectedShopTransferCents: String(expectedShopTransferCents),
+            expectedMerchandiseApplicationFeeCents: String(merchandiseApplicationFeeCents),
+            lineSplitSnapshot: lineInputs
+              .map(
+                (row) =>
+                  `${row.goodsServicesCostCents},${row.productionFeeCents},${row.platformCutCents},${row.shopCutCents}`,
+              )
+              .join("|"),
           }
         : {}),
     },

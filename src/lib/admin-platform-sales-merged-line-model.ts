@@ -1,5 +1,6 @@
 /** Client-safe types and pure helpers for Platform sales merged lines (no Prisma / Node imports). */
 
+import { orderLinePlatformMerchandiseTakeCents } from "@/lib/order-proceeds-splits";
 import {
   buyerCheckoutTotalCents,
 } from "@/lib/stripe-card-processing-fee";
@@ -64,7 +65,12 @@ export type AdminPlatformSalesMergedLine =
       stripeFeeCents: number;
       /** 25¢ cart-tip processing surcharge allocated to this row (0 when no tip). */
       tipProcessingFeeCents: number;
-      order: { id: string; createdAt: Date; orderNumber: number };
+      order: {
+        id: string;
+        createdAt: Date;
+        orderNumber: number;
+        stripePaymentIntentId: string | null;
+      };
       shop: { displayName: string; slug: string } | null;
       buyer: AdminPlatformSalesBuyer;
       itemHref: string | null;
@@ -185,13 +191,19 @@ export function mergedLineBuyerPaymentProcessingPassThroughCents(
 }
 
 /**
- * Merchandise Connect application amount (platform share before COGS breakdown):
- * buyer Paid − Shop payout. Matches Stripe `application_fee_amount` + shipping retained
- * on the platform account; Stripe balance fees are separate.
+ * Merchandise Connect application amount (COGS + production fee + platform cut only).
+ * Excludes buyer payment-processing pass-through shown in Paid.
  */
 export function mergedLineApplicationAmountCents(l: AdminPlatformSalesMergedLine): number {
+  return mergedLineMerchandiseApplicationAmountCents(l);
+}
+
+/** COGS + production fee + platform cut for one merchandise row. */
+export function mergedLineMerchandiseApplicationAmountCents(
+  l: AdminPlatformSalesMergedLine,
+): number {
   if (l.kind !== "merchandise") return 0;
-  return mergedLineCheckoutPaidCents(l) - mergedLineShopPayoutCents(l);
+  return orderLinePlatformMerchandiseTakeCents(l);
 }
 
 /** Per-row shop/platform checkout breakdown header: Paid − Shop payout − COGS − Stripe balance fee. */

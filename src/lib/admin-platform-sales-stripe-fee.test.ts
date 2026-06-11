@@ -17,7 +17,6 @@ import {
   mergedLineStripeBalanceFeeCents,
   platformCheckoutFullChargeCents,
 } from "@/lib/admin-platform-sales-merged-line-model";
-import { orderConnectApplicationFeeCents } from "@/lib/order-proceeds-splits";
 import { splitMerchandiseLineWithItemCostCents } from "@/lib/item-cost-cents";
 import { SHOP_FLAIR_ACCESS_PRICE_CENTS } from "@/lib/shop-flair";
 import { shopFlairPurchaseMerchandiseCents } from "@/lib/admin-platform-shop-upgrades-revenue";
@@ -119,7 +118,7 @@ describe("merchandise order admin line breakdown", () => {
     );
   });
 
-  it("application amount is paid minus shop payout (Connect fee), not minus stripe balance fee", () => {
+  it("application amount is COGS + production fee + platform cut (merchandise only)", () => {
     const subtotalCents = 2500;
     const tipCents = 100;
     const shippingCents = 500;
@@ -155,33 +154,25 @@ describe("merchandise order admin line breakdown", () => {
       shopCutCents: split.shopCutCents,
       stripeFeeCents: merchandiseOrderStripeBalanceFeeCents(order),
       tipProcessingFeeCents: PLATFORM_TIP_FEE_CENTS,
-      order: { id: "order-1", createdAt: new Date(), orderNumber: 1257 },
+      order: {
+        id: "order-1",
+        createdAt: new Date(),
+        orderNumber: 1257,
+        stripePaymentIntentId: null,
+      },
       shop: null,
       buyer: { email: null, shippingState: null, shippingCountry: null },
       itemHref: null,
     };
 
     const applicationAmount = mergedLineApplicationAmountCents(line);
-    const connectApplicationFee = orderConnectApplicationFeeCents({
-      lines: [
-        {
-          goodsServicesCostCents: split.goodsServicesCostCents,
-          productionFeeCents: split.productionFeeCents,
-          platformCutCents: split.platformCutCents,
-        },
-      ],
-      tipCents,
-      paymentProcessingCents: processing,
-    });
+    const merchandiseApplication =
+      split.goodsServicesCostCents + split.productionFeeCents + split.platformCutCents;
 
     assert.equal(mergedLineShopPayoutCents(line), split.shopCutCents + tipCents);
-    assert.equal(applicationAmount, order.totalCents - mergedLineShopPayoutCents(line));
-    assert.equal(applicationAmount, connectApplicationFee + shippingCents);
+    assert.equal(applicationAmount, merchandiseApplication);
+    assert.notEqual(applicationAmount, order.totalCents - mergedLineShopPayoutCents(line));
     assert.ok(mergedLineStripeBalanceFeeCents(line) > 0);
-    assert.notEqual(
-      applicationAmount,
-      order.totalCents - mergedLineStripeBalanceFeeCents(line) - mergedLineShopPayoutCents(line),
-    );
   });
 
   it("buyer payment processing pass-through is nested under application amount", () => {
@@ -219,7 +210,7 @@ describe("merchandise order admin line breakdown", () => {
         totalCents: subtotalCents + processing,
       }),
       tipProcessingFeeCents: 0,
-      order: { id: "order-mug", createdAt: new Date(), orderNumber: 1274 },
+      order: { id: "order-mug", createdAt: new Date(), orderNumber: 1274, stripePaymentIntentId: null },
       shop: null,
       buyer: { email: null, shippingState: null, shippingCountry: null },
       itemHref: null,
@@ -228,7 +219,44 @@ describe("merchandise order admin line breakdown", () => {
     assert.equal(split.shopCutCents, 704);
     assert.equal(mergedLineShopPayoutCents(line), 704);
     assert.equal(mergedLineBuyerPaymentProcessingPassThroughCents(line), processing);
-    assert.equal(mergedLineApplicationAmountCents(line), subtotalCents + processing - 704);
+    assert.equal(
+      mergedLineApplicationAmountCents(line),
+      split.goodsServicesCostCents + split.productionFeeCents + split.platformCutCents,
+    );
+    assert.equal(mergedLineApplicationAmountCents(line), 1796);
+  });
+
+  it("$25 mug with COGS 1192 and prod 575 shows $18.40 application amount", () => {
+    const subtotalCents = 2500;
+    const split = splitMerchandiseLineWithItemCostCents({
+      lineMerchandiseCents: subtotalCents,
+      cogsLineCents: 1192,
+      productionFeeLineCents: 575,
+    });
+    const line = {
+      kind: "merchandise" as const,
+      platformSaleCategory: "item" as const,
+      id: "line-1276",
+      quantity: 1,
+      unitPriceCents: subtotalCents,
+      productName: "Pathetic Mug",
+      checkoutTotalCents: 2606,
+      itemPriceCents: subtotalCents,
+      tipCents: 0,
+      goodsServicesCostCents: split.goodsServicesCostCents,
+      productionFeeCents: split.productionFeeCents,
+      platformCutCents: split.platformCutCents,
+      shopCutCents: split.shopCutCents,
+      stripeFeeCents: 0,
+      tipProcessingFeeCents: 0,
+      order: { id: "order-1276", createdAt: new Date(), orderNumber: 1276, stripePaymentIntentId: null },
+      shop: null,
+      buyer: { email: null, shippingState: null, shippingCountry: null },
+      itemHref: null,
+    };
+
+    assert.equal(split.shopCutCents, 660);
+    assert.equal(mergedLineApplicationAmountCents(line), 1840);
   });
 
   it("stripe balance fee uses full checkout total, not buyer pass-through gross-up", () => {

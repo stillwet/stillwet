@@ -74,6 +74,7 @@ const orderLineInclude = {
       tipCents: true,
       shippingCents: true,
       totalCents: true,
+      stripePaymentIntentId: true,
     },
   },
   shop: { select: { displayName: true, slug: true } },
@@ -739,7 +740,12 @@ export async function loadMergedPlatformSalesLines(
       l.order,
       lineMerch,
     ),
-    order: { id: l.order.id, createdAt: l.order.createdAt, orderNumber: l.order.orderNumber },
+    order: {
+      id: l.order.id,
+      createdAt: l.order.createdAt,
+      orderNumber: l.order.orderNumber,
+      stripePaymentIntentId: l.order.stripePaymentIntentId,
+    },
     shop: l.shop,
     buyer: {
       email: l.order.email,
@@ -1066,14 +1072,11 @@ export function periodShopPayoutCents(
   return totals.itemShopCutCents + totals.itemShopTipCents;
 }
 
-/** Period Connect application amount: buyer paid merchandise total − shop payout. */
+/** Period merchandise Connect application amount: COGS + production fee + platform cut. */
 export function periodApplicationAmountCents(
-  totals: Pick<
-    PlatformSalesPeriodTotals,
-    "itemCheckoutPaidCents" | "itemShopCutCents" | "itemShopTipCents"
-  >,
+  totals: Pick<PlatformSalesPeriodTotals, "itemPlatformMerchandiseTakeCents">,
 ): number {
-  return totals.itemCheckoutPaidCents - periodShopPayoutCents(totals);
+  return totals.itemPlatformMerchandiseTakeCents;
 }
 
 /** Shop sales breakdown header: Paid − Shop payout − COGS − Stripe balance fee. */

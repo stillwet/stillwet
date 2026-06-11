@@ -30,6 +30,7 @@ export function PlatformRevenueBreakdownTable({
   subtle = false,
   solidBackground = false,
   tone = "platform",
+  layout = "table",
   sectionTitle,
   headerTotalCents,
   rows,
@@ -39,6 +40,8 @@ export function PlatformRevenueBreakdownTable({
   solidBackground?: boolean;
   /** Platform sales breakdowns use blue headers; shop merchandise uses neutral zinc. */
   tone?: "platform" | "shop";
+  /** `stacked` puts label and amount on separate lines (narrow viewports). */
+  layout?: "table" | "stacked";
   sectionTitle: string;
   headerTotalCents?: number;
   rows: PlatformSalesBreakdownRow[];
@@ -65,57 +68,91 @@ export function PlatformRevenueBreakdownTable({
   const rowBorder = solidBackground ? "border-zinc-800" : subtle ? "border-zinc-800/35" : "border-zinc-800/50";
   const emphasizeRow = solidBackground ? "bg-zinc-900" : subtle ? "bg-zinc-950/25" : "bg-zinc-950/40";
   const subheaderRow = solidBackground ? "bg-zinc-900/95" : subtle ? "bg-zinc-950/40" : "bg-zinc-950/55";
+  const stacked = layout === "stacked";
+
+  function rowLabelClass(row: PlatformSalesBreakdownRow) {
+    if (row.subheader) return subheaderLabelClass;
+    if (row.nested) return nestedLabelClass;
+    return labelClass;
+  }
+
+  function rowValueClass(row: PlatformSalesBreakdownRow) {
+    if (row.subheader || row.mutedValue) return "text-zinc-500";
+    if (subtle) return "text-zinc-400";
+    return "text-zinc-200";
+  }
+
+  function renderRowLabel(row: PlatformSalesBreakdownRow) {
+    if (row.hint) {
+      return (
+        <BreakdownLabelHint
+          label={row.label}
+          hint={row.hint}
+          hintPosition={row.hintPosition}
+          elevated={solidBackground}
+        />
+      );
+    }
+    return row.label;
+  }
+
+  function renderRowValue(row: PlatformSalesBreakdownRow) {
+    return row.displayValue ?? formatAdminPlatformSalesPrice(row.cents);
+  }
 
   return (
     <div className={wrapClass}>
-      <div className={`${headerWrapClass} flex items-baseline justify-between gap-2`}>
-        <span className={headerTitleClass}>{sectionTitle}</span>
+      <div
+        className={`${headerWrapClass} flex items-baseline justify-between gap-2 ${
+          stacked ? "flex-wrap" : ""
+        }`}
+      >
+        <span className={`${headerTitleClass}${stacked ? " min-w-0 break-words" : ""}`}>
+          {sectionTitle}
+        </span>
         {headerTotalCents != null ? (
-          <span className={headerTotalClass}>{formatAdminPlatformSalesPrice(headerTotalCents)}</span>
+          <span className={`${headerTotalClass} shrink-0`}>
+            {formatAdminPlatformSalesPrice(headerTotalCents)}
+          </span>
         ) : null}
       </div>
-      <table className={`w-full border-collapse text-xs${solidBackground ? " overflow-visible" : ""}`}>
-        <tbody>
+      {stacked ? (
+        <div className={`divide-y ${rowBorder}`}>
           {rows.map((row) => (
-            <tr
+            <div
               key={row.label}
-              className={`border-b ${rowBorder} last:border-b-0 ${
+              className={`px-2 py-1.5 ${
                 row.subheader ? subheaderRow : row.emphasize ? emphasizeRow : ""
               }`}
             >
-              <td
-                className={`overflow-visible px-2 py-1.5 ${
-                  row.subheader ? subheaderLabelClass : row.nested ? nestedLabelClass : labelClass
-                }`}
-              >
-                {row.hint ? (
-                  <BreakdownLabelHint
-                    label={row.label}
-                    hint={row.hint}
-                    hintPosition={row.hintPosition}
-                    elevated={solidBackground}
-                  />
-                ) : (
-                  row.label
-                )}
-              </td>
-              <td
-                className={`px-2 py-1.5 text-right tabular-nums ${
-                  row.subheader
-                    ? "text-zinc-500"
-                    : row.mutedValue
-                      ? "text-zinc-500"
-                      : subtle
-                        ? "text-zinc-400"
-                        : "text-zinc-200"
-                }`}
-              >
-                {row.displayValue ?? formatAdminPlatformSalesPrice(row.cents)}
-              </td>
-            </tr>
+              <div className={`${rowLabelClass(row)} break-words`}>{renderRowLabel(row)}</div>
+              <div className={`mt-0.5 text-right text-xs tabular-nums ${rowValueClass(row)}`}>
+                {renderRowValue(row)}
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      ) : (
+        <table className={`w-full border-collapse text-xs${solidBackground ? " overflow-visible" : ""}`}>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                key={row.label}
+                className={`border-b ${rowBorder} last:border-b-0 ${
+                  row.subheader ? subheaderRow : row.emphasize ? emphasizeRow : ""
+                }`}
+              >
+                <td className={`overflow-visible px-2 py-1.5 ${rowLabelClass(row)}`}>
+                  {renderRowLabel(row)}
+                </td>
+                <td className={`px-2 py-1.5 text-right tabular-nums ${rowValueClass(row)}`}>
+                  {renderRowValue(row)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

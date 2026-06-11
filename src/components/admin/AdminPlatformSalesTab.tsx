@@ -98,7 +98,7 @@ function PlatformRevenueTotalsCard({
                 },
                 {
                   label: "Application amount",
-                  hint: "Amount Stripe will payout to platform",
+                  hint: "Merchandise platform share (COGS + production fee + platform cut)",
                   cents: periodApplicationAmountCents(totals),
                   subheader: true,
                 },

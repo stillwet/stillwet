@@ -1,6 +1,8 @@
 import type Stripe from "stripe";
 import { OrderProceedsRouting, OrderStatus } from "@/generated/prisma/enums";
+import { merchandiseOrderPaymentProcessingCents } from "@/lib/admin-platform-sales-merged-lines";
 import { splitCheckoutTipCents } from "@/lib/checkout-tip";
+import { orderConnectSplitVerification } from "@/lib/order-proceeds-splits";
 import { prisma } from "@/lib/prisma";
 import { notifyShopNewSale } from "@/lib/shop-new-sale-notice";
 import { getStripe } from "@/lib/stripe";
@@ -90,6 +92,49 @@ export async function fulfillMerchandiseOrderFromCheckoutSession(
     order.proceedsRouting !== OrderProceedsRouting.platform_inactivity_deactivated
   ) {
     await notifyShopNewSale({ shopId: order.shopId, orderId });
+  }
+
+  if (
+    orderNewlyPaid &&
+    paymentIntentId &&
+    order.proceedsRouting === OrderProceedsRouting.standard
+  ) {
+    try {
+      const pi = await getStripe().paymentIntents.retrieve(paymentIntentId);
+      const stripeApplicationFeeCents = Math.max(0, pi.application_fee_amount ?? 0);
+      const stripeTransferCents = Math.max(0, pi.amount - stripeApplicationFeeCents);
+      const paymentProcessingCents = merchandiseOrderPaymentProcessingCents(order);
+      const verification = orderConnectSplitVerification({
+        lines: order.lines.map((line) => ({
+          goodsServicesCostCents: line.goodsServicesCostCents,
+          productionFeeCents: line.productionFeeCents,
+          platformCutCents: line.platformCutCents,
+          shopCutCents: line.shopCutCents,
+        })),
+        tipCents: order.tipCents,
+        paymentProcessingCents,
+        checkoutTotalCents: order.totalCents,
+        stripeApplicationFeeCents,
+        stripeTransferCents,
+      });
+      if (
+        verification.applicationFeeDeltaCents !== 0 ||
+        verification.transferShortfallCents !== 0
+      ) {
+        console.error("[orderConnectSplitVerification] Connect split mismatch", {
+          orderId,
+          orderNumber: order.orderNumber,
+          paymentIntentId,
+          ...verification,
+        });
+      }
+    } catch (e) {
+      console.error("[orderConnectSplitVerification] PaymentIntent retrieve failed", {
+        orderId,
+        paymentIntentId,
+        error: e,
+      });
+    }
   }
 
   return orderNewlyPaid;

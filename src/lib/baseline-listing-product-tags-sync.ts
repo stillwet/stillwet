@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import { OrderStatus } from "@/generated/prisma/enums";
 import { revalidatePublicStorefront } from "@/lib/revalidate-public-storefront";
 import { prisma } from "@/lib/prisma";
 import { PLATFORM_SHOP_SLUG, productHref } from "@/lib/marketplace-constants";
@@ -10,12 +11,31 @@ const PICK_PREFIX = "ab|";
 export function productSyncFieldsFromAdminCatalogItem(catalog: {
   name: string;
   itemMinPriceCents: number;
-}): { name: string; minPriceCents: number } {
+}): { name: string; minPriceCents: number; priceCents: number } {
   const name = catalog.name.trim().slice(0, 500);
+  const minPriceCents = Math.max(0, Math.round(catalog.itemMinPriceCents));
   return {
     name: name || "Listing request",
-    minPriceCents: Math.max(0, Math.round(catalog.itemMinPriceCents)),
+    minPriceCents,
+    priceCents: Math.max(1, minPriceCents),
   };
+}
+
+/**
+ * Deletes pending checkout orders for baseline listings so buyers restart with fresh splits.
+ * @internal Exported for unit tests.
+ */
+export async function deletePendingCheckoutOrdersForShopListingIds(
+  shopListingIds: readonly string[],
+): Promise<number> {
+  if (shopListingIds.length === 0) return 0;
+  const result = await prisma.order.deleteMany({
+    where: {
+      status: OrderStatus.pending_payment,
+      lines: { some: { shopListingId: { in: [...shopListingIds] } } },
+    },
+  });
+  return result.count;
 }
 
 /**
@@ -50,7 +70,9 @@ async function baselineListingsForCatalogItem(adminCatalogItemId: string) {
       ],
     },
     select: {
+      id: true,
       productId: true,
+      priceCents: true,
       shop: { select: { slug: true } },
       product: { select: { slug: true } },
     },
@@ -84,6 +106,8 @@ function revalidateAfterBaselineListingSync(params: {
 }): void {
   const { shopSlugs, tagSlugs, productHrefs } = params;
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/listings");
+  revalidatePath("/dashboard/orders");
   revalidatePath("/shop/all");
   for (const slug of tagSlugs) {
     revalidatePath(`/shop/tag/${slug}`);
@@ -102,23 +126,40 @@ function revalidateAfterBaselineListingSync(params: {
 
 /**
  * After an admin catalog item changes, push name/min-price/tags onto every baseline listing product
- * that references it, then revalidate storefront and dashboard caches.
+ * that references it, raise listing prices below the catalog floor, invalidate stale pending
+ * checkouts, then revalidate storefront and dashboard caches.
  *
  * COGS and production fees are **not** stored on listings — checkout and profit estimates read
  * `AdminCatalogItem` live via `baselineCatalogPickEncoded`.
  */
 export async function syncBaselineListingsFromAdminCatalogItemId(
   adminCatalogItemId: string,
-): Promise<{ listingCount: number; productCount: number }> {
+): Promise<{
+  listingCount: number;
+  productCount: number;
+  listingsRaisedToMinPrice: number;
+  pendingOrdersDeleted: number;
+}> {
   const catalog = await prisma.adminCatalogItem.findUnique({
     where: { id: adminCatalogItemId },
-    select: { name: true, itemMinPriceCents: true },
+    select: {
+      name: true,
+      itemMinPriceCents: true,
+      itemGoodsServicesCostCents: true,
+      itemProductionFeeCents: true,
+    },
   });
   if (!catalog) {
-    return { listingCount: 0, productCount: 0 };
+    return {
+      listingCount: 0,
+      productCount: 0,
+      listingsRaisedToMinPrice: 0,
+      pendingOrdersDeleted: 0,
+    };
   }
 
   const productFields = productSyncFieldsFromAdminCatalogItem(catalog);
+  const itemMinPriceCents = productFields.minPriceCents;
   const tagIds = await tagIdsForAdminCatalogItem(adminCatalogItemId);
   const tagRows =
     tagIds.length > 0
@@ -127,6 +168,23 @@ export async function syncBaselineListingsFromAdminCatalogItemId(
   const tagSlugs = tagRows.map((t) => t.slug);
 
   const listings = await baselineListingsForCatalogItem(adminCatalogItemId);
+  const listingIds = listings.map((row) => row.id);
+
+  const listingsRaisedToMinPrice =
+    itemMinPriceCents > 0
+      ? (
+          await prisma.shopListing.updateMany({
+            where: {
+              id: { in: listingIds },
+              priceCents: { lt: itemMinPriceCents },
+            },
+            data: { priceCents: itemMinPriceCents },
+          })
+        ).count
+      : 0;
+
+  const pendingOrdersDeleted = await deletePendingCheckoutOrdersForShopListingIds(listingIds);
+
   const seenProduct = new Set<string>();
   const productHrefs: string[] = [];
   for (const row of listings) {
@@ -150,7 +208,26 @@ export async function syncBaselineListingsFromAdminCatalogItemId(
     productHrefs: [...new Set(productHrefs)],
   });
 
-  return { listingCount: listings.length, productCount: seenProduct.size };
+  if (
+    listings.length > 0 &&
+    (listingsRaisedToMinPrice > 0 || pendingOrdersDeleted > 0)
+  ) {
+    console.info("[syncBaselineListingsFromAdminCatalogItemId] pricing sync", {
+      adminCatalogItemId,
+      itemMinPriceCents,
+      itemGoodsServicesCostCents: catalog.itemGoodsServicesCostCents,
+      itemProductionFeeCents: catalog.itemProductionFeeCents,
+      listingsRaisedToMinPrice,
+      pendingOrdersDeleted,
+    });
+  }
+
+  return {
+    listingCount: listings.length,
+    productCount: seenProduct.size,
+    listingsRaisedToMinPrice,
+    pendingOrdersDeleted,
+  };
 }
 
 /**
