@@ -13,6 +13,12 @@ const btnPack =
 const btnPackSelected =
   "inline-block rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-[11px] font-medium text-zinc-100";
 
+/** Native `<select>` popup — `[color-scheme:dark]` keeps the option list dark on Windows Chromium/Edge. */
+const flairSelectClass =
+  "mt-1 block w-full cursor-pointer rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none [color-scheme:dark] disabled:cursor-not-allowed disabled:opacity-50";
+const flairSelectClassCompact =
+  "mt-1 block w-full cursor-pointer rounded border border-zinc-700 bg-zinc-950/40 px-2 py-1.5 text-xs text-zinc-100 outline-none [color-scheme:dark] disabled:cursor-not-allowed disabled:opacity-50";
+
 export function ShopFlairSection(props: {
   flair: ShopFlairDashboardPayload;
   stripePublishableKey?: string | null;
@@ -69,7 +75,7 @@ export function ShopFlairSection(props: {
                 disabled
                 value="locked"
                 tabIndex={-1}
-                className="mt-1 block w-full cursor-not-allowed rounded-lg border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-sm text-zinc-600"
+                className={`${flairSelectClass} cursor-not-allowed border-zinc-800 bg-zinc-950/70 text-zinc-600`}
               >
                 <option value="locked">Purchase flair access on Shop upgrades to unlock.</option>
               </select>
@@ -87,7 +93,7 @@ export function ShopFlairSection(props: {
             value={selectedFlairTypeId}
             onChange={(e) => saveFlairSelection(e.target.value)}
             disabled={isFlairPending}
-            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 disabled:opacity-50"
+            className={flairSelectClass}
           >
             <option value="">None</option>
             {flair.catalog.types.map((t) => (
@@ -215,7 +221,7 @@ export function ShopFlairSection(props: {
               value={selectedFlairTypeId}
               onChange={(e) => saveFlairSelection(e.target.value)}
               disabled={isFlairPending}
-              className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-950/40 px-2 py-1.5 text-xs text-zinc-100 disabled:opacity-50"
+              className={flairSelectClassCompact}
             >
               <option value="">None</option>
               {flair.catalog.types.map((t) => (
