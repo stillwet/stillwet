@@ -205,6 +205,218 @@ h6 {
   height: 0 !important;
 }
 
+/*
+ * Product detail page/modal — gallery left, details right at all panel widths.
+ * Columns and gaps shrink with the panel (cqw); photo scales down instead of stacking.
+ */
+.pdp-container {
+  container-type: inline-size;
+  container-name: pdp;
+}
+
+.pdp-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+  align-items: start;
+  column-gap: clamp(0.5rem, 3cqw, 2.5rem);
+  row-gap: clamp(1rem, 4cqw, 2rem);
+}
+
+.pdp-detail-grid--page > .pdp-page-gallery {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdp-gallery-hero {
+  flex-shrink: 0;
+}
+
+.pdp-page-add-to-cart {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: clamp(0.5rem, 2.5cqw, 1rem);
+}
+
+.pdp-page-add-to-cart form {
+  width: 100%;
+  margin-top: 0;
+}
+
+.product-add-to-cart-btn {
+  white-space: nowrap;
+  font-size: clamp(0.625rem, 3.25cqw, 0.875rem);
+  line-height: 1.25;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: clamp(0.5rem, 2.75cqw, 1.5rem);
+  padding-right: clamp(0.5rem, 2.75cqw, 1.5rem);
+}
+
+.pdp-detail-grid--page > .pdp-details-col {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Wide panel: stretch columns; vertically center keywords in details tail. */
+@container pdp (min-width: 36rem) {
+  .pdp-detail-grid.pdp-detail-grid--page {
+    align-items: stretch;
+  }
+
+  .pdp-detail-grid--page > .pdp-page-gallery {
+    min-height: 100%;
+  }
+
+  .pdp-detail-keywords-slot {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    min-height: 0;
+    margin-top: 0;
+  }
+}
+
+.pdp-modal-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+  align-items: start;
+  column-gap: clamp(0.5rem, 3cqw, 2.5rem);
+}
+
+.pdp-modal-gallery-col {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdp-modal-details {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.pdp-gallery-col {
+  min-width: 0;
+  width: 100%;
+}
+
+.pdp-gallery-thumbs {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.25rem, 1.25cqw, 0.5rem);
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-gallery-thumbs li {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 4.8rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pdp-gallery-thumb-btn {
+  display: block;
+  width: 100%;
+  max-width: 4.8rem;
+  padding: 0;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  transition: opacity 150ms ease;
+}
+
+.pdp-gallery-thumb-btn:not(.pdp-gallery-thumb-btn--selected) {
+  opacity: 0.95;
+}
+
+.pdp-gallery-thumb-btn:not(.pdp-gallery-thumb-btn--selected):hover {
+  opacity: 1;
+}
+
+.pdp-gallery-thumb-btn--selected {
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.75);
+  outline: 2px solid transparent;
+  outline-offset: clamp(1px, 0.45cqw, 2px);
+}
+
+.pdp-gallery-thumb-img {
+  display: block;
+  width: 100%;
+  max-width: 4.8rem;
+  max-height: 4.8rem;
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 0.25rem;
+  border: 1px solid rgb(63 63 70);
+  object-fit: cover;
+}
+
+.pdp-gallery-col--centered {
+  margin-inline: auto;
+}
+
+.pdp-gallery-caption {
+  font-size: clamp(0.5625rem, 1.65cqw, 0.75rem);
+}
+
+.pdp-details-col {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fluid copy — scales with panel width (cqw) as the gallery image shrinks. */
+.pdp-details-col .pdp-detail-shop-name {
+  font-size: clamp(0.75rem, 2.35cqw, 1rem);
+}
+
+.pdp-details-col .pdp-detail-title {
+  font-size: clamp(0.75rem, 2.35cqw, 1rem);
+}
+
+.pdp-details-col .pdp-detail-subtitle {
+  font-size: clamp(0.625rem, 1.85cqw, 0.75rem);
+}
+
+.pdp-details-col .pdp-detail-price {
+  font-size: clamp(1.125rem, 4.2cqw, 1.5rem);
+  line-height: 1.25;
+}
+
+.pdp-details-col .pdp-detail-blurb {
+  font-size: clamp(0.6875rem, 2.35cqw, 0.875rem);
+  line-height: 1.625;
+}
+
+.pdp-details-col .pdp-detail-section-label {
+  font-size: clamp(0.625rem, 1.85cqw, 0.75rem);
+}
+
+.pdp-details-col .pdp-detail-description,
+.pdp-details-col .pdp-detail-shipping {
+  font-size: clamp(0.6875rem, 2.35cqw, 0.875rem);
+  line-height: 1.625;
+}
+
+.pdp-details-col .pdp-detail-keywords {
+  font-size: clamp(0.625rem, 1.85cqw, 0.6875rem);
+  line-height: 1.625;
+}
+
+.pdp-detail-keywords-slot {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
 /* Fans collection splash — image shimmer only */
 @keyframes featured-spotlight-shimmer {
   0% {
@@ -394,4 +606,31 @@ h6 {
 .listing-artwork-crop-print-window.listing-artwork-crop-wraparound-preview .reactEasyCrop_CropArea {
   color: transparent !important;
   box-shadow: none !important;
+}
+
+/* Dev/test: lock scroll on the outer page while the 360px preview iframe is open. */
+html.mobile-test-viewport:has(.mobile-test-viewport-shell) body {
+  overflow: hidden;
+}
+
+html.mobile-test-viewport:has(.mobile-test-viewport-shell)::after {
+  content: none;
+}
+
+html.mobile-test-viewport-frame::after {
+  content: "Mobile test · 360px viewport";
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 10001;
+  pointer-events: none;
+  border-radius: 9999px;
+  border: 1px solid rgb(59 130 246 / 0.45);
+  background: rgb(9 9 11 / 0.92);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(147 197 253);
 }

@@ -33,7 +33,7 @@ export function ProductAddToCartForm({
 
   return (
     <form
-      className="mt-4 w-full"
+      className="w-full"
       onSubmit={(e) => {
         e.preventDefault();
         startTransition(async () => {
@@ -57,7 +57,7 @@ export function ProductAddToCartForm({
       <button
         type="submit"
         disabled={pending}
-        className={`w-full rounded-xl px-6 py-3 text-sm font-medium transition disabled:opacity-70 ${
+        className={`product-add-to-cart-btn w-full rounded-xl font-medium transition disabled:opacity-70 ${
           added
             ? "bg-zinc-400 text-zinc-950 hover:bg-zinc-300"
             : "bg-blue-900 text-white hover:bg-blue-800"

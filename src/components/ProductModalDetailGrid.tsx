@@ -1,7 +1,12 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { PRODUCT_HERO_GALLERY_WRAP_CLASS } from "@/lib/product-image-gallery-constants";
+import {
+  PRODUCT_PDP_MODAL_DETAIL_GRID_CLASS,
+  PRODUCT_PDP_PAGE_ADD_TO_CART_CLASS,
+  PRODUCT_PDP_PAGE_GALLERY_HERO_CLASS,
+  productPdpGalleryGridCellClass,
+} from "@/lib/product-image-gallery-constants";
 
 type Props = {
   gallery: ReactNode;
@@ -24,36 +29,28 @@ export function ProductModalDetailGrid({
     const node = galleryRef.current;
     if (!node) return;
 
-    const lgQuery = window.matchMedia("(min-width: 1024px)");
-
     const sync = () => {
-      if (!lgQuery.matches) {
-        setGalleryHeightPx(null);
-        return;
-      }
       setGalleryHeightPx(node.getBoundingClientRect().height);
     };
 
     sync();
     const observer = new ResizeObserver(sync);
     observer.observe(node);
-    lgQuery.addEventListener("change", sync);
-    return () => {
-      observer.disconnect();
-      lgQuery.removeEventListener("change", sync);
-    };
+    return () => observer.disconnect();
   }, [galleryHeightKey]);
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:items-start lg:gap-x-8 xl:gap-x-10">
-      <div
-        ref={galleryRef}
-        className={`${PRODUCT_HERO_GALLERY_WRAP_CLASS} lg:col-start-1 lg:row-start-1`}
-      >
-        {gallery}
+    <div className={PRODUCT_PDP_MODAL_DETAIL_GRID_CLASS}>
+      <div className={productPdpGalleryGridCellClass("galleryColumn")}>
+        <div ref={galleryRef} className={PRODUCT_PDP_PAGE_GALLERY_HERO_CLASS}>
+          {gallery}
+        </div>
+        {addToCart ? (
+          <div className={PRODUCT_PDP_PAGE_ADD_TO_CART_CLASS}>{addToCart}</div>
+        ) : null}
       </div>
       <div
-        className={`${PRODUCT_HERO_GALLERY_WRAP_CLASS} lg:col-start-2 lg:row-start-1 min-h-0 overflow-y-auto overscroll-contain rounded-xl bg-zinc-950/92 p-4 sm:p-5`}
+        className={productPdpGalleryGridCellClass("details")}
         style={
           galleryHeightPx != null
             ? { height: `${Math.round(galleryHeightPx)}px` }
@@ -62,11 +59,6 @@ export function ProductModalDetailGrid({
       >
         {details}
       </div>
-      {addToCart ? (
-        <div className={`${PRODUCT_HERO_GALLERY_WRAP_CLASS} lg:col-start-1 lg:row-start-2`}>
-          {addToCart}
-        </div>
-      ) : null}
     </div>
   );
 }

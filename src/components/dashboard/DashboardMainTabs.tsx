@@ -11,6 +11,7 @@ import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
 import type { DashboardMainTabId } from "@/lib/dashboard-main-tab-id";
 import { dashQueryParamForTabId } from "@/lib/dashboard-dash-query";
 import { useDashboardTabFetch, type DashboardTabLoadedFlags } from "@/components/dashboard/useDashboardTabFetch";
+import { useSetShopDashboardCompactLayout } from "@/components/dashboard/shop-dashboard-compact-layout";
 import {
   DASHBOARD_PROMOTIONS_PATH,
   DASHBOARD_SHOP_UPGRADES_LABEL,
@@ -51,6 +52,7 @@ import {
   onboardingSetupAfterGuidelinesAcknowledged,
   onboardingSetupAfterListingSubmitted,
 } from "@/lib/shop-onboarding-gate";
+import { DashboardMarkAllNoticesReadButton } from "@/components/dashboard/DashboardMarkAllNoticesReadButton";
 import { DashboardNoticeMarkReadForm } from "@/components/dashboard/DashboardNoticeMarkReadForm";
 import { DashboardNoticeBody } from "@/components/dashboard/DashboardNoticeBody";
 import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
@@ -58,6 +60,7 @@ import { formatDisplayedDateTime } from "@/lib/format-display-datetime";
 import {
   type ShopSalesProfitSummary,
 } from "@/lib/shop-sales-profit-summary";
+import { orderLineItemCostCents } from "@/lib/item-cost-cents";
 import {
   orderMerchandiseBreakdownTotals,
   orderShopMerchandiseProfitCents,
@@ -203,6 +206,7 @@ export type DashboardPaidOrderRow = {
     quantity: number;
     unitPriceCents: number;
     goodsServicesCostCents: number;
+    productionFeeCents: number;
     platformCutCents: number;
     shopCutCents: number;
   }>;
@@ -266,9 +270,10 @@ function paidOrderShopProfitCents(o: DashboardPaidOrderRow) {
 
 function paidOrderMerchandiseTotals(o: DashboardPaidOrderRow) {
   const totals = orderMerchandiseBreakdownTotals(o.lines);
+  const gsFeesCents = o.lines.reduce((sum, line) => sum + orderLineItemCostCents(line), 0);
   return {
     saleCents: totals.saleCents,
-    goodsServicesCostCents: totals.goodsServicesCostCents,
+    gsFeesCents,
     platformCutCents: totals.platformCutCents,
   };
 }
@@ -281,19 +286,30 @@ function formatMoney(cents: number) {
 }
 
 const paidOrderTableGridClass =
-  "grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem_4.5rem_5.5rem] sm:grid-cols-[3.5rem_minmax(0,1fr)_5.5rem_4.5rem_3.5rem_5.5rem] items-center gap-x-3";
+  "grid grid-cols-[minmax(2.25rem,0.65fr)_minmax(4.5rem,2.2fr)_minmax(2.25rem,0.95fr)_minmax(2rem,0.85fr)_minmax(2.25rem,0.95fr)] sm:grid-cols-[minmax(2.25rem,0.65fr)_minmax(4.5rem,2.2fr)_minmax(2.25rem,0.95fr)_minmax(2rem,0.65fr)_minmax(2rem,0.65fr)_minmax(2.25rem,0.95fr)] items-center gap-x-2 sm:gap-x-3";
+
+const paidOrderTableCellClass = "min-w-0";
+
+const paidOrderTotalColumnClass =
+  "flex w-full items-center justify-center self-center text-center";
 
 const paidOrderMetricValueClass =
-  "text-[11px] tabular-nums leading-snug text-zinc-100";
+  "text-[11px] tabular-nums leading-snug text-zinc-500";
 
 function PaidOrderItemTipHeaderCells() {
   return (
     <>
-      <span className="hidden text-center sm:block">Item profit</span>
-      <span className="hidden text-center sm:block">Tip</span>
-      <div className="flex flex-col items-center gap-0.5 text-center leading-tight sm:hidden">
-        <span>Item profit</span>
-        <span>Tip</span>
+      <span className={`hidden text-center leading-tight sm:block ${paidOrderTableCellClass}`}>
+        Item profit
+      </span>
+      <span className={`hidden text-center leading-tight sm:block ${paidOrderTableCellClass}`}>
+        Tip
+      </span>
+      <div
+        className={`flex w-full min-w-0 flex-col items-center gap-0.5 text-center text-[10px] uppercase leading-tight break-words sm:hidden sm:text-[11px] ${paidOrderTableCellClass}`}
+      >
+        <span className="max-w-full break-words">Item</span>
+        <span className="max-w-full break-words">Tip</span>
       </div>
     </>
   );
@@ -308,15 +324,17 @@ function PaidOrderItemTipValueCells({
 }) {
   return (
     <>
-      <span className={`hidden self-center text-center sm:block ${paidOrderMetricValueClass}`}>
+      <span className={`hidden self-center text-center sm:block ${paidOrderMetricValueClass} ${paidOrderTableCellClass}`}>
         {formatMoney(itemProfitCents)}
       </span>
-      <span className={`hidden self-center text-center sm:block ${paidOrderMetricValueClass}`}>
+      <span className={`hidden self-center text-center sm:block ${paidOrderMetricValueClass} ${paidOrderTableCellClass}`}>
         {formatMoney(tipCents)}
       </span>
-      <div className={`flex flex-col items-center gap-0.5 self-center text-center sm:hidden ${paidOrderMetricValueClass}`}>
-        <span>{formatMoney(itemProfitCents)}</span>
-        <span>{formatMoney(tipCents)}</span>
+      <div
+        className={`flex min-w-0 flex-col items-center gap-0.5 self-center text-center sm:hidden ${paidOrderMetricValueClass} ${paidOrderTableCellClass}`}
+      >
+        <span className="whitespace-nowrap tabular-nums">{formatMoney(itemProfitCents)}</span>
+        <span className="whitespace-nowrap tabular-nums">{formatMoney(tipCents)}</span>
       </div>
     </>
   );
@@ -324,20 +342,20 @@ function PaidOrderItemTipValueCells({
 
 function ShopSalesProfitSummaryCards({ summary }: { summary: ShopSalesProfitSummary }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <div className="rounded-lg border border-zinc-800/90 bg-zinc-950/40 px-4 py-3">
+    <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3">
+      <div className="min-w-0 rounded-lg border border-zinc-800/90 bg-zinc-950/40 px-3 py-2.5 sm:px-4 sm:py-3">
         <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Monthly profit</p>
-        <p className="mt-1 text-lg font-medium tabular-nums text-blue-100">
+        <p className="mt-1 text-base font-medium tabular-nums text-blue-100 sm:text-lg">
           {formatMoney(summary.monthlyProfitCents)}
         </p>
-        <p className="mt-0.5 text-[10px] text-zinc-600">{summary.monthTitle}</p>
+        <p className="mt-0.5 truncate text-[10px] text-zinc-600">{summary.monthTitle}</p>
       </div>
-      <div className="rounded-lg border border-zinc-800/90 bg-zinc-950/40 px-4 py-3">
+      <div className="min-w-0 rounded-lg border border-zinc-800/90 bg-zinc-950/40 px-3 py-2.5 sm:px-4 sm:py-3">
         <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">YTD profit</p>
-        <p className="mt-1 text-lg font-medium tabular-nums text-blue-100">
+        <p className="mt-1 text-base font-medium tabular-nums text-blue-100 sm:text-lg">
           {formatMoney(summary.ytdProfitCents)}
         </p>
-        <p className="mt-0.5 text-[10px] text-zinc-600">{summary.ytdYear}</p>
+        <p className="mt-0.5 truncate text-[10px] text-zinc-600">{summary.ytdYear}</p>
       </div>
     </div>
   );
@@ -1286,6 +1304,21 @@ export function DashboardMainTabs(props: {
     [clientTabFetch, tabFetch],
   );
 
+  const handleAllNoticesMarkedRead = useCallback(async () => {
+    if (clientTabFetch) {
+      await tabFetch.loadTab("notifications", { force: true });
+      return;
+    }
+    setNotifications((prev) => {
+      if (!prev || prev.unreadCount <= 0) return prev;
+      const readAt = new Date().toISOString();
+      return {
+        rows: prev.rows.map((r) => (r.readAt == null ? { ...r, readAt } : r)),
+        unreadCount: 0,
+      };
+    });
+  }, [clientTabFetch, tabFetch]);
+
   /** RSC can send new props without remounting (e.g. `router.refresh`); re-seed client tab cache. */
   useEffect(() => {
     if (clientTabFetch) return;
@@ -1328,6 +1361,7 @@ export function DashboardMainTabs(props: {
   const shopDashboardTabsContainerRef = useRef<HTMLDivElement>(null);
   const shopDashboardTabsMeasureRef = useRef<HTMLDivElement>(null);
   const [shopDashboardTabsStacked, setShopDashboardTabsStacked] = useState(false);
+  const setCompactDashboardLayout = useSetShopDashboardCompactLayout();
 
   useEffect(() => {
     setActiveTab(normalizeDashboardMainTab(initialTabProp, tabOpts));
@@ -1461,14 +1495,22 @@ export function DashboardMainTabs(props: {
   const { live: groupedLive, request: groupedRequest, removed: groupedRemoved } =
     effectiveGroupedListingSections;
 
-  const tabBtnClass = (active: boolean) =>
-    `inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition ${
-      active
-        ? "bg-zinc-800 text-zinc-100 ring-1 ring-zinc-600"
-        : "text-zinc-500 hover:bg-zinc-900/80 hover:text-zinc-300"
-    }`;
+  const tabBtnClass = (active: boolean, compact = false) =>
+    compact
+      ? `inline-flex max-w-full min-w-0 items-center justify-center truncate rounded-md px-1.5 py-1 text-[10px] font-medium transition sm:px-2 sm:text-xs ${
+          active
+            ? "bg-zinc-800 text-zinc-100 ring-1 ring-zinc-600"
+            : "text-zinc-500 hover:bg-zinc-900/80 hover:text-zinc-300"
+        }`
+      : `inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition ${
+          active
+            ? "bg-zinc-800 text-zinc-100 ring-1 ring-zinc-600"
+            : "text-zinc-500 hover:bg-zinc-900/80 hover:text-zinc-300"
+        }`;
 
-  const tabBtn = (id: TabId, label: ReactNode, tabId: string, panelId: string) => {
+  const compactShopTabs = shopDashboardTabsStacked;
+
+  const tabBtn = (id: TabId, label: ReactNode, tabId: string, panelId: string, compact: boolean) => {
     if (clientTabFetch) {
       return (
         <button
@@ -1478,7 +1520,7 @@ export function DashboardMainTabs(props: {
           aria-selected={activeTab === id}
           aria-controls={panelId}
           tabIndex={activeTab === id ? 0 : -1}
-          className={tabBtnClass(activeTab === id)}
+          className={tabBtnClass(activeTab === id, compact)}
           onClick={() => selectTab(id)}
         >
           {label}
@@ -1495,7 +1537,7 @@ export function DashboardMainTabs(props: {
         aria-selected={activeTab === id}
         aria-controls={panelId}
         tabIndex={activeTab === id ? 0 : -1}
-        className={tabBtnClass(activeTab === id)}
+        className={tabBtnClass(activeTab === id, compact)}
       >
         {label}
       </Link>
@@ -1503,14 +1545,26 @@ export function DashboardMainTabs(props: {
   };
 
   /** Same footprint as {@link tabBtn} — opens shop upgrades page (not a `?dash=` tab). */
-  const promotionsPageBtn = () => (
+  const promotionsPageBtn = (compact: boolean) => (
     <Link
       href={DASHBOARD_PROMOTIONS_PATH}
       prefetch={false}
       scroll={false}
-      className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-violet-800/55 bg-violet-950/35 px-3 py-2 text-sm font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50"
+      title={DASHBOARD_SHOP_UPGRADES_LABEL}
+      className={
+        compact
+          ? "inline-flex max-w-full min-w-0 items-center justify-center truncate rounded-md border border-violet-800/55 bg-violet-950/35 px-1.5 py-1 text-[10px] font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50 sm:px-2 sm:text-xs"
+          : "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-violet-800/55 bg-violet-950/35 px-3 py-2 text-sm font-medium text-violet-100 transition hover:border-violet-600/60 hover:bg-violet-950/50"
+      }
     >
-      {DASHBOARD_SHOP_UPGRADES_LABEL}
+      {compact ? (
+        <>
+          <span className="sm:hidden">Upgrades</span>
+          <span className="hidden truncate sm:inline">{DASHBOARD_SHOP_UPGRADES_LABEL}</span>
+        </>
+      ) : (
+        DASHBOARD_SHOP_UPGRADES_LABEL
+      )}
     </Link>
   );
 
@@ -1536,74 +1590,79 @@ export function DashboardMainTabs(props: {
     };
   }, [effectiveNotifications?.rows, notificationsPage]);
 
-  type ShopDashboardTabEntry = { id: string; node: ReactNode };
+  type ShopDashboardTabEntry = { id: string; render: (compact: boolean) => ReactNode };
   const shopDashboardTabItems: ShopDashboardTabEntry[] = [];
   if (hasNotifications) {
     shopDashboardTabItems.push({
       id: "notifications",
-      node: tabBtn(
-        "notifications",
-        <span className="inline-flex items-center gap-2">
-          Notifications
-          {unreadN > 0 ? <span className={navTabCountBadgeCircleClass}>{unreadN}</span> : null}
-        </span>,
-        notificationsTabId,
-        notificationsPanelId,
-      ),
+      render: (compact) =>
+        tabBtn(
+          "notifications",
+          <span className="inline-flex items-center gap-2">
+            Notifications
+            {unreadN > 0 ? <span className={navTabCountBadgeCircleClass}>{unreadN}</span> : null}
+          </span>,
+          notificationsTabId,
+          notificationsPanelId,
+          compact,
+        ),
     });
   }
   if (hasSetup && setup) {
     shopDashboardTabItems.push(
       {
         id: "shopProfile",
-        node: tabBtn("shopProfile", "Shop profile", shopProfileTabId, shopProfilePanelId),
+        render: (compact) => tabBtn("shopProfile", "Shop profile", shopProfileTabId, shopProfilePanelId, compact),
       },
       {
         id: "requestListing",
-        node: tabBtn("requestListing", "Request listing", requestListingTabId, requestListingPanelId),
+        render: (compact) =>
+          tabBtn("requestListing", "Request listing", requestListingTabId, requestListingPanelId, compact),
       },
     );
   }
   shopDashboardTabItems.push(
     {
       id: "listings",
-      node: tabBtn("listings", "Listings", listingsTabId, listingsPanelId),
+      render: (compact) => tabBtn("listings", "Listings", listingsTabId, listingsPanelId, compact),
     },
     {
       id: "orders",
-      node: tabBtn("orders", "Sales", ordersTabId, ordersPanelId),
+      render: (compact) => tabBtn("orders", "Sales", ordersTabId, ordersPanelId, compact),
     },
   );
   if (canSupport) {
     shopDashboardTabItems.push({
       id: "support",
-      node: tabBtn(
-        "support",
-        <span className="inline-flex items-center gap-2">
-          Support
-          {supportStaffBadgeCount > 0 ? (
-            <span className="rounded-full bg-violet-900/70 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-violet-100">
-              {supportStaffBadgeCount}
-            </span>
-          ) : null}
-        </span>,
-        supportTabId,
-        supportPanelId,
-      ),
+      render: (compact) =>
+        tabBtn(
+          "support",
+          <span className="inline-flex items-center gap-2">
+            Support
+            {supportStaffBadgeCount > 0 ? (
+              <span className="rounded-full bg-violet-900/70 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-violet-100">
+                {supportStaffBadgeCount}
+              </span>
+            ) : null}
+          </span>,
+          supportTabId,
+          supportPanelId,
+          compact,
+        ),
     });
   }
   if (!isPlatform && shopAccount) {
     shopDashboardTabItems.push({
       id: "accountInfo",
-      node: tabBtn("accountInfo", "Account info", accountInfoTabId, accountInfoPanelId),
+      render: (compact) => tabBtn("accountInfo", "Account info", accountInfoTabId, accountInfoPanelId, compact),
     });
   }
   if (!isPlatform) {
-    shopDashboardTabItems.push({ id: "shop-upgrades", node: promotionsPageBtn() });
+    shopDashboardTabItems.push({ id: "shop-upgrades", render: promotionsPageBtn });
   }
 
-  const renderShopDashboardTabs = (entries: ShopDashboardTabEntry[]) =>
-    entries.map(({ id, node }) => <Fragment key={id}>{node}</Fragment>);
+  const renderShopDashboardTabs = (entries: ShopDashboardTabEntry[], compact: boolean) =>
+    entries.map(({ id, render }) => <Fragment key={id}>{render(compact)}</Fragment>);
 
   useEffect(() => {
     const container = shopDashboardTabsContainerRef.current;
@@ -1614,7 +1673,13 @@ export function DashboardMainTabs(props: {
       const available = container.clientWidth;
       const needed = measure.scrollWidth;
       const comfortPx = 16;
-      setShopDashboardTabsStacked(needed > Math.max(0, available - comfortPx));
+      const unstackComfortPx = 48;
+      setShopDashboardTabsStacked((prev) => {
+        const next = prev
+          ? needed > Math.max(0, available - unstackComfortPx)
+          : needed > Math.max(0, available - comfortPx);
+        return prev === next ? prev : next;
+      });
     };
 
     updateLayout();
@@ -1633,6 +1698,10 @@ export function DashboardMainTabs(props: {
     isPlatform,
     shopAccount != null,
   ]);
+
+  useEffect(() => {
+    setCompactDashboardLayout(shopDashboardTabsStacked);
+  }, [shopDashboardTabsStacked, setCompactDashboardLayout]);
 
   return (
     <section className="mt-8">
@@ -1675,25 +1744,25 @@ export function DashboardMainTabs(props: {
             aria-hidden
           >
             <div className="inline-flex flex-nowrap items-center">
-              {renderShopDashboardTabs(shopDashboardTabItems)}
+              {renderShopDashboardTabs(shopDashboardTabItems, false)}
             </div>
           </div>
           {shopDashboardTabsStacked ? (
-            <div className="flex flex-col [&_a]:px-2 [&_a]:py-1 [&_a]:text-xs [&_button]:px-2 [&_button]:py-1 [&_button]:text-xs">
-              <div className="grid grid-cols-4 pb-0.5">
-                {shopDashboardTabItems.slice(0, 4).map(({ id, node }) => (
-                  <div key={id} className="flex min-w-0 items-center justify-center">
-                    {node}
+            <div className="flex min-w-0 flex-col overflow-hidden">
+              <div className="grid w-full min-w-0 grid-cols-4 pb-0.5">
+                {shopDashboardTabItems.slice(0, 4).map(({ id, render }) => (
+                  <div key={id} className="flex min-w-0 items-center justify-center overflow-hidden px-0.5">
+                    {render(true)}
                   </div>
                 ))}
               </div>
               {shopDashboardTabItems.length > 4 ? (
                 <>
                   <div className="border-t border-zinc-800/80" aria-hidden />
-                  <div className="grid grid-cols-4 pt-0.5">
-                    {shopDashboardTabItems.slice(4).map(({ id, node }) => (
-                      <div key={id} className="flex min-w-0 items-center justify-center">
-                        {node}
+                  <div className="grid w-full min-w-0 grid-cols-4 pt-0.5">
+                    {shopDashboardTabItems.slice(4).map(({ id, render }) => (
+                      <div key={id} className="flex min-w-0 items-center justify-center overflow-hidden px-0.5">
+                        {render(true)}
                       </div>
                     ))}
                   </div>
@@ -1702,7 +1771,7 @@ export function DashboardMainTabs(props: {
             </div>
           ) : (
             <div className="flex w-full min-w-0 flex-nowrap items-center justify-between">
-              {renderShopDashboardTabs(shopDashboardTabItems)}
+              {renderShopDashboardTabs(shopDashboardTabItems, false)}
             </div>
           )}
         </div>
@@ -1811,6 +1880,7 @@ export function DashboardMainTabs(props: {
               moderationPhrases={effectiveModerationPhrases}
               onListingSubmittedSuccess={afterListingSubmitted}
               knownListingCount={effectiveListings.length}
+              compactDashboardTabs={shopDashboardTabsStacked}
               embedded
             />
           ) : null}
@@ -1995,6 +2065,12 @@ export function DashboardMainTabs(props: {
             </div>
           ) : effectiveNotifications ? (
             <>
+              <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+                <DashboardMarkAllNoticesReadButton
+                  unreadCount={effectiveNotifications.unreadCount}
+                  onMarkedAllRead={handleAllNoticesMarkedRead}
+                />
+              </div>
               <ul className="space-y-3">
                 {notificationsPaging.pageRows.map((n) => {
                   const isUnread = n.readAt == null;
@@ -2114,32 +2190,46 @@ export function DashboardMainTabs(props: {
           <ShopSalesProfitSummaryCards summary={effectiveSalesProfitSummary} />
         ) : null}
         {effectivePaidOrders.length > 0 ? (
-          <>
-            <div
-              className="mt-4 border-b border-zinc-800/80 px-3 pb-2 text-[11px] uppercase tracking-wide text-zinc-500"
-              aria-hidden
-            >
-              <div className={paidOrderTableGridClass}>
-                <span className="text-center">Date</span>
-                <span className="text-left">Item</span>
-                <span className="text-center text-zinc-600">Order number</span>
-                <PaidOrderItemTipHeaderCells />
-                <span className="text-center text-blue-400">Total profit</span>
-              </div>
-            </div>
-            <ul className="mt-2 space-y-3">
+          <div className="mt-4 min-w-0 overflow-x-auto">
+            <ul className="min-w-[16.5rem] space-y-3">
+              <li
+                className="list-none border-b border-zinc-800/80 px-2 pb-2 text-[10px] uppercase tracking-wide text-zinc-500 sm:px-3 sm:text-[11px]"
+                aria-hidden
+              >
+                <div className={paidOrderTableGridClass}>
+                  <span className={`text-center leading-tight ${paidOrderTableCellClass}`}>Date</span>
+                  <span className={`text-left leading-tight ${paidOrderTableCellClass}`}>Item</span>
+                  <span className={`text-center leading-tight text-zinc-600 ${paidOrderTableCellClass}`}>
+                    Order #
+                  </span>
+                  <PaidOrderItemTipHeaderCells />
+                  <div className={`${paidOrderTotalColumnClass} ${paidOrderTableCellClass}`}>
+                    <span className="relative inline-flex shrink-0 translate-x-1.5 items-center justify-center leading-snug tracking-normal text-blue-400">
+                      TOTAL
+                      <span
+                        className="ml-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center invisible"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </li>
               {effectivePaidOrders.map((o) => (
-                <li key={o.id} className="rounded-lg border border-zinc-800 p-3 text-xs text-zinc-400">
-                  <div className={`${paidOrderTableGridClass} items-start`}>
+                <li key={o.id} className="rounded-lg border border-zinc-800 p-2 text-xs text-zinc-400 sm:p-3">
+                  <div className={paidOrderTableGridClass}>
                     <time
                       dateTime={paidOrderDateTimeAttr(o.createdAt)}
-                      className="self-center text-center font-normal tabular-nums text-zinc-300"
+                      className={`self-center whitespace-nowrap text-center font-normal tabular-nums text-zinc-300 ${paidOrderTableCellClass}`}
                     >
                       {formatPaidOrderDate(o.createdAt)}
                     </time>
-                    <ul className="min-w-0 space-y-2 text-zinc-400">
+                    <ul className={`min-w-0 self-center space-y-1 text-zinc-400 ${paidOrderTableCellClass}`}>
                       {o.lines.map((l, i) => (
-                        <li key={i} className="leading-snug text-zinc-300">
+                        <li
+                          key={i}
+                          className="truncate leading-snug text-zinc-300"
+                          title={`${l.lineDisplayLabel} × ${l.quantity}`}
+                        >
                           {l.lineDisplayLabel} × {l.quantity}
                         </li>
                       ))}
@@ -2148,19 +2238,22 @@ export function DashboardMainTabs(props: {
                       const merch = paidOrderMerchandiseTotals(o);
                       return (
                         <>
-                          <span className="self-center text-center text-[11px] tabular-nums leading-snug text-zinc-600">
+                          <span
+                            className={`self-center whitespace-nowrap text-center text-[11px] tabular-nums leading-snug text-zinc-600 ${paidOrderTableCellClass}`}
+                          >
                             {formatBuyerOrderNumberShort(o.orderNumber)}
                           </span>
                           <PaidOrderItemTipValueCells
                             itemProfitCents={paidOrderItemProfitCents(o)}
                             tipCents={paidOrderShopTipCents(o)}
                           />
-                          <div className="flex self-center justify-center">
+                          <div className={`${paidOrderTotalColumnClass} ${paidOrderTableCellClass}`}>
                             <PaidOrderShopProfitHelp
                               shopProfitCents={paidOrderShopProfitCents(o)}
                               saleCents={merch.saleCents}
-                              goodsServicesCostCents={merch.goodsServicesCostCents}
+                              gsFeesCents={merch.gsFeesCents}
                               platformCutCents={merch.platformCutCents}
+                              tipCents={paidOrderShopTipCents(o)}
                             />
                           </div>
                         </>
@@ -2170,7 +2263,7 @@ export function DashboardMainTabs(props: {
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         ) : (
           <p className="mt-4 text-sm text-zinc-600">No paid orders for this shop yet.</p>
         )}

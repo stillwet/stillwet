@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Source_Sans_3, Source_Code_Pro } from "next/font/google";
+import { MobileTestViewportShell } from "@/components/MobileTestViewportShell";
+import { MobileTestViewportSync } from "@/components/MobileTestViewportSync";
 import { metadataBaseUrl } from "@/lib/public-app-url";
 import { BRAND_NAME } from "@/lib/site-brand";
 import "./globals.css";
@@ -55,6 +57,8 @@ export default function RootLayout({
       className={`${sourceSans.variable} ${sourceCode.variable} ${sourceSans.className} h-full antialiased`}
     >
       <body className="min-h-full bg-zinc-950 font-sans text-zinc-100">
+        <MobileTestViewportSync />
+        <MobileTestViewportShell />
         {children}
       </body>
     </html>

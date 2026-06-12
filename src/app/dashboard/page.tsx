@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -56,6 +55,7 @@ import {
 import { dashboardPromotionsUrl } from "@/lib/dashboard-promotions-path";
 import { loadShopFlairDashboardPayload } from "@/lib/shop-flair-dashboard-payload";
 import { DashboardShopPageActions } from "@/components/dashboard/DashboardShopPageActions";
+import { ShopDashboardCompactLayoutProvider } from "@/components/dashboard/shop-dashboard-compact-layout";
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -454,9 +454,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   })();
 
   return (
+    <ShopDashboardCompactLayoutProvider>
     <main className={DASHBOARD_MAIN_SHELL_CLASS}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-4">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-zinc-50">Shop Dashboard</h1>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
             <p className="text-sm text-zinc-500">{shopDisplayNameForPublicLabel(shop.displayName)}</p>
@@ -473,23 +474,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             </form>
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-          <DashboardShopPageActions shopSlug={shop.slug} />
-          {!isPlatform ? (
-            <Link
-              href={bugFeedbackHref}
-              prefetch={false}
-              scroll={false}
-              className={`rounded-lg border px-3 py-1.5 text-sm transition ${
-                dashTab === "bugFeedback"
-                  ? "border-zinc-500 bg-zinc-800/80 text-zinc-100 ring-1 ring-zinc-600"
-                  : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
-              }`}
-            >
-              Bug / feedback
-            </Link>
-          ) : null}
-        </div>
+        <DashboardShopPageActions
+          shopSlug={shop.slug}
+          bugFeedbackHref={!isPlatform ? bugFeedbackHref : undefined}
+          bugFeedbackActive={!isPlatform && dashTab === "bugFeedback"}
+        />
       </div>
 
       <Suspense fallback={null}>
@@ -587,6 +576,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       <SiteLegalFooter />
     </main>
+    </ShopDashboardCompactLayoutProvider>
   );
   } catch (e) {
     await tryRedirectHomeOnDeletedShopAccountLoadError(e, owner.shopUserId);

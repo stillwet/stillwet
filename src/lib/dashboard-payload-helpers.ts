@@ -4,6 +4,7 @@ import {
   baselineGoodsServicesUnitCents,
   baselineItemCostUnitCents,
 } from "@/lib/baseline-goods-services-unit-cents";
+import { effectiveListingItemDisplayName } from "@/lib/moderation-keyword-scan";
 import { parseBaselinePick } from "@/lib/shop-baseline-catalog";
 
 export type AdminCatalogRowForDisplay = {
@@ -18,18 +19,14 @@ export function formatMoneyServer(cents: number): string {
   }).format(cents / 100);
 }
 
-/** Orders tab: shop listing title, then admin catalog product name in parentheses. */
+/** Orders tab: shop listing title only (no admin catalog type suffix). */
 export function dashboardPaidOrderLineDisplayLabel(line: {
   productName: string;
   product: { name: string } | null;
   shopListing: { requestItemName: string | null } | null;
 }): string {
-  const adminLabel = (line.product?.name ?? line.productName).trim() || line.productName;
-  const shopLabel = line.shopListing?.requestItemName?.trim() ?? "";
-  if (!shopLabel || shopLabel === adminLabel) {
-    return adminLabel;
-  }
-  return `${shopLabel} (${adminLabel})`;
+  const catalogName = (line.product?.name ?? line.productName).trim() || line.productName;
+  return effectiveListingItemDisplayName(line.shopListing?.requestItemName, catalogName);
 }
 
 /** Uses current admin baseline catalog + listing pick (same as checkout). */

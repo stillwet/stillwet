@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 export const BETA_TESTER_COHORT_LABEL = "Beta Tester";
 export const DEFAULT_BETA_TESTER_CODE_COUNT = 50;
-export const BETA_TESTER_SIGNUP_LISTING_CREDITS = 10;
+export const BETA_TESTER_SIGNUP_LISTING_CREDITS = 5;
 
 async function createUniqueShopSetupGiftCode(
   tx: Prisma.TransactionClient,

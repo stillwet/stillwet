@@ -65,10 +65,11 @@ export default async function DemoInstructionsPage() {
               </span>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>Shop setup fee waived ($15)</li>
-                <li>10 free listings ($5)</li>
+                <li>5 free listings ($5)</li>
                 <li>Free shop flair ({shopFlairAccessPriceUsdLabel().replace(".00", "")})</li>
                 <li className="-ml-5 list-none italic text-zinc-500">
-                  Testers that do not complete onboarding and the survey will not receive promotion
+                  Testers who do not complete onboarding /survey by due date will have promotions
+                  revoked.
                 </li>
               </ul>
             </li>

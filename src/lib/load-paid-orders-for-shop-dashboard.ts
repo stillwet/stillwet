@@ -26,6 +26,7 @@ function mapOrderToPaidOrderRow(o: OrderLineForDash): DashboardPaidOrderRow {
       quantity: l.quantity,
       unitPriceCents: l.unitPriceCents,
       goodsServicesCostCents: l.goodsServicesCostCents,
+      productionFeeCents: l.productionFeeCents,
       platformCutCents: l.platformCutCents,
       shopCutCents: l.shopCutCents,
     })),
@@ -67,6 +68,7 @@ type OrderLineForDash = Prisma.OrderGetPayload<{
         quantity: true;
         unitPriceCents: true;
         goodsServicesCostCents: true;
+        productionFeeCents: true;
         platformCutCents: true;
         shopCutCents: true;
         shopListing: { select: { requestItemName: true } };
@@ -92,6 +94,7 @@ async function queryPaidOrdersLive(shopId: string): Promise<DashboardPaidOrderRo
           quantity: true,
           unitPriceCents: true,
           goodsServicesCostCents: true,
+          productionFeeCents: true,
           platformCutCents: true,
           shopCutCents: true,
           shopListing: {

@@ -6,11 +6,13 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { CART_HEADER_CHANGED_EVENT } from "@/lib/cart-header-sync-client";
 import { PLATFORM_SHOP_SLUG, shopAllProductsHref, shopCartHref } from "@/lib/marketplace-constants";
 import { BrandLogoLink } from "@/components/BrandLogoLink";
+import { syncMobileTestViewportForAdmin } from "@/lib/mobile-test-viewport";
 
 type HeaderState = {
   cartQty: number;
   shopOwnerEmail?: string;
   shopOwnerDisplayName?: string;
+  adminLoggedIn?: boolean;
 };
 
 function dashboardLinkFallbackFromEmail(email: string) {
@@ -44,7 +46,7 @@ export function StoreNav({
   const tenant = shopSlug && shopSlug !== PLATFORM_SHOP_SLUG;
   const allItemsHref = shopAllProductsHref(shopSlug ?? PLATFORM_SHOP_SLUG);
   const fullCartHref = shopCartHref(shopSlug ?? PLATFORM_SHOP_SLUG);
-  const { cartQty, shopOwnerEmail, shopOwnerDisplayName } = headerState;
+  const { cartQty, shopOwnerEmail, shopOwnerDisplayName, adminLoggedIn } = headerState;
 
   useEffect(() => {
     if (!hydrateHeaderState) return;
@@ -55,6 +57,7 @@ export function StoreNav({
         const res = await fetch("/api/header-state", { credentials: "same-origin" });
         const data = res.ok ? ((await res.json()) as HeaderState) : null;
         if (!alive || !data) return;
+        const nextAdminLoggedIn = data.adminLoggedIn === true;
         setHeaderState({
           cartQty: Number.isFinite(data.cartQty) ? Math.max(0, Math.floor(data.cartQty)) : 0,
           shopOwnerEmail:
@@ -63,7 +66,9 @@ export function StoreNav({
             typeof data.shopOwnerDisplayName === "string"
               ? data.shopOwnerDisplayName
               : undefined,
+          adminLoggedIn: nextAdminLoggedIn,
         });
+        syncMobileTestViewportForAdmin(nextAdminLoggedIn);
       } catch {
         // Offline or unreachable — keep showing last known header state.
       }
@@ -79,8 +84,8 @@ export function StoreNav({
 
   return (
     <>
-      <header className="relative z-[1000] border-b border-zinc-800/40 bg-zinc-950/40 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1124px] items-center justify-between gap-4 px-4 py-4">
+      <header className="relative z-[1000] border-b border-zinc-800/40 bg-zinc-950">
+        <div className="mx-auto flex max-w-[1124px] items-center justify-between gap-3 px-4 py-4 sm:gap-4">
           <div className="flex min-w-0 shrink-0 items-center gap-4 sm:gap-5">
             <BrandLogoLink logoHeight={24} />
             {shopOwnerEmail ? (
@@ -113,29 +118,30 @@ export function StoreNav({
               </div>
             ) : null}
           </div>
-          <nav className="flex flex-1 flex-wrap items-center justify-end gap-x-5 gap-y-2 sm:gap-x-7">
+          <nav className="ml-auto flex shrink-0 flex-nowrap items-center justify-end gap-x-2 sm:gap-x-4 md:gap-x-7">
             <a
               href="/demo-instructions"
-              className="store-nav-link text-zinc-400 transition hover:text-white"
+              title="Tester instructions"
+              className="store-nav-link shrink-0 text-zinc-400 transition hover:text-white"
             >
-              Tester Instructions
+              Testers
             </a>
             <a
               href={allItemsHref}
-              className="store-nav-link text-zinc-400 transition hover:text-white"
+              className="store-nav-link shrink-0 text-zinc-400 transition hover:text-white"
             >
               Items
             </a>
             <a
               href="/shops"
-              className="store-nav-link text-zinc-400 transition hover:text-white"
+              className="store-nav-link shrink-0 text-zinc-400 transition hover:text-white"
             >
               Shops
             </a>
             <button
               type="button"
               onClick={() => setCartOpen(true)}
-              className="store-nav-link inline-flex items-center gap-1.5 text-zinc-400 transition hover:text-white"
+              className="store-nav-link inline-flex shrink-0 items-center gap-1.5 text-zinc-400 transition hover:text-white"
             >
               Cart
               {cartQty > 0 ? (

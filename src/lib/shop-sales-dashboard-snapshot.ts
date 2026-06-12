@@ -3,7 +3,7 @@ import { pacificCalendarDateKey } from "@/lib/promotion-period-pacific";
 import { prisma } from "@/lib/prisma";
 
 /** Bump when snapshot payload shape changes (invalidates prior daily caches). */
-const SHOP_SALES_SNAPSHOT_PAYLOAD_VERSION = "v3";
+const SHOP_SALES_SNAPSHOT_PAYLOAD_VERSION = "v5";
 
 export function shopSalesDashboardSnapshotPeriodKey(now: Date = new Date()): string {
   return `${pacificCalendarDateKey(now)}:${SHOP_SALES_SNAPSHOT_PAYLOAD_VERSION}`;

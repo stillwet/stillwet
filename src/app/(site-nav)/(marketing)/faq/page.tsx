@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { FaqPageContent } from "@/components/FaqPageContent";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 
@@ -9,11 +8,6 @@ export default function FaqPage() {
 
       <FaqPageContent />
 
-      <p className="mt-12">
-        <Link href="/" className="text-sm text-blue-400/90 hover:underline">
-          ← Home
-        </Link>
-      </p>
       <SiteLegalFooter />
     </main>
   );

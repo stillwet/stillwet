@@ -172,7 +172,7 @@ export default async function ShopTenantHomePage({ params, searchParams }: Props
 
       {featuredList.length > 0 ? (
         <section className="mb-12">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+          <h2 className="text-center text-sm font-medium uppercase tracking-wide text-zinc-500">
             Featured
           </h2>
           <FeaturedProductsCarousel
@@ -185,7 +185,7 @@ export default async function ShopTenantHomePage({ params, searchParams }: Props
 
       {carouselProducts.length > 0 ? (
         <section>
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+          <h2 className="text-center text-sm font-medium uppercase tracking-wide text-zinc-500">
             Highlights
           </h2>
           <FeaturedProductsCarousel

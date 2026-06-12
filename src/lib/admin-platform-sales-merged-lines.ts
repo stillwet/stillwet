@@ -106,7 +106,9 @@ function promotionPaidAtWhere(
 
 function listingCreditPackMergedLabel(packId: string): string {
   const pack = listingCreditPackById(packId);
-  return pack ? `Listing credits — ${pack.label}` : "Listing credits — pack purchase";
+  if (!pack) return "Listing credits — pack purchase";
+  const creditWord = pack.credits === 1 ? "credit" : "credits";
+  return `Listing credits — ${pack.credits} ${creditWord}`;
 }
 
 function promotionMergedLabel(kind: PromotionKind, listingName: string | null): string {

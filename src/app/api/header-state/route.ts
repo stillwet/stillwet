@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCartSessionBadgeReadonly, getShopOwnerSessionReadonly } from "@/lib/session";
+import {
+  getAdminSessionReadonly,
+  getCartSessionBadgeReadonly,
+  getShopOwnerSessionReadonly,
+} from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +14,10 @@ function headerCartBadgeQuantity(items: Record<string, { quantity: number }>): n
 
 export async function GET() {
   try {
-    const [cart, ownerSession] = await Promise.all([
+    const [cart, ownerSession, adminSession] = await Promise.all([
       getCartSessionBadgeReadonly(),
       getShopOwnerSessionReadonly(),
+      getAdminSessionReadonly(),
     ]);
     const owner =
       ownerSession.shopUserId != null
@@ -26,6 +31,7 @@ export async function GET() {
       cartQty: headerCartBadgeQuantity(cart.items),
       shopOwnerEmail: owner?.email,
       shopOwnerDisplayName: owner?.shop.displayName?.trim() || undefined,
+      adminLoggedIn: adminSession.isAdmin === true,
     });
   } catch (e) {
     console.error("[api/header-state]", e);

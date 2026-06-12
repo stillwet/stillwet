@@ -4,8 +4,11 @@ import { productImageUrlsForShopListing } from "@/lib/product-media";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { ProductModalDetailGrid } from "@/components/ProductModalDetailGrid";
 import {
-  PRODUCT_HERO_GALLERY_MAX_WIDTH_CLASS,
-  PRODUCT_HERO_GALLERY_WRAP_CLASS,
+  PRODUCT_PDP_DETAIL_GRID_CLASS,
+  PRODUCT_PDP_DETAILS_COLUMN_CLASS,
+  PRODUCT_PDP_PAGE_ADD_TO_CART_CLASS,
+  PRODUCT_PDP_PAGE_GALLERY_CLASS,
+  PRODUCT_PDP_PAGE_GALLERY_HERO_CLASS,
 } from "@/lib/product-image-gallery-constants";
 import { StoreDocumentPanel } from "@/components/StoreDocumentPanel";
 import { SHOP_ALL_ROUTE } from "@/lib/constants";
@@ -17,7 +20,7 @@ import {
 } from "@/lib/storefront-listing-display-name";
 
 const SHOP_NAME_LINK_CLASS =
-  "store-dimension-brand text-sm uppercase tracking-[0.2em] text-blue-400/80 transition hover:text-blue-300/90 sm:text-base";
+  "pdp-detail-shop-name store-dimension-brand uppercase tracking-[0.2em] text-blue-400/80 transition hover:text-blue-300/90";
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -74,7 +77,7 @@ export function ProductDetailContent({
     resolvedAdminCatalogItemName != null &&
     resolvedAdminCatalogItemName.toLowerCase() !== displayItemName.trim().toLowerCase();
   const adminCatalogSubtitle = showAdminCatalogSubtitle ? (
-    <p className="mt-1 text-[11px] font-normal leading-snug text-zinc-500 sm:text-xs">
+    <p className="pdp-detail-subtitle mt-1 font-normal leading-snug text-zinc-500">
       {resolvedAdminCatalogItemName}
     </p>
   ) : null;
@@ -122,8 +125,8 @@ export function ProductDetailContent({
         <h1
           className={
             tenant
-              ? "mt-1.5 text-sm font-medium leading-snug text-zinc-100 sm:mt-2 sm:text-base"
-              : "m-0 text-sm font-medium leading-snug text-zinc-100 sm:text-base"
+              ? "pdp-detail-title mt-1.5 font-medium leading-snug text-zinc-100 sm:mt-2"
+              : "pdp-detail-title m-0 font-medium leading-snug text-zinc-100"
           }
         >
           {displayItemName}
@@ -131,34 +134,36 @@ export function ProductDetailContent({
       ) : null}
       {variant === "page" ? adminCatalogSubtitle : null}
       <p
-        className={
-          variant === "page" || tenant
-            ? "mt-3 text-2xl text-blue-200/90"
-            : "text-2xl text-blue-200/90"
-        }
+        className={`pdp-detail-price text-blue-200/90 ${
+          variant === "page" || tenant ? "mt-3" : ""
+        }`}
       >
         {formatPrice(displayPriceCents)}
       </p>
       {blurbText ? (
-        <p className="mt-3 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">
+        <p className="pdp-detail-blurb mt-3 whitespace-pre-line italic text-zinc-300">
           {blurbText}
         </p>
       ) : null}
       <div className={blurbText ? "mt-5" : "mt-6"}>
-        <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Item details</h3>
+        <h3 className="pdp-detail-section-label font-medium uppercase tracking-wide text-zinc-500">
+          Item details
+        </h3>
         {description ? (
-          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-zinc-400">{description}</p>
+          <p className="pdp-detail-description mt-2 whitespace-pre-line text-zinc-400">{description}</p>
         ) : null}
         <p
-          className={`text-sm leading-relaxed text-zinc-500 ${description ? "mt-3" : "mt-2"}`}
+          className={`pdp-detail-shipping text-zinc-500 ${description ? "mt-3" : "mt-2"}`}
         >
           Free shipping
         </p>
       </div>
       {keywordsText ? (
-        <p className="mt-8 text-[11px] leading-relaxed text-zinc-600">
-          <span className="text-zinc-500">Keywords:</span> {keywordsText}
-        </p>
+        <div className="pdp-detail-keywords-slot">
+          <p className="pdp-detail-keywords text-zinc-600">
+            <span className="text-zinc-500">Keywords:</span> {keywordsText}
+          </p>
+        </div>
       ) : null}
     </>
   );
@@ -185,21 +190,25 @@ export function ProductDetailContent({
         }
       />
     ) : (
-      <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-8 xl:gap-x-10">
-        <div className={PRODUCT_HERO_GALLERY_MAX_WIDTH_CLASS}>
-          <ProductImageGallery
-            images={images}
-            sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
-          />
-          {purchaseDisabled ? null : (
-            <ProductDetailAddToCart
-              productId={product.id}
-              shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
-              variant={variant}
+      <div className={PRODUCT_PDP_DETAIL_GRID_CLASS}>
+        <div className={PRODUCT_PDP_PAGE_GALLERY_CLASS}>
+          <div className={PRODUCT_PDP_PAGE_GALLERY_HERO_CLASS}>
+            <ProductImageGallery
+              images={images}
+              sizeReferenceImageUrl={adminCatalogSizeExampleImageUrl}
             />
+          </div>
+          {purchaseDisabled ? null : (
+            <div className={PRODUCT_PDP_PAGE_ADD_TO_CART_CLASS}>
+              <ProductDetailAddToCart
+                productId={product.id}
+                shopSlug={shopSlug === PLATFORM_SHOP_SLUG ? undefined : shopSlug}
+                variant={variant}
+              />
+            </div>
           )}
         </div>
-        <div>{detailsColumn}</div>
+        <div className={PRODUCT_PDP_DETAILS_COLUMN_CLASS}>{detailsColumn}</div>
       </div>
     );
 

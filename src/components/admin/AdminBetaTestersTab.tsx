@@ -4,6 +4,7 @@ import { AdminBetaTesterShopFreezeToggle } from "@/components/admin/AdminBetaTes
 import { AdminCreatorGiftCodeNotesField } from "@/components/admin/AdminCreatorGiftCodeNotesField";
 import { AdminGenerateBetaTesterCodesControls } from "@/components/admin/AdminGenerateBetaTesterCodesControls";
 import type { AdminBetaTesterDashboardPayload } from "@/lib/admin-beta-testers-load";
+import { BETA_TESTER_SIGNUP_LISTING_CREDITS } from "@/lib/beta-tester-codes";
 import { BetaTesterOnboardingStatus } from "@/generated/prisma/enums";
 
 function formatWhen(iso: string | null): string {
@@ -45,8 +46,8 @@ export function AdminBetaTestersTab(props: { payload: AdminBetaTesterDashboardPa
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Beta testers</h2>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-500">
           Shops created with beta-tester invite codes are tagged{" "}
-          <span className="text-zinc-300">Beta Tester</span> and automatically receive 10 listing
-          credits plus shop flair access. Onboarding status is refreshed once per day by the daily
+          <span className="text-zinc-300">Beta Tester</span> and automatically receive{" "}
+          {BETA_TESTER_SIGNUP_LISTING_CREDITS} listing credits plus shop flair access. Onboarding status is refreshed once per day by the daily
           maintenance cron.
         </p>
         <AdminGenerateBetaTesterCodesControls />

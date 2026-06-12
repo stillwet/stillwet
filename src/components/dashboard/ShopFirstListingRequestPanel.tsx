@@ -30,12 +30,12 @@ import {
   type PillowSidesArtworkMode,
 } from "@/lib/listing-artwork-pillow-listing";
 import { ListingArtworkLetterboxFill } from "@/generated/prisma/enums";
-import { flattenShopBaselineCatalogGroups, partitionShopBaselineCatalogGroups, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
+import { flattenShopBaselineCatalogGroups, sortShopBaselineCatalogGroupsByNameAsc, type ShopSetupCatalogGroup } from "@/lib/shop-baseline-catalog";
 import {
   CATALOG_ARTWORK_SOURCE_TIER_GUIDANCE,
   CATALOG_ARTWORK_SOURCE_TIER_LABELS,
 } from "@/lib/listing-artwork-source-tier";
-import { SHOP_EXTENDED_CATALOG_SECTION_LABEL } from "@/lib/secret-menu-catalog";
+import { SHOP_EXTENDED_CATALOG_SECTION_LABEL, sortExtendedCatalogGroups } from "@/lib/secret-menu-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
 import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
 import {
@@ -114,11 +114,12 @@ function listingProfitHint(
   return `Est. profit: ${formatUsdFromCents(profit)}`;
 }
 
-function CatalogItemPhotoLink({ href }: { href: string }) {
+function CatalogItemPhotoLink({ href, muted = false }: { href: string; muted?: boolean }) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
-  const linkClassName =
-    "text-[11px] text-blue-400/90 underline underline-offset-2 hover:text-blue-300";
+  const linkClassName = muted
+    ? "text-[11px] text-zinc-600 underline underline-offset-2 hover:text-zinc-500"
+    : "text-[11px] text-blue-400/90 underline underline-offset-2 hover:text-blue-300";
 
   useEffect(() => {
     if (!open) return;
@@ -136,7 +137,7 @@ function CatalogItemPhotoLink({ href }: { href: string }) {
 
   return (
     <>
-      <span className="flex w-full items-center justify-center">
+      <span className={`${CATALOG_PICKER_PHOTO_COL} flex items-center justify-center`}>
         <button
           type="button"
           title="View item photo"
@@ -184,17 +185,104 @@ function CatalogItemPhotoLink({ href }: { href: string }) {
   );
 }
 
-/** Shared row: item name (left) | item photo + sale price (right-aligned group) */
-const CATALOG_PICKER_ROW = "flex items-center gap-x-4";
-const CATALOG_PICKER_ITEM_COL = "min-w-0 max-w-[20rem] sm:max-w-[24rem]";
+function CatalogHighResolutionHelp() {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative inline-flex shrink-0 self-center leading-none">
+      <button
+        type="button"
+        aria-label="High resolution artwork requirement"
+        aria-expanded={open}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className="relative h-4 w-4 shrink-0 rounded-full border border-zinc-600 bg-zinc-900/80 p-0 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+      >
+        <span
+          className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold leading-none"
+          aria-hidden="true"
+        >
+          *
+        </span>
+      </button>
+      {open ? (
+        <div
+          role="tooltip"
+          className="absolute left-0 top-full z-30 mt-1.5 w-max max-w-[min(16rem,calc(100vw-2rem))] rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-left text-[11px] leading-snug text-zinc-400 shadow-lg"
+        >
+          Requires extra high resolution files
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Shared row: item name (left, flex priority) | item photo + sale price (right-aligned group) */
+const CATALOG_PICKER_ROW = "flex items-center gap-x-2 sm:gap-x-4";
+const CATALOG_PICKER_ITEM_COL = "min-w-0 flex-1 basis-0 pr-2 sm:pr-3";
 const CATALOG_PICKER_ITEM_HEADER_COL = `${CATALOG_PICKER_ITEM_COL} pl-7`;
-const CATALOG_PICKER_TRAILING_COLS =
-  "ml-auto grid shrink-0 grid-cols-[7rem_8rem] items-center gap-x-4 sm:grid-cols-[7.5rem_8.5rem]";
-const CATALOG_PICKER_PHOTO_COL = "text-center text-[11px] leading-tight";
-const CATALOG_PICKER_PRICE_COL = "text-center text-[11px] tabular-nums leading-tight";
+const CATALOG_PICKER_TRAILING_COLS_BASE = "ml-auto grid w-auto shrink items-center";
+const CATALOG_PICKER_TRAILING_COLS_STANDARD = `${CATALOG_PICKER_TRAILING_COLS_BASE} grid-cols-[minmax(3.25rem,4.25rem)_minmax(3.75rem,4.75rem)] gap-x-2 sm:grid-cols-[5.5rem_6rem] sm:gap-x-3 md:grid-cols-[7rem_8rem] md:gap-x-4 lg:grid-cols-[7.5rem_8.5rem]`;
+const CATALOG_PICKER_TRAILING_COLS_NARROW = `${CATALOG_PICKER_TRAILING_COLS_BASE} grid-cols-[minmax(2.25rem,2.75rem)_minmax(2.5rem,3rem)] gap-x-1.5`;
+const catalogPickerTrailingColsClass = (narrowTrailingCols: boolean) =>
+  narrowTrailingCols ? CATALOG_PICKER_TRAILING_COLS_NARROW : CATALOG_PICKER_TRAILING_COLS_STANDARD;
+const CATALOG_PICKER_PHOTO_COL =
+  "min-w-0 w-full text-center text-[11px] leading-tight break-words";
+const CATALOG_PICKER_PRICE_COL =
+  "min-w-0 w-full text-center text-[11px] tabular-nums leading-tight break-words";
 const CATALOG_PICKER_HEADER_ROW = `${CATALOG_PICKER_ROW} sticky top-0 z-20 border-b border-zinc-800 bg-zinc-900 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-zinc-100`;
-const CATALOG_PICKER_SECTION_ROW = `${CATALOG_PICKER_ROW} sticky top-8 z-10 border-b border-zinc-800/80 bg-zinc-900 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500`;
+const catalogPickerSectionRowClass = (compactDashboardTabs: boolean) =>
+  `${CATALOG_PICKER_ROW} sticky ${compactDashboardTabs ? "top-10" : "top-8"} z-10 border-b border-zinc-800/80 bg-zinc-900 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500`;
 const catalogPickerHeaderMutedClass = (muted: boolean) => (muted ? " opacity-45" : "");
+const catalogPickerItemTextClass = (selected: boolean, hasSelection: boolean) =>
+  !hasSelection || selected ? "text-zinc-200" : "text-zinc-600";
+const catalogPickerPhotoPlaceholderClass = (selected: boolean, hasSelection: boolean) =>
+  !hasSelection || selected ? "text-zinc-700" : "text-zinc-600";
+
+function CatalogPickerTrailingHeaders({ compactDashboardTabs }: { compactDashboardTabs: boolean }) {
+  if (compactDashboardTabs) {
+    return (
+      <>
+        <div className={`${CATALOG_PICKER_PHOTO_COL} flex flex-col items-center gap-0.5`}>
+          <span className="max-w-full break-words">Item</span>
+          <span className="max-w-full break-words">Photo</span>
+        </div>
+        <div className={`${CATALOG_PICKER_PRICE_COL} flex flex-col items-center gap-0.5`}>
+          <span className="max-w-full break-words">Sale</span>
+          <span className="max-w-full break-words">Price</span>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span className={CATALOG_PICKER_PHOTO_COL}>Item Photo</span>
+      <span className={CATALOG_PICKER_PRICE_COL}>Sale Price</span>
+    </>
+  );
+}
 
 async function probeDashboardListingCount(): Promise<number | null> {
   for (const delayMs of [0, 400, 1200]) {
@@ -234,6 +322,8 @@ export function ShopFirstListingRequestPanel(props: {
   onListingSubmittedSuccess?: () => void;
   /** Listings already on the shop before submit — used to detect success after transport/RSC errors. */
   knownListingCount?: number;
+  /** When shop dashboard tabs stack to two rows (narrow width). */
+  compactDashboardTabs?: boolean;
 }) {
   const {
     catalogGroups,
@@ -256,6 +346,7 @@ export function ShopFirstListingRequestPanel(props: {
     moderationPhrases = [],
     onListingSubmittedSuccess,
     knownListingCount = 0,
+    compactDashboardTabs = false,
   } = props;
 
   const [isListingPending, startListingTransition] = useTransition();
@@ -341,33 +432,63 @@ export function ShopFirstListingRequestPanel(props: {
     [allCatalogGroups],
   );
 
-  const catalogGroupsByTier = useMemo(
-    () => partitionShopBaselineCatalogGroups(catalogGroups),
+  const baselineCatalogPickerGroups = useMemo(
+    () => sortShopBaselineCatalogGroupsByNameAsc(catalogGroups),
     [catalogGroups],
   );
 
-  const catalogPickerSections = useMemo(() => {
-    const sections: { key: string; title: string; groups: ShopSetupCatalogGroup[] }[] = [
-      {
-        key: "phone_pic_safe",
-        title: CATALOG_ARTWORK_SOURCE_TIER_LABELS.phone_pic_safe,
-        groups: catalogGroupsByTier.phonePicSafe,
-      },
-      {
-        key: "camera_or_vector_only",
-        title: `${CATALOG_ARTWORK_SOURCE_TIER_LABELS.camera_or_vector_only} -- requires higher resolution images`,
-        groups: catalogGroupsByTier.cameraOrVectorOnly,
-      },
-    ];
-    if (extendedCatalogGroups.length > 0) {
-      sections.push({
-        key: "extended_catalog",
-        title: SHOP_EXTENDED_CATALOG_SECTION_LABEL,
-        groups: extendedCatalogGroups,
-      });
+  const extendedCatalogPickerGroups = useMemo(
+    () => sortExtendedCatalogGroups(extendedCatalogGroups),
+    [extendedCatalogGroups],
+  );
+
+  const catalogPickerLayoutProbe = useMemo(() => {
+    const groups = [...baselineCatalogPickerGroups, ...extendedCatalogPickerGroups];
+    if (groups.length === 0) {
+      return { itemName: "", showHighResolutionHelp: false };
     }
-    return sections;
-  }, [catalogGroupsByTier, extendedCatalogGroups]);
+    let itemName = groups[0]!.itemName;
+    let showHighResolutionHelp = false;
+    for (const g of groups) {
+      if (g.itemName.length > itemName.length) itemName = g.itemName;
+      if (g.option.artworkSourceTier === "camera_or_vector_only") {
+        showHighResolutionHelp = true;
+      }
+    }
+    return { itemName, showHighResolutionHelp };
+  }, [baselineCatalogPickerGroups, extendedCatalogPickerGroups]);
+
+  const catalogPickerScrollRef = useRef<HTMLDivElement>(null);
+  const catalogPickerMeasureRef = useRef<HTMLDivElement>(null);
+  const [narrowCatalogTrailingCols, setNarrowCatalogTrailingCols] = useState(false);
+
+  useEffect(() => {
+    const scroll = catalogPickerScrollRef.current;
+    const measure = catalogPickerMeasureRef.current;
+    if (!scroll || !measure || !catalogPickerLayoutProbe.itemName) return;
+
+    const updateLayout = () => {
+      const nameProbe = measure.querySelector<HTMLElement>("[data-catalog-picker-name-probe]");
+      if (!nameProbe) return;
+      const truncates = nameProbe.scrollWidth > nameProbe.clientWidth + 1;
+      setNarrowCatalogTrailingCols((prev) => {
+        const next = prev
+          ? nameProbe.scrollWidth > nameProbe.clientWidth - 8
+          : truncates;
+        return prev === next ? prev : next;
+      });
+    };
+
+    updateLayout();
+    const ro = new ResizeObserver(updateLayout);
+    ro.observe(scroll);
+    ro.observe(measure);
+    return () => ro.disconnect();
+  }, [
+    catalogPickerLayoutProbe.itemName,
+    catalogPickerLayoutProbe.showHighResolutionHelp,
+    compactDashboardTabs,
+  ]);
 
   const selectedCatalogGroup = useMemo(() => {
     for (const g of allCatalogGroups) {
@@ -1098,17 +1219,46 @@ export function ShopFirstListingRequestPanel(props: {
             <p
               className={`mt-1 text-[11px] leading-relaxed text-zinc-600${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
             >
-              Select a base item your design will be printed on. Items are grouped by typical phone photo suitability.
+              Select a base item your design will be printed on.
             </p>
             <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/40">
-              <div className="h-[350px] overflow-y-auto [scrollbar-gutter:stable]">
+              <div
+                ref={catalogPickerScrollRef}
+                className="relative h-[350px] overflow-y-auto [scrollbar-gutter:stable]"
+              >
+                <div
+                  ref={catalogPickerMeasureRef}
+                  className="pointer-events-none invisible absolute left-0 top-0 -z-10 h-0 w-full overflow-hidden"
+                  aria-hidden
+                >
+                  <div className={`${CATALOG_PICKER_ROW} px-3 py-2.5`}>
+                    <label className={`${CATALOG_PICKER_ITEM_COL} flex items-center gap-2.5`}>
+                      <span className="h-4 w-4 shrink-0" />
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span data-catalog-picker-name-probe className="min-w-0 truncate">
+                          {catalogPickerLayoutProbe.itemName}
+                        </span>
+                        {catalogPickerLayoutProbe.showHighResolutionHelp ? (
+                          <span className="h-4 w-4 shrink-0" />
+                        ) : null}
+                      </span>
+                    </label>
+                    <div className={CATALOG_PICKER_TRAILING_COLS_STANDARD}>
+                      <span className={CATALOG_PICKER_PHOTO_COL} aria-hidden>
+                        —
+                      </span>
+                      <span className={CATALOG_PICKER_PRICE_COL} aria-hidden>
+                        $0
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <div className={CATALOG_PICKER_HEADER_ROW} aria-hidden>
                   <span className={`${CATALOG_PICKER_ITEM_HEADER_COL}${catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}`}>
                     Item
                   </span>
-                  <div className={`${CATALOG_PICKER_TRAILING_COLS}${catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}`}>
-                    <span className={CATALOG_PICKER_PHOTO_COL}>Item Photo</span>
-                    <span className={CATALOG_PICKER_PRICE_COL}>Sale Price</span>
+                  <div className={`${catalogPickerTrailingColsClass(narrowCatalogTrailingCols)}${catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}`}>
+                    <CatalogPickerTrailingHeaders compactDashboardTabs={compactDashboardTabs} />
                   </div>
                 </div>
                 <ul
@@ -1117,55 +1267,111 @@ export function ShopFirstListingRequestPanel(props: {
                   aria-label="Items from admin catalog"
                   aria-disabled={shopAtInReviewListingLimit ? true : undefined}
                 >
-                {catalogPickerSections.map((section) =>
-                  section.groups.length === 0 ? null : (
-                    <li key={section.key} className="list-none">
-                      <div className={CATALOG_PICKER_SECTION_ROW} aria-hidden>
-                        <span className={catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}>
-                          {section.title}
-                        </span>
+                {baselineCatalogPickerGroups.map((g) => {
+                  const selected = listingProductId === g.option.productId;
+                  const catalogPickDisabled = listingRequestFieldsDisabled;
+                  const catalogPickerSelectionActive = listingProductId !== "";
+                  const rowUnselected = catalogPickerSelectionActive && !selected;
+                  return (
+                    <li key={g.itemId}>
+                      <div className={`${CATALOG_PICKER_ROW} relative z-0 px-3 py-2.5`}>
+                        <label
+                          className={`${CATALOG_PICKER_ITEM_COL} flex items-center gap-2.5 text-sm ${catalogPickerItemTextClass(selected, catalogPickerSelectionActive)} ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="catalogProductPick"
+                            value={g.option.productId}
+                            checked={selected}
+                            disabled={catalogPickDisabled}
+                            onChange={() => setListingProductId(g.option.productId)}
+                            className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
+                          />
+                          <span className="flex min-w-0 items-center gap-1.5">
+                            <span className="min-w-0 truncate">{g.itemName}</span>
+                            {g.option.artworkSourceTier === "camera_or_vector_only" ? (
+                              <CatalogHighResolutionHelp />
+                            ) : null}
+                          </span>
+                        </label>
+                        <div className={catalogPickerTrailingColsClass(narrowCatalogTrailingCols)}>
+                          {g.option.exampleHref ? (
+                            <CatalogItemPhotoLink href={g.option.exampleHref} muted={rowUnselected} />
+                          ) : (
+                            <span
+                              className={`${CATALOG_PICKER_PHOTO_COL} ${catalogPickerPhotoPlaceholderClass(selected, catalogPickerSelectionActive)}`}
+                            >
+                              —
+                            </span>
+                          )}
+                          <span
+                            className={`${CATALOG_PICKER_PRICE_COL} text-xs text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                          >
+                            {formatUsdFromCents(g.option.minPriceCents)}
+                          </span>
+                        </div>
                       </div>
-                      <ul className="divide-y divide-zinc-800/80" role="group" aria-label={section.title}>
-                        {section.groups.map((g) => {
-                          const selected = listingProductId === g.option.productId;
-                          const catalogPickDisabled = listingRequestFieldsDisabled;
-                          return (
-                            <li key={g.itemId}>
-                              <div className={`${CATALOG_PICKER_ROW} relative z-0 px-3 py-2.5`}>
-                                <label
-                                  className={`${CATALOG_PICKER_ITEM_COL} flex items-center gap-2.5 text-sm text-zinc-200 ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name="catalogProductPick"
-                                    value={g.option.productId}
-                                    checked={selected}
-                                    disabled={catalogPickDisabled}
-                                    onChange={() => setListingProductId(g.option.productId)}
-                                    className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
-                                  />
-                                  <span className="min-w-0 truncate">{g.itemName}</span>
-                                </label>
-                                <div className={CATALOG_PICKER_TRAILING_COLS}>
-                                  {g.option.exampleHref ? (
-                                    <CatalogItemPhotoLink href={g.option.exampleHref} />
-                                  ) : (
-                                    <span className={`${CATALOG_PICKER_PHOTO_COL} text-zinc-700`}>—</span>
-                                  )}
-                                  <span
-                                    className={`${CATALOG_PICKER_PRICE_COL} text-xs text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
-                                  >
-                                    {formatUsdFromCents(g.option.minPriceCents)}
-                                  </span>
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
                     </li>
-                  ),
-                )}
+                  );
+                })}
+                {extendedCatalogPickerGroups.length > 0 ? (
+                  <li className="list-none">
+                    <div className={catalogPickerSectionRowClass(compactDashboardTabs)} aria-hidden>
+                      <span className={catalogPickerHeaderMutedClass(shopAtInReviewListingLimit)}>
+                        {SHOP_EXTENDED_CATALOG_SECTION_LABEL}
+                      </span>
+                    </div>
+                    <ul className="divide-y divide-zinc-800/80" role="group" aria-label={SHOP_EXTENDED_CATALOG_SECTION_LABEL}>
+                      {extendedCatalogPickerGroups.map((g) => {
+                        const selected = listingProductId === g.option.productId;
+                        const catalogPickDisabled = listingRequestFieldsDisabled;
+                        const catalogPickerSelectionActive = listingProductId !== "";
+                        const rowUnselected = catalogPickerSelectionActive && !selected;
+                        return (
+                          <li key={g.itemId}>
+                            <div className={`${CATALOG_PICKER_ROW} relative z-0 px-3 py-2.5`}>
+                              <label
+                                className={`${CATALOG_PICKER_ITEM_COL} flex items-center gap-2.5 text-sm ${catalogPickerItemTextClass(selected, catalogPickerSelectionActive)} ${catalogPickDisabled ? "cursor-not-allowed" : "cursor-pointer"}${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="catalogProductPick"
+                                  value={g.option.productId}
+                                  checked={selected}
+                                  disabled={catalogPickDisabled}
+                                  onChange={() => setListingProductId(g.option.productId)}
+                                  className="shrink-0 border-zinc-600 bg-zinc-900 text-blue-600"
+                                />
+                                <span className="flex min-w-0 items-center gap-1.5">
+                                  <span className="min-w-0 truncate">{g.itemName}</span>
+                                  {g.option.artworkSourceTier === "camera_or_vector_only" ? (
+                                    <CatalogHighResolutionHelp />
+                                  ) : null}
+                                </span>
+                              </label>
+                              <div className={catalogPickerTrailingColsClass(narrowCatalogTrailingCols)}>
+                                {g.option.exampleHref ? (
+                                  <CatalogItemPhotoLink href={g.option.exampleHref} muted={rowUnselected} />
+                                ) : (
+                                  <span
+                                    className={`${CATALOG_PICKER_PHOTO_COL} ${catalogPickerPhotoPlaceholderClass(selected, catalogPickerSelectionActive)}`}
+                                  >
+                                    —
+                                  </span>
+                                )}
+                                <span
+                                  className={`${CATALOG_PICKER_PRICE_COL} text-xs text-zinc-500${shopAtInReviewListingLimit ? " opacity-45" : ""}`}
+                                >
+                                  {formatUsdFromCents(g.option.minPriceCents)}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ) : null}
               </ul>
               </div>
             </div>

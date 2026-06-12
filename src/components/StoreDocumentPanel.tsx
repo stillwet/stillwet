@@ -39,7 +39,7 @@ export function StoreDocumentPanel({
 }: Props) {
   return (
     <article
-      className={`store-dimension-panel animate-store-panel-in relative pb-10 pt-0 sm:pb-12 ${panelPaddingClass} ${narrow ? "mx-auto max-w-3xl" : ""}`}
+      className={`pdp-container store-dimension-panel animate-store-panel-in relative pb-10 pt-0 sm:pb-12 ${panelPaddingClass} ${narrow ? "mx-auto max-w-3xl" : ""}`}
     >
       <header
         className={`relative mb-8 flex min-h-20 items-center border-b border-zinc-800/80 sm:min-h-[5.5rem] ${closeHref ? "pr-12 sm:pr-14" : ""}`}

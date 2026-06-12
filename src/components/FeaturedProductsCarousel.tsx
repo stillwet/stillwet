@@ -16,9 +16,9 @@ const ROTATE_MS = 2500;
 const ADVANCE_DURATION_MS = 560;
 const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-/** Default layout: large center square + smaller side squares. Base ≈ 70% of original. */
-const DEFAULT_CENTER_PX = Math.round(300 * 0.7);
-const DEFAULT_SLIDE_GAP_PX = Math.round(40 * 0.7);
+/** Default layout: large center square + smaller side squares. Base ≈ 63% of original. */
+const DEFAULT_CENTER_PX = Math.round(300 * 0.63);
+const DEFAULT_SLIDE_GAP_PX = Math.round(40 * 0.63);
 
 /** Same formula as side rails: scales with center tile. */
 function sidePxFromCenter(centerPx: number): number {
@@ -37,6 +37,65 @@ function carouselTileMetrics(compact: boolean): {
   const sidePx = sidePxFromCenter(centerPx);
   const slideGapPx = compact ? DEFAULT_SLIDE_GAP_PX / 2 : DEFAULT_SLIDE_GAP_PX;
   return { centerPx, sidePx, slideGapPx };
+}
+
+type CarouselLayout = {
+  centerPx: number;
+  sidePx: number;
+  slideGapPx: number;
+  showSideRails: boolean;
+};
+
+function carouselRowWidth(centerPx: number, sidePx: number, slideGapPx: number): number {
+  return sidePx + slideGapPx + centerPx + slideGapPx + sidePx;
+}
+
+function metricsFromCenter(
+  centerPx: number,
+  compact: boolean,
+): Pick<CarouselLayout, "centerPx" | "sidePx" | "slideGapPx"> {
+  const base = carouselTileMetrics(compact);
+  const sidePx = sidePxFromCenter(centerPx);
+  const slideGapPx = Math.max(6, Math.round(centerPx * (base.slideGapPx / base.centerPx)));
+  return { centerPx, sidePx, slideGapPx };
+}
+
+function fitSingleTile(availableWidth: number, compact: boolean): CarouselLayout {
+  const base = carouselTileMetrics(compact);
+  const centerPx =
+    availableWidth > 0 ? Math.min(base.centerPx, Math.floor(availableWidth)) : base.centerPx;
+  return { ...metricsFromCenter(centerPx, compact), showSideRails: false };
+}
+
+function computeCarouselLayout(
+  availableWidth: number,
+  compact: boolean,
+  itemCount: number,
+  preferSideRails: boolean,
+): CarouselLayout {
+  if (itemCount <= 1 || !preferSideRails) {
+    return fitSingleTile(availableWidth, compact);
+  }
+
+  const base = carouselTileMetrics(compact);
+  const minCenterThreeUp = compact ? 72 : 100;
+  let centerPx = base.centerPx;
+  let sidePx = base.sidePx;
+  let slideGapPx = base.slideGapPx;
+  let rowW = carouselRowWidth(centerPx, sidePx, slideGapPx);
+
+  while (rowW > availableWidth && centerPx > minCenterThreeUp) {
+    const scale = availableWidth / rowW;
+    centerPx = Math.max(minCenterThreeUp, Math.floor(centerPx * scale * 0.98));
+    ({ sidePx, slideGapPx } = metricsFromCenter(centerPx, compact));
+    rowW = carouselRowWidth(centerPx, sidePx, slideGapPx);
+  }
+
+  if (rowW > availableWidth || centerPx < minCenterThreeUp) {
+    return fitSingleTile(availableWidth, compact);
+  }
+
+  return { centerPx, sidePx, slideGapPx, showSideRails: true };
 }
 
 type Props = {
@@ -74,10 +133,14 @@ export function FeaturedProductsCarousel({
   defaultListingShopSlug,
   compact = false,
 }: Props) {
-  const { centerPx, sidePx, slideGapPx } = carouselTileMetrics(compact);
+  const n = items.length;
+  const [layout, setLayout] = useState<CarouselLayout>(() => ({
+    ...carouselTileMetrics(compact),
+    showSideRails: false,
+  }));
+  const { centerPx, sidePx, slideGapPx, showSideRails } = layout;
   const dx = -(slideGapPx + centerPx / 2 + sidePx / 2);
 
-  const n = items.length;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -85,6 +148,7 @@ export function FeaturedProductsCarousel({
   const [phase, setPhase] = useState<"idle" | "advancing">("idle");
   const [animArmed, setAnimArmed] = useState(false);
   const centerMotionRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -93,6 +157,20 @@ export function FeaturedProductsCarousel({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+
+  useLayoutEffect(() => {
+    const node = frameRef.current;
+    if (!node) return;
+
+    const update = () => {
+      setLayout(computeCarouselLayout(node.clientWidth, compact, n, isMd));
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(node);
+    return () => ro.disconnect();
+  }, [compact, n, isMd]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -108,13 +186,13 @@ export function FeaturedProductsCarousel({
   const beginAdvance = useCallback(() => {
     if (n <= 1 || phase !== "idle") return;
     if (paused) return;
-    if (reduceMotion || !isMd) {
+    if (reduceMotion || !showSideRails) {
       setIndex((i) => (i + 1) % n);
       return;
     }
     setAnimArmed(false);
     setPhase("advancing");
-  }, [n, phase, paused, reduceMotion, isMd]);
+  }, [n, phase, paused, reduceMotion, showSideRails]);
 
   /** Arm motion in the same layout pass as `advancing` so opacity + transform start together (no extra frame). */
   useLayoutEffect(() => {
@@ -276,7 +354,7 @@ export function FeaturedProductsCarousel({
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
     >
-      <div className="mx-auto max-w-[996px]" style={frameStyle}>
+      <div ref={frameRef} className="mx-auto max-w-[996px]" style={frameStyle}>
         {hideKicker ? null : (
           <p className="mb-2 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
             {eyebrow}
@@ -287,8 +365,8 @@ export function FeaturedProductsCarousel({
             className="flex min-h-[var(--fc-center)] items-center justify-center overflow-visible"
             style={{ gap: `${slideGapPx}px` }}
           >
-            {n > 1 && prev ? (
-              <div className="relative hidden w-[var(--fc-side)] shrink-0 md:block">
+            {n > 1 && prev && showSideRails ? (
+              <div className="relative w-[var(--fc-side)] shrink-0">
                 <div
                   className="aspect-square w-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/60"
                   style={leftMotion}
@@ -328,8 +406,8 @@ export function FeaturedProductsCarousel({
               </div>
             </Link>
 
-            {n > 1 && next ? (
-              <div className="relative hidden w-[var(--fc-side)] shrink-0 md:block">
+            {n > 1 && next && showSideRails ? (
+              <div className="relative w-[var(--fc-side)] shrink-0">
                 {/* Underlay: following list photo fades onto the rail as the front tile moves to center */}
                 <div
                   className={`absolute inset-0 z-0 aspect-square overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/60 ${!motionLive ? "pointer-events-none" : ""}`}

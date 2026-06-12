@@ -34,3 +34,13 @@ async function markOwnerNoticeReadForCurrentShop(formData: FormData) {
 export async function dashboardMarkOwnerNoticeRead(formData: FormData) {
   await markOwnerNoticeReadForCurrentShop(formData);
 }
+
+/** Marks every unread notice read for the signed-in shop (Notifications tab). */
+export async function dashboardMarkAllOwnerNoticesRead(): Promise<void> {
+  const user = await requireShopOwner();
+  await prisma.shopOwnerNotice.updateMany({
+    where: { shopId: user.shopId, readAt: null },
+    data: { readAt: new Date() },
+  });
+  revalidatePath("/dashboard");
+}

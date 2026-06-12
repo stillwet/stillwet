@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { SupportSiteCta } from "@/components/SupportSiteCta";
+
+const FAQ_SUPPORT_SITE_LINK_CLASS =
+  "store-dimension-brand inline cursor-pointer border-0 bg-transparent p-0 font-normal text-blue-400/90 underline decoration-blue-500/40 underline-offset-[3px] transition hover:text-blue-300 hover:decoration-blue-400/60";
 
 type FaqAudience = "buyer" | "seller";
 type FaqCategory = "both" | FaqAudience;
@@ -41,6 +45,23 @@ const FAQ_ITEMS: FaqItem[] = [
         <h2 className="text-base font-semibold text-zinc-200">Where do you ship?</h2>
         <p>
           Currently, we can only ship to the US. We are actively trying to expand into other countries.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "shop-outside-us",
+    category: "seller",
+    content: (
+      <>
+        <h2 className="text-base font-semibold text-zinc-200">
+          Can I open a shop if I live outside of the U.S.?
+        </h2>
+        <p>
+          Currently, we can only support payouts to U.S. bank accounts, but are actively trying to expand into
+          other countries. Consider{" "}
+          <SupportSiteCta className={FAQ_SUPPORT_SITE_LINK_CLASS}>supporting the site</SupportSiteCta> to vote
+          for your country.
         </p>
       </>
     ),

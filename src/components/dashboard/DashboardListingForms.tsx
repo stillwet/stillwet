@@ -564,7 +564,7 @@ function formatUsdFromCents(cents: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(Math.max(0, cents) / 100);
+  }).format(cents / 100);
 }
 
 function listingSalePriceCents(
@@ -614,8 +614,8 @@ function ListingMerchandiseBreakdownRow({
       className={`flex flex-wrap items-baseline gap-x-6 gap-y-1.5 text-[11px] text-zinc-500 tabular-nums ${className}`}
     >
       <span className="shrink-0">Sale {formatUsdFromCents(saleCents)}</span>
-      <span className="shrink-0">Goods/services cost {formatUsdFromCents(goodsServicesCostCents)}</span>
-      <span className="shrink-0">Platform fee {formatUsdFromCents(platformCutCents)}</span>
+      <span className="shrink-0">G/S Fees {formatUsdFromCents(-goodsServicesCostCents)}</span>
+      <span className="shrink-0">Platform fee {formatUsdFromCents(-platformCutCents)}</span>
     </div>
   );
 }
@@ -726,20 +726,25 @@ export function ListingEstProfitBreakdownHelp({
 
 function MerchandiseBreakdownCentsRow({
   saleCents,
-  goodsServicesCostCents,
+  gsFeesCents,
   platformCutCents,
+  tipCents = 0,
   className = "flex-col items-end gap-1",
 }: {
   saleCents: number;
-  goodsServicesCostCents: number;
+  gsFeesCents: number;
   platformCutCents: number;
+  tipCents?: number;
   className?: string;
 }) {
   return (
     <div className={`flex text-[11px] text-zinc-500 tabular-nums ${className}`}>
       <span className="shrink-0">Sale {formatUsdFromCents(saleCents)}</span>
-      <span className="shrink-0">Goods/services cost {formatUsdFromCents(goodsServicesCostCents)}</span>
-      <span className="shrink-0">Platform fee {formatUsdFromCents(platformCutCents)}</span>
+      <span className="shrink-0">G/S Fees {formatUsdFromCents(-gsFeesCents)}</span>
+      <span className="shrink-0">Platform fee {formatUsdFromCents(-platformCutCents)}</span>
+      {tipCents > 0 ? (
+        <span className="shrink-0">Tip +{formatUsdFromCents(tipCents)}</span>
+      ) : null}
     </div>
   );
 }
@@ -748,13 +753,15 @@ function MerchandiseBreakdownCentsRow({
 export function PaidOrderShopProfitHelp({
   shopProfitCents,
   saleCents,
-  goodsServicesCostCents,
+  gsFeesCents,
   platformCutCents,
+  tipCents = 0,
 }: {
   shopProfitCents: number;
   saleCents: number;
-  goodsServicesCostCents: number;
+  gsFeesCents: number;
   platformCutCents: number;
+  tipCents?: number;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -800,8 +807,9 @@ export function PaidOrderShopProfitHelp({
             >
               <MerchandiseBreakdownCentsRow
                 saleCents={saleCents}
-                goodsServicesCostCents={goodsServicesCostCents}
+                gsFeesCents={gsFeesCents}
                 platformCutCents={platformCutCents}
+                tipCents={tipCents}
               />
             </div>
           ) : null}

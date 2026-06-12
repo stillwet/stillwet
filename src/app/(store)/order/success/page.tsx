@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { clearCartAfterPaidSession } from "@/actions/order";
 import { formatBuyerOrderNumberShort } from "@/lib/buyer-order-number";
 import { SHOP_ALL_ROUTE } from "@/lib/constants";
 import { loadBuyerOrderNumberForSuccessSession } from "@/lib/order-success-lookup";
@@ -12,9 +11,6 @@ type Props = { searchParams: Promise<{ session_id?: string }> };
 
 export default async function OrderSuccessPage({ searchParams }: Props) {
   const { session_id } = await searchParams;
-  if (session_id) {
-    await clearCartAfterPaidSession(session_id);
-  }
 
   const orderNumber = session_id
     ? await loadBuyerOrderNumberForSuccessSession(session_id)

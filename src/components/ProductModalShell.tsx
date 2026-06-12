@@ -35,7 +35,7 @@ export function ProductModalShell({ children }: { children: ReactNode }) {
           aria-labelledby="product-modal-title"
         >
           <StorePanelCloseButton onClick={close} />
-          <div className="store-product-modal-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-10 pr-14 sm:px-10 sm:pb-10 sm:pt-6 sm:pr-16">
+          <div className="pdp-container store-product-modal-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-10 pr-14 sm:px-10 sm:pb-10 sm:pt-6 sm:pr-16">
             {children}
           </div>
         </div>
