@@ -1722,10 +1722,10 @@ export function DashboardMainTabs(props: {
             role="tablist"
             aria-label="Shop onboarding"
           >
-            <Fragment key="setup">{tabBtn("setup", "Onboarding", setupTabId, setupPanelId)}</Fragment>
+            <Fragment key="setup">{tabBtn("setup", "Onboarding", setupTabId, setupPanelId, false)}</Fragment>
             {!guidelinesAcknowledged ? (
               <Fragment key="itemGuidelines">
-                {tabBtn("itemGuidelines", "Shop regulations", itemGuidelinesTabId, itemGuidelinesPanelId)}
+                {tabBtn("itemGuidelines", "Shop regulations", itemGuidelinesTabId, itemGuidelinesPanelId, false)}
               </Fragment>
             ) : null}
           </div>

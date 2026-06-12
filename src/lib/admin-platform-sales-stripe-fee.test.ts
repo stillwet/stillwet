@@ -205,9 +205,6 @@ describe("merchandise order admin line breakdown", () => {
       platformCutCents: split.platformCutCents,
       shopCutCents: split.shopCutCents,
       stripeFeeCents: merchandiseOrderStripeBalanceFeeCents({
-        subtotalCents,
-        tipCents,
-        shippingCents,
         totalCents: subtotalCents + processing,
       }),
       tipProcessingFeeCents: 0,
