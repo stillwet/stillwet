@@ -1,3 +1,7 @@
+/** Product modal shell overlay (`ProductModalShell`) — keep gallery lightbox above this. */
+export const PRODUCT_GALLERY_LIGHTBOX_OVERLAY_Z_CLASS = "z-[2600]";
+export const PRODUCT_GALLERY_LIGHTBOX_DIALOG_Z_CLASS = "z-[2601]";
+
 /** PDP gallery column — fills its grid track and scales with the panel. */
 export const PRODUCT_HERO_GALLERY_COLUMN_CLASS = "pdp-gallery-col";
 

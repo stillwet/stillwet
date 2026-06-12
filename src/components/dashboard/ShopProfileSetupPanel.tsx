@@ -27,6 +27,13 @@ import {
   type ShopSocialLinksRecord,
 } from "@/lib/shop-social-links";
 import type { ShopSetupShopPayload } from "@/components/dashboard/ShopSetupTabs";
+import type { ShopFlairDashboardPayload } from "@/lib/shop-flair-dashboard-payload";
+
+const emptyShopFlairPayload: ShopFlairDashboardPayload = {
+  purchasedAt: null,
+  selectedType: null,
+  catalog: { types: [] },
+};
 import {
   shopProfileModerationMatchesByField,
   moderationTriggerErrorMessage,
@@ -548,13 +555,13 @@ export function ShopProfileSetupPanel(props: {
               </p>
             ) : null}
           </label>
-          {shop.flair ? (
-            <ShopFlairSection
-              flair={shop.flair}
-              variant="selection"
-              className=""
-            />
-          ) : null}
+          <ShopFlairSection
+            flair={shop.flair ?? emptyShopFlairPayload}
+            stripePublishableKey={stripePublishableKey}
+            mockListingFeeCheckout={mockListingFeeCheckout}
+            variant="full"
+            className="border-t border-zinc-800 pt-4"
+          />
           <div className="border-t border-zinc-800 pt-4">
             <div className="flex flex-col gap-3 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <span id={`shop-listed-browse-label-${shop.shopSlug}`} className="text-xs text-zinc-500">

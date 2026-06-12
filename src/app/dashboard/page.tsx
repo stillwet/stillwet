@@ -411,8 +411,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const setupTabsKey = `setup-${setupSteps.stripe}-${setupSteps.profile}-${setupSteps.guidelines}-${setupSteps.emailVerified}-${setupSteps.listing}-${Boolean(shop.itemGuidelinesAcknowledgedAt)}-${Boolean(user.emailVerifiedAt)}`;
 
-  const flairPayload =
-    !isPlatform && dashTab === "shopProfile" ? await loadShopFlairDashboardPayload(shop.id) : null;
+  const flairPayload = !isPlatform ? await loadShopFlairDashboardPayload(shop.id) : null;
 
   const creatorSetup: CreatorDashboardSetupPayload | null = !isPlatform
     ? {

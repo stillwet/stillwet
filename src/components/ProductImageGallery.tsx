@@ -3,9 +3,14 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { StorePanelCloseButton } from "@/components/StorePanelCloseButton";
+import {
+  PRODUCT_GALLERY_LIGHTBOX_DIALOG_Z_CLASS,
+  PRODUCT_GALLERY_LIGHTBOX_OVERLAY_Z_CLASS,
+  PRODUCT_HERO_GALLERY_WRAP_CLASS,
+} from "@/lib/product-image-gallery-constants";
 import { catalogImageUrlKey, uniqueImageUrlsOrdered } from "@/lib/product-media";
 
-export { PRODUCT_HERO_GALLERY_WRAP_CLASS } from "@/lib/product-image-gallery-constants";
+export { PRODUCT_HERO_GALLERY_WRAP_CLASS };
 
 type Props = {
   images: string[];
@@ -164,7 +169,9 @@ export function ProductImageGallery({
       ) : null}
       {lightboxIndex != null && lightboxSrc && typeof document !== "undefined"
         ? createPortal(
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              className={`fixed inset-0 ${PRODUCT_GALLERY_LIGHTBOX_OVERLAY_Z_CLASS} flex items-center justify-center p-4`}
+            >
               <button
                 type="button"
                 aria-label="Close image preview"
@@ -175,7 +182,7 @@ export function ProductImageGallery({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={lightboxTitleId}
-                className="relative z-[61] w-full max-w-[min(92vw,720px)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 p-3 shadow-xl sm:p-4"
+                className={`relative ${PRODUCT_GALLERY_LIGHTBOX_DIALOG_Z_CLASS} w-full max-w-[min(92vw,720px)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 p-3 shadow-xl sm:p-4`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <StorePanelCloseButton
