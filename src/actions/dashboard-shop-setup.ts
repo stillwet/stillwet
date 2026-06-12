@@ -348,7 +348,7 @@ export async function uploadShopProfileImageSetup(
         error: "Image uploads are not configured on this server (R2 env vars missing).",
       };
     }
-    if (/public image URL is not reachable/i.test(msg)) {
+    if (/public image URL is not reachable|public URL is not reachable/i.test(msg)) {
       return { ok: false, error: msg };
     }
     return {

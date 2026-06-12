@@ -135,25 +135,59 @@ export function publicHttpsUrlForR2ObjectKey(key: string): string {
   return `${baseUrl}/${segments.join("/")}`;
 }
 
-/** HEAD-check that a freshly uploaded public URL is reachable (catches wrong `R2_PUBLIC_BASE_URL`). */
+/** Returns a human hint when `R2_PUBLIC_BASE_URL` is set to a non-public host or wrong shape. */
+export function r2PublicBaseUrlMisconfigurationHint(): string | null {
+  const base = readR2Env("R2_PUBLIC_BASE_URL")?.trim() ?? "";
+  if (!base) return "R2_PUBLIC_BASE_URL is not set.";
+  if (/r2\.cloudflarestorage\.com/i.test(base)) {
+    return "R2_PUBLIC_BASE_URL must be this bucket's pub-….r2.dev URL (or your CDN domain), not the private …r2.cloudflarestorage.com API host.";
+  }
+  const bucket = readR2BucketName();
+  if (bucket && (base.endsWith(`/${bucket}`) || base.includes(`/${bucket}/`))) {
+    return "R2_PUBLIC_BASE_URL should not include the bucket name as a path segment.";
+  }
+  return null;
+}
+
+async function probePublicR2ObjectUrlOnce(url: string): Promise<boolean> {
+  const head = await fetch(url, {
+    method: "HEAD",
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (head.ok) return true;
+  if (head.status === 404) return false;
+
+  // Some public buckets/CDNs reject HEAD while GET works.
+  const get = await fetch(url, {
+    method: "GET",
+    headers: { Range: "bytes=0-0" },
+    signal: AbortSignal.timeout(10_000),
+  });
+  return get.ok || get.status === 206;
+}
+
+/** HEAD/GET-check that a freshly uploaded public URL is reachable (catches wrong `R2_PUBLIC_BASE_URL`). */
 export async function verifyPublicR2ObjectUrl(url: string): Promise<boolean> {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  const backoffMs = [400, 900, 1_500, 2_500];
+  for (let attempt = 0; attempt < backoffMs.length + 1; attempt++) {
     try {
-      const res = await fetch(url, {
-        method: "HEAD",
-        signal: AbortSignal.timeout(8_000),
-      });
-      if (res.ok) return true;
-      if (res.status === 404 && attempt < 2) {
-        await new Promise((r) => setTimeout(r, 350));
-        continue;
-      }
-      return false;
+      if (await probePublicR2ObjectUrlOnce(url)) return true;
     } catch {
-      if (attempt < 2) await new Promise((r) => setTimeout(r, 350));
+      /* retry */
+    }
+    if (attempt < backoffMs.length) {
+      await new Promise((r) => setTimeout(r, backoffMs[attempt]));
     }
   }
   return false;
+}
+
+export function formatR2PublicUrlUnreachableError(url: string): string {
+  const hint = r2PublicBaseUrlMisconfigurationHint();
+  const configHint =
+    hint ??
+    "On the server, set R2_PUBLIC_BASE_URL to this bucket's pub-….r2.dev URL (or your CDN domain) — not the private r2.cloudflarestorage.com API host.";
+  return `Image uploaded to storage but the public URL is not reachable (${url}). ${configHint} Restart the dev server after changing env vars, then run npm run test:r2.`;
 }
 
 /** Upload bytes and return the public HTTPS URL (R2_PUBLIC_BASE_URL + / + key). */
@@ -166,6 +200,11 @@ export async function putPublicR2Object(params: {
     throw new Error("R2 bucket credentials or R2_PUBLIC_BASE_URL missing");
   }
 
+  const misconfig = r2PublicBaseUrlMisconfigurationHint();
+  if (misconfig) {
+    throw new Error(misconfig);
+  }
+
   const put = await putR2ObjectBytes(params);
   if (!put.ok) throw new Error(put.error);
 
@@ -173,9 +212,7 @@ export async function putPublicR2Object(params: {
   const reachable = await verifyPublicR2ObjectUrl(url);
   if (!reachable) {
     await deleteR2ObjectsByKeys([params.key]);
-    throw new Error(
-      "Artwork uploaded to storage but the public image URL is not reachable. On the server, set R2_PUBLIC_BASE_URL to this bucket's pub-….r2.dev URL (or your CDN domain) — not the private r2.cloudflarestorage.com API host.",
-    );
+    throw new Error(formatR2PublicUrlUnreachableError(url));
   }
   return url;
 }

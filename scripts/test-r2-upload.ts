@@ -59,6 +59,7 @@ async function main() {
   }
 
   const key = `listing/test-${Date.now()}.png`;
+  const avatarKey = `shops/r2-test/avatar-${Date.now()}.webp`;
   console.log(`\n[r2-test] Uploading ${key} (${PNG_1X1.length} bytes)…`);
 
   try {
@@ -78,6 +79,14 @@ async function main() {
       );
       process.exit(2);
     }
+
+    console.log(`\n[r2-test] Uploading shop avatar path ${avatarKey}…`);
+    const avatarUrl = await putPublicR2Object({
+      key: avatarKey,
+      body: PNG_1X1,
+      contentType: "image/png",
+    });
+    console.log(`[r2-test] Shop avatar path OK:\n  ${avatarUrl}\n`);
     console.log("\n[r2-test] Done.\n");
   } catch (e) {
     console.error("[r2-test] Failed:", e instanceof Error ? e.message : e);
