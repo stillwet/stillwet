@@ -602,6 +602,47 @@ function printifyAuxUnpublishErrRedirect(
   redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}`);
 }
 
+function printifyInventoryUnpublishErrRedirect(
+  printifyProductId: string,
+  r: { status: number; body: string },
+): never {
+  const detail = r.body.trim().slice(0, 240);
+  const q = new URLSearchParams({
+    tab: "printify",
+    unpublish: "err",
+    printifyId: printifyProductId,
+    reason: `api_${r.status}`,
+  });
+  if (detail) q.set("detail", detail);
+  redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}`);
+}
+
+export async function adminUnpublishPrintifyInventoryProduct(formData: FormData): Promise<void> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) {
+    redirect("/admin/login");
+  }
+
+  const printifyProductId = String(formData.get("printifyProductId") ?? "").trim();
+  if (!printifyProductId) {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify&unpublish=err&reason=no_product`);
+  }
+
+  const shopId = printifyPrimaryShopId();
+  if (!shopId || !hasPrintifyApiToken()) {
+    redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=printify&unpublish=err&reason=no_shop`);
+  }
+
+  const r = await releasePrintifyProductPublishState(shopId, printifyProductId);
+  if (!r.ok) {
+    printifyInventoryUnpublishErrRedirect(printifyProductId, r);
+  }
+
+  redirect(
+    `${ADMIN_BACKEND_BASE_PATH}?tab=printify&unpublish=ok&printifyId=${encodeURIComponent(printifyProductId)}`,
+  );
+}
+
 export async function adminUnpublishPrintifyAuxProduct(formData: FormData): Promise<void> {
   const admin = await getAdminSessionReadonly();
   if (!admin.isAdmin) {

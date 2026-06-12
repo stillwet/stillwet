@@ -354,6 +354,29 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
   const tagSaved = typeof sp.tag_saved === "string" ? sp.tag_saved : undefined;
   const kwErr = typeof sp.kw_err === "string" ? sp.kw_err : undefined;
   const kwSaved = typeof sp.kw_saved === "string" ? sp.kw_saved : undefined;
+  const kwSync = typeof sp.kw_sync === "string" ? sp.kw_sync : undefined;
+  const kwSyncCount = (() => {
+    const n = Number.parseInt(typeof sp.kw_count === "string" ? sp.kw_count : "", 10);
+    return Number.isFinite(n) ? n : undefined;
+  })();
+  const kwSyncRenorm = (() => {
+    const n = Number.parseInt(typeof sp.kw_renorm === "string" ? sp.kw_renorm : "", 10);
+    return Number.isFinite(n) ? n : undefined;
+  })();
+  const kwSyncDupes = (() => {
+    const n = Number.parseInt(typeof sp.kw_dupes === "string" ? sp.kw_dupes : "", 10);
+    return Number.isFinite(n) ? n : undefined;
+  })();
+  const kwSyncEmpty = (() => {
+    const n = Number.parseInt(typeof sp.kw_empty === "string" ? sp.kw_empty : "", 10);
+    return Number.isFinite(n) ? n : undefined;
+  })();
+  const printifyUnpublish = typeof sp.unpublish === "string" ? sp.unpublish : undefined;
+  const printifyUnpublishReason =
+    printifyUnpublish === "err" && typeof sp.reason === "string" ? sp.reason : undefined;
+  const printifyUnpublishPrintifyId =
+    typeof sp.printifyId === "string" ? sp.printifyId : undefined;
+  const printifyUnpublishDetail = typeof sp.detail === "string" ? sp.detail : undefined;
   const flErr = typeof sp.fl_err === "string" ? sp.fl_err : undefined;
   const flSaved = sp.fl_saved === "1";
   const flShop = typeof sp.fl_shop === "string" ? sp.fl_shop : undefined;
@@ -887,6 +910,10 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
                         }
                       : undefined
               }
+              unpublish={printifyUnpublish}
+              unpublishReason={printifyUnpublishReason}
+              unpublishPrintifyId={printifyUnpublishPrintifyId}
+              unpublishDetail={printifyUnpublishDetail}
             />
           ) : inventoryTab === "removed" ? (
             <AdminRemovedListingItemsTab rows={removedListingTabRows} />
@@ -914,6 +941,11 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
               migrationRequired={moderationKeywordMigrationRequired}
               kwErr={kwErr}
               kwSaved={kwSaved}
+              kwSync={kwSync}
+              kwSyncCount={kwSyncCount}
+              kwSyncRenorm={kwSyncRenorm}
+              kwSyncDupes={kwSyncDupes}
+              kwSyncEmpty={kwSyncEmpty}
             />
           ) : inventoryTab === "award-promotions" ? (
             <AdminAwardPromotionsTab

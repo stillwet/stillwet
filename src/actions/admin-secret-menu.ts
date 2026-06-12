@@ -56,7 +56,7 @@ export async function loadAdminSecretMenuShopRows(): Promise<AdminSecretMenuShop
 
 export async function loadAdminShopSlugPickerOptions(): Promise<AdminShopSlugPick[]> {
   const rows = await prisma.shop.findMany({
-    where: { slug: { not: PLATFORM_SHOP_SLUG } },
+    where: { slug: { not: PLATFORM_SHOP_SLUG }, users: { some: {} } },
     orderBy: [{ displayName: "asc" }, { slug: "asc" }],
     select: { slug: true, displayName: true },
   });

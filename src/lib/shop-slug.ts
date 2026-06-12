@@ -20,9 +20,12 @@ export async function allocateUniqueShopSlug(
     const candidate = n === 0 ? base : `${base}-${n + 1}`;
     const taken = await prisma.shop.findUnique({
       where: { slug: candidate },
-      select: { id: true },
+      select: {
+        id: true,
+        _count: { select: { users: true } },
+      },
     });
-    if (!taken || taken.id === excludeShopId) {
+    if (!taken || taken.id === excludeShopId || taken._count.users === 0) {
       return { slug: candidate };
     }
   }

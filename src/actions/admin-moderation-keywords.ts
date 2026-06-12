@@ -7,7 +7,10 @@ import { ADMIN_BACKEND_BASE_PATH } from "@/lib/admin-dashboard-urls";
 import { revalidateAdminViews } from "@/lib/revalidate-admin-views";
 import { prisma, prismaModerationKeywordOrNull } from "@/lib/prisma";
 import { getAdminSessionReadonly } from "@/lib/session";
-import { normalizeModerationPhraseKey } from "@/lib/moderation-keyword-scan";
+import {
+  normalizeModerationPhraseKey,
+  syncModerationKeywordDatabase,
+} from "@/lib/moderation-keyword-scan";
 
 export type AdminModerationKeywordActionResult =
   | { ok: true }
@@ -95,4 +98,31 @@ export async function adminDeleteModerationKeywordForm(formData: FormData): Prom
     );
   }
   redirect(`${ADMIN_BACKEND_BASE_PATH}?tab=keyword-triggers&kw_saved=deleted#keyword-triggers`);
+}
+
+export async function adminSyncModerationKeywordsForm(): Promise<void> {
+  const admin = await getAdminSessionReadonly();
+  if (!admin.isAdmin) {
+    redirect("/admin/login");
+  }
+
+  const r = await syncModerationKeywordDatabase(prisma);
+  if (!r.ok) {
+    redirect(
+      `${ADMIN_BACKEND_BASE_PATH}?tab=keyword-triggers&kw_err=${encodeURIComponent(r.error)}#keyword-triggers`,
+    );
+  }
+
+  revalidateAdminViews();
+  revalidatePath("/dashboard");
+
+  const q = new URLSearchParams({
+    tab: "keyword-triggers",
+    kw_sync: "ok",
+    kw_count: String(r.phraseCount),
+    kw_renorm: String(r.renormalized),
+    kw_dupes: String(r.removedDuplicates),
+    kw_empty: String(r.removedEmpty),
+  });
+  redirect(`${ADMIN_BACKEND_BASE_PATH}?${q.toString()}#keyword-triggers`);
 }

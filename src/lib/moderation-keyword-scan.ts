@@ -50,6 +50,71 @@ export type ModerationKeywordAdminRow = {
   createdAt: Date;
 };
 
+/** Reconcile `phraseNormalized`, drop empty rows, and remove duplicate phrases (keeps oldest). */
+export async function syncModerationKeywordDatabase(
+  db: PrismaModerationDelegate,
+): Promise<
+  | {
+      ok: true;
+      phraseCount: number;
+      renormalized: number;
+      removedDuplicates: number;
+      removedEmpty: number;
+    }
+  | { ok: false; error: string; migrationRequired?: boolean }
+> {
+  const delegate = moderationKeywordDelegateOrNull(db);
+  if (!delegate) {
+    return {
+      ok: false,
+      migrationRequired: true,
+      error:
+        "Keyword triggers are unavailable until the database migration is applied (20260516120000_moderation_keyword) and the app is redeployed.",
+    };
+  }
+
+  const rows = await delegate.findMany({
+    orderBy: [{ createdAt: "asc" }],
+    select: { id: true, phrase: true, phraseNormalized: true },
+  });
+
+  let renormalized = 0;
+  let removedDuplicates = 0;
+  let removedEmpty = 0;
+  const seen = new Set<string>();
+
+  for (const row of rows) {
+    const phrase = row.phrase.trim();
+    const key = normalizeModerationPhraseKey(phrase);
+    if (!key) {
+      await delegate.delete({ where: { id: row.id } });
+      removedEmpty += 1;
+      continue;
+    }
+    if (seen.has(key)) {
+      await delegate.delete({ where: { id: row.id } });
+      removedDuplicates += 1;
+      continue;
+    }
+    seen.add(key);
+    if (row.phraseNormalized !== key || row.phrase !== phrase) {
+      await delegate.update({
+        where: { id: row.id },
+        data: { phrase, phraseNormalized: key },
+      });
+      renormalized += 1;
+    }
+  }
+
+  return {
+    ok: true,
+    phraseCount: seen.size,
+    renormalized,
+    removedDuplicates,
+    removedEmpty,
+  };
+}
+
 /** Admin keyword-triggers tab — never throws when the table or delegate is missing. */
 export async function loadModerationKeywordAdminRows(
   db: PrismaModerationDelegate,

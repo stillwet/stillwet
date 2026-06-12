@@ -6,6 +6,7 @@ import {
   isR2UploadConfigured,
   listR2ObjectKeysWithPrefix,
 } from "@/lib/r2-upload";
+import { releaseOrphanShopPublicIdentityFields } from "@/lib/shop-public-identity";
 
 function storefrontCatalogImageUrlsFromRows(
   rows: { listingStorefrontCatalogImageUrls: unknown }[],
@@ -143,6 +144,8 @@ export async function releaseShopUsersForVerifiedAccountDeletion(shopId: string)
       where: { email: { in: emails } },
     });
   }
+
+  await releaseOrphanShopPublicIdentityFields(shopId);
 
   return deleted.count;
 }

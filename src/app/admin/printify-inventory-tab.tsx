@@ -52,6 +52,10 @@ export type PrintifyInventoryTabProps = {
         deleted: number;
       }
     | { variant: "err"; reason: string };
+  unpublish?: string;
+  unpublishReason?: string;
+  unpublishPrintifyId?: string;
+  unpublishDetail?: string;
 };
 
 function priceInputValue(cents: number): string {
@@ -93,6 +97,10 @@ export async function PrintifyInventoryTab({
   openListingId,
   listingSavedId,
   r2PruneNotice,
+  unpublish,
+  unpublishReason,
+  unpublishPrintifyId,
+  unpublishDetail,
 }: PrintifyInventoryTabProps) {
   const readyForFulfillment = isPrintifyConfigured();
   if (readyForFulfillment) {
@@ -222,6 +230,44 @@ export async function PrintifyInventoryTab({
           )}
         </p>
       )}
+
+      {unpublish === "ok" ? (
+        <p className="rounded-lg border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200/90">
+          Unpublish succeeded
+          {unpublishPrintifyId ? (
+            <>
+              {" "}
+              for <code className="text-emerald-100/90">{unpublishPrintifyId}</code>
+            </>
+          ) : null}
+          .
+        </p>
+      ) : null}
+
+      {unpublish === "err" ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-amber-900/60 bg-amber-950/40 px-4 py-3 text-sm text-amber-200/90"
+        >
+          Unpublish failed
+          {unpublishPrintifyId ? (
+            <>
+              {" "}
+              for <code className="text-amber-100/90">{unpublishPrintifyId}</code>
+            </>
+          ) : null}
+          {unpublishReason === "no_shop"
+            ? " — set PRINTIFY_SHOP_ID and PRINTIFY_API_TOKEN."
+            : unpublishReason === "no_product"
+              ? " — missing Printify product id."
+              : unpublishReason
+                ? ` (${unpublishReason}).`
+                : "."}
+          {unpublishDetail ? (
+            <span className="mt-1 block font-mono text-[11px] text-amber-100/80">{unpublishDetail}</span>
+          ) : null}
+        </p>
+      ) : null}
 
       {sync === "err" && (
         <p className="rounded-lg border border-blue-900/60 bg-blue-950/40 px-4 py-3 text-sm text-blue-200/90">

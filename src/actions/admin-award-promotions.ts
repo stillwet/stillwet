@@ -485,7 +485,7 @@ export async function loadAdminShopSlugPickerOptions(): Promise<AdminShopSlugPic
   if (!admin.isAdmin) return [];
 
   return prisma.shop.findMany({
-    where: { slug: { not: PLATFORM_SHOP_SLUG } },
+    where: { slug: { not: PLATFORM_SHOP_SLUG }, users: { some: {} } },
     select: { slug: true, displayName: true },
     orderBy: { slug: "asc" },
     take: 5000,

@@ -10,4 +10,5 @@ export const shopListingPrintifyMappingReservedWhere = {
   creatorRemovedFromShopAt: null,
   adminRemovedFromShopAt: null,
   removedFromListingRequestsAt: null,
+  shop: { users: { some: {} } },
 } satisfies Prisma.ShopListingWhereInput;

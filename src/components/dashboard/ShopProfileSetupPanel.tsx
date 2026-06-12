@@ -80,26 +80,28 @@ function buildShopProfileFormData(
 
 const PROFILE_AUTOSAVE_DEBOUNCE_MS = 750;
 
-function ProfileAutoSaveStatus({
-  pending,
-  savedFlash,
-  dirty,
+function ProfileSaveStatusBanner({
+  saving,
+  upToDate,
 }: {
-  pending: boolean;
-  savedFlash: boolean;
-  dirty: boolean;
+  saving: boolean;
+  upToDate: boolean;
 }) {
-  const label = pending ? "Saving…" : savedFlash && !dirty ? "Saved" : "\u00a0";
-  return (
-    <span
-      className={`inline-block min-w-[4rem] text-right text-xs font-medium tabular-nums ${
-        pending ? "text-zinc-400" : savedFlash && !dirty ? "text-emerald-400/90" : "text-transparent"
-      }`}
-      aria-live="polite"
-    >
-      {label}
-    </span>
-  );
+  if (saving) {
+    return (
+      <p className="text-center text-xs font-medium text-zinc-100" role="status" aria-live="polite">
+        Saving…
+      </p>
+    );
+  }
+  if (upToDate) {
+    return (
+      <p className="text-center text-xs text-zinc-500" role="status" aria-live="polite">
+        Profile is saved
+      </p>
+    );
+  }
+  return null;
 }
 
 function OnboardingCompleteCheckIcon({ className }: { className?: string }) {
@@ -205,8 +207,6 @@ export function ShopProfileSetupPanel(props: {
   const [socialAddKey, setSocialAddKey] = useState<"" | ShopSocialKey>("");
   const [socialAddUrl, setSocialAddUrl] = useState("");
   const [socialAddError, setSocialAddError] = useState<string | null>(null);
-  const [profileSavedFlash, setProfileSavedFlash] = useState(false);
-
   const [avatarSavedFlash, setAvatarSavedFlash] = useState(false);
   const [profileImageUrlOverride, setProfileImageUrlOverride] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -221,7 +221,6 @@ export function ShopProfileSetupPanel(props: {
     setWelcomeMessage(shop.welcomeMessage ?? "");
     setSocial(socialRecordFromShop(shop.socialLinks));
     setListedOnShopsBrowse(shop.listedOnShopsBrowse);
-    setProfileSavedFlash(false);
   }, [shop.shopSlug, shop.displayName, shop.welcomeMessage, shop.socialLinks, shop.listedOnShopsBrowse]);
 
   useEffect(() => {
@@ -251,9 +250,8 @@ export function ShopProfileSetupPanel(props: {
 
   const profileAutosaveBlocked = Boolean(welcomeUrlError) || !displayName.trim();
 
-  useEffect(() => {
-    if (profileDirty) setProfileSavedFlash(false);
-  }, [profileDirty]);
+  const profileSaving = isProfilePending || isAvatarPending;
+  const profileUpToDate = !profileDirty && !profileSaving;
 
   useEffect(() => {
     if (!profileDirty || profileAutosaveBlocked || isSocialSavePending) return;
@@ -267,8 +265,6 @@ export function ShopProfileSetupPanel(props: {
         if (gen !== profileAutosaveGen.current) return;
         if (r.ok) {
           setMessage(null);
-          setProfileSavedFlash(true);
-          window.setTimeout(() => setProfileSavedFlash(false), 2500);
           router.refresh();
         } else {
           setMessage({ tone: "err", text: r.error });
@@ -460,7 +456,7 @@ export function ShopProfileSetupPanel(props: {
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-semibold text-zinc-100">{shop.displayName}</p>
             {avatarSavedFlash ? (
-              <p className="mt-0.5 text-[11px] text-emerald-300/90" role="status">
+              <p className="mt-0.5 text-[11px] text-zinc-100" role="status">
                 Photo saved
               </p>
             ) : null}
@@ -520,15 +516,9 @@ export function ShopProfileSetupPanel(props: {
         ) : null}
 
         <div className="space-y-4">
+          <ProfileSaveStatusBanner saving={profileSaving} upToDate={profileUpToDate} />
           <label className="block text-xs text-zinc-500">
-            <span className="flex items-center justify-between gap-3">
-              <span>Shop Name</span>
-              <ProfileAutoSaveStatus
-                pending={isProfilePending}
-                savedFlash={profileSavedFlash}
-                dirty={profileDirty}
-              />
-            </span>
+            <span>Shop Name</span>
             <input
               name="displayName"
               required

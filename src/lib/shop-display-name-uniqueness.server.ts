@@ -16,14 +16,16 @@ export async function findShopIdConflictingDisplayName(
   if (!key) return null;
   const rows = excludeShopId
     ? await prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
-        SELECT id FROM "Shop"
-        WHERE LOWER(TRIM("displayName")) = ${key}
-          AND id <> ${excludeShopId}
+        SELECT s.id FROM "Shop" s
+        WHERE LOWER(TRIM(s."displayName")) = ${key}
+          AND s.id <> ${excludeShopId}
+          AND EXISTS (SELECT 1 FROM "ShopUser" u WHERE u."shopId" = s.id)
         LIMIT 1
       `)
     : await prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
-        SELECT id FROM "Shop"
-        WHERE LOWER(TRIM("displayName")) = ${key}
+        SELECT s.id FROM "Shop" s
+        WHERE LOWER(TRIM(s."displayName")) = ${key}
+          AND EXISTS (SELECT 1 FROM "ShopUser" u WHERE u."shopId" = s.id)
         LIMIT 1
       `);
   return rows[0]?.id ?? null;

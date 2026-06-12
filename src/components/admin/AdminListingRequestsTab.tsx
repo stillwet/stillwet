@@ -83,24 +83,17 @@ export type PrintifyCatalogPickEntry = {
   catalogUpdatedAt?: number;
 };
 
-/** Printify products reserved by an in-queue / on-shop listing are hidden, except this row’s current mapping. */
+/** Admin picker lists every live Printify catalog product (duplicate-mapping warnings are separate). */
 function printifyCatalogPickListForListingRow(
   fullCatalog: PrintifyCatalogPickEntry[],
-  mappedToAnyListing: readonly string[],
+  _mappedToAnyListing: readonly string[],
   currentPrintifyProductId: string,
 ): PrintifyCatalogPickEntry[] {
-  const mapped = new Set(mappedToAnyListing.map((id) => id.trim()).filter(Boolean));
   const cur = currentPrintifyProductId.trim();
-  const base = fullCatalog.filter((p) => {
-    const id = p.id.trim();
-    return !mapped.has(id) || id === cur;
-  });
-  if (cur && !base.some((p) => p.id.trim() === cur)) {
-    const hit = fullCatalog.find((p) => p.id.trim() === cur);
-    if (hit) return [hit, ...base.filter((p) => p.id.trim() !== cur)];
-    return [{ id: cur, title: `Linked Printify product (not in live catalog)` }, ...base];
+  if (cur && !fullCatalog.some((p) => p.id.trim() === cur)) {
+    return [{ id: cur, title: `Linked Printify product (not in live catalog)` }, ...fullCatalog];
   }
-  return base;
+  return fullCatalog;
 }
 
 /**
@@ -388,10 +381,6 @@ function ListingRequestCopySummary({
   return (
     <div className={className}>
       <p className="text-zinc-500">
-        <span className="text-zinc-600">Product name </span>
-        <span className={productName === empty ? "text-zinc-600" : "text-zinc-300"}>{productName}</span>
-      </p>
-      <p className="text-zinc-500">
         <span className="text-zinc-600">Listing item name </span>
         <span
           className={
@@ -402,6 +391,10 @@ function ListingRequestCopySummary({
         >
           {itemName}
         </span>
+      </p>
+      <p className="text-zinc-500">
+        <span className="text-zinc-600">Product name </span>
+        <span className={productName === empty ? "text-zinc-600" : "text-zinc-300"}>{productName}</span>
       </p>
       <p className="text-zinc-500">
         <span className="text-zinc-600">Storefront pitch </span>

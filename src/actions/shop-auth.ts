@@ -242,8 +242,9 @@ export async function createShopFromSignup(
       const displayKey = displayName.trim().toLowerCase();
       if (displayKey) {
         const displayConflict = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
-          SELECT id FROM "Shop"
-          WHERE LOWER(TRIM("displayName")) = ${displayKey}
+          SELECT s.id FROM "Shop" s
+          WHERE LOWER(TRIM(s."displayName")) = ${displayKey}
+            AND EXISTS (SELECT 1 FROM "ShopUser" u WHERE u."shopId" = s.id)
           LIMIT 1
         `);
         if (displayConflict.length > 0) return { status: "display_taken" as const };

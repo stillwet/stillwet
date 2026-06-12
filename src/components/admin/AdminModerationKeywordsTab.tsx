@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   adminAddModerationKeywordForm,
   adminDeleteModerationKeywordForm,
+  adminSyncModerationKeywordsForm,
 } from "@/actions/admin-moderation-keywords";
 import { ADMIN_MAIN_BASE_PATH } from "@/lib/admin-dashboard-urls";
 
@@ -24,8 +25,24 @@ export function AdminModerationKeywordsTab(props: {
   migrationRequired?: boolean;
   kwErr?: string;
   kwSaved?: string;
+  kwSync?: string;
+  kwSyncCount?: number;
+  kwSyncRenorm?: number;
+  kwSyncDupes?: number;
+  kwSyncEmpty?: number;
 }) {
-  const { rows, spotlightRows, migrationRequired, kwErr, kwSaved } = props;
+  const {
+    rows,
+    spotlightRows,
+    migrationRequired,
+    kwErr,
+    kwSaved,
+    kwSync,
+    kwSyncCount,
+    kwSyncRenorm,
+    kwSyncDupes,
+    kwSyncEmpty,
+  } = props;
 
   return (
     <section id="keyword-triggers" aria-label="Moderation keyword triggers">
@@ -62,11 +79,38 @@ export function AdminModerationKeywordsTab(props: {
           Phrase removed.
         </p>
       ) : null}
+      {kwSync === "ok" ? (
+        <p
+          role="status"
+          className="mt-3 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-4 py-2 text-sm text-emerald-200/90"
+        >
+          Database synced — {kwSyncCount ?? 0} phrase(s) active
+          {(kwSyncRenorm ?? 0) > 0 ? `, ${kwSyncRenorm} renormalized` : ""}
+          {(kwSyncDupes ?? 0) > 0 ? `, ${kwSyncDupes} duplicate(s) removed` : ""}
+          {(kwSyncEmpty ?? 0) > 0 ? `, ${kwSyncEmpty} empty row(s) removed` : ""}
+          .
+        </p>
+      ) : null}
       {kwErr ? (
         <p className="mt-3 rounded border border-blue-900/50 bg-blue-950/30 px-3 py-2 text-xs text-blue-200/90">
           {kwErr}
         </p>
       ) : null}
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <form action={adminSyncModerationKeywordsForm}>
+          <button
+            type="submit"
+            disabled={migrationRequired}
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Sync DB
+          </button>
+        </form>
+        <p className="text-[11px] text-zinc-600">
+          Reloads the live phrase bank from the database (fixes stale triggers after admin edits).
+        </p>
+      </div>
 
       <form action={adminAddModerationKeywordForm} className="mt-4 flex flex-wrap items-end gap-2">
         <label className="block min-w-[12rem] flex-1 text-[11px] text-zinc-500">
