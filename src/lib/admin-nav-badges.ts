@@ -5,6 +5,7 @@ import {
   PromotionKind,
   PromotionPurchaseStatus,
 } from "@/generated/prisma/enums";
+import { PLATFORM_SHOP_SLUG } from "@/lib/marketplace-constants";
 import { supportUnresolvedThreadShopIdsExcludingPlatform } from "@/lib/support-thread-unresolved";
 import type { Prisma } from "@/generated/prisma/client";
 import { isPaidPromotionActiveNow } from "@/lib/promotion-policy-shared";
