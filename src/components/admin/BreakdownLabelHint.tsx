@@ -6,21 +6,17 @@ export function BreakdownLabelHint({
   label,
   hint,
   hintPosition = "below",
-  elevated = false,
 }: {
   label: string;
   hint: string;
   hintPosition?: "above" | "below";
-  /** Higher stacking when nested inside fixed popups. */
+  /** @deprecated In-flow hints no longer need elevated stacking. */
   elevated?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
-  const hintZ = elevated ? "z-[110]" : "z-20";
-  const hintClass =
-    hintPosition === "above"
-      ? `absolute bottom-full left-0 ${hintZ} mb-1 w-max max-w-[14rem] rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[10px] normal-case tracking-normal text-zinc-300 shadow-lg`
-      : `absolute left-0 top-full ${hintZ} mt-1 w-max max-w-[14rem] rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[10px] normal-case tracking-normal text-zinc-300 shadow-lg`;
+  const hintPanelClass =
+    "w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-left text-[10px] normal-case tracking-normal text-zinc-300 shadow-lg break-words whitespace-normal";
 
   useEffect(() => {
     if (!open) return;
@@ -36,20 +32,21 @@ export function BreakdownLabelHint({
   }, [open]);
 
   return (
-    <span ref={rootRef} className="inline-flex items-center gap-1">
-      {label}
-      <span className="relative inline-block">
+    <span ref={rootRef} className="block w-full min-w-0 max-w-full">
+      {hintPosition === "above" && open ? <p className={`mb-1 ${hintPanelClass}`}>{hint}</p> : null}
+      <span className="inline-flex items-center gap-1">
+        {label}
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
           aria-label={`About ${label}`}
-          className="inline-flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full border border-zinc-600 text-[9px] font-semibold leading-none text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
+          className="inline-flex h-3.5 w-3.5 shrink-0 cursor-help items-center justify-center rounded-full border border-zinc-600 text-[9px] font-semibold leading-none text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
         >
           ?
         </button>
-        {open ? <p className={hintClass}>{hint}</p> : null}
       </span>
+      {hintPosition === "below" && open ? <p className={`mt-1 ${hintPanelClass}`}>{hint}</p> : null}
     </span>
   );
 }

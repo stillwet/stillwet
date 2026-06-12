@@ -59,26 +59,33 @@ function PlatformRevenueTotalsCard({
     ? "text-[10px] uppercase tracking-wide text-blue-400/55"
     : "text-[10px] uppercase tracking-wide text-blue-400/90";
   const combinedDd = subtle ? "tabular-nums text-blue-200/75" : "tabular-nums text-blue-100";
-  const expandSummaryClass = subtle
-    ? "cursor-pointer select-none list-none py-1 text-[10px] font-medium uppercase tracking-wide text-zinc-600 hover:text-zinc-400 [&::-webkit-details-marker]:hidden"
-    : "cursor-pointer select-none list-none py-1 text-[10px] font-medium uppercase tracking-wide text-zinc-500 hover:text-zinc-300 [&::-webkit-details-marker]:hidden";
+  const expandToggleClass = subtle
+    ? "inline-flex w-3 shrink-0 justify-center text-[10px] font-medium leading-none text-blue-400/70"
+    : "inline-flex w-3 shrink-0 justify-center text-[10px] font-medium leading-none text-blue-400/90";
   return (
     <div className={cardClass}>
       <p className={titleClass}>{title}</p>
       {subtitle ? <p className={subtitleClass}>{subtitle}</p> : null}
       <dl className="mt-2">
-        <div className={`${combinedWrap} flex items-baseline justify-between gap-2`}>
-          <dt className={combinedDt}>Actual profit</dt>
-          <dd className={`${combinedDd} m-0`}>{formatPrice(combined)}</dd>
-        </div>
-        <details className="mt-2">
-          <summary className={expandSummaryClass}>Expand</summary>
+        <details className="group">
+          <summary
+            className={`${combinedWrap} flex cursor-pointer select-none list-none items-baseline justify-between gap-2 hover:brightness-110 [&::-webkit-details-marker]:hidden`}
+          >
+            <dt className={`${combinedDt} flex min-w-0 items-baseline gap-1.5`}>
+              <span className={`${expandToggleClass} transition group-open:rotate-180`} aria-hidden>
+                ▾
+              </span>
+              Actual profit
+            </dt>
+            <dd className={`${combinedDd} m-0 shrink-0`}>{formatPrice(combined)}</dd>
+          </summary>
           <div className="mt-2 space-y-2">
             <PlatformRevenueBreakdownTable
               subtle={subtle}
               tone="shop"
               sectionTitle="Item Sales - Profit"
               headerTotalCents={itemSalesCutHeaderCents}
+              collapseRows
               rows={[
                 {
                   label: "Paid",
@@ -92,16 +99,16 @@ function PlatformRevenueTotalsCard({
                   cents: -totals.shopSalesPaymentProcessingCents,
                 },
                 {
-                  label: "Shop payout",
-                  hint: "Creator shop merchandise profit + tip",
-                  cents: -periodShopPayoutCents(totals),
-                  brightValue: true,
-                },
-                {
                   label: "Application amount",
                   hint: "Stripe deducts this from Paid to calculate shop payouts",
                   cents: periodApplicationAmountCents(totals),
                   subheader: true,
+                },
+                {
+                  label: "Shop payout",
+                  hint: "Creator shop merchandise profit + tip",
+                  cents: -periodShopPayoutCents(totals),
+                  brightValue: true,
                 },
                 {
                   label: "COGS",

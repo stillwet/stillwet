@@ -71,8 +71,28 @@ function mergedLineDetailRows(
       label: "Application amount",
       hint: "Stripe deducts this from Paid to calculate shop payouts",
       cents: mergedLineApplicationAmountCents(l),
-      subheader: true,
+      nested: true,
+      mutedValue: true,
     });
+    rows.push({
+      label: "Shop payout",
+      hint: "Expected Stripe Connect transfer to the shop (merchandise shop cut + tip)",
+      cents: -mergedLineShopPayoutCents(l),
+      subheader: true,
+      brightValue: true,
+    });
+    if (
+      stripeShopTransferCents != null &&
+      stripeShopTransferCents !== mergedLineShopPayoutCents(l)
+    ) {
+      rows.push({
+        label: "Stripe shop transfer",
+        hint: "Actual Connect transfer from Stripe (differs from persisted shop cut at checkout)",
+        cents: -stripeShopTransferCents,
+        mutedValue: true,
+        nested: true,
+      });
+    }
     if (!profitOnlyListingSplit && mergedLineStripeBalanceFeeCents(l) > 0) {
       rows.push({
         label: "Stripe fee",
@@ -112,25 +132,6 @@ function mergedLineDetailRows(
         cents: l.tipProcessingFeeCents,
         mutedValue: true,
         referenceOnly: true,
-      });
-    }
-    rows.push({
-      label: "Shop payout",
-      hint: "Expected Stripe Connect transfer to the shop (merchandise shop cut + tip)",
-      cents: -mergedLineShopPayoutCents(l),
-      subheader: true,
-      brightValue: true,
-    });
-    if (
-      stripeShopTransferCents != null &&
-      stripeShopTransferCents !== mergedLineShopPayoutCents(l)
-    ) {
-      rows.push({
-        label: "Stripe shop transfer",
-        hint: "Actual Connect transfer from Stripe (differs from persisted shop cut at checkout)",
-        cents: -stripeShopTransferCents,
-        mutedValue: true,
-        nested: true,
       });
     }
   } else if (!profitOnlyListingSplit && mergedLineStripeBalanceFeeCents(l) > 0) {

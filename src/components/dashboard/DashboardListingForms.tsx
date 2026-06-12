@@ -785,34 +785,34 @@ export function PaidOrderShopProfitHelp({
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative inline-flex shrink-0 items-center justify-center leading-snug">
-      <span className="text-[11px] tabular-nums leading-snug text-zinc-100">
-        {formatUsdFromCents(shopProfitCents)}
-      </span>
-      {showHelp ? (
-        <div className="relative ml-1.5 inline-block shrink-0">
+    <div ref={rootRef} className="inline-flex max-w-full min-w-0 flex-col items-end leading-snug">
+      <div className="inline-flex shrink-0 items-center justify-center leading-snug">
+        <span className="text-[11px] tabular-nums leading-snug text-zinc-100">
+          {formatUsdFromCents(shopProfitCents)}
+        </span>
+        {showHelp ? (
           <button
             type="button"
             aria-label="Show order profit breakdown"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/80 text-[10px] font-semibold leading-none text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+            className="ml-1.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/80 text-[10px] font-semibold leading-none text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
           >
             ?
           </button>
-          {open ? (
-            <div
-              role="tooltip"
-              className="absolute right-0 top-full z-30 mt-1.5 w-max max-w-[min(16rem,calc(100vw-2rem))] rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-right shadow-lg"
-            >
-              <MerchandiseBreakdownCentsRow
-                saleCents={saleCents}
-                gsFeesCents={gsFeesCents}
-                platformCutCents={platformCutCents}
-                tipCents={tipCents}
-              />
-            </div>
-          ) : null}
+        ) : null}
+      </div>
+      {showHelp && open ? (
+        <div
+          role="tooltip"
+          className="mt-1.5 w-full max-w-full rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-right shadow-lg break-words whitespace-normal"
+        >
+          <MerchandiseBreakdownCentsRow
+            saleCents={saleCents}
+            gsFeesCents={gsFeesCents}
+            platformCutCents={platformCutCents}
+            tipCents={tipCents}
+          />
         </div>
       ) : null}
     </div>
