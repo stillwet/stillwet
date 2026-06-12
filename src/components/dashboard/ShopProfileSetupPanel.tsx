@@ -80,13 +80,7 @@ function buildShopProfileFormData(
 
 const PROFILE_AUTOSAVE_DEBOUNCE_MS = 750;
 
-function ProfileSaveStatusBanner({
-  saving,
-  upToDate,
-}: {
-  saving: boolean;
-  upToDate: boolean;
-}) {
+function ProfileSaveStatusBanner({ saving }: { saving: boolean }) {
   if (saving) {
     return (
       <p className="text-center text-xs font-medium text-zinc-100" role="status" aria-live="polite">
@@ -94,14 +88,11 @@ function ProfileSaveStatusBanner({
       </p>
     );
   }
-  if (upToDate) {
-    return (
-      <p className="text-center text-xs text-zinc-500" role="status" aria-live="polite">
-        Profile is saved
-      </p>
-    );
-  }
-  return null;
+  return (
+    <p className="text-center text-xs text-zinc-500" role="status">
+      Profile is saved
+    </p>
+  );
 }
 
 function OnboardingCompleteCheckIcon({ className }: { className?: string }) {
@@ -251,7 +242,6 @@ export function ShopProfileSetupPanel(props: {
   const profileAutosaveBlocked = Boolean(welcomeUrlError) || !displayName.trim();
 
   const profileSaving = isProfilePending || isAvatarPending;
-  const profileUpToDate = !profileDirty && !profileSaving;
 
   useEffect(() => {
     if (!profileDirty || profileAutosaveBlocked || isSocialSavePending) return;
@@ -516,7 +506,7 @@ export function ShopProfileSetupPanel(props: {
         ) : null}
 
         <div className="space-y-4">
-          <ProfileSaveStatusBanner saving={profileSaving} upToDate={profileUpToDate} />
+          <ProfileSaveStatusBanner saving={profileSaving} />
           <label className="block text-xs text-zinc-500">
             <span>Shop Name</span>
             <input

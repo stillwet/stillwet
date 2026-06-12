@@ -19,7 +19,7 @@ import { productImageUrlsUnionHero } from "@/lib/product-media";
 import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums";
 import {
   AdminListingApproveForm,
-  AdminListingRejectForm,
+  AdminListingFailsCheckForm,
   AdminFreezeSubmitButton,
 } from "@/components/admin/AdminListingRequestActionButtons";
 import { formatDisplayedDate, formatDisplayedDateTime } from "@/lib/format-display-datetime";
@@ -27,6 +27,7 @@ import {
   parseShopListingRequestImages,
   shopListingRequestImageLabel,
 } from "@/lib/shop-listing-request-images";
+import { printifyCatalogPickListForListingRow } from "@/lib/shop-listing-printify-mapping-reserved";
 import { listingRequestArtworkAdminViewUrl } from "@/lib/listing-request-artwork-admin-url";
 
 export type ListingRequestTabRow = {
@@ -82,19 +83,6 @@ export type PrintifyCatalogPickEntry = {
   /** Server-only sort key (ms); may be omitted. */
   catalogUpdatedAt?: number;
 };
-
-/** Admin picker lists every live Printify catalog product (duplicate-mapping warnings are separate). */
-function printifyCatalogPickListForListingRow(
-  fullCatalog: PrintifyCatalogPickEntry[],
-  _mappedToAnyListing: readonly string[],
-  currentPrintifyProductId: string,
-): PrintifyCatalogPickEntry[] {
-  const cur = currentPrintifyProductId.trim();
-  if (cur && !fullCatalog.some((p) => p.id.trim() === cur)) {
-    return [{ id: cur, title: `Linked Printify product (not in live catalog)` }, ...fullCatalog];
-  }
-  return fullCatalog;
-}
 
 /**
  * Shared fields for {@link adminMarkPrintifyListingReady} (step 2 initial save + step 3 resave).
@@ -220,9 +208,6 @@ function ListingPrintifyHeroSummary({
               approving.
             </p>
           ) : null}
-          <p className="text-[11px] text-zinc-600">
-            Item reference photos are managed per catalog item on the Admin List tab.
-          </p>
         </div>
       </div>
     </div>
@@ -375,8 +360,6 @@ function ListingRequestCopySummary({
   const empty = "—";
   const productName = r.product.name.trim() || empty;
   const itemName = r.requestItemName?.trim() || empty;
-  const pitch = r.storefrontItemBlurb?.trim() || empty;
-  const keywords = r.listingSearchKeywords?.trim() || empty;
 
   return (
     <div className={className}>
@@ -395,24 +378,6 @@ function ListingRequestCopySummary({
       <p className="text-zinc-500">
         <span className="text-zinc-600">Product name </span>
         <span className={productName === empty ? "text-zinc-600" : "text-zinc-300"}>{productName}</span>
-      </p>
-      <p className="text-zinc-500">
-        <span className="text-zinc-600">Storefront pitch </span>
-        <span
-          className={pitch === empty ? "text-zinc-600" : "whitespace-pre-wrap break-words text-zinc-300"}
-        >
-          {pitch}
-        </span>
-      </p>
-      <p className="text-zinc-500">
-        <span className="text-zinc-600">Keywords </span>
-        <span
-          className={
-            keywords === empty ? "text-zinc-600" : "whitespace-pre-wrap break-words text-zinc-300"
-          }
-        >
-          {keywords}
-        </span>
       </p>
     </div>
   );
@@ -654,7 +619,7 @@ function ListingRequestCard({
           aria-label="Image check: pass or fail"
         >
           <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Step 1 — Image check</p>
-          <div className="flex flex-wrap items-start gap-8">
+          <div className="flex flex-wrap items-end gap-8">
             <div className="flex min-w-0 flex-col gap-1.5">
               <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">Passes check?</span>
               <form action={adminMarkListingImagesOk} className="inline-flex">
@@ -662,13 +627,8 @@ function ListingRequestCard({
                 <ImageOkMarkButton />
               </form>
             </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">Does not pass</span>
-              <AdminListingRejectForm
-                listingId={r.id}
-                className="max-w-md"
-                rejectionReasonLegend="Why it does not pass"
-              />
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <AdminListingFailsCheckForm listingId={r.id} />
             </div>
           </div>
         </div>
@@ -728,13 +688,8 @@ function ListingRequestCard({
                   </p>
                 </div>
                 {!printifyStepImageOk ? (
-                  <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">Image rejected</span>
-                    <AdminListingRejectForm
-                      listingId={r.id}
-                      className="max-w-md"
-                      rejectionReasonLegend="Why images are rejected"
-                    />
+                  <div className="flex min-w-0 flex-col gap-1.5">
+                    <AdminListingFailsCheckForm listingId={r.id} />
                   </div>
                 ) : null}
               </div>
@@ -859,7 +814,7 @@ function ListingRequestCard({
                 </div>
                 {r.requestStatus !== ListingRequestStatus.images_ok &&
                 r.requestStatus !== ListingRequestStatus.printify_item_created ? (
-                  <AdminListingRejectForm listingId={r.id} className="max-w-md" />
+                  <AdminListingFailsCheckForm listingId={r.id} />
                 ) : null}
               </div>
             </div>

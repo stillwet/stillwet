@@ -35,6 +35,7 @@ const tests = [
   "src/lib/order-return-claim-r2.test.ts",
   "src/lib/printify-order-label.test.ts",
   "src/lib/google-merchant/listing-product-input.test.ts",
+  "src/lib/shop-listing-printify-mapping-reserved.test.ts",
   "src/lib/shop-setup-image-listing-artwork.test.ts",
   "src/lib/listing-artwork-staging-chunks.test.ts",
   "src/lib/listing-artwork-server-crop.test.ts",

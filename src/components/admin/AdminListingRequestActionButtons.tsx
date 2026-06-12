@@ -195,6 +195,27 @@ export function AdminListingSupplementImageRejectForm({
   );
 }
 
+/** Image-check fail — always notifies shop with the item-regulations reason (no radio picker). */
+export function AdminListingFailsCheckForm({
+  listingId,
+  className,
+  label = "Fails check",
+  pendingLabel = "Failing check…",
+}: {
+  listingId: string;
+  className?: string;
+  label?: string;
+  pendingLabel?: string;
+}) {
+  return (
+    <form action={adminRejectListingRequest} className={className}>
+      <input type="hidden" name="listingId" value={listingId} />
+      <input type="hidden" name="rejectReason" value="regulations" />
+      <AdminRejectSubmitButton label={label} pendingLabel={pendingLabel} />
+    </form>
+  );
+}
+
 export function AdminListingRejectForm({
   listingId,
   className,
@@ -278,6 +299,22 @@ export function AdminLegacyVariantListingGroupApproveForm({
         buttonClassName="px-4 py-2 text-sm font-medium"
         disabled={approveDisabled}
       />
+    </form>
+  );
+}
+
+export function AdminLegacyVariantListingGroupFailsCheckForm({
+  listingIds,
+  className,
+}: {
+  listingIds: string[];
+  className?: string;
+}) {
+  return (
+    <form action={adminRejectLegacyVariantListingGroup} className={className}>
+      <input type="hidden" name="legacyGroupListingIdsJson" value={JSON.stringify(listingIds)} />
+      <input type="hidden" name="rejectReason" value="regulations" />
+      <AdminRejectSubmitButton label="Fails check (all sizes)" pendingLabel="Failing check…" />
     </form>
   );
 }
