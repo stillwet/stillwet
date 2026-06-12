@@ -2,7 +2,11 @@ import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@/generated/prisma/client";
-import { prisma } from "@/lib/prisma";
+import { ensurePrismaClient } from "@/lib/prisma";
+
+function storefrontDb() {
+  return ensurePrismaClient();
+}
 import { MarketplaceEmptyState } from "@/components/MarketplaceEmptyState";
 import { ShopDataLoadError } from "@/components/ShopDataLoadError";
 import { rethrowNextNavigationError } from "@/lib/next-navigation-errors";
@@ -194,13 +198,14 @@ async function loadBrowsePageSlice(args: {
   }
 
   const load = async () => {
-    const totalCount = await prisma.shopListing.count({ where });
+    const db = storefrontDb();
+    const totalCount = await db.shopListing.count({ where });
     const totalPages = Math.max(1, Math.ceil(totalCount / SHOP_ALL_PAGE_SIZE));
     const displayPage = Math.min(Math.max(1, pageParam), totalPages);
     const skip = (displayPage - 1) * SHOP_ALL_PAGE_SIZE;
 
     const orderBy = shopListingBrowsePrismaOrderBy(browseSort);
-    const rows = await prisma.shopListing.findMany({
+    const rows = await db.shopListing.findMany({
       where,
       orderBy: orderBy!,
       skip,
@@ -220,7 +225,7 @@ async function loadBrowsePageSlice(args: {
 function loadCachedShopAllShop(shopSlug: string) {
   return unstable_cache(
     () =>
-      prisma.shop.findFirst({
+      storefrontDb().shop.findFirst({
         where: { slug: shopSlug, active: true },
         select: { id: true },
       }),
@@ -237,7 +242,7 @@ function loadCachedFeaturedPoolRows(
   cacheKey: string | null,
 ) {
   const load = () =>
-    prisma.shopListing.findMany({
+    storefrontDb().shopListing.findMany({
       where,
       orderBy: [{ product: { updatedAt: "desc" } }],
       take: SHOP_ALL_FEATURED_POOL_LIMIT,
@@ -255,7 +260,7 @@ function loadCachedNameOrderedFeaturedRows(
   cacheKey: string | null,
 ) {
   const load = () =>
-    prisma.shopListing.findMany({
+    storefrontDb().shopListing.findMany({
       where,
       orderBy: listingOrderNameAsc,
       take: SHOP_ALL_FEATURED_POOL_LIMIT,
@@ -487,11 +492,12 @@ export async function ShopAllProductsPage({
 
   let marketplaceEmptyStats: { creatorShops: number; liveListings: number } | undefined;
   if (browseProducts.length === 0 && !searchQuery?.trim() && isPlatformCatalog) {
+    const db = storefrontDb();
     const [creatorShops, liveListings] = await Promise.all([
-      prisma.shop.count({
+      db.shop.count({
         where: { active: true, slug: { not: PLATFORM_SHOP_SLUG } },
       }),
-      prisma.shopListing.count({
+      db.shopListing.count({
         where: {
           ...marketplaceAggregatedListingWhere,
           product: { active: true },
@@ -586,7 +592,20 @@ export async function ShopAllProductsPage({
   );
   } catch (e) {
     rethrowNextNavigationError(e);
-    console.error("[ShopAllProductsPage]", e);
+    const detail = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error("[ShopAllProductsPage]", shopSlug, detail, e);
+    if (embedded) {
+      return (
+        <section className="mt-10 rounded-lg border border-red-900/45 bg-red-950/20 px-4 py-6 text-center sm:mt-12">
+          <p className="text-sm font-medium text-red-100/95">Couldn&apos;t load the item list</p>
+          <p className="mt-2 text-xs leading-relaxed text-red-200/75">
+            Highlights above loaded, but the browse grid failed. This is usually not a missing migration
+            — check Vercel logs for{" "}
+            <code className="font-mono text-[11px] text-red-100/90">[ShopAllProductsPage]</code>.
+          </p>
+        </section>
+      );
+    }
     return <ShopDataLoadError cause={e} />;
   }
 }

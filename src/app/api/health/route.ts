@@ -28,11 +28,34 @@ export async function GET() {
   const dbSource = runtimeDatabaseUrlSourceKey();
   let dbOk = false;
   let dbError: string | undefined;
+  let shopBrowseOk = false;
+  let shopBrowseError: string | undefined;
   if (hasDatabaseUrl) {
     try {
       const { ensurePrismaClient } = await import("@/lib/prisma");
-      await ensurePrismaClient().$queryRaw`SELECT 1 AS ok`;
+      const db = ensurePrismaClient();
+      await db.$queryRaw`SELECT 1 AS ok`;
       dbOk = true;
+      try {
+        const { storefrontShopListingWhere } = await import(
+          "@/lib/shop-listing-storefront-visibility"
+        );
+        await db.shopListing.findFirst({
+          where: {
+            ...storefrontShopListingWhere,
+            product: { active: true },
+          },
+          select: { id: true },
+        });
+        shopBrowseOk = true;
+      } catch (e) {
+        shopBrowseError =
+          e instanceof Error
+            ? e.message.slice(0, 240)
+            : typeof e === "string"
+              ? e.slice(0, 240)
+              : "shop_browse_query_failed";
+      }
     } catch (e) {
       dbError =
         e instanceof Error
@@ -112,12 +135,14 @@ export async function GET() {
 
   return Response.json(
     {
-      ok: dbOk,
+      ok: dbOk && shopBrowseOk,
       hasDatabaseUrl,
       database: {
         ok: dbOk,
         source: dbSource,
         error: dbError,
+        shopBrowseOk,
+        shopBrowseError,
         ignoredLocalhostEnvKeys: localhostDbKeys.length > 0 ? localhostDbKeys : undefined,
         neonIntegrationEnvKeys:
           neonIntegrationKeys.length > 0 ? neonIntegrationKeys : undefined,
