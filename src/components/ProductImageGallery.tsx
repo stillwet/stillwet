@@ -18,7 +18,7 @@ type Props = {
 };
 
 function imageCaption(
-  src: string | undefined,
+  src: string | null | undefined,
   sizeReferenceImageUrl: string | null | undefined,
 ): string | null {
   if (!src) return null;
