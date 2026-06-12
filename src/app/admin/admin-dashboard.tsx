@@ -675,7 +675,7 @@ async function AdminDashboardPageBody({
                 : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300"
             }`}
           >
-            Printify Catalogue
+            Example Catalogue
           </Link>
                 </div>
               </div>

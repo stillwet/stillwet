@@ -69,10 +69,10 @@ export async function PrintifyAuxTab({
   }
 
   return (
-    <div className="space-y-10" aria-label="Printify catalogue">
+    <div className="space-y-10" aria-label="Example catalogue">
       <div>
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
-          Printify catalogue (unpublish only)
+          Example catalogue (unpublish only)
         </h2>
         <p className="mt-1 text-xs leading-relaxed text-zinc-600">
           Read-only view of a second Printify shop. Products here are{" "}

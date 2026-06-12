@@ -12,6 +12,12 @@ const btnPurchaseListing =
 const btnPurchaseListingSelected =
   "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2.5 py-1 text-center text-[11px] font-medium text-zinc-100";
 
+const btnPurchaseListingEmphasized =
+  "block w-full rounded-md border border-blue-500/70 bg-blue-950/50 px-2.5 py-1 text-center text-[11px] font-medium text-blue-200 transition-colors hover:border-blue-400/80 hover:bg-blue-950/70 hover:text-blue-100";
+
+const btnPurchaseListingEmphasizedSelected =
+  "block w-full rounded-md border border-blue-400/90 bg-blue-900/60 px-2.5 py-1 text-center text-[11px] font-medium text-blue-100";
+
 function packLabelParts(label: string): { creditsLine: string; priceLine: string } {
   const sep = label.indexOf(" — ");
   if (sep === -1) return { creditsLine: label, priceLine: "" };
@@ -38,8 +44,16 @@ export function ListingCreditPackSection(props: {
   freeListingSlots: FreeListingRequestSlotsSummary;
   stripePublishableKey: string | null;
   mockListingFeeCheckout: boolean;
+  /** Blue pack buttons when the shop must buy credits before requesting another listing. */
+  emphasizePurchasePacks?: boolean;
 }) {
-  const { unpaidListings, freeListingSlots, stripePublishableKey, mockListingFeeCheckout } = props;
+  const {
+    unpaidListings,
+    freeListingSlots,
+    stripePublishableKey,
+    mockListingFeeCheckout,
+    emphasizePurchasePacks = false,
+  } = props;
 
   const [payPanelPack, setPayPanelPack] = useState<ListingCreditPack | null>(null);
   const packsContainerRef = useRef<HTMLDivElement>(null);
@@ -69,13 +83,21 @@ export function ListingCreditPackSection(props: {
     LISTING_CREDIT_PACKS.map((pack) => {
       const selected = payPanelPack?.id === pack.id;
       const { creditsLine, priceLine } = packLabelParts(pack.label);
-      const btnClass = compact
-        ? selected
-          ? "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-100"
-          : "block w-full rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100"
-        : selected
-          ? btnPurchaseListingSelected
-          : btnPurchaseListing;
+      const btnClass = emphasizePurchasePacks
+        ? compact
+          ? selected
+            ? "block w-full rounded-md border border-blue-400/90 bg-blue-900/60 px-2 py-1 text-center text-[11px] font-medium leading-tight text-blue-100"
+            : "block w-full rounded-md border border-blue-500/70 bg-blue-950/50 px-2 py-1 text-center text-[11px] font-medium leading-tight text-blue-200 transition-colors hover:border-blue-400/80 hover:bg-blue-950/70 hover:text-blue-100"
+          : selected
+            ? btnPurchaseListingEmphasizedSelected
+            : btnPurchaseListingEmphasized
+        : compact
+          ? selected
+            ? "block w-full rounded-md border border-zinc-500/80 bg-zinc-800/70 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-100"
+            : "block w-full rounded-md border border-zinc-700/80 bg-zinc-900/50 px-2 py-1 text-center text-[11px] font-medium leading-tight text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100"
+          : selected
+            ? btnPurchaseListingSelected
+            : btnPurchaseListing;
       return (
         <li key={pack.id} className={forMeasure ? "shrink-0" : "min-w-0 flex-1"}>
           <button type="button" className={btnClass} onClick={() => setPayPanelPack(pack)}>
@@ -107,7 +129,13 @@ export function ListingCreditPackSection(props: {
             {renderPackButtons(packsCompact)}
           </ul>
         </div>
-        <FreeListingSlotsHint slots={freeListingSlots} />
+        {emphasizePurchasePacks ? (
+          <p className="mt-2 text-xs text-blue-200/90">
+            Buy listing credits to unlock a new request.
+          </p>
+        ) : (
+          <FreeListingSlotsHint slots={freeListingSlots} />
+        )}
       </div>
 
       {hasUnpaid ? (

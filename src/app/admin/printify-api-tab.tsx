@@ -116,7 +116,7 @@ export async function PrintifyApiTab({ hookBanner }: PrintifyApiTabProps = {}) {
                   href={`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux`}
                   className="text-blue-400/90 hover:underline"
                 >
-                  Printify Catalogue
+                  Example Catalogue
                 </Link>{" "}
                 tab (unpublish only; not synced to catalog)
               </>
@@ -127,7 +127,7 @@ export async function PrintifyApiTab({ hookBanner }: PrintifyApiTabProps = {}) {
                   href={`${ADMIN_BACKEND_BASE_PATH}?tab=printify-aux`}
                   className="text-blue-400/90 hover:underline"
                 >
-                  Printify Catalogue
+                  Example Catalogue
                 </Link>
                 )
               </span>

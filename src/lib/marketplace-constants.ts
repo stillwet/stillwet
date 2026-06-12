@@ -79,6 +79,15 @@ export type FreeListingRequestSlotsSummary = {
   founderUnlimited: boolean;
 };
 
+/** Request listing form is blocked until the shop buys credits (paid slot needed, balance empty). */
+export function listingRequestBlockedForNoCredits(
+  needsCredit: boolean,
+  slots: FreeListingRequestSlotsSummary,
+): boolean {
+  if (!needsCredit || slots.founderUnlimited) return false;
+  return slots.listingCreditsAvailable <= 0;
+}
+
 /** Whether the next submitted listing request would require a listing credit (beyond free 3 + bonus pool). */
 export function nextListingRequestRequiresCredit(
   shopSlug: string,

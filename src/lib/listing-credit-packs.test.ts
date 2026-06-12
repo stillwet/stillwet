@@ -6,8 +6,10 @@ import {
   parseListingCreditPackId,
 } from "@/lib/listing-credit-packs";
 import {
+  listingRequestBlockedForNoCredits,
   nextListingRequestRequiresCredit,
   shopListingCreditsAvailable,
+  type FreeListingRequestSlotsSummary,
 } from "@/lib/marketplace-constants";
 
 describe("listing credit packs", () => {
@@ -40,5 +42,32 @@ describe("listing credit submit gate", () => {
   it("does not require credit within free + bonus cap", () => {
     assert.equal(nextListingRequestRequiresCredit("my-shop", 5, 2), false);
     assert.equal(shopListingCreditsAvailable(5, 5), 3);
+  });
+
+  it("blocks request listing when paid slot needed and no credits", () => {
+    const slots: FreeListingRequestSlotsSummary = {
+      cap: 3,
+      remaining: 0,
+      listingCreditsAvailable: 0,
+      founderUnlimited: false,
+    };
+    assert.equal(listingRequestBlockedForNoCredits(true, slots), true);
+    assert.equal(listingRequestBlockedForNoCredits(false, slots), false);
+    assert.equal(
+      listingRequestBlockedForNoCredits(true, {
+        ...slots,
+        listingCreditsAvailable: 2,
+      }),
+      false,
+    );
+    assert.equal(
+      listingRequestBlockedForNoCredits(true, {
+        cap: 3,
+        remaining: Number.POSITIVE_INFINITY,
+        listingCreditsAvailable: Number.POSITIVE_INFINITY,
+        founderUnlimited: true,
+      }),
+      false,
+    );
   });
 });

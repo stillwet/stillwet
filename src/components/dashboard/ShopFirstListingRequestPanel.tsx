@@ -37,7 +37,11 @@ import {
 } from "@/lib/listing-artwork-source-tier";
 import { SHOP_EXTENDED_CATALOG_SECTION_LABEL, sortExtendedCatalogGroups } from "@/lib/secret-menu-catalog";
 import type { DraftListingRequestPrefillPayload } from "@/lib/shop-baseline-draft-prefill";
-import { SHOP_LISTING_MAX_PRICE_CENTS, shopListingMaxPriceUsdLabel } from "@/lib/marketplace-constants";
+import {
+  listingRequestBlockedForNoCredits,
+  SHOP_LISTING_MAX_PRICE_CENTS,
+  shopListingMaxPriceUsdLabel,
+} from "@/lib/marketplace-constants";
 import {
   listingArtworkFileWithinUploadCap,
   listingArtworkUploadCapError,
@@ -233,7 +237,7 @@ function CatalogHighResolutionHelp() {
   );
 }
 
-/** Shared row: item name (left, flex priority) | item photo + sale price (right-aligned group) */
+/** Shared row: item name (left, flex priority) | item photo + min sale price (right-aligned group) */
 const CATALOG_PICKER_ROW = "flex items-center gap-x-2 sm:gap-x-4";
 const CATALOG_PICKER_ITEM_COL = "min-w-0 flex-1 basis-0 pr-2 sm:pr-3";
 const CATALOG_PICKER_ITEM_HEADER_COL = `${CATALOG_PICKER_ITEM_COL} pl-7`;
@@ -264,7 +268,7 @@ function CatalogPickerTrailingHeaders({ compactDashboardTabs }: { compactDashboa
           <span className="max-w-full break-words">Photo</span>
         </div>
         <div className={`${CATALOG_PICKER_PRICE_COL} flex flex-col items-center gap-0.5`}>
-          <span className="max-w-full break-words">Sale</span>
+          <span className="max-w-full break-words">Min Sale</span>
           <span className="max-w-full break-words">Price</span>
         </div>
       </>
@@ -274,7 +278,7 @@ function CatalogPickerTrailingHeaders({ compactDashboardTabs }: { compactDashboa
   return (
     <>
       <span className={CATALOG_PICKER_PHOTO_COL}>Item Photo</span>
-      <span className={CATALOG_PICKER_PRICE_COL}>Sale Price</span>
+      <span className={CATALOG_PICKER_PRICE_COL}>Min Sale Price</span>
     </>
   );
 }
@@ -397,7 +401,6 @@ export function ShopFirstListingRequestPanel(props: {
   const pendingListingFdRef = useRef<FormData | null>(null);
   const [attestationOpen, setAttestationOpen] = useState(false);
   const [attestationChecked, setAttestationChecked] = useState(false);
-  const [feeChargeConsentChecked, setFeeChargeConsentChecked] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const listingRequestFormId = useId();
   const storefrontPitchFieldId = useId();
@@ -408,13 +411,14 @@ export function ShopFirstListingRequestPanel(props: {
   useEffect(() => {
     if (attestationOpen) {
       setAttestationChecked(false);
-      setFeeChargeConsentChecked(false);
     }
   }, [attestationOpen]);
 
-  const listingCreditConsentRequired = needsListingCreditForNextRequest;
+  const listingBlockedNoCredits = listingRequestBlockedForNoCredits(
+    needsListingCreditForNextRequest,
+    freeListingSlots,
+  );
   const shopAtInReviewListingLimit = shopInReviewListingRequestLimitReached(inReviewListingRequestCount);
-  const feeConsentOk = !listingCreditConsentRequired || feeChargeConsentChecked;
 
   const allCatalogGroups = useMemo(
     () => [...catalogGroups, ...extendedCatalogGroups],
@@ -1108,9 +1112,11 @@ export function ShopFirstListingRequestPanel(props: {
         ? btnPrimarySaved
         : btnPrimaryDisabled
       : btnPrimary;
-  const isListingFormSubmitDisabled = !listingFormReady || isListingPending || artworkBusy;
+  const isListingFormSubmitDisabled =
+    !listingFormReady || isListingPending || artworkBusy || listingBlockedNoCredits;
   const freezeListingRequestFields = isListingPending || artworkBusy;
-  const listingRequestFieldsDisabled = freezeListingRequestFields || shopAtInReviewListingLimit;
+  const listingRequestFieldsDisabled =
+    freezeListingRequestFields || shopAtInReviewListingLimit || listingBlockedNoCredits;
 
   return (
     <div
@@ -1127,6 +1133,7 @@ export function ShopFirstListingRequestPanel(props: {
         freeListingSlots={freeListingSlots}
         stripePublishableKey={stripePublishableKey}
         mockListingFeeCheckout={mockListingFeeCheckout}
+        emphasizePurchasePacks={listingBlockedNoCredits}
       />
 
       {!hasCatalogItems ? (
@@ -1157,9 +1164,9 @@ export function ShopFirstListingRequestPanel(props: {
         </p>
       ) : (
         <>
-          {listingCreditConsentRequired ? (
-            <p className="mt-2 text-xs text-zinc-500">
-              Your next listing will use one listing credit. Buy more credits above if needed.
+          {listingBlockedNoCredits ? (
+            <p className="mt-2 rounded-lg border border-blue-900/45 bg-blue-950/25 px-3 py-2 text-xs text-blue-200/90">
+              You need listing credits before you can submit another request. Buy a pack above to continue.
             </p>
           ) : null}
           {shopAtInReviewListingLimit ? (
@@ -1763,17 +1770,6 @@ export function ShopFirstListingRequestPanel(props: {
                 .
               </span>
             </label>
-            {listingCreditConsentRequired ? (
-              <label className="mt-3 flex cursor-pointer gap-2 text-sm text-zinc-300">
-                <input
-                  type="checkbox"
-                  checked={feeChargeConsentChecked}
-                  onChange={(e) => setFeeChargeConsentChecked(e.target.checked)}
-                  className="mt-1 shrink-0 rounded border-zinc-600"
-                />
-                <span>This listing will use one listing credit from my balance.</span>
-              </label>
-            ) : null}
             <div className="mt-5 flex flex-wrap justify-end gap-2">
               <button
                 type="button"
@@ -1787,15 +1783,12 @@ export function ShopFirstListingRequestPanel(props: {
               </button>
               <button
                 type="button"
-                disabled={!attestationChecked || !feeConsentOk || isListingPending || artworkUploadInProgress}
+                disabled={!attestationChecked || isListingPending || artworkUploadInProgress}
                 className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => {
                   const fd = pendingListingFdRef.current;
-                  if (!fd || !attestationChecked || !feeConsentOk) return;
+                  if (!fd || !attestationChecked) return;
                   fd.set("guidelinesAttestation", "1");
-                  if (listingCreditConsentRequired) {
-                    fd.set("feeChargeAttestation", "1");
-                  }
                   setAttestationOpen(false);
                   pendingListingFdRef.current = null;
                   void handleListingSubmit(fd);
