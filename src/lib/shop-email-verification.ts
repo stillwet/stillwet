@@ -33,7 +33,7 @@ export async function issueShopEmailVerificationTokenAndSend(
 
 export async function verifyShopEmailFromRawToken(
   rawToken: string | null | undefined,
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true; alreadyVerified?: boolean } | { ok: false; reason: string }> {
   const raw = (rawToken ?? "").trim();
   if (!raw) {
     return { ok: false, reason: "missing" };
@@ -45,7 +45,13 @@ export async function verifyShopEmailFromRawToken(
     include: { shopUser: true },
   });
 
-  if (!row || row.usedAt) {
+  if (!row) {
+    return { ok: false, reason: "invalid" };
+  }
+  if (row.usedAt) {
+    if (row.shopUser.emailVerifiedAt) {
+      return { ok: true, alreadyVerified: true };
+    }
     return { ok: false, reason: "invalid" };
   }
   if (row.expiresAt.getTime() < Date.now()) {

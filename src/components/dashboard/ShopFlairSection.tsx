@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { dashboardSetShopFlairType, type DashboardFlairActionResult } from "@/actions/dashboard-flair";
 import { ShopFlairAccessPay } from "@/components/dashboard/ShopFlairAccessPay";
 import type { ShopFlairDashboardPayload } from "@/lib/shop-flair-dashboard-payload";
@@ -34,12 +34,7 @@ export function ShopFlairSection(props: {
   const [isFlairPending, startFlairTransition] = useTransition();
   const [selectedFlairTypeId, setSelectedFlairTypeId] = useState(flair.selectedType?.id ?? "");
   const [flairPayOpen, setFlairPayOpen] = useState(false);
-  const [flairSuccessKind, setFlairSuccessKind] = useState<"purchase" | "update" | null>(null);
-
-  const flairSelectionDirty = useMemo(() => {
-    const savedId = flair.selectedType?.id ?? "";
-    return selectedFlairTypeId !== savedId;
-  }, [flair.selectedType?.id, selectedFlairTypeId]);
+  const [flairSuccessKind, setFlairSuccessKind] = useState<"purchase" | null>(null);
 
   useEffect(() => {
     setFlairResult(null);
@@ -47,6 +42,21 @@ export function ShopFlairSection(props: {
     setSelectedFlairTypeId(flair.selectedType?.id ?? "");
     setFlairPayOpen(false);
   }, [flair.purchasedAt, flair.selectedType?.id]);
+
+  const saveFlairSelection = (nextFlairTypeId: string) => {
+    const savedId = flair.selectedType?.id ?? "";
+    if (nextFlairTypeId === savedId || isFlairPending) return;
+
+    setSelectedFlairTypeId(nextFlairTypeId);
+    setFlairResult(null);
+    const fd = new FormData();
+    fd.set("flairTypeId", nextFlairTypeId);
+    startFlairTransition(async () => {
+      const r = await dashboardSetShopFlairType(fd);
+      setFlairResult(r);
+      if (r.ok) router.refresh();
+    });
+  };
 
   if (variant === "selection") {
     if (!flair.purchasedAt) {
@@ -71,54 +81,27 @@ export function ShopFlairSection(props: {
 
     return (
       <div className={className}>
-        <form
-          className="space-y-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (isFlairPending || !flairSelectionDirty) return;
-            setFlairResult(null);
-            const fd = new FormData();
-            fd.set("flairTypeId", selectedFlairTypeId);
-            startFlairTransition(async () => {
-              const r = await dashboardSetShopFlairType(fd);
-              if (r.ok) setFlairSuccessKind("update");
-              setFlairResult(r);
-              if (r.ok) router.refresh();
-            });
-          }}
-        >
-          <label className="block text-xs text-zinc-500">
-            Shop flair
-            <select
-              value={selectedFlairTypeId}
-              onChange={(e) => setSelectedFlairTypeId(e.target.value)}
-              disabled={isFlairPending}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 disabled:opacity-50"
-            >
-              <option value="">None</option>
-              {flair.catalog.types.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {flairResult && !flairResult.ok ? (
-            <p className="text-xs leading-snug text-red-300/90" role="alert">
-              {flairResult.error}
-            </p>
-          ) : null}
-          {flairResult && flairResult.ok ? (
-            <p className="text-xs text-emerald-300/90">Flair updated.</p>
-          ) : null}
-          <button
-            type="submit"
-            disabled={isFlairPending || !flairSelectionDirty}
-            className="rounded-lg border border-zinc-600 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
+        <label className="block text-xs text-zinc-500">
+          Shop flair
+          <select
+            value={selectedFlairTypeId}
+            onChange={(e) => saveFlairSelection(e.target.value)}
+            disabled={isFlairPending}
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 disabled:opacity-50"
           >
-            {isFlairPending ? "Saving…" : "Save flair"}
-          </button>
-        </form>
+            <option value="">None</option>
+            {flair.catalog.types.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {flairResult && !flairResult.ok ? (
+          <p className="mt-2 text-xs leading-snug text-red-300/90" role="alert">
+            {flairResult.error}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -152,11 +135,9 @@ export function ShopFlairSection(props: {
           {flairResult.error}
         </p>
       ) : null}
-      {flairResult && flairResult.ok ? (
+      {flairResult && flairResult.ok && flairSuccessKind === "purchase" ? (
         <p className="mt-2 rounded border border-emerald-900/40 bg-emerald-950/20 px-2.5 py-1.5 text-xs text-emerald-200/90">
-          {flairSuccessKind === "purchase"
-            ? "Flair access purchased. Choose a flair below."
-            : "Flair updated."}
+          Flair access purchased. Choose a flair below.
         </p>
       ) : null}
 
@@ -227,27 +208,12 @@ export function ShopFlairSection(props: {
           ) : null}
         </>
       ) : (
-        <form
-          className="mt-3 rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (isFlairPending || !flairSelectionDirty) return;
-            setFlairResult(null);
-            const fd = new FormData();
-            fd.set("flairTypeId", selectedFlairTypeId);
-            startFlairTransition(async () => {
-              const r = await dashboardSetShopFlairType(fd);
-              if (r.ok) setFlairSuccessKind("update");
-              setFlairResult(r);
-              if (r.ok) router.refresh();
-            });
-          }}
-        >
+        <div className="mt-3 rounded-lg border border-zinc-800/90 bg-zinc-900/35 p-3">
           <label className="block text-[11px] font-medium text-zinc-200">
             Choose a flair type
             <select
               value={selectedFlairTypeId}
-              onChange={(e) => setSelectedFlairTypeId(e.target.value)}
+              onChange={(e) => saveFlairSelection(e.target.value)}
               disabled={isFlairPending}
               className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-950/40 px-2 py-1.5 text-xs text-zinc-100 disabled:opacity-50"
             >
@@ -259,16 +225,7 @@ export function ShopFlairSection(props: {
               ))}
             </select>
           </label>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="submit"
-              disabled={isFlairPending || !flairSelectionDirty}
-              className="rounded border border-zinc-600 bg-zinc-400 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isFlairPending ? "Saving…" : "Save flair"}
-            </button>
-          </div>
-        </form>
+        </div>
       )}
     </section>
   );

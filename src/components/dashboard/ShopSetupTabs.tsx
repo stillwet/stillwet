@@ -192,25 +192,25 @@ export function ShopSetupTabs(props: {
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
         Onboarding
       </h2>
-      <div
-        className="mt-3 flex items-start gap-3 rounded-lg border border-blue-500/25 bg-zinc-900/50 px-4 py-3 shadow-sm shadow-black/20 ring-1 ring-blue-500/10"
-        role="status"
-      >
-        <span
-          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-blue-500/35 bg-blue-950/50 text-xs font-semibold leading-none text-blue-300 shadow-[inset_0_1px_0_0_rgba(147,197,253,0.1)]"
-          aria-hidden
-        >
-          !
-        </span>
-        <p className="min-w-0 text-sm leading-snug text-zinc-300">
-          Onboarding must be completed before your shop goes live.
-        </p>
-      </div>
 
       <nav
-        className="mt-6 rounded-lg border border-zinc-800/80 bg-zinc-900/35 p-4"
+        className="mt-3 rounded-lg border border-zinc-800/80 bg-zinc-900/35 p-4"
         aria-label="Onboarding checklist"
       >
+        <div
+          className="mb-4 flex items-center gap-3 rounded-lg border border-blue-500/25 bg-zinc-900/50 px-4 py-3 shadow-sm shadow-black/20 ring-1 ring-blue-500/10"
+          role="status"
+        >
+          <span
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-blue-500/35 bg-blue-950/50 text-xs font-semibold leading-none text-blue-300 shadow-[inset_0_1px_0_0_rgba(147,197,253,0.1)]"
+            aria-hidden
+          >
+            !
+          </span>
+          <p className="min-w-0 flex-1 text-sm leading-snug text-zinc-300">
+            Onboarding must be completed before your shop goes live.
+          </p>
+        </div>
         <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">To do</p>
         <ol className="mt-3 list-none space-y-3 p-0">
           <li className="flex gap-3">

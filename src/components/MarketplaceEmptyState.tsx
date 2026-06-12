@@ -54,6 +54,14 @@ export function MarketplaceEmptyState({ variant, stats, searchQuery, children }:
     stats &&
     (stats.creatorShops !== undefined || stats.liveListings !== undefined);
 
+  if (variant === "shop-listings") {
+    return (
+      <div role="status" className="mt-8 text-center">
+        <h2 className="text-base font-medium text-zinc-100">{titleForVariant(variant, searchQuery)}</h2>
+      </div>
+    );
+  }
+
   return (
     <div
       role="status"

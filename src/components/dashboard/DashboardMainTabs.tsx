@@ -73,6 +73,7 @@ import {
 } from "@/lib/product-media";
 import type { GroupedDashboardListing } from "@/lib/dashboard-legacy-baseline-listing-groups";
 import { ListingsTabExpandSection } from "@/components/dashboard/ListingsTabExpandSection";
+import { ShopEmailVerifiedDashboardListener } from "@/components/dashboard/ShopEmailVerifiedDashboardListener";
 const DASHBOARD_NOTIFICATIONS_PAGE_SIZE = 10;
 
 const ShopSetupTabsLazy = nextDynamic(
@@ -1705,6 +1706,7 @@ export function DashboardMainTabs(props: {
 
   return (
     <section className="mt-8">
+      <ShopEmailVerifiedDashboardListener />
       {listingSubmittedFlash ? (
         <p className="mb-3 rounded-lg border border-emerald-900/50 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200/90">
           Listing submitted.

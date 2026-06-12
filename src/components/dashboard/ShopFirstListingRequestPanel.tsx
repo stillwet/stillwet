@@ -217,14 +217,9 @@ function CatalogHighResolutionHelp() {
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="relative h-4 w-4 shrink-0 rounded-full border border-zinc-600 bg-zinc-900/80 p-0 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+        className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/80 p-0 font-mono text-[8px] font-bold leading-none text-zinc-400 translate-y-px hover:border-zinc-500 hover:text-zinc-200"
       >
-        <span
-          className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold leading-none"
-          aria-hidden="true"
-        >
-          *
-        </span>
+        *
       </button>
       {open ? (
         <div
@@ -2015,7 +2010,11 @@ export function ShopFirstListingRequestPanel(props: {
         />
       ) : null}
 
-      <ItemGuidelinesPopup open={guidelinesOpen} onClose={() => setGuidelinesOpen(false)} />
+      <ItemGuidelinesPopup
+        open={guidelinesOpen}
+        onClose={() => setGuidelinesOpen(false)}
+        variant="compact"
+      />
     </div>
   );
 }
