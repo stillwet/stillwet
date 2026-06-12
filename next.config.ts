@@ -86,6 +86,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/favicon.ico", destination: "/icon", permanent: false },
+      { source: "/apple-touch-icon.png", destination: "/apple-icon", permanent: false },
+      {
+        source: "/apple-touch-icon-precomposed.png",
+        destination: "/apple-icon",
+        permanent: false,
+      },
       { source: "/shop/sub", destination: "/shop/all", permanent: true },
       { source: "/shop/sub/tag/:slug", destination: "/shop/tag/:slug", permanent: true },
       { source: "/shop/domme", destination: "/shop/all", permanent: true },

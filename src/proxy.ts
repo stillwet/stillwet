@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { SITE_GATE_COOKIE, siteGateCookieDomain } from "@/lib/site-gate";
+import {
+  isLinkPreviewCrawlerUserAgent,
+  isSiteGatePublicAssetPath,
+} from "@/lib/site-gate-public-paths";
 import { publicAppOrigin } from "@/lib/public-app-url";
 
 /** Force HTTPS in production (fixes “Not secure” when users hit http:// or env used http). */
@@ -93,7 +97,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/api/admin/") ||
     pathname.startsWith("/api/webhooks/") ||
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico"
+    isSiteGatePublicAssetPath(pathname) ||
+    (pathname === "/" && isLinkPreviewCrawlerUserAgent(request.headers.get("user-agent")))
   ) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
@@ -131,5 +136,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image).*)"],
 };

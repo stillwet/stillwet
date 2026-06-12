@@ -4,9 +4,9 @@ import { Suspense } from "react";
 import { AccountDeletedBanner } from "@/components/AccountDeletedBanner";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { BrandLogoLink } from "@/components/BrandLogoLink";
-import { googleSiteVerificationMetadata } from "@/lib/google-site-verification";
+import { buildSiteMetadataWithGoogleVerification } from "@/lib/site-metadata";
 
-export const metadata: Metadata = googleSiteVerificationMetadata;
+export const metadata: Metadata = buildSiteMetadataWithGoogleVerification();
 
 export default function HomePage() {
   return (

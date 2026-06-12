@@ -5,56 +5,26 @@ import {
   PromotionKind,
   PromotionPurchaseStatus,
 } from "@/generated/prisma/enums";
-import { PLATFORM_SHOP_SLUG, listingFeeCentsForOrdinal } from "@/lib/marketplace-constants";
 import { supportUnresolvedThreadShopIdsExcludingPlatform } from "@/lib/support-thread-unresolved";
 import type { Prisma } from "@/generated/prisma/client";
 import { isPaidPromotionActiveNow } from "@/lib/promotion-policy-shared";
 import { loadPlatformSalesNavBadgeCounts } from "@/lib/admin-platform-sales-merged-lines";
-import { listingOrdinalByListingId } from "@/lib/shop-listing-ordinal";
 
 const TWO_HOURS_S = 60 * 60 * 2;
 
 async function computeListingRequestTabBadgeCountUncached() {
-  const listingRequestTabPrismaWhere: Prisma.ShopListingWhereInput = {
-    removedFromListingRequestsAt: null,
-    requestStatus: {
-      in: [
-        ListingRequestStatus.submitted,
-        ListingRequestStatus.images_ok,
-        ListingRequestStatus.printify_item_created,
-        ListingRequestStatus.approved,
-      ],
-    },
-  };
-
-  // Badge is shown on every admin load; compute once and cache.
-  const slimRows = await prisma.shopListing.findMany({
-    where: listingRequestTabPrismaWhere,
-    orderBy: { updatedAt: "desc" },
-    select: {
-      id: true,
-      shopId: true,
-      requestStatus: true,
-      listingFeePaidAt: true,
-      shop: { select: { slug: true, listingFeeBonusFreeSlots: true } },
+  return prisma.shopListing.count({
+    where: {
+      removedFromListingRequestsAt: null,
+      requestStatus: {
+        in: [
+          ListingRequestStatus.submitted,
+          ListingRequestStatus.images_ok,
+          ListingRequestStatus.printify_item_created,
+        ],
+      },
     },
   });
-  const listingOrdinalById = await listingOrdinalByListingId(
-    prisma,
-    slimRows.map((r) => r.id),
-  );
-  const listingRequestTabBadgeCount = slimRows.filter((r) => {
-    if (r.requestStatus !== ListingRequestStatus.approved) return true;
-    if (r.shop.slug === PLATFORM_SHOP_SLUG) return false;
-    const fee = listingFeeCentsForOrdinal(
-      listingOrdinalById.get(r.id) ?? 1,
-      r.shop.slug,
-      r.shop.listingFeeBonusFreeSlots ?? 0,
-    );
-    if (r.listingFeePaidAt != null || fee === 0) return false;
-    return true;
-  }).length;
-  return listingRequestTabBadgeCount;
 }
 
 /**

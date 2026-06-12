@@ -415,7 +415,6 @@ async function tryExecuteAdminApproveListingRequest(
   const feeCents = isPlatform
     ? 0
     : listingFeeCentsForOrdinal(ordinal, listing.shop.slug, listing.shop.listingFeeBonusFreeSlots ?? 0);
-  const alreadyPaid = listing.listingFeePaidAt != null;
 
   const catalogItemName = await adminCatalogItemNameForApprovedNotice(
     listing.baselineCatalogPickEncoded,
@@ -442,67 +441,32 @@ async function tryExecuteAdminApproveListingRequest(
     return { ok: true, shopSlug: listing.shop.slug, shopId: listing.shopId };
   }
 
-  if (feeCents === 0) {
-    await prisma.shopListing.update({
-      where: { id: listingId },
-      data: {
-        requestStatus: ListingRequestStatus.approved,
-        active: true,
-        listingFeePaidAt: listing.listingFeePaidAt ?? new Date(),
-        listingPublicationFeePaidCents: listing.listingPublicationFeePaidCents ?? 0,
-        requestImages: [],
-      },
-    });
-    await activateProductWhenShopListingGoesLive(productId, listing.shop.slug);
-    await syncFreeListingFeeWaivers(listing.shopId);
-    await prisma.shopOwnerNotice.create({
-      data: {
-        shopId: listing.shopId,
-        kind: "listing_approved",
-        body: `Your listing ${approvedListingLabel} is approved and live in your shop.`,
-      },
-    });
-  } else if (alreadyPaid) {
-    await prisma.shopListing.update({
-      where: { id: listingId },
-      data: {
-        requestStatus: ListingRequestStatus.approved,
-        active: true,
-        requestImages: [],
-      },
-    });
-    await activateProductWhenShopListingGoesLive(productId, listing.shop.slug);
-    await prisma.shopOwnerNotice.create({
-      data: {
-        shopId: listing.shopId,
-        kind: "listing_approved",
-        body: `Your listing ${approvedListingLabel} is approved and live in your shop.`,
-      },
-    });
-  } else {
-    await prisma.shopListing.update({
-      where: { id: listingId },
-      data: {
-        requestStatus: ListingRequestStatus.approved,
-        active: false,
-        requestImages: [],
-      },
-    });
-    await prisma.shopOwnerNotice.create({
-      data: {
-        shopId: listing.shopId,
-        kind: "listing_approved_pay_fee",
-        body: `Your listing ${approvedListingLabel} was approved. Buy listing credits on the Request listing tab if needed, then publish it from the Listings tab.`,
-      },
-    });
-  }
+  await prisma.shopListing.update({
+    where: { id: listingId },
+    data: {
+      requestStatus: ListingRequestStatus.approved,
+      active: true,
+      listingFeePaidAt: listing.listingFeePaidAt ?? new Date(),
+      listingPublicationFeePaidCents:
+        listing.listingPublicationFeePaidCents ?? (feeCents > 0 ? feeCents : 0),
+      requestImages: [],
+    },
+  });
+  await activateProductWhenShopListingGoesLive(productId, listing.shop.slug);
+  await syncFreeListingFeeWaivers(listing.shopId);
+  await prisma.shopOwnerNotice.create({
+    data: {
+      shopId: listing.shopId,
+      kind: "listing_approved",
+      body: `Your listing ${approvedListingLabel} is approved and live in your shop.`,
+    },
+  });
 
   return { ok: true, shopSlug: listing.shop.slug, shopId: listing.shopId };
 }
 
 /**
- * Step 2: approve listing (requires Printify IDs). Applies free-slot waivers and either goes live
- * or asks the shop to buy listing credits when slots are exhausted.
+ * Step 2: approve listing (requires Printify IDs). Goes live immediately; listing credits are enforced at request submit.
  */
 export async function adminApproveListingRequest(formData: FormData): Promise<void> {
   await requireAdmin();

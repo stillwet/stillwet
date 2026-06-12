@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -10,7 +9,6 @@ import {
 import { useFormStatus } from "react-dom";
 import type { Prisma } from "@/generated/prisma/client";
 import {
-  adminFreezeShopListing,
   adminMarkListingImagesOk,
   adminMarkPrintifyListingReady,
   adminRemoveListingFromRequestsQueue,
@@ -20,7 +18,6 @@ import { FulfillmentType, ListingRequestStatus } from "@/generated/prisma/enums"
 import {
   AdminListingApproveForm,
   AdminListingFailsCheckForm,
-  AdminFreezeSubmitButton,
 } from "@/components/admin/AdminListingRequestActionButtons";
 import { formatDisplayedDate, formatDisplayedDateTime } from "@/lib/format-display-datetime";
 import {
@@ -47,8 +44,6 @@ export type ListingRequestTabRow = {
   listingPrintifyVariantId: string | null;
   /** ISO timestamp from last successful `adminMarkPrintifyListingReady` (save / resave). */
   listingPrintifyCatalogSyncedAt: string | null;
-  listingFeePaidAt: string | null;
-  listingOrdinal: number;
   /** Phrases from the moderation bank matching saved listing or shop profile text (live scan). */
   moderationMatchSummary: string[];
   /** Admin optional second storefront image (R2 WebP). */
@@ -63,8 +58,6 @@ export type ListingRequestTabRow = {
     imageGallery: Prisma.JsonValue | null;
   };
 };
-
-type RequestsTabId = "new" | "fee";
 
 function sortRows(rows: ListingRequestTabRow[]): ListingRequestTabRow[] {
   return [...rows].sort((a, b) => {
@@ -226,8 +219,6 @@ function adminQueueStatusChipClass(status: ListingRequestStatus): string {
     case ListingRequestStatus.submitted:
     case ListingRequestStatus.printify_item_created:
       return "bg-amber-950/35 text-amber-100/95 ring-1 ring-amber-800/50";
-    case ListingRequestStatus.approved:
-      return "bg-emerald-950/40 text-emerald-100 ring-1 ring-emerald-800/50";
     case ListingRequestStatus.rejected:
       return "bg-red-950/40 text-red-100 ring-1 ring-red-800/50";
     default:
@@ -421,8 +412,7 @@ function ListingRequestCard({
   /** After Printify mapping is saved, hide raw submission URLs (hero comes from Printify on the product). */
   const hideRequestImageUrlList =
     (r.listingPrintifyProductId?.trim() ?? "") !== "" ||
-    r.requestStatus === ListingRequestStatus.printify_item_created ||
-    r.requestStatus === ListingRequestStatus.approved;
+    r.requestStatus === ListingRequestStatus.printify_item_created;
   const showPrintifyWorkflowSection =
     (isImagesOkStep &&
       (!suppressLegacyGroupPrintifyStep1Block || !suppressLegacyGroupPrintifyStep2Block)) ||
@@ -430,8 +420,6 @@ function ListingRequestCard({
   /** Nested legacy size row: trim Step 2 chrome; mapping is framed by the group card / Step 3 resave. */
   const compactNestedGroupInlineStep2 =
     Boolean(groupedVariant && isImagesOkStep && !suppressLegacyGroupPrintifyStep2Block);
-  const isApproved = r.requestStatus === ListingRequestStatus.approved;
-  const adminRemoved = r.adminRemovedFromShopAt != null;
   /**
    * Use the live Printify catalog `<select>` whenever the server loaded `printifyCatalogPickList`.
    * Do **not** gate on stub products missing Printify IDs yet — the old gate hid the dropdown.
@@ -467,22 +455,11 @@ function ListingRequestCard({
   useEffect(() => {
     setPrintifyProductId((r.listingPrintifyProductId ?? "").trim());
   }, [r.id, r.listingPrintifyProductId]);
-  const statusChip =
-    isApproved && r.active
-      ? "On shop"
-      : isApproved && !r.active && adminRemoved
-        ? "Frozen"
-        : isApproved && !r.active
-          ? "Fee pending"
-          : null;
-
   const shellClass = groupedVariant
     ? groupedVariant.stacked
       ? "mt-4 border-t border-zinc-800 pt-4 text-sm text-zinc-300"
       : "text-sm text-zinc-300"
-    : `rounded-lg border p-4 text-sm text-zinc-300 ${
-        isApproved ? "border-emerald-900/40 bg-emerald-950/10" : "border-zinc-800 bg-zinc-950/20"
-      }`;
+    : "rounded-lg border border-zinc-800 bg-zinc-950/20 p-4 text-sm text-zinc-300";
 
   const Shell = groupedVariant ? "div" : "li";
 
@@ -501,11 +478,6 @@ function ListingRequestCard({
               >
                 {adminQueueStatusLabel(r.requestStatus)}
               </span>
-              {statusChip ? (
-                <span className="rounded-full bg-emerald-950/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-300/90 ring-1 ring-emerald-800/50">
-                  {statusChip}
-                </span>
-              ) : null}
               {r.moderationMatchSummary.length > 0 ? (
                 <span
                   className="rounded-full bg-amber-950/50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-200/90 ring-1 ring-amber-800/50"
@@ -527,7 +499,7 @@ function ListingRequestCard({
               </button>
             </form>
           </div>
-          {!isPrintifyReady && !isApproved ? <ListingRequestCopySummary r={r} /> : null}
+          {!isPrintifyReady ? <ListingRequestCopySummary r={r} /> : null}
           {!hideRequestImageUrlList ? (
             imageEntries.length > 0 ? (
               <ul className="mt-2 list-inside list-disc text-xs text-zinc-500">
@@ -558,23 +530,7 @@ function ListingRequestCard({
           ) : null}
         </>
       ) : suppressLegacyGroupPrintifyStep2Block ? (
-        statusChip ? (
-          <div className="flex flex-wrap items-start gap-3">
-            <p className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-              <span className="rounded-full bg-emerald-950/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-300/90 ring-1 ring-emerald-800/50">
-                {statusChip}
-              </span>
-              {r.moderationMatchSummary.length > 0 ? (
-                <span
-                  className="rounded-full bg-amber-950/50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-200/90 ring-1 ring-amber-800/50"
-                  title={`Trigger text: ${r.moderationMatchSummary.join(", ")}`}
-                >
-                  Trigger text
-                </span>
-              ) : null}
-            </p>
-          </div>
-        ) : r.moderationMatchSummary.length > 0 ? (
+        r.moderationMatchSummary.length > 0 ? (
           <div className="flex flex-wrap items-start gap-3">
             <p className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               <span
@@ -593,11 +549,6 @@ function ListingRequestCard({
               <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Option: {groupedVariant.variantLabel}
               </span>
-              {statusChip ? (
-                <span className="rounded-full bg-emerald-950/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-300/90 ring-1 ring-emerald-800/50">
-                  {statusChip}
-                </span>
-              ) : null}
               {r.moderationMatchSummary.length > 0 ? (
                 <span
                   className="rounded-full bg-amber-950/50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-200/90 ring-1 ring-amber-800/50"
@@ -608,7 +559,7 @@ function ListingRequestCard({
               ) : null}
             </p>
           </div>
-          {!isPrintifyReady && !isApproved ? <ListingRequestCopySummary r={r} /> : null}
+          {!isPrintifyReady ? <ListingRequestCopySummary r={r} /> : null}
         </>
       )}
 
@@ -824,80 +775,6 @@ function ListingRequestCard({
         </div>
       ) : null}
 
-      {isApproved ? (
-        <div className="mt-4 space-y-3 border-t border-zinc-800 pt-4">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Admin listing images</p>
-          <p className="text-xs text-zinc-500">
-            Hero and optional second image (same as step 3). You can update the second image while this listing awaits
-            listing credits from the shop.
-          </p>
-          <p className="text-xs text-zinc-500">
-            <span className="font-medium text-zinc-400">Printify mapping</span> — product:{" "}
-            <span className="font-mono text-zinc-400">{r.listingPrintifyProductId ?? "—"}</span>
-          </p>
-          <details className="rounded-lg border border-zinc-800/80 bg-zinc-950/30 px-3 py-2">
-            <summary className="cursor-pointer select-none text-[11px] font-medium text-zinc-400">
-              Resave Printify product (re-syncs catalog before go-live)
-            </summary>
-            <div className="mt-3 space-y-3">
-              <form
-                id={`admin-printify-resave-approved-${r.id}`}
-                action={adminMarkPrintifyListingReady}
-                className="space-y-3"
-                onSubmit={(e) => {
-                  if (!printifyProductId.trim()) {
-                    e.preventDefault();
-                  }
-                }}
-              >
-                <AdminPrintifyMappingFormFields
-                  r={r}
-                  catalogPickEnabled={catalogPickEnabled}
-                  printifyCatalogPickList={printifyCatalogPickList}
-                  printifyProductIdsMappedToShopListings={printifyProductIdsMappedToShopListings}
-                  printifyProductIdsSharedAcrossListings={printifyProductIdsSharedAcrossListings}
-                  printifyProductId={printifyProductId}
-                  setPrintifyProductId={setPrintifyProductId}
-                />
-                <PrintifyCatalogSyncSubmitFooter lastSyncedAtIso={r.listingPrintifyCatalogSyncedAt} />
-              </form>
-            </div>
-          </details>
-          <ListingPrintifyHeroSummary r={r} printifyHeroPreview={printifyHeroPreview} />
-        </div>
-      ) : null}
-
-      {isApproved ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-800/80 pt-4">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-950/50 px-3 py-1.5 text-xs font-medium text-emerald-200 ring-1 ring-emerald-800/50"
-            role="status"
-          >
-            <span className="text-emerald-400" aria-hidden>
-              ✓
-            </span>
-            Approved
-          </span>
-          {r.active ? (
-            <form action={adminFreezeShopListing} className="inline-flex flex-wrap items-center gap-2">
-              <input type="hidden" name="listingId" value={r.id} />
-              <AdminFreezeSubmitButton />
-              <span className="text-[11px] text-zinc-600">Hides this listing from the creator&apos;s shop.</span>
-            </form>
-          ) : adminRemoved ? (
-            <p className="text-xs text-zinc-500">
-              <span className="font-medium text-zinc-400">Frozen</span> — not shown on the shop.
-            </p>
-          ) : (
-            <p className="text-xs text-zinc-500">
-              <span className="font-medium text-zinc-400">Awaiting listing credits</span> — listing{" "}
-              <span className="tabular-nums text-zinc-400">#{r.listingOrdinal}</span> needs credits before it can go
-              live. After the creator buys credits (or a free-slot waiver applies), this row leaves Listing requests and you can
-              follow it under <span className="text-zinc-400">Shop Data</span>.
-            </p>
-          )}
-        </div>
-      ) : null}
     </Shell>
   );
 }
@@ -923,83 +800,16 @@ export function AdminListingRequestsTab(props: {
     printifyProductIdsSharedAcrossListings = [],
     r2Configured = true,
   } = props;
-  const [tab, setTab] = useState<RequestsTabId>("new");
-
-  const newRows = useMemo(
-    () =>
-      sortRows(
-        rows.filter(
-          (r) =>
-            r.requestStatus === ListingRequestStatus.submitted ||
-            r.requestStatus === ListingRequestStatus.images_ok ||
-            r.requestStatus === ListingRequestStatus.printify_item_created,
-        ),
-      ),
-    [rows],
-  );
-
-  const feeRows = useMemo(
-    () => sortRows(rows.filter((r) => r.requestStatus === ListingRequestStatus.approved)),
-    [rows],
-  );
-
-  const setTabNew = useCallback(() => setTab("new"), []);
-  const setTabFee = useCallback(() => setTab("fee"), []);
-
-  const visibleRows = tab === "new" ? newRows : feeRows;
+  const queueRows = useMemo(() => sortRows(rows), [rows]);
 
   return (
     <section aria-label="Listing requests">
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Listing requests</h2>
 
-      <div
-        className="mt-4 flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3"
-        role="tablist"
-        aria-label="Listing requests views"
-      >
-        <button
-          type="button"
-          role="tab"
-          id="listing-requests-tab-new"
-          aria-selected={tab === "new"}
-          aria-controls="listing-requests-panel-new"
-          onClick={setTabNew}
-          className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-            tab === "new"
-              ? "border-zinc-500 bg-zinc-800/80 text-zinc-100"
-              : "border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
-          }`}
-        >
-          New requests
-          <span className="ml-1.5 tabular-nums text-zinc-500">({newRows.length})</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          id="listing-requests-tab-fee"
-          aria-selected={tab === "fee"}
-          aria-controls="listing-requests-panel-fee"
-          onClick={setTabFee}
-          className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-            tab === "fee"
-              ? "border-zinc-500 bg-zinc-800/80 text-zinc-100"
-              : "border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
-          }`}
-        >
-          Awaiting listing fee
-          <span className="ml-1.5 tabular-nums text-zinc-500">({feeRows.length})</span>
-        </button>
-      </div>
-
-      <div
-        role="tabpanel"
-        id={tab === "new" ? "listing-requests-panel-new" : "listing-requests-panel-fee"}
-        aria-labelledby={tab === "new" ? "listing-requests-tab-new" : "listing-requests-tab-fee"}
-        className="mt-4"
-      >
-        {visibleRows.length > 0 ? (
+      <div className="mt-4">
+        {queueRows.length > 0 ? (
           <ul className="space-y-4">
-            {visibleRows.map((r) => (
+            {queueRows.map((r) => (
               <ListingRequestCard
                 key={r.id}
                 r={r}
@@ -1011,11 +821,7 @@ export function AdminListingRequestsTab(props: {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-zinc-600">
-            {tab === "new"
-              ? "No new requests awaiting Printify setup or approval."
-              : "No approved listings waiting on listing credits."}
-          </p>
+          <p className="text-sm text-zinc-600">No requests awaiting Printify setup or approval.</p>
         )}
       </div>
     </section>

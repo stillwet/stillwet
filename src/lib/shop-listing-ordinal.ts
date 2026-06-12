@@ -2,7 +2,7 @@ import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 
 /**
  * 1-based position of each listing within its shop when ordered by `createdAt` asc, then `id` asc.
- * Used for publication-fee tiering (admin listing-requests tab + nav badge).
+ * Used for publication-fee tiering (creator dashboard, listing credit checks).
  *
  * Implemented with per-row counts instead of loading every listing id for involved shops — the
  * latter degrades badly when a shop has a large catalog but only a few queue rows.

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Source_Sans_3, Source_Code_Pro } from "next/font/google";
 import { MobileTestViewportShell } from "@/components/MobileTestViewportShell";
 import { MobileTestViewportSync } from "@/components/MobileTestViewportSync";
-import { metadataBaseUrl } from "@/lib/public-app-url";
-import { BRAND_NAME } from "@/lib/site-brand";
+import { buildRootSiteMetadata } from "@/lib/site-metadata";
 import "./globals.css";
 
 /* Dimension (html5up.net/dimension) uses Source Sans Pro; Source Sans 3 is the maintained successor. */
@@ -19,32 +18,7 @@ const sourceCode = Source_Code_Pro({
   weight: ["400", "600"],
 });
 
-const site = metadataBaseUrl();
-
-export const metadata: Metadata = {
-  metadataBase: site,
-  title: {
-    default: `${BRAND_NAME} — Merch`,
-    template: `%s · ${BRAND_NAME}`,
-  },
-  description: `Printed merchandise marketplace powered by ${BRAND_NAME}.`,
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: site.origin,
-    siteName: BRAND_NAME,
-    title: `${BRAND_NAME} — Merch`,
-    description: `Printed merchandise marketplace powered by ${BRAND_NAME}.`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${BRAND_NAME} — Merch`,
-    description: `Printed merchandise marketplace powered by ${BRAND_NAME}.`,
-  },
-};
+export const metadata: Metadata = buildRootSiteMetadata();
 
 export default function RootLayout({
   children,

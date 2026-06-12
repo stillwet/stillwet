@@ -51,14 +51,9 @@ import {
   toAdminSummaryEmailSettingsDTO,
 } from "@/lib/admin-summary-email-settings-dto";
 import { AdminInboxTab, type AdminInboxRow } from "@/components/admin/AdminInboxTab";
-import {
-  listingFeeCentsForOrdinal,
-  PLATFORM_SHOP_SLUG,
-} from "@/lib/marketplace-constants";
 import { adminInboxEmailAddress } from "@/lib/admin-inbox-config";
 import { shopListingPrintifyMappingReservedWhere } from "@/lib/shop-listing-printify-mapping-reserved";
 import { loadSupportUnresolvedShopIdsForAdmin } from "@/lib/admin-nav-badges";
-import { listingOrdinalByListingId } from "@/lib/shop-listing-ordinal";
 import {
   fetchPrintifyCatalog,
   hasPrintifyApiToken,
@@ -157,7 +152,6 @@ type AdminRemovedShopListingLoaded = Prisma.ShopListingGetPayload<{
 
 function buildListingRequestTabRowsFromLoaded(
   listingRequestRows: AdminListingRequestShopListing[],
-  listingOrdinalById: Map<string, number>,
   moderationPhrases: readonly string[],
 ): ListingRequestTabRow[] {
   return listingRequestRows
@@ -176,8 +170,6 @@ function buildListingRequestTabRowsFromLoaded(
       listingPrintifyProductId: r.listingPrintifyProductId,
       listingPrintifyVariantId: r.listingPrintifyVariantId,
       listingPrintifyCatalogSyncedAt: r.listingPrintifyCatalogSyncedAt?.toISOString() ?? null,
-      listingFeePaidAt: r.listingFeePaidAt?.toISOString() ?? null,
-      listingOrdinal: listingOrdinalById.get(r.id) ?? 1,
       adminListingSecondaryImageUrl: r.adminListingSecondaryImageUrl,
       moderationMatchSummary: moderationMatchesForListingRequestRow(
         {
@@ -198,18 +190,7 @@ function buildListingRequestTabRowsFromLoaded(
         listingFeeBonusFreeSlots: r.shop.listingFeeBonusFreeSlots,
       },
       product: r.product,
-    }))
-    .filter((r) => {
-      if (r.requestStatus !== ListingRequestStatus.approved) return true;
-      if (r.shop.slug === PLATFORM_SHOP_SLUG) return false;
-      const fee = listingFeeCentsForOrdinal(
-        r.listingOrdinal,
-        r.shop.slug,
-        r.shop.listingFeeBonusFreeSlots ?? 0,
-      );
-      if (r.listingFeePaidAt != null || fee === 0) return false;
-      return true;
-    });
+    }));
 }
 
 export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps) {
@@ -292,7 +273,6 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
         ListingRequestStatus.submitted,
         ListingRequestStatus.images_ok,
         ListingRequestStatus.printify_item_created,
-        ListingRequestStatus.approved,
       ],
     },
   };
@@ -573,14 +553,9 @@ export async function AdminDashboardTabPanel(props: AdminDashboardTabPanelProps)
         },
       },
     });
-    const listingOrdinalById = await listingOrdinalByListingId(
-      prisma,
-      listingRequestRows.map((r) => r.id),
-    );
     const moderationPhrases = await loadModerationKeywordPhrases(prisma);
     listingRequestTabRows = buildListingRequestTabRowsFromLoaded(
       listingRequestRows,
-      listingOrdinalById,
       moderationPhrases,
     );
   }
